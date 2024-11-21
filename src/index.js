@@ -1,40 +1,40 @@
-import '@kitware/vtk.js/favicon';
+import "@kitware/vtk.js/favicon";
 
 // Load the rendering pieces we want to use (for both WebGL and WebGPU)
-import '@kitware/vtk.js/Rendering/Profiles/All';
+import "@kitware/vtk.js/Rendering/Profiles/All";
 
-import vtkActor from '@kitware/vtk.js/Rendering/Core/Actor';
-import vtkAnnotatedCubeActor from '@kitware/vtk.js/Rendering/Core/AnnotatedCubeActor';
-import vtkDataArray from '@kitware/vtk.js/Common/Core/DataArray';
-import vtkHttpDataSetReader from '@kitware/vtk.js/IO/Core/HttpDataSetReader';
-import vtkGenericRenderWindow from '@kitware/vtk.js/Rendering/Misc/GenericRenderWindow';
-import vtkImageData from '@kitware/vtk.js/Common/DataModel/ImageData';
-import vtkImageMapper from '@kitware/vtk.js/Rendering/Core/ImageMapper';
-import vtkImageReslice from '@kitware/vtk.js/Imaging/Core/ImageReslice';
-import vtkImageSlice from '@kitware/vtk.js/Rendering/Core/ImageSlice';
-import vtkInteractorStyleImage from '@kitware/vtk.js/Interaction/Style/InteractorStyleImage';
-import vtkInteractorStyleTrackballCamera from '@kitware/vtk.js/Interaction/Style/InteractorStyleTrackballCamera';
-import vtkMath from '@kitware/vtk.js/Common/Core/Math';
-import vtkMapper from '@kitware/vtk.js/Rendering/Core/Mapper';
-import vtkOutlineFilter from '@kitware/vtk.js/Filters/General/OutlineFilter';
-import vtkOrientationMarkerWidget from '@kitware/vtk.js/Interaction/Widgets/OrientationMarkerWidget';
-import vtkResliceCursorWidget from '@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget';
-import vtkWidgetManager from '@kitware/vtk.js/Widgets/Core/WidgetManager';
+import vtkActor from "@kitware/vtk.js/Rendering/Core/Actor";
+import vtkAnnotatedCubeActor from "@kitware/vtk.js/Rendering/Core/AnnotatedCubeActor";
+import vtkDataArray from "@kitware/vtk.js/Common/Core/DataArray";
+import vtkHttpDataSetReader from "@kitware/vtk.js/IO/Core/HttpDataSetReader";
+import vtkGenericRenderWindow from "@kitware/vtk.js/Rendering/Misc/GenericRenderWindow";
+import vtkImageData from "@kitware/vtk.js/Common/DataModel/ImageData";
+import vtkImageMapper from "@kitware/vtk.js/Rendering/Core/ImageMapper";
+import vtkImageReslice from "@kitware/vtk.js/Imaging/Core/ImageReslice";
+import vtkImageSlice from "@kitware/vtk.js/Rendering/Core/ImageSlice";
+import vtkInteractorStyleImage from "@kitware/vtk.js/Interaction/Style/InteractorStyleImage";
+import vtkInteractorStyleTrackballCamera from "@kitware/vtk.js/Interaction/Style/InteractorStyleTrackballCamera";
+import vtkMath from "@kitware/vtk.js/Common/Core/Math";
+import vtkMapper from "@kitware/vtk.js/Rendering/Core/Mapper";
+import vtkOutlineFilter from "@kitware/vtk.js/Filters/General/OutlineFilter";
+import vtkOrientationMarkerWidget from "@kitware/vtk.js/Interaction/Widgets/OrientationMarkerWidget";
+import vtkResliceCursorWidget from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget";
+import vtkWidgetManager from "@kitware/vtk.js/Widgets/Core/WidgetManager";
 
-import vtkSphereSource from '@kitware/vtk.js/Filters/Sources/SphereSource';
-import { CaptureOn } from '@kitware/vtk.js/Widgets/Core/WidgetManager/Constants';
+import vtkSphereSource from "@kitware/vtk.js/Filters/Sources/SphereSource";
+import { CaptureOn } from "@kitware/vtk.js/Widgets/Core/WidgetManager/Constants";
 
-import { vec3 } from 'gl-matrix';
-import { SlabMode } from '@kitware/vtk.js/Imaging/Core/ImageReslice/Constants';
+import { vec3 } from "gl-matrix";
+import { SlabMode } from "@kitware/vtk.js/Imaging/Core/ImageReslice/Constants";
 
 import {
   xyzToViewType,
   InteractionMethodsName,
-} from '@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants';
-import controlPanel from '../dist/index.html';
+} from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants";
+import controlPanel from "../dist/index.html";
 
 // Force the loading of HttpDataAccessHelper to support gzip decompression
-import '@kitware/vtk.js/IO/Core/DataAccessHelper/HttpDataAccessHelper';
+import "@kitware/vtk.js/IO/Core/DataAccessHelper/HttpDataAccessHelper";
 
 // ----------------------------------------------------------------------------
 // Define main attributes
@@ -53,30 +53,28 @@ const widget = vtkResliceCursorWidget.newInstance();
 window.widget = widget;
 const widgetState = widget.getWidgetState();
 // Set size in CSS pixel space because scaleInPixels defaults to true
-widgetState
-  .getStatesWithLabel('sphere')
-  .forEach((handle) => handle.setScale1(20));
+widgetState.getStatesWithLabel("sphere").forEach((handle) => handle.setScale1(20));
 const showDebugActors = true;
 
 const appCursorStyles = {
-  translateCenter: 'move',
-  rotateLine: 'alias',
-  translateAxis: 'pointer',
-  default: 'default',
+  translateCenter: "move",
+  rotateLine: "alias",
+  translateAxis: "pointer",
+  default: "default",
 };
 
 // ----------------------------------------------------------------------------
 // Define html structure
 // ----------------------------------------------------------------------------
 
-const container = document.querySelector('body');
-const controlContainer = document.createElement('div');
+const container = document.querySelector("body");
+const controlContainer = document.createElement("div");
 controlContainer.innerHTML = controlPanel;
 container.appendChild(controlContainer);
-const checkboxTranslation = document.getElementById('checkboxTranslation');
-const checkboxShowRotation = document.getElementById('checkboxShowRotation');
-const checkboxRotation = document.getElementById('checkboxRotation');
-const checkboxOrthogonality = document.getElementById('checkboxOrthogonality');
+const checkboxTranslation = document.getElementById("checkboxTranslation");
+const checkboxShowRotation = document.getElementById("checkboxShowRotation");
+const checkboxRotation = document.getElementById("checkboxRotation");
+const checkboxOrthogonality = document.getElementById("checkboxOrthogonality");
 
 // ----------------------------------------------------------------------------
 // Setup rendering code
@@ -107,7 +105,7 @@ function createSyntheticImageData(dims) {
     numberOfComponents: 1,
     values: newArray,
   });
-  da.setName('scalars');
+  da.setName("scalars");
 
   imageData.getPointData().setScalars(da);
 
@@ -116,7 +114,7 @@ function createSyntheticImageData(dims) {
 
 function createRGBStringFromRGBValues(rgb) {
   if (rgb.length !== 3) {
-    return 'rgb(0, 0, 0)';
+    return "rgb(0, 0, 0)";
   }
   return `rgb(${(rgb[0] * 255).toString()}, ${(rgb[1] * 255).toString()}, ${(
     rgb[2] * 255
@@ -128,16 +126,16 @@ const initialPlanesState = { ...widgetState.getPlanes() };
 let view3D = null;
 
 for (let i = 0; i < 4; i++) {
-  const elementParent = document.createElement('div');
-  elementParent.setAttribute('class', 'view');
-  elementParent.style.width = '50%';
-  elementParent.style.height = '300px';
-  elementParent.style.display = 'inline-block';//保留上下外边距/内边距
+  const elementParent = document.createElement("div");
+  elementParent.setAttribute("class", "view");
+  elementParent.style.width = "50%";
+  elementParent.style.height = "300px";
+  elementParent.style.display = "inline-block"; //保留上下外边距/内边距
 
-  const element = document.createElement('div');
-  element.setAttribute('class', 'view');
-  element.style.width = '100%';
-  element.style.height = '100%';
+  const element = document.createElement("div");
+  element.setAttribute("class", "view");
+  element.style.width = "100%";
+  element.style.height = "100%";
   elementParent.appendChild(element);
 
   container.appendChild(elementParent);
@@ -164,26 +162,32 @@ for (let i = 0; i < 4; i++) {
   obj.interactor.bindEvents(element);
   obj.widgetManager.setRenderer(obj.renderer);
   if (i < 3) {
+    // 设置交互器的样式为 vtk.js 提供的 `vtkInteractorStyleImage` 实例
     obj.interactor.setInteractorStyle(vtkInteractorStyleImage.newInstance());
+    // 添加一个小部件（widget）到 widgetManager，并根据 xyzToViewType[i] 设置其类型
     obj.widgetInstance = obj.widgetManager.addWidget(widget, xyzToViewType[i]);
+    // 将小部件的缩放方式设置为基于像素
     obj.widgetInstance.setScaleInPixels(true);
-    obj.widgetInstance.setHoleWidth(50);
+    // 调整小部件的孔宽度为 2
+    obj.widgetInstance.setHoleWidth(0);
+    // 设置小部件为非无限线（即长度有限）
     obj.widgetInstance.setInfiniteLine(false);
-    widgetState
-      .getStatesWithLabel('line')
-      .forEach((state) => state.setScale3(4, 4, 400));
-    widgetState
-      .getStatesWithLabel('center')
-      .forEach((state) => state.setOpacity(128));
+    // 调整标签为 'line' 的所有状态的缩放比例
+    // x 和 y 轴方向的缩放因子为 2（变宽和变高）
+    // z 轴方向的缩放因子为 300（在深度方向拉长）
+    widgetState.getStatesWithLabel("line").forEach((state) => state.setScale3(2, 2, 300));
+    // 调整标签为 'center' 的所有状态的不透明度为 128
+    widgetState.getStatesWithLabel("center").forEach((state) => state.setOpacity(0));
+    // 设置小部件是否保持正交性（即垂直关系），值取决于 checkboxOrthogonality 的选中状态
     obj.widgetInstance.setKeepOrthogonality(checkboxOrthogonality.checked);
+    // 设置小部件的鼠标指针样式，`appCursorStyles` 是自定义的样式对象
     obj.widgetInstance.setCursorStyles(appCursorStyles);
+    // 启用小部件的拾取功能（即可以通过鼠标交互选择小部件）
     obj.widgetManager.enablePicking();
-    // Use to update all renderers buffer when actors are moved
+    // 设置小部件管理器在鼠标移动时捕获渲染器缓冲区的行为
     obj.widgetManager.setCaptureOn(CaptureOn.MOUSE_MOVE);
   } else {
-    obj.interactor.setInteractorStyle(
-      vtkInteractorStyleTrackballCamera.newInstance()
-    );
+    obj.interactor.setInteractorStyle(vtkInteractorStyleTrackballCamera.newInstance());
   }
 
   obj.reslice = vtkImageReslice.newInstance();
@@ -223,40 +227,40 @@ for (let i = 0; i < 4; i++) {
   // create axes
   const axes = vtkAnnotatedCubeActor.newInstance();
   axes.setDefaultStyle({
-    text: '+X',
-    fontStyle: 'bold',
-    fontFamily: 'Arial',
-    fontColor: 'black',
+    text: "+X",
+    fontStyle: "bold",
+    fontFamily: "Arial",
+    fontColor: "black",
     fontSizeScale: (res) => res / 2,
     faceColor: createRGBStringFromRGBValues(viewColors[0]),
     faceRotation: 0,
     edgeThickness: 0.1,
-    edgeColor: 'black',
+    edgeColor: "black",
     resolution: 400,
   });
   // axes.setXPlusFaceProperty({ text: '+X' });
   axes.setXMinusFaceProperty({
-    text: '-X',
+    text: "-X",
     faceColor: createRGBStringFromRGBValues(viewColors[0]),
     faceRotation: 90,
-    fontStyle: 'italic',
+    fontStyle: "italic",
   });
   axes.setYPlusFaceProperty({
-    text: '+Y',
+    text: "+Y",
     faceColor: createRGBStringFromRGBValues(viewColors[1]),
     fontSizeScale: (res) => res / 4,
   });
   axes.setYMinusFaceProperty({
-    text: '-Y',
+    text: "-Y",
     faceColor: createRGBStringFromRGBValues(viewColors[1]),
-    fontColor: 'white',
+    fontColor: "white",
   });
   axes.setZPlusFaceProperty({
-    text: '+Z',
+    text: "+Z",
     faceColor: createRGBStringFromRGBValues(viewColors[2]),
   });
   axes.setZMinusFaceProperty({
-    text: '-Z',
+    text: "-Z",
     faceColor: createRGBStringFromRGBValues(viewColors[2]),
     faceRotation: 45,
   });
@@ -267,29 +271,25 @@ for (let i = 0; i < 4; i++) {
     interactor: obj.renderWindow.getInteractor(),
   });
   obj.orientationWidget.setEnabled(true);
-  obj.orientationWidget.setViewportCorner(
-    vtkOrientationMarkerWidget.Corners.BOTTOM_RIGHT
-  );
+  obj.orientationWidget.setViewportCorner(vtkOrientationMarkerWidget.Corners.BOTTOM_RIGHT);
   obj.orientationWidget.setViewportSize(0.15);
   obj.orientationWidget.setMinPixelSize(100);
   obj.orientationWidget.setMaxPixelSize(300);
 
   // create sliders
   if (i < 3) {
-    const slider = document.createElement('input');
-    slider.type = 'range';
+    const slider = document.createElement("input");
+    slider.type = "range";
     slider.min = 0;
     slider.max = 300;
-    slider.style.bottom = '0px';
-    slider.style.width = '100%';
+    slider.style.bottom = "0px";
+    slider.style.width = "100%";
     elementParent.appendChild(slider);
     obj.slider = slider;
 
-    slider.addEventListener('change', (ev) => {
+    slider.addEventListener("change", (ev) => {
       const newDistanceToP1 = ev.target.value;
-      const dirProj = widget.getWidgetState().getPlanes()[
-        xyzToViewType[i]
-      ].normal;
+      const dirProj = widget.getWidgetState().getPlanes()[xyzToViewType[i]].normal;
       const planeExtremities = widget.getPlaneExtremities(xyzToViewType[i]);
       const newCenter = vtkMath.multiplyAccumulate(
         planeExtremities[0],
@@ -298,9 +298,7 @@ for (let i = 0; i < 4; i++) {
         []
       );
       widget.setCenter(newCenter);
-      obj.widgetInstance.invokeInteractionEvent(
-        obj.widgetInstance.getActiveInteraction()
-      );
+      obj.widgetInstance.invokeInteractionEvent(obj.widgetInstance.getActiveInteraction());
       viewAttributes.forEach((obj2) => {
         obj2.interactor.render();
       });
@@ -314,7 +312,7 @@ for (let i = 0; i < 4; i++) {
 
 function updateReslice(
   interactionContext = {
-    viewType: '',
+    viewType: "",
     reslice: null,
     actor: null,
     renderer: null,
@@ -339,17 +337,12 @@ function updateReslice(
     interactionContext.sphereSources[2].setCenter(planeSource.getPoint2());
 
     if (interactionContext.slider) {
-      const planeExtremities = widget.getPlaneExtremities(
-        interactionContext.viewType
-      );
+      const planeExtremities = widget.getPlaneExtremities(interactionContext.viewType);
       const length = Math.sqrt(
         vtkMath.distance2BetweenPoints(planeExtremities[0], planeExtremities[1])
       );
       const dist = Math.sqrt(
-        vtkMath.distance2BetweenPoints(
-          planeExtremities[0],
-          widgetState.getCenter()
-        )
+        vtkMath.distance2BetweenPoints(planeExtremities[0], widgetState.getCenter())
       );
       interactionContext.slider.min = 0;
       interactionContext.slider.max = length;
@@ -422,11 +415,8 @@ reader.setUrl(`https://kitware.github.io/vtk-js/data/volume/LIDC2.vti`).then(() 
             (interactionMethodName) => {
               const canUpdateFocalPoint =
                 interactionMethodName === InteractionMethodsName.RotateLine;
-              const activeViewType = widget
-                .getWidgetState()
-                .getActiveViewType();
-              const computeFocalPointOffset =
-                activeViewType === viewType || !canUpdateFocalPoint;
+              const activeViewType = widget.getWidgetState().getActiveViewType();
+              const computeFocalPointOffset = activeViewType === viewType || !canUpdateFocalPoint;
               updateReslice({
                 viewType,
                 reslice,
@@ -459,7 +449,7 @@ reader.setUrl(`https://kitware.github.io/vtk-js/data/volume/LIDC2.vti`).then(() 
 
     // set max number of slices to slider.
     const maxNumberOfSlices = vec3.length(image.getDimensions());
-    document.getElementById('slabNumber').max = maxNumberOfSlices;
+    document.getElementById("slabNumber").max = maxNumberOfSlices;
   });
 });
 
@@ -484,78 +474,76 @@ function updateViews() {
   view3D.renderer.resetCameraClippingRange();
 }
 
-checkboxTranslation.addEventListener('change', (ev) => {
+checkboxTranslation.addEventListener("change", (ev) => {
   viewAttributes.forEach((obj) =>
     obj.widgetInstance.setEnableTranslation(checkboxTranslation.checked)
   );
 });
 
-checkboxShowRotation.addEventListener('change', (ev) => {
+checkboxShowRotation.addEventListener("change", (ev) => {
   widgetState
-    .getStatesWithLabel('rotation')
+    .getStatesWithLabel("rotation")
     .forEach((handle) => handle.setVisible(checkboxShowRotation.checked));
   viewAttributes.forEach((obj) => {
     obj.interactor.render();
   });
   checkboxRotation.checked = checkboxShowRotation.checked;
   checkboxRotation.disabled = !checkboxShowRotation.checked;
-  checkboxRotation.dispatchEvent(new Event('change'));
+  checkboxRotation.dispatchEvent(new Event("change"));
 });
 
-checkboxRotation.addEventListener('change', (ev) => {
-  viewAttributes.forEach((obj) =>
-    obj.widgetInstance.setEnableRotation(checkboxRotation.checked)
-  );
+checkboxRotation.addEventListener("change", (ev) => {
+  viewAttributes.forEach((obj) => obj.widgetInstance.setEnableRotation(checkboxRotation.checked));
   checkboxOrthogonality.disabled = !checkboxRotation.checked;
-  checkboxOrthogonality.dispatchEvent(new Event('change'));
+  checkboxOrthogonality.dispatchEvent(new Event("change"));
 });
 
-checkboxOrthogonality.addEventListener('change', (ev) => {
+checkboxOrthogonality.addEventListener("change", (ev) => {
   viewAttributes.forEach((obj) =>
     obj.widgetInstance.setKeepOrthogonality(checkboxOrthogonality.checked)
   );
 });
 
-const checkboxScaleInPixels = document.getElementById('checkboxScaleInPixels');
-checkboxScaleInPixels.addEventListener('change', (ev) => {
+const checkboxScaleInPixels = document.getElementById("checkboxScaleInPixels");
+checkboxScaleInPixels.addEventListener("change", (ev) => {
   widget.setScaleInPixels(checkboxScaleInPixels.checked);
   viewAttributes.forEach((obj) => {
     obj.interactor.render();
   });
 });
 
-const opacity = document.getElementById('opacity');
-opacity.addEventListener('input', (ev) => {
-  const opacityValue = document.getElementById('opacityValue');
+const opacity = document.getElementById("opacity");
+opacity.addEventListener("input", (ev) => {
+  const opacityValue = document.getElementById("opacityValue");
   opacityValue.innerHTML = ev.target.value;
   widget
     .getWidgetState()
-    .getStatesWithLabel('handles')
+    .getStatesWithLabel("handles")
     .forEach((handle) => handle.setOpacity(ev.target.value));
   viewAttributes.forEach((obj) => {
     obj.interactor.render();
   });
 });
 
-const optionSlabModeMin = document.getElementById('slabModeMin');
+const optionSlabModeMin = document.getElementById("slabModeMin");
 optionSlabModeMin.value = SlabMode.MIN;
-const optionSlabModeMax = document.getElementById('slabModeMax');
+const optionSlabModeMax = document.getElementById("slabModeMax");
 optionSlabModeMax.value = SlabMode.MAX;
-const optionSlabModeMean = document.getElementById('slabModeMean');
+const optionSlabModeMean = document.getElementById("slabModeMean");
 optionSlabModeMean.value = SlabMode.MEAN;
-const optionSlabModeSum = document.getElementById('slabModeSum');
+const optionSlabModeSum = document.getElementById("slabModeSum");
 optionSlabModeSum.value = SlabMode.SUM;
-const selectSlabMode = document.getElementById('slabMode');
-selectSlabMode.addEventListener('change', (ev) => {
+const selectSlabMode = document.getElementById("slabMode");
+selectSlabMode.addEventListener("change", (ev) => {
   viewAttributes.forEach((obj) => {
     obj.reslice.setSlabMode(Number(ev.target.value));
   });
   updateViews();
 });
 
-const sliderSlabNumberofSlices = document.getElementById('slabNumber');
-sliderSlabNumberofSlices.addEventListener('change', (ev) => {
-  const trSlabNumberValue = document.getElementById('slabNumberValue');
+const sliderSlabNumberofSlices = document.getElementById("slabNumber");
+sliderSlabNumberofSlices.addEventListener("change", (ev) => {
+  const trSlabNumberValue = document.getElementById("slabNumberValue");
   trSlabNumberValue.innerHTML = ev.target.value;
   viewAttributes.forEach((obj) => {
     obj.reslice.setSlabNumberOfSlices(ev.target.value);
@@ -563,23 +551,23 @@ sliderSlabNumberofSlices.addEventListener('change', (ev) => {
   updateViews();
 });
 
-const buttonReset = document.getElementById('buttonReset');
-buttonReset.addEventListener('click', () => {
+const buttonReset = document.getElementById("buttonReset");
+buttonReset.addEventListener("click", () => {
   widgetState.setPlanes({ ...initialPlanesState });
   widget.setCenter(widget.getWidgetState().getImage().getCenter());
   updateViews();
 });
 
-const selectInterpolationMode = document.getElementById('selectInterpolation');
-selectInterpolationMode.addEventListener('change', (ev) => {
+const selectInterpolationMode = document.getElementById("selectInterpolation");
+selectInterpolationMode.addEventListener("change", (ev) => {
   viewAttributes.forEach((obj) => {
     obj.reslice.setInterpolationMode(Number(ev.target.selectedIndex));
   });
   updateViews();
 });
 
-const checkboxWindowLevel = document.getElementById('checkboxWindowLevel');
-checkboxWindowLevel.addEventListener('change', (ev) => {
+const checkboxWindowLevel = document.getElementById("checkboxWindowLevel");
+checkboxWindowLevel.addEventListener("change", (ev) => {
   viewAttributes.forEach((obj, index) => {
     if (index < 3) {
       obj.interactor.setInteractorStyle(
