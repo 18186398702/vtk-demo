@@ -132,7 +132,7 @@ for (let i = 0; i < 4; i++) {
   elementParent.setAttribute('class', 'view');
   elementParent.style.width = '50%';
   elementParent.style.height = '300px';
-  elementParent.style.display = 'inline-block';
+  elementParent.style.display = 'inline-block';//保留上下外边距/内边距
 
   const element = document.createElement('div');
   element.setAttribute('class', 'view');
@@ -171,7 +171,7 @@ for (let i = 0; i < 4; i++) {
     obj.widgetInstance.setInfiniteLine(false);
     widgetState
       .getStatesWithLabel('line')
-      .forEach((state) => state.setScale3(4, 4, 300));
+      .forEach((state) => state.setScale3(4, 4, 400));
     widgetState
       .getStatesWithLabel('center')
       .forEach((state) => state.setOpacity(128));
@@ -279,7 +279,7 @@ for (let i = 0; i < 4; i++) {
     const slider = document.createElement('input');
     slider.type = 'range';
     slider.min = 0;
-    slider.max = 200;
+    slider.max = 300;
     slider.style.bottom = '0px';
     slider.style.width = '100%';
     elementParent.appendChild(slider);
@@ -367,7 +367,7 @@ function updateReslice(
 }
 
 const reader = vtkHttpDataSetReader.newInstance({ fetchGzip: true });
-reader.setUrl(`${__BASE_PATH__}/data/volume/LIDC2.vti`).then(() => {
+reader.setUrl(`https://kitware.github.io/vtk-js/data/volume/LIDC2.vti`).then(() => {
   reader.loadData().then(() => {
     const image = reader.getOutputData();
     widget.setImage(image);
