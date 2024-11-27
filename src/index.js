@@ -206,15 +206,31 @@ for (let i = 0; i < 4; i++) {
   // Create sphere for each 2D views which will be displayed in 3D
   // Define origin, point1 and point2 of the plane used to reslice the volume
   for (let j = 0; j < 3; j++) {
+    // 创建一个新的 vtkSphereSource 实例，用于生成球体
     const sphere = vtkSphereSource.newInstance();
-    sphere.setRadius(10);
+    // 设置球体的半径为 10
+    sphere.setRadius(1);
+
+    // 创建一个新的 vtkMapper 实例，负责将数据映射到渲染中
     const mapper = vtkMapper.newInstance();
+    // 将球体的输出连接到映射器，以便映射器可以渲染球体
     mapper.setInputConnection(sphere.getOutputPort());
+
+    // 创建一个新的 vtkActor 实例，负责在渲染中显示数据
     const actor = vtkActor.newInstance();
+    // 将映射器应用到演员上，使其渲染球体
     actor.setMapper(mapper);
+
+    // 设置球体演员的颜色，viewColors[i] 应该是一个 RGB 颜色数组
     actor.getProperty().setColor(...viewColors[i]);
+
+    // 设置球体演员的可见性，showDebugActors 为布尔值，决定是否显示球体
     actor.setVisibility(showDebugActors);
+
+    // 将演员添加到 obj.sphereActors 数组中，便于管理和后续操作
     obj.sphereActors.push(actor);
+
+    // 将球体源添加到 obj.sphereSources 数组中，便于管理和后续操作
     obj.sphereSources.push(sphere);
   }
 
