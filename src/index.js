@@ -224,17 +224,40 @@ for (let i = 0; i < 4; i++) {
     obj.interactor.setInteractorStyle(vtkInteractorStyleTrackballCamera.newInstance());
   }
 
+  // 创建一个 vtkImageReslice 实例，用于图像重切割操作
   obj.reslice = vtkImageReslice.newInstance();
+
+  // 设置重切割模式为 SlabMode.MEAN，表示在切割方向上对多个切片取平均
   obj.reslice.setSlabMode(SlabMode.MEAN);
+
+  // 设置重切割操作的切片数量为 1，表示只取一个切片
   obj.reslice.setSlabNumberOfSlices(1);
+
+  // 设置是否使用变换来输入采样，false 表示不使用变换
   obj.reslice.setTransformInputSampling(false);
+
+  // 设置输出图像是否自动裁剪，true 表示输出图像会根据内容自动裁剪
   obj.reslice.setAutoCropOutput(true);
+
+  // 设置输出图像的维度为 2，表示输出为 2D 图像（通常用于切片视图）
   obj.reslice.setOutputDimensionality(2);
+
+  // 创建一个 vtkImageMapper 实例，用于映射图像数据
   obj.resliceMapper = vtkImageMapper.newInstance();
+
+  // 将 vtkImageReslice 的输出连接到映射器，确保映射器能渲染重切割后的图像
   obj.resliceMapper.setInputConnection(obj.reslice.getOutputPort());
+
+  // 创建一个 vtkImageSlice 实例，用于显示图像切片
   obj.resliceActor = vtkImageSlice.newInstance();
+
+  // 将映射器应用到 vtkImageSlice 上，以便它能够渲染图像
   obj.resliceActor.setMapper(obj.resliceMapper);
+
+  // 初始化一个空数组，用于存储球体演员对象
   obj.sphereActors = [];
+
+  // 初始化一个空数组，用于存储球体源对象
   obj.sphereSources = [];
 
   // Create sphere for each 2D views which will be displayed in 3D
