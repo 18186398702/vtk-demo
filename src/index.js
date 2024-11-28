@@ -168,15 +168,33 @@ for (let i = 0; i < 4; i++) {
     orientationWidget: null, // 当前没有设置方向小部件（通常用于显示视图方向等信息）
   };
 
+  // 设置当前活跃相机为平行投影（不使用透视效果）
   obj.renderer.getActiveCamera().setParallelProjection(true);
+
+  // 设置渲染器的背景颜色，viewColors[i] 是一个 RGB 颜色数组
   obj.renderer.setBackground(...viewColors[i]);
+
+  // 将渲染器添加到渲染窗口中，这样渲染器才能在窗口中显示
   obj.renderWindow.addRenderer(obj.renderer);
+
+  // 将 OpenGL 窗口添加到渲染窗口，确保渲染窗口能够显示 3D 图形
   obj.renderWindow.addView(obj.GLWindow);
+
+  // 设置交互器与渲染窗口关联，确保用户能够与窗口进行交互
   obj.renderWindow.setInteractor(obj.interactor);
+
+  // 设置交互器与 OpenGL 窗口关联，确保用户与窗口的交互正确显示
   obj.interactor.setView(obj.GLWindow);
+
+  // 初始化交互器，准备开始与用户的交互
   obj.interactor.initialize();
+
+  // 绑定事件到 HTML 元素，使得用户可以通过鼠标和键盘与视图进行交互
   obj.interactor.bindEvents(element);
+
+  // 设置小部件管理器的渲染器，这样小部件可以在正确的渲染器上渲染
   obj.widgetManager.setRenderer(obj.renderer);
+
   if (i < 3) {
     // 设置交互器的样式为 vtk.js 提供的 `vtkInteractorStyleImage` 实例
     obj.interactor.setInteractorStyle(vtkInteractorStyleImage.newInstance());
