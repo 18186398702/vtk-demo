@@ -126,30 +126,46 @@ const initialPlanesState = { ...widgetState.getPlanes() };
 let view3D = null;
 
 for (let i = 0; i < 4; i++) {
+  // 创建一个新的 div 元素作为容器，父级容器，用来放置视图
   const elementParent = document.createElement("div");
+  // 为父容器设置 CSS 类名
   elementParent.setAttribute("class", "view");
+  // 设置父容器的宽度为页面宽度的 50%
   elementParent.style.width = "50%";
+  // 设置父容器的高度为 300px
   elementParent.style.height = "300px";
-  elementParent.style.display = "inline-block"; //保留上下外边距/内边距
+  // 设置父容器的显示方式为 inline-block，确保它会与其他元素并排显示
+  elementParent.style.display = "inline-block"; // 保留上下外边距/内边距
 
+  // 创建一个新的 div 元素作为实际的视图容器
   const element = document.createElement("div");
+  // 为视图容器设置 CSS 类名
   element.setAttribute("class", "view");
+  // 设置视图容器的宽度为父容器的 100%
   element.style.width = "100%";
+  // 设置视图容器的高度为父容器的 100%
   element.style.height = "100%";
+  // 将实际的视图容器添加到父容器中
   elementParent.appendChild(element);
 
+  // 将父容器添加到页面的指定容器（container）中
   container.appendChild(elementParent);
 
+  // 创建一个 vtkGenericRenderWindow 实例，负责管理 VTK 渲染窗口
   const grw = vtkGenericRenderWindow.newInstance();
+  // 将刚才创建的视图容器赋给渲染窗口容器
   grw.setContainer(element);
+  // 调用 resize 方法确保渲染窗口的尺寸与视图容器一致
   grw.resize();
+
+  // 创建一个对象，用于存储渲染窗口、渲染器、GL 渲染窗口等属性
   const obj = {
-    renderWindow: grw.getRenderWindow(),
-    renderer: grw.getRenderer(),
-    GLWindow: grw.getApiSpecificRenderWindow(),
-    interactor: grw.getInteractor(),
-    widgetManager: vtkWidgetManager.newInstance(),
-    orientationWidget: null,
+    renderWindow: grw.getRenderWindow(), // 获取渲染窗口对象
+    renderer: grw.getRenderer(), // 获取渲染器对象
+    GLWindow: grw.getApiSpecificRenderWindow(), // 获取与 API 相关的渲染窗口对象
+    interactor: grw.getInteractor(), // 获取交互器对象，用于处理用户输入（例如鼠标操作）
+    widgetManager: vtkWidgetManager.newInstance(), // 创建一个新的小部件管理器实例，管理各种交互小部件
+    orientationWidget: null, // 当前没有设置方向小部件（通常用于显示视图方向等信息）
   };
 
   obj.renderer.getActiveCamera().setParallelProjection(true);
