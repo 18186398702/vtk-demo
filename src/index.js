@@ -432,63 +432,80 @@ function updateReslice(
   return modified;
 }
 
+// 创建一个新的 VTK 数据集读取器实例，配置选项表示支持读取 Gzip 压缩的文件。
 const reader = vtkHttpDataSetReader.newInstance({ fetchGzip: true });
+
+// 设置要加载的 VTI 数据集文件的 URL
 reader.setUrl(`https://kitware.github.io/vtk-js/data/volume/LIDC2.vti`).then(() => {
+  // 数据加载完成后执行以下操作
   reader.loadData().then(() => {
+    // 从读取器中获取已加载的图像数据
     const image = reader.getOutputData();
+    console.log('Origin:', reader.getArrays());
+    // 如果需要，也可以访问图像的其他属性
+    console.log('Image Dimensions:', image.getDimensions());
+    console.log('Spacing:', image.getSpacing());
+    console.log('Origin:', image.getOrigin());
+    // 将加载的图像数据设置到一个假设的控件 `widget` 中进行显示
     widget.setImage(image);
 
-    // Create image outline in 3D view
+    // 创建一个轮廓过滤器，用于生成图像的边界框
     const outline = vtkOutlineFilter.newInstance();
+    // 设置输入数据为当前加载的图像数据
     outline.setInputData(image);
+    // 创建一个映射器，用于将轮廓数据渲染到视图中
     const outlineMapper = vtkMapper.newInstance();
+    // 设置映射器输入为轮廓数据的输出
     outlineMapper.setInputData(outline.getOutputData());
+    // 创建一个演员（Actor），将轮廓渲染到 3D 视图中
     const outlineActor = vtkActor.newInstance();
+    // 将轮廓映射器绑定到演员上
     outlineActor.setMapper(outlineMapper);
+    // 将演员添加到 3D 渲染器中进行显示
     view3D.renderer.addActor(outlineActor);
 
+    // 对每个视图的属性进行操作，`viewAttributes` 是包含多个视图属性的数组
     viewAttributes.forEach((obj, i) => {
+      // 设置该视图的重采样输入数据为加载的图像数据
       obj.reslice.setInputData(image);
+      // 将该视图的重采样演员添加到渲染器中
       obj.renderer.addActor(obj.resliceActor);
+      // 将重采样演员添加到 3D 渲染器中进行显示
       view3D.renderer.addActor(obj.resliceActor);
+      // 遍历并将该视图中的球体演员添加到渲染器中
       obj.sphereActors.forEach((actor) => {
         obj.renderer.addActor(actor);
         view3D.renderer.addActor(actor);
       });
+
       const reslice = obj.reslice;
       const viewType = xyzToViewType[i];
 
+      // 对所有视图进行操作，确保在当前视图进行交互时能够正确更新切片
       viewAttributes
-        // No need to update plane nor refresh when interaction
-        // is on current view. Plane can't be changed with interaction on current
-        // view. Refreshs happen automatically with `animation`.
-        // Note: Need to refresh also the current view because of adding the mouse wheel
-        // to change slicer
         .forEach((v) => {
-          // Store the FocalPoint offset before "interacting".
-          // The offset may have been changed externally when manipulating the camera
-          // or interactorstyle.
+          // 在交互开始时，更新重采样器的状态
           v.widgetInstance.onStartInteractionEvent(() => {
             updateReslice({
               viewType,
               reslice,
               actor: obj.resliceActor,
               renderer: obj.renderer,
-              resetFocalPoint: false,
-              computeFocalPointOffset: true,
+              resetFocalPoint: false, // 交互开始时不重置焦点位置
+              computeFocalPointOffset: true, // 允许计算焦点偏移
               sphereSources: obj.sphereSources,
               slider: obj.slider,
             });
           });
 
-          // Interactions in other views may change current plane
+          // 在交互过程中，更新切片的位置和焦点
           v.widgetInstance.onInteractionEvent(
-            // canUpdateFocalPoint: Boolean which defines if the focal point can be updated because
-            // the current interaction is a rotation
+            // 可以根据当前交互方法判断是否允许更新焦点
             (interactionMethodName) => {
               const canUpdateFocalPoint =
                 interactionMethodName === InteractionMethodsName.RotateLine;
               const activeViewType = widget.getWidgetState().getActiveViewType();
+              // 如果当前视图是活动视图或不能更新焦点，则允许计算焦点偏移
               const computeFocalPointOffset = activeViewType === viewType || !canUpdateFocalPoint;
               updateReslice({
                 viewType,
@@ -504,23 +521,27 @@ reader.setUrl(`https://kitware.github.io/vtk-js/data/volume/LIDC2.vti`).then(() 
           );
         });
 
+      // 初始化时，更新切片的状态，并将焦点设置为图像中心
       updateReslice({
         viewType,
         reslice,
         actor: obj.resliceActor,
         renderer: obj.renderer,
-        resetFocalPoint: true, // At first initilization, center the focal point to the image center
-        computeFocalPointOffset: true, // Allow to compute the current offset between display reslice center and display focal point
+        resetFocalPoint: true, // 重置焦点到图像中心
+        computeFocalPointOffset: true, // 允许计算当前偏移
         sphereSources: obj.sphereSources,
         slider: obj.slider,
       });
+      // 渲染当前视图
       obj.interactor.render();
     });
 
+    // 重置 3D 渲染器的相机，确保视图显示正确
     view3D.renderer.resetCamera();
+    // 重置相机的裁剪范围
     view3D.renderer.resetCameraClippingRange();
 
-    // set max number of slices to slider.
+    // 设置最大切片数量到滑块的最大值
     const maxNumberOfSlices = vec3.length(image.getDimensions());
     document.getElementById("slabNumber").max = maxNumberOfSlices;
   });
