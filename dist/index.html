@@ -37,19 +37,31 @@
             description: "Rescale Intercept", }, rescaleSlope: { id: "0028,1053", //像素值的物理转换斜率 
             description: "Rescale Slope", }, pixelData: { id: "7FE0,0010",//实际影像像素数据 
             description: "Pixel Data"} }; 
-            // 配置三个视图
-        const containerIds = ["axialContainer", "coronalContainer", "sagittalContainer"];
-        const sliderIds = ["axialSlider", "coronalSlider", "sagittalSlider"];
+        const controlID = {
+            container:{
+                containerIds:["axialContainer", "coronalContainer", "sagittalContainer"],
+                description:"显示视图内容"
+            },
+            slider:{
+                sliderIds:["axialSlider", "coronalSlider", "sagittalSlider"],
+                description:"滑动切换显示层"
+            }
+        }
         // 文件选择框的变化事件
       dicomFileInput.addEventListener("change", function (event) {
         const files = event.target.files;
         if (files.length > 0) {
-            let dicom_tags = pian.getTags(files)
+           let dicomArrayBuffer = pian.f_load_directory(files)
+           console.log("dicomArrayBuffer",dicomArrayBuffer);
+           load(dicomArrayBuffer)
+        }})
+        async function load(dicomArrayBuffer){
+            let dicom_tags = pian.getTags(dicomArrayBuffer)
             const dicom_info = pian.processTagsInfo(dicom_tags,dicomTags)
-            pian.loadMPR(dicom_info, sliderIds, containerIds)
+            pian.loadMPR(dicom_info, controlID)
             console.log("dicom_tags",dicom_tags)
             console.log("dicom_info",dicom_info)
-        }})
+        }
     </script>
 </body>
 </html>

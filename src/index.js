@@ -1,27 +1,17 @@
 import daikon from "./halo_200804";
 import validateInputs from "./data/validate"
-export async function loadMPR(dicomInfo, sliderIds, containerIds) {
+// import createImageData from "./data/createImage"
+export async function loadMPR(dicomInfo, controlId) {
     // console.log("data",dicomInfo, sliderIds, containerIds);
   // 调用验证函数
-  let data = await  validateInputs(dicomInfo, sliderIds, containerIds);
+  let data = await  validateInputs(dicomInfo, controlId);
 //   // 加载 DICOM 数据
 //   const loadInfo = loadDICOM();
   console.log("data", data);
 //   console.log("loadInfo", loadInfo);
-  // switch (loadType) {
-  //     case 'MPR':
-  //         console.log("MPR");
-  //         break;
-  // }
 }
-export async function getTags(selectFiles) {
+export async function getTags(dicomArrayBuffer) {
   let dicom_tags = [];
-  let dicomArrayBuffer = [];
-  if (selectFiles.length == 0) {
-    console.error("入参为空");
-  } else {
-    dicomArrayBuffer = f_load_directory(selectFiles);
-  }
   if (dicomArrayBuffer.length == 0) {
     console.error("获取文件buffer为空,不支持获取tags数据");
   } else {
@@ -79,7 +69,7 @@ export async function processTagsInfo(tagsData, dicomTags) {
   // console.log("allTags",allTags);
   return allTags;
 }
-function f_load_directory(selectFiles) {
+export function f_load_directory(selectFiles) {
   let dicom_arraybuffer = [];
   for (var file of selectFiles) {
     const readFileAsync = (file) =>
