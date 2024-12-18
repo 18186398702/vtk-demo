@@ -80,8 +80,10 @@ function MultiSliceImageMapper(imageData,controlId) {
     renderer.resetCamera();
     renderWindow.render();
   });
-
-  // 添加滑块事件监听器
+  slider(sliderIds,resliceInstances,sliceOrigins)
+}
+function slider(sliderIds,resliceInstances,sliceOrigins){
+    // 添加滑块事件监听器
   sliderIds.forEach((sliderId, index) => {
     const slider = document.getElementById(sliderId);
     slider.addEventListener("input", (event) => {
@@ -110,9 +112,6 @@ function MultiSliceImageMapper(imageData,controlId) {
       sliceOrigins[index] = origin;
     });
   });
-}
-function slider(sliderIds,){
-
 }
 
 export async function getTags(dicomArrayBuffer) {
