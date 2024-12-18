@@ -10,6 +10,8 @@ import vtkMatrixBuilder from "@kitware/vtk.js/Common/Core/MatrixBuilder";
 import vtkImageMapper from "@kitware/vtk.js/Rendering/Core/ImageMapper";
 import vtkImageSlice from "@kitware/vtk.js/Rendering/Core/ImageSlice";
 
+import vtkInteractorStyleImage from '@kitware/vtk.js/Interaction/Style/InteractorStyleImage';
+
 // import createImageData from "./data/createImage"
 export async function loadMPR(dicomInfo, controlId) {
   // 调用验证函数
@@ -41,6 +43,12 @@ function MultiSliceImageMapper(imageData,controlId) {
     const renderer = grw.getRenderer();
     const renderWindow = grw.getRenderWindow();
     const interactor = grw.getInteractor(); // 获取交互器对象，用于处理用户输入（例如鼠标操作）
+
+    // 自定义交互器样式
+    const interactorStyle = vtkInteractorStyleImage.newInstance();
+    interactorStyle.setInteractionMode('IMAGE_SLICING'); // 设置交互模式为 2D 切片模式
+    interactor.setInteractorStyle(interactorStyle);
+
     renderWindow.setInteractor(interactor); // 设置交互器与渲染窗口关联，确保用户能够与窗口进行交互
     interactor.initialize(); // 初始化交互器，准备开始与用户的交互
     interactor.bindEvents(element); // 绑定事件到 HTML 元素，使得用户可以通过鼠标和键盘与视图进行交互
@@ -80,8 +88,9 @@ function MultiSliceImageMapper(imageData,controlId) {
     renderer.resetCamera();
     renderWindow.render();
   });
-  slider(sliderIds,resliceInstances,sliceOrigins)
+ 
 }
+// slider(sliderIds,resliceInstances,sliceOrigins)
 function slider(sliderIds,resliceInstances,sliceOrigins){
     // 添加滑块事件监听器
   sliderIds.forEach((sliderId, index) => {
