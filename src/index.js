@@ -12,11 +12,14 @@ import vtkImageSlice from "@kitware/vtk.js/Rendering/Core/ImageSlice";
 
 // import createImageData from "./data/createImage"
 export async function loadMPR(dicomInfo, controlId) {
-  // console.log("data",dicomInfo, sliderIds, containerIds);
   // 调用验证函数
   let data = await validateInputs(dicomInfo, controlId);
   let imageData = createImageData(data);
-
+  MultiSliceImageMapper(imageData,controlId) 
+}
+function MultiSliceImageMapper(imageData,controlId) {
+    // 从 controlId 解构出 sliderIds 和 containerIds
+  const { slider: { sliderIds } = {}, container: { containerIds } = {} } = controlId;
   const planeConfigs = [
     { axis: "z", rotation: { x: 0, y: 0, z: 0 }, origin: [0, 0, 30] }, // 横断面
     { axis: "y", rotation: { x: 90, y: 0, z: 0 }, origin: [0, 50, 0] }, // 冠状面
@@ -25,8 +28,7 @@ export async function loadMPR(dicomInfo, controlId) {
   // 初始化每个视图和交叉线
   const resliceInstances = [];
   const sliceOrigins = planeConfigs.map((config) => [...config.origin]);
-  // 从 controlId 解构出 sliderIds 和 containerIds
-  const { slider: { sliderIds } = {}, container: { containerIds } = {} } = controlId;
+
   // 初始化每个平面视图
   containerIds.forEach((containerId, index) => {
     const config = planeConfigs[index];
@@ -108,9 +110,11 @@ export async function loadMPR(dicomInfo, controlId) {
       sliceOrigins[index] = origin;
     });
   });
-
-  console.log("data", data);
 }
+function slider(sliderIds,){
+
+}
+
 export async function getTags(dicomArrayBuffer) {
   let dicom_tags = [];
   if (dicomArrayBuffer.length == 0) {
