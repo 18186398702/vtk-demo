@@ -3,7 +3,7 @@ import insertSlice from "./insertSlice";
 import vtkImageData from "@kitware/vtk.js/Common/DataModel/ImageData";
 import vtkDataArray from "@kitware/vtk.js/Common/Core/DataArray";
 
-function createImageData(dicomSlices) {
+export default function createImageData(dicomSlices) {
     const imageData = vtkImageData.newInstance();
     const dimensions = [
       dicomSlices[0].pixelData.Description.numCols,
