@@ -50,7 +50,7 @@ const widgetState = widget.getWidgetState();
 // Set size in CSS pixel space because scaleInPixels defaults to true
 widgetState.getStatesWithLabel("sphere").forEach((handle) => handle.setScale1(20));
 const showDebugActors = true;
-const windowWidthCenter = []
+const windowWidthCenter = [];
 const appCursorStyles = {
   translateCenter: "move",
   rotateLine: "alias",
@@ -127,7 +127,7 @@ for (let i = 0; i < 4; i++) {
   // 设置父容器的宽度为页面宽度的 50%
   elementParent.style.width = "50%";
   // 设置父容器的高度为 300px
-  elementParent.style.height = "450px";
+  elementParent.style.height = "300px";
   // 设置父容器的显示方式为 inline-block，确保它会与其他元素并排显示
   elementParent.style.display = "inline-block"; // 保留上下外边距/内边距
 
@@ -588,12 +588,12 @@ const dicomTags = {
     id: "7FE0,0010", //实际影像像素数据
     description: "Pixel Data",
   },
-  windowCenter:{
-    id:"0028,1050",
+  windowCenter: {
+    id: "0028,1050",
     description: "Window Center",
   },
-  windowWidth:{
-    id:"0028,1051",
+  windowWidth: {
+    id: "0028,1051",
     description: "Window Width",
   },
 };
@@ -627,7 +627,6 @@ function MultiSliceImageMapper(imageData) {
     console.error("imageData is not loaded or initialized.");
     return;
   }
-
   // 将加载的图像数据设置到一个假设的控件 `widget` 中进行显示
   widget.setImage(imageData);
 
@@ -730,22 +729,37 @@ function MultiSliceImageMapper(imageData) {
 }
 
 function createImageData(dicomSlices) {
+  // 判断 dicomSlices 是否是一个有效数组
+  if (!Array.isArray(dicomSlices) || dicomSlices.length === 0) {
+    console.log("dicomSlices 不是一个有效的数组或数组为空");
+    return null; // 返回 null 或者其他合适的值表示创建失败
+  }
+  // 提取第一个 dicomSlice 的必要信息
+  const firstSlice = dicomSlices[0];
+  const { pixelData, windowCenter, windowWidth, sliceThickness, pixelSpacing } = firstSlice;
+
+  const { Description: pixelDataDescription } = pixelData;
+  const { Description: windowCenterDescription } = windowCenter;
+  const { Description: windowWidthDescription } = windowWidth;
+  const { Description: sliceThicknessDescription } = sliceThickness;
+  const { Description: pixelSpacingDescription } = pixelSpacing;
+
   const imageData = vtkImageData.newInstance();
   const dimensions = [
-    dicomSlices[0].pixelData.Description.numCols,
-    dicomSlices[0].pixelData.Description.numRows,
+    pixelDataDescription.numCols,
+    pixelDataDescription.numRows,
     dicomSlices.length,
   ];
   imageData.setDimensions(...dimensions);
-  // console.log("windowCenter",dicomSlices[0].windowCenter.Description);
-  // console.log("windowWidth",dicomSlices[0].windowWidth.Description);
-  windowWidthCenter.push(dicomSlices[0].windowWidth.Description[0])
-  windowWidthCenter.push(dicomSlices[0].windowCenter.Description[0])
-  console.log("windowWidthCenter",windowWidthCenter);
+  windowWidthCenter.push(windowWidthDescription[0]);
+  windowWidthCenter.push(windowCenterDescription[0]);
+  console.log("windowWidthCenter", windowWidthCenter);
   // 设置图像数据的维度和体素间距
-  let pixelSpacing = dicomSlices[0].pixelSpacing.Description;
-  let sliceThickness = dicomSlices[0].sliceThickness.Description;
-  let spacing = [pixelSpacing[0], pixelSpacing[1], sliceThickness[0]];
+  let spacing = [
+    pixelSpacingDescription[0],
+    pixelSpacingDescription[1],
+    sliceThicknessDescription[0],
+  ];
   imageData.setSpacing(spacing);
   imageData.setOrigin([0, 0, 0]);
   const typedPixelArray = new Float32Array(dimensions[0] * dimensions[1] * dimensions[2]);
