@@ -62,7 +62,7 @@ const appCursorStyles = {
 // Define html structure
 // ----------------------------------------------------------------------------
 
-const container = document.querySelector("body");
+const container = document.getElementById("container");
 const controlContainer = document.createElement("div");
 container.appendChild(controlContainer);
 const checkboxTranslation = document.getElementById("checkboxTranslation");
