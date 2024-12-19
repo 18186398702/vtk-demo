@@ -352,20 +352,36 @@ for (let i = 0; i < 4; i++) {
     elementParent.appendChild(slider);
     obj.slider = slider;
 
-    slider.addEventListener("change", (ev) => {
+    // 为滑块添加事件监听器，当滑块值发生改变时触发
+    slider.addEventListener("input", (ev) => {
+      // 获取滑块的新值（用户拖动后的数值）
       const newDistanceToP1 = ev.target.value;
+
+      // 获取当前平面的法向量（用于表示平面的方向）
       const dirProj = widget.getWidgetState().getPlanes()[xyzToViewType[i]].normal;
+
+      // 获取当前平面的边界点（通常是平面的两个端点）
       const planeExtremities = widget.getPlaneExtremities(xyzToViewType[i]);
+
+      // 计算新的平面中心点：
+      // 从平面起始点 planeExtremities[0] 出发，
+      // 沿法向量 dirProj 移动 newDistanceToP1 的距离
       const newCenter = vtkMath.multiplyAccumulate(
-        planeExtremities[0],
-        dirProj,
-        Number(newDistanceToP1),
-        []
+        planeExtremities[0], // 起始点
+        dirProj, // 法向量
+        Number(newDistanceToP1), // 滑块值转换为数字
+        [] // 结果存储在一个新数组中
       );
+
+      // 设置平面的新中心点
       widget.setCenter(newCenter);
+
+      // 模拟用户交互，触发小部件的交互事件，确保状态更新
       obj.widgetInstance.invokeInteractionEvent(obj.widgetInstance.getActiveInteraction());
+
+      // 遍历所有视图属性，逐一渲染每个视图以更新显示
       viewAttributes.forEach((obj2) => {
-        obj2.interactor.render();
+        obj2.interactor.render(); // 重新渲染视图
       });
     });
   }
