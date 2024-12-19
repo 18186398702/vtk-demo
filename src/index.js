@@ -30,7 +30,6 @@ import {
   xyzToViewType,
   InteractionMethodsName,
 } from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants";
-import controlPanel from "../dist/index.html";
 
 // ----------------------------------------------------------------------------
 // Define main attributes
@@ -65,7 +64,6 @@ const appCursorStyles = {
 
 const container = document.querySelector("body");
 const controlContainer = document.createElement("div");
-controlContainer.innerHTML = controlPanel;
 container.appendChild(controlContainer);
 const checkboxTranslation = document.getElementById("checkboxTranslation");
 const checkboxShowRotation = document.getElementById("checkboxShowRotation");
@@ -246,7 +244,6 @@ for (let i = 0; i < 4; i++) {
 
   // 创建一个 vtkImageSlice 实例，用于显示图像切片
   obj.resliceActor = vtkImageSlice.newInstance();
-
   // 将映射器应用到 vtkImageSlice 上，以便它能够渲染图像
   obj.resliceActor.setMapper(obj.resliceMapper);
 
@@ -592,6 +589,14 @@ const dicomTags = {
     id: "7FE0,0010", //实际影像像素数据
     description: "Pixel Data",
   },
+  windowCenter:{
+    id:"0028,1050",
+    description: "Window Center",
+  },
+  windowWidth:{
+    id:"0028,1051",
+    description: "Window Width",
+  },
 };
 
 export async function load(ArrayBuffer) {
@@ -602,17 +607,17 @@ export async function load(ArrayBuffer) {
       arrayBuffer.push(buffer);
     }
   }
-  const loader = new Loader()
-  loader.MPR(arrayBuffer)
+  const loader = new Loader();
+  loader.MPR(arrayBuffer);
 }
 export class Loader {
   MPR(array_Buffer) {
     let dicom_info = getTags(array_Buffer, dicomTags);
-    if (dicom_info.length==0){
+    if (dicom_info.length == 0) {
       console.error("获取 dicom 信息数据为空");
-    }else{
+    } else {
       let imageData = createImageData(dicom_info);
-      MultiSliceImageMapper(imageData)
+      MultiSliceImageMapper(imageData);
     }
   }
 }
@@ -620,7 +625,7 @@ export class Loader {
 // ---------------------------------------------------------------------------------------------------
 function MultiSliceImageMapper(imageData) {
   if (!imageData) {
-    console.error('imageData is not loaded or initialized.');
+    console.error("imageData is not loaded or initialized.");
     return;
   }
 
@@ -730,7 +735,7 @@ function createImageData(dicomSlices) {
     dicomSlices.length,
   ];
   imageData.setDimensions(...dimensions);
-
+  console.log();
   // 设置图像数据的维度和体素间距
   let pixelSpacing = dicomSlices[0].pixelSpacing.Description;
   let sliceThickness = dicomSlices[0].sliceThickness.Description;
