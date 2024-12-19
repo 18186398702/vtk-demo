@@ -19,7 +19,7 @@ import vtkOutlineFilter from "@kitware/vtk.js/Filters/General/OutlineFilter";
 import vtkOrientationMarkerWidget from "@kitware/vtk.js/Interaction/Widgets/OrientationMarkerWidget";
 import vtkResliceCursorWidget from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget";
 import vtkWidgetManager from "@kitware/vtk.js/Widgets/Core/WidgetManager";
-
+import vtkCursor3D from "@kitware/vtk.js/Filters/Sources/Cursor3D";
 import vtkSphereSource from "@kitware/vtk.js/Filters/Sources/SphereSource";
 import { CaptureOn } from "@kitware/vtk.js/Widgets/Core/WidgetManager/Constants";
 
@@ -30,7 +30,6 @@ import {
   xyzToViewType,
   InteractionMethodsName,
 } from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants";
-
 // ----------------------------------------------------------------------------
 // Define main attributes
 // ----------------------------------------------------------------------------
@@ -118,6 +117,8 @@ function createRGBStringFromRGBValues(rgb) {
 const initialPlanesState = { ...widgetState.getPlanes() };
 
 let view3D = null;
+// 创建空的 vtkImageData 实例
+let imageData = null
 
 for (let i = 0; i < 4; i++) {
   // 创建一个新的 div 元素作为容器，父级容器，用来放置视图
@@ -287,6 +288,15 @@ for (let i = 0; i < 4; i++) {
     viewAttributes.push(obj);
   } else {
     view3D = obj;
+    // 调用封装函数，创建一个 vtkCursor3D 边框
+    setupCursor3D(view3D, [0, 0, 0], [-20, 20, -20, 20, -20, 20], {
+      zShadows: false,
+      xShadows: false,
+      yShadows: false,
+      outline: true,
+      axes: false,
+      center: false,
+    });
   }
 
   // create axes
@@ -385,6 +395,57 @@ for (let i = 0; i < 4; i++) {
       });
     });
   }
+}
+/**
+ * 创建并显示一个 vtkCursor3D 边框
+ * @param {Object} view3D - 包含 renderer 和 renderWindow 的对象
+ * @param {Array} focalPoint - 设置焦点 [x, y, z]
+ * @param {Array} modelBounds - 设置模型边界 [xmin, xmax, ymin, ymax, zmin, zmax]
+ * @param {Object} options - 配置选项，例如是否显示边框、阴影、坐标轴等
+ */
+function setupCursor3D(
+  view3D,
+  focalPoint = [0, 0, 0],
+  modelBounds = [-10, 10, -10, 10, -10, 10],
+  options = {}
+) {
+  // 清除渲染器中的所有演员
+  view3D.renderer.getActors().forEach((actor) => {
+    view3D.renderer.removeActor(actor);
+  });
+
+  // 创建新的 vtkCursor3D
+  const cursor3D = vtkCursor3D.newInstance();
+  cursor3D.setFocalPoint(focalPoint);
+  cursor3D.setModelBounds(modelBounds);
+
+  // 设置选项，默认只显示边框
+  cursor3D.set({
+    zShadows: options.zShadows ?? false,
+    xShadows: options.xShadows ?? false,
+    yShadows: options.yShadows ?? false,
+    outline: options.outline ?? true,
+    axes: options.axes ?? false,
+    center: options.center ?? false,
+  });
+
+  // 创建 Mapper 和 Actor
+  const cursor3DMapper = vtkMapper.newInstance();
+  cursor3DMapper.setInputConnection(cursor3D.getOutputPort());
+  const cursor3DActor = vtkActor.newInstance();
+  cursor3DActor.setMapper(cursor3DMapper);
+
+  // 添加到渲染器
+  view3D.renderer.addActor(cursor3DActor);
+
+  // 更新渲染器
+  view3D.renderer.resetCamera();
+  view3D.renderWindow.render();
+
+  // 更新 view3D 引用
+  view3D.cursor3D = cursor3D;
+  view3D.cursor3DMapper = cursor3DMapper;
+  view3D.cursor3DActor = cursor3DActor;
 }
 
 // ----------------------------------------------------------------------------
@@ -551,7 +612,22 @@ buttonReset.addEventListener("click", () => {
     console.warn("No valid image found. Reset operation skipped for center.");
   }
 });
-
+const buttonClearAll = document.getElementById("buttonClearAll");
+buttonClearAll.addEventListener("click", () => {
+  // 调用封装函数，创建一个 vtkCursor3D 边框
+  setupCursor3D(view3D, [0, 0, 0], [-20, 20, -20, 20, -20, 20], {
+    zShadows: false,
+    xShadows: false,
+    yShadows: false,
+    outline: true,
+    axes: false,
+    center: false,
+  });
+});
+const buttonViewAll = document.getElementById("buttonViewAll");
+buttonViewAll.addEventListener("click", () => {
+  updateOutline(view3D, imageData)
+});
 const selectInterpolationMode = document.getElementById("selectInterpolation");
 selectInterpolationMode.addEventListener("change", (ev) => {
   viewAttributes.forEach((obj) => {
@@ -572,6 +648,42 @@ checkboxWindowLevel.addEventListener("change", (ev) => {
     }
   });
 });
+/**
+ * 清除已有边框并添加图像数据的边界框到 3D 视图
+ * @param {Object} view3D - 包含 renderer 和 renderWindow 的对象
+ * @param {vtkImageData} imageData - 用于生成边界框的图像数据
+ * @returns {vtkActor} - 创建的边界框 Actor
+ */
+function updateOutline(view3D, imageData) {
+  // 清除渲染器中的所有演员
+  view3D.renderer.getActors().forEach((actor) => {
+    view3D.renderer.removeActor(actor);
+  });
+
+  // 创建一个轮廓过滤器，用于生成图像的边界框
+  const outline = vtkOutlineFilter.newInstance();
+  outline.setInputData(imageData); // 设置输入数据为当前加载的图像数据
+
+  // 创建一个映射器，用于将轮廓数据渲染到视图中
+  const outlineMapper = vtkMapper.newInstance();
+  outlineMapper.setInputData(outline.getOutputData()); // 设置映射器输入为轮廓数据的输出
+
+  // 创建一个演员（Actor），将轮廓渲染到 3D 视图中
+  const outlineActor = vtkActor.newInstance();
+  outlineActor.setMapper(outlineMapper); // 将轮廓映射器绑定到演员上
+
+  // 将演员添加到 3D 渲染器中进行显示
+  view3D.renderer.addActor(outlineActor);
+  viewAttributes.forEach((obj, i) => {
+    if (i==0){
+      // 将重采样演员添加到 3D 渲染器中进行显示
+      view3D.renderer.addActor(obj.resliceActor);
+    }
+  })
+  // 更新视图
+  view3D.renderer.resetCamera();
+  view3D.renderWindow.render();
+}
 
 //-----------------------------------------------------------------------------------------------------
 const dicomTags = {
@@ -638,7 +750,7 @@ export class Loader {
     if (dicom_info.length == 0) {
       console.error("获取 dicom 信息数据为空");
     } else {
-      let imageData = createImageData(dicom_info);
+      imageData = createImageData(dicom_info);
       MultiSliceImageMapper(imageData);
     }
   }
@@ -652,22 +764,14 @@ function MultiSliceImageMapper(imageData) {
   }
   // 将加载的图像数据设置到一个假设的控件 `widget` 中进行显示
   widget.setImage(imageData);
-
-  // 创建一个轮廓过滤器，用于生成图像的边界框
-  const outline = vtkOutlineFilter.newInstance();
-  // 设置输入数据为当前加载的图像数据
-  outline.setInputData(imageData);
-  // 创建一个映射器，用于将轮廓数据渲染到视图中
-  const outlineMapper = vtkMapper.newInstance();
-  // 设置映射器输入为轮廓数据的输出
-  outlineMapper.setInputData(outline.getOutputData());
-  // 创建一个演员（Actor），将轮廓渲染到 3D 视图中
-  const outlineActor = vtkActor.newInstance();
-  // 将轮廓映射器绑定到演员上
-  outlineActor.setMapper(outlineMapper);
-  // 将演员添加到 3D 渲染器中进行显示
-  view3D.renderer.addActor(outlineActor);
-
+    setupCursor3D(view3D, [0, 0, 0], [-20, 20, -20, 20, -20, 20], {
+      zShadows: false,
+      xShadows: false,
+      yShadows: false,
+      outline: true,
+      axes: false,
+      center: false,
+    });
   // 对每个视图的属性进行操作，`viewAttributes` 是包含多个视图属性的数组
   viewAttributes.forEach((obj, i) => {
     // 设置该视图的重采样输入数据为加载的图像数据
@@ -677,12 +781,10 @@ function MultiSliceImageMapper(imageData) {
     property.setColorLevel(windowWidthCenter[1]); // 设置窗口中心
     // 将该视图的重采样演员添加到渲染器中
     obj.renderer.addActor(obj.resliceActor);
-    // 将重采样演员添加到 3D 渲染器中进行显示
-    view3D.renderer.addActor(obj.resliceActor);
     // 遍历并将该视图中的球体演员添加到渲染器中
     obj.sphereActors.forEach((actor) => {
       obj.renderer.addActor(actor);
-      view3D.renderer.addActor(actor);
+      // view3D.renderer.addActor(actor);
     });
 
     const reslice = obj.reslice;
@@ -745,7 +847,7 @@ function MultiSliceImageMapper(imageData) {
   view3D.renderer.resetCamera();
   // 重置相机的裁剪范围
   view3D.renderer.resetCameraClippingRange();
-
+  view3D.renderWindow.render();
   // 设置最大切片数量到滑块的最大值
   const maxNumberOfSlices = vec3.length(imageData.getDimensions());
   document.getElementById("slabNumber").max = maxNumberOfSlices;
