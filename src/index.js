@@ -1,11 +1,5 @@
 import daikon from "./halo_200804";
-import validateInputs from "./data/validate";
 import createImageData from "./data/createImage";
-
-import vtkMatrixBuilder from "@kitware/vtk.js/Common/Core/MatrixBuilder";
-
-//------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------
 import "@kitware/vtk.js/favicon";
 
 // Load the rendering pieces we want to use (for both WebGL and WebGPU)
@@ -14,7 +8,6 @@ import "@kitware/vtk.js/Rendering/Profiles/All";
 import vtkActor from "@kitware/vtk.js/Rendering/Core/Actor";
 import vtkAnnotatedCubeActor from "@kitware/vtk.js/Rendering/Core/AnnotatedCubeActor";
 import vtkDataArray from "@kitware/vtk.js/Common/Core/DataArray";
-import vtkHttpDataSetReader from "@kitware/vtk.js/IO/Core/HttpDataSetReader";
 import vtkGenericRenderWindow from "@kitware/vtk.js/Rendering/Misc/GenericRenderWindow";
 import vtkImageData from "@kitware/vtk.js/Common/DataModel/ImageData";
 import vtkImageMapper from "@kitware/vtk.js/Rendering/Core/ImageMapper";
@@ -40,9 +33,6 @@ import {
   InteractionMethodsName,
 } from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants";
 import controlPanel from "../dist/index.html";
-
-// Force the loading of HttpDataAccessHelper to support gzip decompression
-import "@kitware/vtk.js/IO/Core/DataAccessHelper/HttpDataAccessHelper";
 
 // ----------------------------------------------------------------------------
 // Define main attributes
@@ -217,7 +207,7 @@ for (let i = 0; i < 4; i++) {
     // 调整标签为 'line' 的所有状态的缩放比例
     // x 和 y 轴方向的缩放因子为 2（变宽和变高）
     // z 轴方向的缩放因子为 300（在深度方向拉长）
-    widgetState.getStatesWithLabel("line").forEach((state) => state.setScale3(2, 2, 300));
+    widgetState.getStatesWithLabel("line").forEach((state) => state.setScale3(2, 2, 1000));
     // 调整标签为 'center' 的所有状态的不透明度为 128
     widgetState.getStatesWithLabel("center").forEach((state) => state.setOpacity(0));
     // 设置小部件是否保持正交性（即垂直关系），值取决于 checkboxOrthogonality 的选中状态
@@ -440,123 +430,6 @@ function updateReslice(
   return modified;
 }
 
-// 创建一个新的 VTK 数据集读取器实例，配置选项表示支持读取 Gzip 压缩的文件。
-// const reader = vtkHttpDataSetReader.newInstance({ fetchGzip: true });
-
-// // 设置要加载的 VTI 数据集文件的 URL
-// // reader.setUrl(`https://kitware.github.io/vtk-js/data/volume/LIDC2.vti`).then(() => {
-// reader.setUrl(`http://10.10.10.229:9912/vtk-js/data/volume/LIDC2.vti`).then(() => {
-//   // 数据加载完成后执行以下操作
-//   reader.loadData().then(() => {
-//     // 从读取器中获取已加载的图像数据
-//     const image = reader.getOutputData();
-//     console.log('Origin:', reader.getArrays());
-//     // 如果需要，也可以访问图像的其他属性
-//     console.log('Image Dimensions:', image.getDimensions());
-//     console.log('Spacing:', image.getSpacing());
-//     console.log('Origin:', image.getOrigin());
-//     // 将加载的图像数据设置到一个假设的控件 `widget` 中进行显示
-//     widget.setImage(image);
-
-//     // 创建一个轮廓过滤器，用于生成图像的边界框
-//     const outline = vtkOutlineFilter.newInstance();
-//     // 设置输入数据为当前加载的图像数据
-//     outline.setInputData(image);
-//     // 创建一个映射器，用于将轮廓数据渲染到视图中
-//     const outlineMapper = vtkMapper.newInstance();
-//     // 设置映射器输入为轮廓数据的输出
-//     outlineMapper.setInputData(outline.getOutputData());
-//     // 创建一个演员（Actor），将轮廓渲染到 3D 视图中
-//     const outlineActor = vtkActor.newInstance();
-//     // 将轮廓映射器绑定到演员上
-//     outlineActor.setMapper(outlineMapper);
-//     // 将演员添加到 3D 渲染器中进行显示
-//     view3D.renderer.addActor(outlineActor);
-
-//     // 对每个视图的属性进行操作，`viewAttributes` 是包含多个视图属性的数组
-//     viewAttributes.forEach((obj, i) => {
-//       // 设置该视图的重采样输入数据为加载的图像数据
-//       obj.reslice.setInputData(image);
-//       // 将该视图的重采样演员添加到渲染器中
-//       obj.renderer.addActor(obj.resliceActor);
-//       // 将重采样演员添加到 3D 渲染器中进行显示
-//       view3D.renderer.addActor(obj.resliceActor);
-//       // 遍历并将该视图中的球体演员添加到渲染器中
-//       obj.sphereActors.forEach((actor) => {
-//         obj.renderer.addActor(actor);
-//         view3D.renderer.addActor(actor);
-//       });
-
-//       const reslice = obj.reslice;
-//       console.log("viewType",i);
-//       const viewType = xyzToViewType[i];
-
-//       // 对所有视图进行操作，确保在当前视图进行交互时能够正确更新切片
-//       viewAttributes
-//         .forEach((v) => {
-//           // 在交互开始时，更新重采样器的状态
-//           v.widgetInstance.onStartInteractionEvent(() => {
-//             updateReslice({
-//               viewType,
-//               reslice,
-//               actor: obj.resliceActor,
-//               renderer: obj.renderer,
-//               resetFocalPoint: false, // 交互开始时不重置焦点位置
-//               computeFocalPointOffset: true, // 允许计算焦点偏移
-//               sphereSources: obj.sphereSources,
-//               slider: obj.slider,
-//             });
-//           });
-
-//           // 在交互过程中，更新切片的位置和焦点
-//           v.widgetInstance.onInteractionEvent(
-//             // 可以根据当前交互方法判断是否允许更新焦点
-//             (interactionMethodName) => {
-//               const canUpdateFocalPoint =
-//                 interactionMethodName === InteractionMethodsName.RotateLine;
-//               const activeViewType = widget.getWidgetState().getActiveViewType();
-//               // 如果当前视图是活动视图或不能更新焦点，则允许计算焦点偏移
-//               const computeFocalPointOffset = activeViewType === viewType || !canUpdateFocalPoint;
-//               updateReslice({
-//                 viewType,
-//                 reslice,
-//                 actor: obj.resliceActor,
-//                 renderer: obj.renderer,
-//                 resetFocalPoint: false,
-//                 computeFocalPointOffset,
-//                 sphereSources: obj.sphereSources,
-//                 slider: obj.slider,
-//               });
-//             }
-//           );
-//         });
-
-//       // 初始化时，更新切片的状态，并将焦点设置为图像中心
-//       updateReslice({
-//         viewType,
-//         reslice,
-//         actor: obj.resliceActor,
-//         renderer: obj.renderer,
-//         resetFocalPoint: true, // 重置焦点到图像中心
-//         computeFocalPointOffset: true, // 允许计算当前偏移
-//         sphereSources: obj.sphereSources,
-//         slider: obj.slider,
-//       });
-//       // 渲染当前视图
-//       obj.interactor.render();
-//     });
-
-//     // 重置 3D 渲染器的相机，确保视图显示正确
-//     view3D.renderer.resetCamera();
-//     // 重置相机的裁剪范围
-//     view3D.renderer.resetCameraClippingRange();
-
-//     // 设置最大切片数量到滑块的最大值
-//     const maxNumberOfSlices = vec3.length(image.getDimensions());
-//     document.getElementById("slabNumber").max = maxNumberOfSlices;
-//   });
-// });
-
 // ----------------------------------------------------------------------------
 // Define panel interactions
 // ----------------------------------------------------------------------------
@@ -748,6 +621,11 @@ export class Loader {
 
 // ---------------------------------------------------------------------------------------------------
 function MultiSliceImageMapper(imageData) {
+  if (!imageData) {
+    console.error('imageData is not loaded or initialized.');
+    return;
+  }
+
   // 将加载的图像数据设置到一个假设的控件 `widget` 中进行显示
   widget.setImage(imageData);
 
