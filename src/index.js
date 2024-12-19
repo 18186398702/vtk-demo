@@ -525,8 +525,15 @@ sliderSlabNumberofSlices.addEventListener("change", (ev) => {
 const buttonReset = document.getElementById("buttonReset");
 buttonReset.addEventListener("click", () => {
   widgetState.setPlanes({ ...initialPlanesState });
-  widget.setCenter(widget.getWidgetState().getImage().getCenter());
-  updateViews();
+  // 检查是否存在有效的图像
+  const image = widget.getWidgetState().getImage();
+  if (image) {
+    // 设置中心点为图像中心
+    widget.setCenter(image.getCenter());
+    updateViews();
+  } else {
+    console.warn("No valid image found. Reset operation skipped for center.");
+  }
 });
 
 const selectInterpolationMode = document.getElementById("selectInterpolation");
