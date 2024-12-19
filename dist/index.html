@@ -6,7 +6,7 @@
 </head>
 <body>
     <input type="file" id="dicomFileInput" webkitdirectory multiple="multiple" />
-    <div>
+    <!-- <div>
         <label for="axialSlider">Axial (横断面):</label>
         <input type="range" id="axialSlider" min="0" max="100" value="30">
       </div>
@@ -24,44 +24,100 @@
       <div id="coronalContainer" style="width: 33%; height: 300px; float: left;border: 1px solid red;"></div>
       <div id="sagittalContainer" style="width: 33%; height: 300px; float: left;border: 1px solid red;"></div>
       <div id="3DContainer" style="width: 33%; height: 300px; float: left;border: 1px solid red;"></div>
+    </div> -->
+    <div>
+      <table>
+        <tbody>
+          <tr>
+            <td>Allow translation:</td>
+            <td><input type="checkbox" id="checkboxTranslation" checked="checked" /></td>
+          </tr>
+          <tr>
+            <td>Show rotation:</td>
+            <td><input type="checkbox" id="checkboxShowRotation" checked="checked" /></td>
+          </tr>
+          <tr>
+            <td>Allow rotation:</td>
+            <td><input type="checkbox" id="checkboxRotation" checked="checked" /></td>
+          </tr>
+          <tr>
+            <td>Keep orthogonality:</td>
+            <td><input type="checkbox" id="checkboxOrthogonality" checked="checked" /></td>
+          </tr>
+          <tr>
+            <td>Scale in pixels:</td>
+            <td><input type="checkbox" id="checkboxScaleInPixels" checked="checked" /></td>
+          </tr>
+          <tr>
+            <td>Opacity :</td>
+            <td>
+              <input
+                id="opacity"
+                type="range"
+                min="0"
+                max="255"
+                step="1"
+                value="255"
+                style="width: 100px"
+              />
+            </td>
+            <td id="opacityValue">255</td>
+          </tr>
+          <tr>
+            <td>Slab Mode :</td>
+            <td>
+              <select id="slabMode">
+                <option id="slabModeMin" value="0">MIN</option>
+                <option id="slabModeMax" value="1">MAX</option>
+                <option id="slabModeMean" selected="selected" value="2">MEAN</option>
+                <option id="slabModeSum" value="3">SUM</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>Slab Number of Slices :</td>
+            <td>
+              <input
+                id="slabNumber"
+                type="range"
+                min="1"
+                max="385.69547573182655"
+                step="1"
+                value="1"
+                style="width: 100px"
+              />
+            </td>
+            <td id="slabNumberValue">1</td>
+          </tr>
+          <tr>
+            <td>Interpolation mode :</td>
+            <td>
+              <select id="selectInterpolation">
+                <option id="nearest" selected="selected">Nearest</option>
+                <option id="linear">Linear</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>Window Level:</td>
+            <td><input type="checkbox" id="checkboxWindowLevel" checked="checked" /></td>
+          </tr>
+          <tr>
+            <td><button id="buttonReset">Reset views</button></td>
+          </tr>
+        </tbody>
+      </table>
     </div>
     <script src="./webvtk.js"></script>
     <script>
-            const dicomTags = { imagePositionPatient: { id: "0020,0032", //图像在患者坐标系中的位置 
-            description: "Image Position (Patient)", }, imageOrientationPatient: { id: "0020,0037", //图像方向矩阵
-            description: "Image Orientation (Patient)", }, pixelSpacing: { id: "0028,0030", //像素的物理间距
-            description: "Pixel Spacing", }, sliceThickness: { id: "0018,0050",//切片厚度 
-            description: "Slice Thickness", }, instanceNumber: { id: "0020,0013", //当前影像序号 
-            description: "Instance Number", }, sopInstanceUID: { id: "0008,0018", //唯一标识影像的
-            UIDdescription: "SOP Instance UID", }, rescaleIntercept: { id: "0028,1052", //像素值的物理转换截距 
-            description: "Rescale Intercept", }, rescaleSlope: { id: "0028,1053", //像素值的物理转换斜率 
-            description: "Rescale Slope", }, pixelData: { id: "7FE0,0010",//实际影像像素数据 
-            description: "Pixel Data"} }; 
-        const controlID = {
-            container:{
-                containerIds:["axialContainer", "coronalContainer", "sagittalContainer"],
-                description:"显示视图内容"
-            },
-            slider:{
-                sliderIds:["axialSlider", "coronalSlider", "sagittalSlider"],
-                description:"滑动切换显示层"
-            }
-        }
         // 文件选择框的变化事件
       dicomFileInput.addEventListener("change", function (event) {
         const files = event.target.files;
         if (files.length > 0) {
-           let dicomArrayBuffer = pian.f_load_directory(files)
-           console.log("dicomArrayBuffer",dicomArrayBuffer);
-           load(dicomArrayBuffer)
+           let ArrayBuffer = pian.f_load_directory(files)
+           console.log("ArrayBuffer",ArrayBuffer);
+           pian.load(ArrayBuffer)
         }})
-        async function load(dicomArrayBuffer){
-            let dicom_tags = pian.getTags(dicomArrayBuffer)
-            const dicom_info = pian.processTagsInfo(dicom_tags,dicomTags)
-            pian.loadMPR(dicom_info, controlID)
-            console.log("dicom_tags",dicom_tags)
-            console.log("dicom_info",dicom_info)
-        }
     </script>
 </body>
 </html>
