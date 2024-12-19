@@ -30,7 +30,6 @@ import {
   xyzToViewType,
   InteractionMethodsName,
 } from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants";
-import controlPanel from "../dist/index.html";
 
 // ----------------------------------------------------------------------------
 // Define main attributes
@@ -51,7 +50,7 @@ const widgetState = widget.getWidgetState();
 // Set size in CSS pixel space because scaleInPixels defaults to true
 widgetState.getStatesWithLabel("sphere").forEach((handle) => handle.setScale1(20));
 const showDebugActors = true;
-
+const windowWidthCenter = [];
 const appCursorStyles = {
   translateCenter: "move",
   rotateLine: "alias",
@@ -63,9 +62,8 @@ const appCursorStyles = {
 // Define html structure
 // ----------------------------------------------------------------------------
 
-const container = document.querySelector("body");
+const container = document.getElementById("container");
 const controlContainer = document.createElement("div");
-controlContainer.innerHTML = controlPanel;
 container.appendChild(controlContainer);
 const checkboxTranslation = document.getElementById("checkboxTranslation");
 const checkboxShowRotation = document.getElementById("checkboxShowRotation");
@@ -172,7 +170,6 @@ for (let i = 0; i < 4; i++) {
 
   // 将渲染器添加到渲染窗口中，这样渲染器才能在窗口中显示
   obj.renderWindow.addRenderer(obj.renderer);
-
   // 将 OpenGL 窗口添加到渲染窗口，确保渲染窗口能够显示 3D 图形
   obj.renderWindow.addView(obj.GLWindow);
 
@@ -246,7 +243,6 @@ for (let i = 0; i < 4; i++) {
 
   // 创建一个 vtkImageSlice 实例，用于显示图像切片
   obj.resliceActor = vtkImageSlice.newInstance();
-
   // 将映射器应用到 vtkImageSlice 上，以便它能够渲染图像
   obj.resliceActor.setMapper(obj.resliceMapper);
 
@@ -356,20 +352,36 @@ for (let i = 0; i < 4; i++) {
     elementParent.appendChild(slider);
     obj.slider = slider;
 
-    slider.addEventListener("change", (ev) => {
+    // 为滑块添加事件监听器，当滑块值发生改变时触发
+    slider.addEventListener("input", (ev) => {
+      // 获取滑块的新值（用户拖动后的数值）
       const newDistanceToP1 = ev.target.value;
+
+      // 获取当前平面的法向量（用于表示平面的方向）
       const dirProj = widget.getWidgetState().getPlanes()[xyzToViewType[i]].normal;
+
+      // 获取当前平面的边界点（通常是平面的两个端点）
       const planeExtremities = widget.getPlaneExtremities(xyzToViewType[i]);
+
+      // 计算新的平面中心点：
+      // 从平面起始点 planeExtremities[0] 出发，
+      // 沿法向量 dirProj 移动 newDistanceToP1 的距离
       const newCenter = vtkMath.multiplyAccumulate(
-        planeExtremities[0],
-        dirProj,
-        Number(newDistanceToP1),
-        []
+        planeExtremities[0], // 起始点
+        dirProj, // 法向量
+        Number(newDistanceToP1), // 滑块值转换为数字
+        [] // 结果存储在一个新数组中
       );
+
+      // 设置平面的新中心点
       widget.setCenter(newCenter);
+
+      // 模拟用户交互，触发小部件的交互事件，确保状态更新
       obj.widgetInstance.invokeInteractionEvent(obj.widgetInstance.getActiveInteraction());
+
+      // 遍历所有视图属性，逐一渲染每个视图以更新显示
       viewAttributes.forEach((obj2) => {
-        obj2.interactor.render();
+        obj2.interactor.render(); // 重新渲染视图
       });
     });
   }
@@ -529,8 +541,15 @@ sliderSlabNumberofSlices.addEventListener("change", (ev) => {
 const buttonReset = document.getElementById("buttonReset");
 buttonReset.addEventListener("click", () => {
   widgetState.setPlanes({ ...initialPlanesState });
-  widget.setCenter(widget.getWidgetState().getImage().getCenter());
-  updateViews();
+  // 检查是否存在有效的图像
+  const image = widget.getWidgetState().getImage();
+  if (image) {
+    // 设置中心点为图像中心
+    widget.setCenter(image.getCenter());
+    updateViews();
+  } else {
+    console.warn("No valid image found. Reset operation skipped for center.");
+  }
 });
 
 const selectInterpolationMode = document.getElementById("selectInterpolation");
@@ -592,6 +611,14 @@ const dicomTags = {
     id: "7FE0,0010", //实际影像像素数据
     description: "Pixel Data",
   },
+  windowCenter: {
+    id: "0028,1050",
+    description: "Window Center",
+  },
+  windowWidth: {
+    id: "0028,1051",
+    description: "Window Width",
+  },
 };
 
 export async function load(ArrayBuffer) {
@@ -602,17 +629,17 @@ export async function load(ArrayBuffer) {
       arrayBuffer.push(buffer);
     }
   }
-  const loader = new Loader()
-  loader.MPR(arrayBuffer)
+  const loader = new Loader();
+  loader.MPR(arrayBuffer);
 }
 export class Loader {
   MPR(array_Buffer) {
     let dicom_info = getTags(array_Buffer, dicomTags);
-    if (dicom_info.length==0){
+    if (dicom_info.length == 0) {
       console.error("获取 dicom 信息数据为空");
-    }else{
+    } else {
       let imageData = createImageData(dicom_info);
-      MultiSliceImageMapper(imageData)
+      MultiSliceImageMapper(imageData);
     }
   }
 }
@@ -620,10 +647,9 @@ export class Loader {
 // ---------------------------------------------------------------------------------------------------
 function MultiSliceImageMapper(imageData) {
   if (!imageData) {
-    console.error('imageData is not loaded or initialized.');
+    console.error("imageData is not loaded or initialized.");
     return;
   }
-
   // 将加载的图像数据设置到一个假设的控件 `widget` 中进行显示
   widget.setImage(imageData);
 
@@ -646,6 +672,9 @@ function MultiSliceImageMapper(imageData) {
   viewAttributes.forEach((obj, i) => {
     // 设置该视图的重采样输入数据为加载的图像数据
     obj.reslice.setInputData(imageData);
+    const property = obj.resliceActor.getProperty();
+    property.setColorWindow(windowWidthCenter[0]); // 设置窗口宽度
+    property.setColorLevel(windowWidthCenter[1]); // 设置窗口中心
     // 将该视图的重采样演员添加到渲染器中
     obj.renderer.addActor(obj.resliceActor);
     // 将重采样演员添加到 3D 渲染器中进行显示
@@ -723,18 +752,37 @@ function MultiSliceImageMapper(imageData) {
 }
 
 function createImageData(dicomSlices) {
+  // 判断 dicomSlices 是否是一个有效数组
+  if (!Array.isArray(dicomSlices) || dicomSlices.length === 0) {
+    console.log("dicomSlices 不是一个有效的数组或数组为空");
+    return null; // 返回 null 或者其他合适的值表示创建失败
+  }
+  // 提取第一个 dicomSlice 的必要信息
+  const firstSlice = dicomSlices[0];
+  const { pixelData, windowCenter, windowWidth, sliceThickness, pixelSpacing } = firstSlice;
+
+  const { Description: pixelDataDescription } = pixelData;
+  const { Description: windowCenterDescription } = windowCenter;
+  const { Description: windowWidthDescription } = windowWidth;
+  const { Description: sliceThicknessDescription } = sliceThickness;
+  const { Description: pixelSpacingDescription } = pixelSpacing;
+
   const imageData = vtkImageData.newInstance();
   const dimensions = [
-    dicomSlices[0].pixelData.Description.numCols,
-    dicomSlices[0].pixelData.Description.numRows,
+    pixelDataDescription.numCols,
+    pixelDataDescription.numRows,
     dicomSlices.length,
   ];
   imageData.setDimensions(...dimensions);
-
+  windowWidthCenter.push(windowWidthDescription[0]);
+  windowWidthCenter.push(windowCenterDescription[0]);
+  console.log("windowWidthCenter", windowWidthCenter);
   // 设置图像数据的维度和体素间距
-  let pixelSpacing = dicomSlices[0].pixelSpacing.Description;
-  let sliceThickness = dicomSlices[0].sliceThickness.Description;
-  let spacing = [pixelSpacing[0], pixelSpacing[1], sliceThickness[0]];
+  let spacing = [
+    pixelSpacingDescription[0],
+    pixelSpacingDescription[1],
+    sliceThicknessDescription[0],
+  ];
   imageData.setSpacing(spacing);
   imageData.setOrigin([0, 0, 0]);
   const typedPixelArray = new Float32Array(dimensions[0] * dimensions[1] * dimensions[2]);
