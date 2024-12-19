@@ -19,7 +19,7 @@ import vtkOutlineFilter from "@kitware/vtk.js/Filters/General/OutlineFilter";
 import vtkOrientationMarkerWidget from "@kitware/vtk.js/Interaction/Widgets/OrientationMarkerWidget";
 import vtkResliceCursorWidget from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget";
 import vtkWidgetManager from "@kitware/vtk.js/Widgets/Core/WidgetManager";
-
+import vtkCursor3D from "@kitware/vtk.js/Filters/Sources/Cursor3D";
 import vtkSphereSource from "@kitware/vtk.js/Filters/Sources/SphereSource";
 import { CaptureOn } from "@kitware/vtk.js/Widgets/Core/WidgetManager/Constants";
 
@@ -30,7 +30,6 @@ import {
   xyzToViewType,
   InteractionMethodsName,
 } from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants";
-
 // ----------------------------------------------------------------------------
 // Define main attributes
 // ----------------------------------------------------------------------------
@@ -287,6 +286,15 @@ for (let i = 0; i < 4; i++) {
     viewAttributes.push(obj);
   } else {
     view3D = obj;
+    // 调用封装函数，创建一个 vtkCursor3D 边框
+    setupCursor3D(view3D, [0, 0, 0], [-20, 20, -20, 20, -20, 20], {
+      zShadows: false,
+      xShadows: false,
+      yShadows: false,
+      outline: true,
+      axes: false,
+      center: false,
+    });
   }
 
   // create axes
@@ -385,6 +393,57 @@ for (let i = 0; i < 4; i++) {
       });
     });
   }
+}
+/**
+ * 创建并显示一个 vtkCursor3D 边框
+ * @param {Object} view3D - 包含 renderer 和 renderWindow 的对象
+ * @param {Array} focalPoint - 设置焦点 [x, y, z]
+ * @param {Array} modelBounds - 设置模型边界 [xmin, xmax, ymin, ymax, zmin, zmax]
+ * @param {Object} options - 配置选项，例如是否显示边框、阴影、坐标轴等
+ */
+function setupCursor3D(
+  view3D,
+  focalPoint = [0, 0, 0],
+  modelBounds = [-10, 10, -10, 10, -10, 10],
+  options = {}
+) {
+  // 移除旧的 cursor3D Actor（如果存在）
+  if (view3D.cursor3DActor) {
+    view3D.renderer.removeActor(view3D.cursor3DActor);
+  }
+
+  // 创建新的 vtkCursor3D
+  const cursor3D = vtkCursor3D.newInstance();
+  cursor3D.setFocalPoint(focalPoint);
+  cursor3D.setModelBounds(modelBounds);
+
+  // 设置选项，默认只显示边框
+  cursor3D.set({
+    zShadows: options.zShadows ?? false,
+    xShadows: options.xShadows ?? false,
+    yShadows: options.yShadows ?? false,
+    outline: options.outline ?? true,
+    axes: options.axes ?? false,
+    center: options.center ?? false,
+  });
+
+  // 创建 Mapper 和 Actor
+  const cursor3DMapper = vtkMapper.newInstance();
+  cursor3DMapper.setInputConnection(cursor3D.getOutputPort());
+  const cursor3DActor = vtkActor.newInstance();
+  cursor3DActor.setMapper(cursor3DMapper);
+
+  // 添加到渲染器
+  view3D.renderer.addActor(cursor3DActor);
+
+  // 更新渲染器
+  view3D.renderer.resetCamera();
+  view3D.renderWindow.render();
+
+  // 更新 view3D 引用
+  view3D.cursor3D = cursor3D;
+  view3D.cursor3DMapper = cursor3DMapper;
+  view3D.cursor3DActor = cursor3DActor;
 }
 
 // ----------------------------------------------------------------------------
@@ -652,7 +711,11 @@ function MultiSliceImageMapper(imageData) {
   }
   // 将加载的图像数据设置到一个假设的控件 `widget` 中进行显示
   widget.setImage(imageData);
-
+  // 清除已有的边框（如果存在）
+  if (view3D.cursor3DActor) {
+    view3D.renderer.removeActor(view3D.cursor3DActor); // 从渲染器中移除 Actor
+    view3D.cursor3DActor = null; // 清空引用，便于重新创建
+  }
   // 创建一个轮廓过滤器，用于生成图像的边界框
   const outline = vtkOutlineFilter.newInstance();
   // 设置输入数据为当前加载的图像数据
@@ -745,7 +808,7 @@ function MultiSliceImageMapper(imageData) {
   view3D.renderer.resetCamera();
   // 重置相机的裁剪范围
   view3D.renderer.resetCameraClippingRange();
-
+  view3D.renderWindow.render();
   // 设置最大切片数量到滑块的最大值
   const maxNumberOfSlices = vec3.length(imageData.getDimensions());
   document.getElementById("slabNumber").max = maxNumberOfSlices;
