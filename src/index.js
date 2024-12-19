@@ -2,150 +2,878 @@ import daikon from "./halo_200804";
 import validateInputs from "./data/validate";
 import createImageData from "./data/createImage";
 
-import "@kitware/vtk.js/favicon";
-import "@kitware/vtk.js/Rendering/Profiles/All";
-import vtkGenericRenderWindow from "@kitware/vtk.js/Rendering/Misc/GenericRenderWindow";
-import vtkImageReslice from "@kitware/vtk.js/Imaging/Core/ImageReslice";
 import vtkMatrixBuilder from "@kitware/vtk.js/Common/Core/MatrixBuilder";
+
+//------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------
+import "@kitware/vtk.js/favicon";
+
+// Load the rendering pieces we want to use (for both WebGL and WebGPU)
+import "@kitware/vtk.js/Rendering/Profiles/All";
+
+import vtkActor from "@kitware/vtk.js/Rendering/Core/Actor";
+import vtkAnnotatedCubeActor from "@kitware/vtk.js/Rendering/Core/AnnotatedCubeActor";
+import vtkDataArray from "@kitware/vtk.js/Common/Core/DataArray";
+import vtkHttpDataSetReader from "@kitware/vtk.js/IO/Core/HttpDataSetReader";
+import vtkGenericRenderWindow from "@kitware/vtk.js/Rendering/Misc/GenericRenderWindow";
+import vtkImageData from "@kitware/vtk.js/Common/DataModel/ImageData";
 import vtkImageMapper from "@kitware/vtk.js/Rendering/Core/ImageMapper";
+import vtkImageReslice from "@kitware/vtk.js/Imaging/Core/ImageReslice";
 import vtkImageSlice from "@kitware/vtk.js/Rendering/Core/ImageSlice";
+import vtkInteractorStyleImage from "@kitware/vtk.js/Interaction/Style/InteractorStyleImage";
+import vtkInteractorStyleTrackballCamera from "@kitware/vtk.js/Interaction/Style/InteractorStyleTrackballCamera";
+import vtkMath from "@kitware/vtk.js/Common/Core/Math";
+import vtkMapper from "@kitware/vtk.js/Rendering/Core/Mapper";
+import vtkOutlineFilter from "@kitware/vtk.js/Filters/General/OutlineFilter";
+import vtkOrientationMarkerWidget from "@kitware/vtk.js/Interaction/Widgets/OrientationMarkerWidget";
+import vtkResliceCursorWidget from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget";
+import vtkWidgetManager from "@kitware/vtk.js/Widgets/Core/WidgetManager";
 
-import vtkInteractorStyleImage from '@kitware/vtk.js/Interaction/Style/InteractorStyleImage';
+import vtkSphereSource from "@kitware/vtk.js/Filters/Sources/SphereSource";
+import { CaptureOn } from "@kitware/vtk.js/Widgets/Core/WidgetManager/Constants";
 
-// import createImageData from "./data/createImage"
-export async function loadMPR(dicomInfo, controlId) {
-  // 调用验证函数
-  let data = await validateInputs(dicomInfo, controlId);
-  let imageData = createImageData(data);
-  MultiSliceImageMapper(imageData,controlId) 
-}
-function MultiSliceImageMapper(imageData,controlId) {
-    // 从 controlId 解构出 sliderIds 和 containerIds
-  const { slider: { sliderIds } = {}, container: { containerIds } = {} } = controlId;
-  const planeConfigs = [
-    { axis: "z", rotation: { x: 0, y: 0, z: 0 }, origin: [0, 0, 30] }, // 横断面
-    { axis: "y", rotation: { x: 90, y: 0, z: 0 }, origin: [0, 50, 0] }, // 冠状面
-    { axis: "x", rotation: { x: 0, y: 90, z: 0 }, origin: [20, 0, 0] }, // 矢状面
-  ];
-  // 初始化每个视图和交叉线
-  const resliceInstances = [];
-  const sliceOrigins = planeConfigs.map((config) => [...config.origin]);
+import { vec3 } from "gl-matrix";
+import { SlabMode } from "@kitware/vtk.js/Imaging/Core/ImageReslice/Constants";
 
-  // 初始化每个平面视图
-  containerIds.forEach((containerId, index) => {
-    const config = planeConfigs[index];
-    const element = document.getElementById(containerId);
+import {
+  xyzToViewType,
+  InteractionMethodsName,
+} from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants";
+import controlPanel from "../dist/index.html";
 
-    // 创建渲染窗口
-    const grw = vtkGenericRenderWindow.newInstance({ background: [0, 0, 0] });
-    grw.setContainer(element);
-    grw.resize();
-    const renderer = grw.getRenderer();
-    const renderWindow = grw.getRenderWindow();
-    const interactor = grw.getInteractor(); // 获取交互器对象，用于处理用户输入（例如鼠标操作）
+// Force the loading of HttpDataAccessHelper to support gzip decompression
+import "@kitware/vtk.js/IO/Core/DataAccessHelper/HttpDataAccessHelper";
 
-    // 自定义交互器样式
-    const interactorStyle = vtkInteractorStyleImage.newInstance();
-    interactorStyle.setInteractionMode('IMAGE_SLICING'); // 设置交互模式为 2D 切片模式
-    interactor.setInteractorStyle(interactorStyle);
+// ----------------------------------------------------------------------------
+// Define main attributes
+// ----------------------------------------------------------------------------
 
-    renderWindow.setInteractor(interactor); // 设置交互器与渲染窗口关联，确保用户能够与窗口进行交互
-    interactor.initialize(); // 初始化交互器，准备开始与用户的交互
-    interactor.bindEvents(element); // 绑定事件到 HTML 元素，使得用户可以通过鼠标和键盘与视图进行交互
+const viewColors = [
+  [1, 0, 0], // sagittal
+  [0, 1, 0], // coronal
+  [0, 0, 1], // axial
+  [0.5, 0.5, 0.5], // 3D
+];
 
-    // 创建 Reslice
-    const reslice = vtkImageReslice.newInstance();
-    reslice.setInputData(imageData);
-    reslice.setOutputDimensionality(2);
+const viewAttributes = [];
+window.va = viewAttributes;
+const widget = vtkResliceCursorWidget.newInstance();
+window.widget = widget;
+const widgetState = widget.getWidgetState();
+// Set size in CSS pixel space because scaleInPixels defaults to true
+widgetState.getStatesWithLabel("sphere").forEach((handle) => handle.setScale1(20));
+const showDebugActors = true;
 
-    // 设置初始变换矩阵
-    const resliceAxes = vtkMatrixBuilder
-      .buildFromDegree()
-      .identity()
-      .translate(...config.origin)
-      .rotateX(config.rotation.x)
-      .rotateY(config.rotation.y)
-      .rotateZ(config.rotation.z)
-      .getMatrix();
-    reslice.setResliceAxes(resliceAxes);
+const appCursorStyles = {
+  translateCenter: "move",
+  rotateLine: "alias",
+  translateAxis: "pointer",
+  default: "default",
+};
 
-    // 创建 Mapper 和 Actor
-    const mapper = vtkImageMapper.newInstance();
-    mapper.setInputConnection(reslice.getOutputPort());
-    const imageActorI = vtkImageSlice.newInstance();
-    imageActorI.setMapper(mapper);
-    // 添加 Actor 到渲染器
-    renderer.addActor(imageActorI);
-    // 保存实例
-    resliceInstances.push({
-      reslice,
-      renderWindow,
-      renderer,
-      axis: config.axis,
-      rotation: config.rotation,
-    });
-    // 渲染初始视图
-    renderer.resetCamera();
-    renderWindow.render();
-  });
- 
-}
-// slider(sliderIds,resliceInstances,sliceOrigins)
-function slider(sliderIds,resliceInstances,sliceOrigins){
-    // 添加滑块事件监听器
-  sliderIds.forEach((sliderId, index) => {
-    const slider = document.getElementById(sliderId);
-    slider.addEventListener("input", (event) => {
-      const value = Number(event.target.value);
-      const { reslice, renderWindow, axis, rotation } = resliceInstances[index];
+// ----------------------------------------------------------------------------
+// Define html structure
+// ----------------------------------------------------------------------------
 
-      // 动态生成新的变换矩阵
-      const origin = [...sliceOrigins[index]]; // 复制当前原点
-      if (axis === "x") origin[0] = value;
-      else if (axis === "y") origin[1] = value;
-      else if (axis === "z") origin[2] = value;
+const container = document.querySelector("body");
+const controlContainer = document.createElement("div");
+controlContainer.innerHTML = controlPanel;
+container.appendChild(controlContainer);
+const checkboxTranslation = document.getElementById("checkboxTranslation");
+const checkboxShowRotation = document.getElementById("checkboxShowRotation");
+const checkboxRotation = document.getElementById("checkboxRotation");
+const checkboxOrthogonality = document.getElementById("checkboxOrthogonality");
 
-      const newResliceAxes = vtkMatrixBuilder
-        .buildFromDegree()
-        .identity()
-        .translate(...origin)
-        .rotateX(rotation.x)
-        .rotateY(rotation.y)
-        .rotateZ(rotation.z)
-        .getMatrix();
+// ----------------------------------------------------------------------------
+// Setup rendering code
+// ----------------------------------------------------------------------------
 
-      reslice.setResliceAxes(newResliceAxes);
-      renderWindow.render();
-
-      // 更新原点记录
-      sliceOrigins[index] = origin;
-    });
-  });
-}
-
-export async function getTags(dicomArrayBuffer) {
-  let dicom_tags = [];
-  if (dicomArrayBuffer.length == 0) {
-    console.error("获取文件buffer为空,不支持获取tags数据");
-  } else {
-    for (var i = 0; i < Object.keys(dicomArrayBuffer).length; i++) {
-      try {
-        const buffer = await dicomArrayBuffer[i]; // Resolve each promise
-        if (buffer && buffer.byteLength > 0) {
-          // 检查是否有数据
-          const data_a = new DataView(buffer);
-          daikon.Parser.verbose = true;
-          const dicom_data = daikon.Series.parseImage(data_a);
-          dicom_tags.push(dicom_data);
-        } else {
-          console.warn(`Buffer at index ${i} is empty or invalid`);
-        }
-      } catch (error) {
-        console.error("处理 DICOM 数据时出错:", error);
+/**
+ * Function to create synthetic image data with correct dimensions
+ * Can be use for debug
+ * @param {Array[Int]} dims
+ */
+// eslint-disable-next-line no-unused-vars
+function createSyntheticImageData(dims) {
+  const imageData = vtkImageData.newInstance();
+  const newArray = new Uint8Array(dims[0] * dims[1] * dims[2]);
+  const s = 0.1;
+  imageData.setSpacing(s, s, s);
+  imageData.setExtent(0, 127, 0, 127, 0, 127);
+  let i = 0;
+  for (let z = 0; z < dims[2]; z++) {
+    for (let y = 0; y < dims[1]; y++) {
+      for (let x = 0; x < dims[0]; x++) {
+        newArray[i++] = (256 * (i % (dims[0] * dims[1]))) / (dims[0] * dims[1]);
       }
     }
   }
-  return dicom_tags;
+
+  const da = vtkDataArray.newInstance({
+    numberOfComponents: 1,
+    values: newArray,
+  });
+  da.setName("scalars");
+
+  imageData.getPointData().setScalars(da);
+
+  return imageData;
+}
+
+function createRGBStringFromRGBValues(rgb) {
+  if (rgb.length !== 3) {
+    return "rgb(0, 0, 0)";
+  }
+  return `rgb(${(rgb[0] * 255).toString()}, ${(rgb[1] * 255).toString()}, ${(
+    rgb[2] * 255
+  ).toString()})`;
+}
+
+const initialPlanesState = { ...widgetState.getPlanes() };
+
+let view3D = null;
+
+for (let i = 0; i < 4; i++) {
+  // 创建一个新的 div 元素作为容器，父级容器，用来放置视图
+  const elementParent = document.createElement("div");
+  // 为父容器设置 CSS 类名
+  elementParent.setAttribute("class", "view");
+  // 设置父容器的宽度为页面宽度的 50%
+  elementParent.style.width = "50%";
+  // 设置父容器的高度为 300px
+  elementParent.style.height = "300px";
+  // 设置父容器的显示方式为 inline-block，确保它会与其他元素并排显示
+  elementParent.style.display = "inline-block"; // 保留上下外边距/内边距
+
+  // 创建一个新的 div 元素作为实际的视图容器
+  const element = document.createElement("div");
+  // 为视图容器设置 CSS 类名
+  element.setAttribute("class", "view");
+  // 设置视图容器的宽度为父容器的 100%
+  element.style.width = "100%";
+  // 设置视图容器的高度为父容器的 100%
+  element.style.height = "100%";
+  // 将实际的视图容器添加到父容器中
+  elementParent.appendChild(element);
+
+  // 将父容器添加到页面的指定容器（container）中
+  container.appendChild(elementParent);
+
+  // 创建一个 vtkGenericRenderWindow 实例，负责管理 VTK 渲染窗口
+  const grw = vtkGenericRenderWindow.newInstance();
+  // 将刚才创建的视图容器赋给渲染窗口容器
+  grw.setContainer(element);
+  // 调用 resize 方法确保渲染窗口的尺寸与视图容器一致
+  grw.resize();
+
+  // 创建一个对象，用于存储渲染窗口、渲染器、GL 渲染窗口等属性
+  const obj = {
+    renderWindow: grw.getRenderWindow(), // 获取渲染窗口对象
+    renderer: grw.getRenderer(), // 获取渲染器对象
+    GLWindow: grw.getApiSpecificRenderWindow(), // 获取与 API 相关的渲染窗口对象
+    interactor: grw.getInteractor(), // 获取交互器对象，用于处理用户输入（例如鼠标操作）
+    widgetManager: vtkWidgetManager.newInstance(), // 创建一个新的小部件管理器实例，管理各种交互小部件
+    orientationWidget: null, // 当前没有设置方向小部件（通常用于显示视图方向等信息）
+  };
+
+  // 设置当前活跃相机为平行投影（不使用透视效果）
+  obj.renderer.getActiveCamera().setParallelProjection(true);
+
+  // 设置渲染器的背景颜色，viewColors[i] 是一个 RGB 颜色数组
+  obj.renderer.setBackground(...viewColors[i]);
+
+  // 将渲染器添加到渲染窗口中，这样渲染器才能在窗口中显示
+  obj.renderWindow.addRenderer(obj.renderer);
+
+  // 将 OpenGL 窗口添加到渲染窗口，确保渲染窗口能够显示 3D 图形
+  obj.renderWindow.addView(obj.GLWindow);
+
+  // 设置交互器与渲染窗口关联，确保用户能够与窗口进行交互
+  obj.renderWindow.setInteractor(obj.interactor);
+
+  // 设置交互器与 OpenGL 窗口关联，确保用户与窗口的交互正确显示
+  obj.interactor.setView(obj.GLWindow);
+
+  // 初始化交互器，准备开始与用户的交互
+  obj.interactor.initialize();
+
+  // 绑定事件到 HTML 元素，使得用户可以通过鼠标和键盘与视图进行交互
+  obj.interactor.bindEvents(element);
+
+  // 设置小部件管理器的渲染器，这样小部件可以在正确的渲染器上渲染
+  obj.widgetManager.setRenderer(obj.renderer);
+
+  if (i < 3) {
+    // 设置交互器的样式为 vtk.js 提供的 `vtkInteractorStyleImage` 实例
+    obj.interactor.setInteractorStyle(vtkInteractorStyleImage.newInstance());
+    // 添加一个小部件（widget）到 widgetManager，并根据 xyzToViewType[i] 设置其类型
+    obj.widgetInstance = obj.widgetManager.addWidget(widget, xyzToViewType[i]);
+    // 将小部件的缩放方式设置为基于像素
+    obj.widgetInstance.setScaleInPixels(true);
+    // 调整小部件的孔宽度为 2
+    obj.widgetInstance.setHoleWidth(0);
+    // 设置小部件为非无限线（即长度有限）
+    obj.widgetInstance.setInfiniteLine(false);
+    // 调整标签为 'line' 的所有状态的缩放比例
+    // x 和 y 轴方向的缩放因子为 2（变宽和变高）
+    // z 轴方向的缩放因子为 300（在深度方向拉长）
+    widgetState.getStatesWithLabel("line").forEach((state) => state.setScale3(2, 2, 300));
+    // 调整标签为 'center' 的所有状态的不透明度为 128
+    widgetState.getStatesWithLabel("center").forEach((state) => state.setOpacity(0));
+    // 设置小部件是否保持正交性（即垂直关系），值取决于 checkboxOrthogonality 的选中状态
+    obj.widgetInstance.setKeepOrthogonality(checkboxOrthogonality.checked);
+    // 设置小部件的鼠标指针样式，`appCursorStyles` 是自定义的样式对象
+    obj.widgetInstance.setCursorStyles(appCursorStyles);
+    // 启用小部件的拾取功能（即可以通过鼠标交互选择小部件）
+    obj.widgetManager.enablePicking();
+    // 设置小部件管理器在鼠标移动时捕获渲染器缓冲区的行为
+    obj.widgetManager.setCaptureOn(CaptureOn.MOUSE_MOVE);
+  } else {
+    obj.interactor.setInteractorStyle(vtkInteractorStyleTrackballCamera.newInstance());
+  }
+
+  // 创建一个 vtkImageReslice 实例，用于图像重切割操作
+  obj.reslice = vtkImageReslice.newInstance();
+
+  // 设置重切割模式为 SlabMode.MEAN，表示在切割方向上对多个切片取平均
+  obj.reslice.setSlabMode(SlabMode.MEAN);
+
+  // 设置重切割操作的切片数量为 1，表示只取一个切片
+  obj.reslice.setSlabNumberOfSlices(1);
+
+  // 设置是否使用变换来输入采样，false 表示不使用变换
+  obj.reslice.setTransformInputSampling(false);
+
+  // 设置输出图像是否自动裁剪，true 表示输出图像会根据内容自动裁剪
+  obj.reslice.setAutoCropOutput(true);
+
+  // 设置输出图像的维度为 2，表示输出为 2D 图像（通常用于切片视图）
+  obj.reslice.setOutputDimensionality(2);
+
+  // 创建一个 vtkImageMapper 实例，用于映射图像数据
+  obj.resliceMapper = vtkImageMapper.newInstance();
+
+  // 将 vtkImageReslice 的输出连接到映射器，确保映射器能渲染重切割后的图像
+  obj.resliceMapper.setInputConnection(obj.reslice.getOutputPort());
+
+  // 创建一个 vtkImageSlice 实例，用于显示图像切片
+  obj.resliceActor = vtkImageSlice.newInstance();
+
+  // 将映射器应用到 vtkImageSlice 上，以便它能够渲染图像
+  obj.resliceActor.setMapper(obj.resliceMapper);
+
+  // 初始化一个空数组，用于存储球体演员对象
+  obj.sphereActors = [];
+
+  // 初始化一个空数组，用于存储球体源对象
+  obj.sphereSources = [];
+
+  // Create sphere for each 2D views which will be displayed in 3D
+  // Define origin, point1 and point2 of the plane used to reslice the volume
+  for (let j = 0; j < 3; j++) {
+    // 创建一个新的 vtkSphereSource 实例，用于生成球体
+    const sphere = vtkSphereSource.newInstance();
+    // 设置球体的半径为 10
+    sphere.setRadius(1);
+
+    // 创建一个新的 vtkMapper 实例，负责将数据映射到渲染中
+    const mapper = vtkMapper.newInstance();
+    // 将球体的输出连接到映射器，以便映射器可以渲染球体
+    mapper.setInputConnection(sphere.getOutputPort());
+
+    // 创建一个新的 vtkActor 实例，负责在渲染中显示数据
+    const actor = vtkActor.newInstance();
+    // 将映射器应用到演员上，使其渲染球体
+    actor.setMapper(mapper);
+
+    // 设置球体演员的颜色，viewColors[i] 应该是一个 RGB 颜色数组
+    actor.getProperty().setColor(...viewColors[i]);
+
+    // 设置球体演员的可见性，showDebugActors 为布尔值，决定是否显示球体
+    actor.setVisibility(showDebugActors);
+
+    // 将演员添加到 obj.sphereActors 数组中，便于管理和后续操作
+    obj.sphereActors.push(actor);
+
+    // 将球体源添加到 obj.sphereSources 数组中，便于管理和后续操作
+    obj.sphereSources.push(sphere);
+  }
+
+  if (i < 3) {
+    viewAttributes.push(obj);
+  } else {
+    view3D = obj;
+  }
+
+  // create axes
+  const axes = vtkAnnotatedCubeActor.newInstance();
+  axes.setDefaultStyle({
+    text: "+X",
+    fontStyle: "bold",
+    fontFamily: "Arial",
+    fontColor: "black",
+    fontSizeScale: (res) => res / 2,
+    faceColor: createRGBStringFromRGBValues(viewColors[0]),
+    faceRotation: 0,
+    edgeThickness: 0.1,
+    edgeColor: "black",
+    resolution: 400,
+  });
+  // axes.setXPlusFaceProperty({ text: '+X' });
+  axes.setXMinusFaceProperty({
+    text: "-X",
+    faceColor: createRGBStringFromRGBValues(viewColors[0]),
+    faceRotation: 90,
+    fontStyle: "italic",
+  });
+  axes.setYPlusFaceProperty({
+    text: "+Y",
+    faceColor: createRGBStringFromRGBValues(viewColors[1]),
+    fontSizeScale: (res) => res / 4,
+  });
+  axes.setYMinusFaceProperty({
+    text: "-Y",
+    faceColor: createRGBStringFromRGBValues(viewColors[1]),
+    fontColor: "white",
+  });
+  axes.setZPlusFaceProperty({
+    text: "+Z",
+    faceColor: createRGBStringFromRGBValues(viewColors[2]),
+  });
+  axes.setZMinusFaceProperty({
+    text: "-Z",
+    faceColor: createRGBStringFromRGBValues(viewColors[2]),
+    faceRotation: 45,
+  });
+
+  // create orientation widget
+  obj.orientationWidget = vtkOrientationMarkerWidget.newInstance({
+    actor: axes,
+    interactor: obj.renderWindow.getInteractor(),
+  });
+  obj.orientationWidget.setEnabled(true);
+  obj.orientationWidget.setViewportCorner(vtkOrientationMarkerWidget.Corners.BOTTOM_RIGHT);
+  obj.orientationWidget.setViewportSize(0.15);
+  obj.orientationWidget.setMinPixelSize(100);
+  obj.orientationWidget.setMaxPixelSize(300);
+
+  // create sliders
+  if (i < 3) {
+    const slider = document.createElement("input");
+    slider.type = "range";
+    slider.min = 0;
+    slider.max = 300;
+    slider.style.bottom = "0px";
+    slider.style.width = "100%";
+    elementParent.appendChild(slider);
+    obj.slider = slider;
+
+    slider.addEventListener("change", (ev) => {
+      const newDistanceToP1 = ev.target.value;
+      const dirProj = widget.getWidgetState().getPlanes()[xyzToViewType[i]].normal;
+      const planeExtremities = widget.getPlaneExtremities(xyzToViewType[i]);
+      const newCenter = vtkMath.multiplyAccumulate(
+        planeExtremities[0],
+        dirProj,
+        Number(newDistanceToP1),
+        []
+      );
+      widget.setCenter(newCenter);
+      obj.widgetInstance.invokeInteractionEvent(obj.widgetInstance.getActiveInteraction());
+      viewAttributes.forEach((obj2) => {
+        obj2.interactor.render();
+      });
+    });
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Load image
+// ----------------------------------------------------------------------------
+
+function updateReslice(
+  interactionContext = {
+    viewType: "",
+    reslice: null,
+    actor: null,
+    renderer: null,
+    resetFocalPoint: false, // Reset the focal point to the center of the display image
+    computeFocalPointOffset: false, // Defines if the display offset between reslice center and focal point has to be
+    // computed. If so, then this offset will be used to keep the focal point position during rotation.
+    spheres: null,
+    slider: null,
+  }
+) {
+  const modified = widget.updateReslicePlane(
+    interactionContext.reslice,
+    interactionContext.viewType
+  );
+  if (modified) {
+    const resliceAxes = interactionContext.reslice.getResliceAxes();
+    // Get returned modified from setter to know if we have to render
+    interactionContext.actor.setUserMatrix(resliceAxes);
+    const planeSource = widget.getPlaneSource(interactionContext.viewType);
+    interactionContext.sphereSources[0].setCenter(planeSource.getOrigin());
+    interactionContext.sphereSources[1].setCenter(planeSource.getPoint1());
+    interactionContext.sphereSources[2].setCenter(planeSource.getPoint2());
+
+    if (interactionContext.slider) {
+      const planeExtremities = widget.getPlaneExtremities(interactionContext.viewType);
+      const length = Math.sqrt(
+        vtkMath.distance2BetweenPoints(planeExtremities[0], planeExtremities[1])
+      );
+      const dist = Math.sqrt(
+        vtkMath.distance2BetweenPoints(planeExtremities[0], widgetState.getCenter())
+      );
+      interactionContext.slider.min = 0;
+      interactionContext.slider.max = length;
+      interactionContext.slider.value = dist;
+    }
+  }
+  widget.updateCameraPoints(
+    interactionContext.renderer,
+    interactionContext.viewType,
+    interactionContext.resetFocalPoint,
+    interactionContext.computeFocalPointOffset
+  );
+  view3D.renderWindow.render();
+  return modified;
+}
+
+// 创建一个新的 VTK 数据集读取器实例，配置选项表示支持读取 Gzip 压缩的文件。
+// const reader = vtkHttpDataSetReader.newInstance({ fetchGzip: true });
+
+// // 设置要加载的 VTI 数据集文件的 URL
+// // reader.setUrl(`https://kitware.github.io/vtk-js/data/volume/LIDC2.vti`).then(() => {
+// reader.setUrl(`http://10.10.10.229:9912/vtk-js/data/volume/LIDC2.vti`).then(() => {
+//   // 数据加载完成后执行以下操作
+//   reader.loadData().then(() => {
+//     // 从读取器中获取已加载的图像数据
+//     const image = reader.getOutputData();
+//     console.log('Origin:', reader.getArrays());
+//     // 如果需要，也可以访问图像的其他属性
+//     console.log('Image Dimensions:', image.getDimensions());
+//     console.log('Spacing:', image.getSpacing());
+//     console.log('Origin:', image.getOrigin());
+//     // 将加载的图像数据设置到一个假设的控件 `widget` 中进行显示
+//     widget.setImage(image);
+
+//     // 创建一个轮廓过滤器，用于生成图像的边界框
+//     const outline = vtkOutlineFilter.newInstance();
+//     // 设置输入数据为当前加载的图像数据
+//     outline.setInputData(image);
+//     // 创建一个映射器，用于将轮廓数据渲染到视图中
+//     const outlineMapper = vtkMapper.newInstance();
+//     // 设置映射器输入为轮廓数据的输出
+//     outlineMapper.setInputData(outline.getOutputData());
+//     // 创建一个演员（Actor），将轮廓渲染到 3D 视图中
+//     const outlineActor = vtkActor.newInstance();
+//     // 将轮廓映射器绑定到演员上
+//     outlineActor.setMapper(outlineMapper);
+//     // 将演员添加到 3D 渲染器中进行显示
+//     view3D.renderer.addActor(outlineActor);
+
+//     // 对每个视图的属性进行操作，`viewAttributes` 是包含多个视图属性的数组
+//     viewAttributes.forEach((obj, i) => {
+//       // 设置该视图的重采样输入数据为加载的图像数据
+//       obj.reslice.setInputData(image);
+//       // 将该视图的重采样演员添加到渲染器中
+//       obj.renderer.addActor(obj.resliceActor);
+//       // 将重采样演员添加到 3D 渲染器中进行显示
+//       view3D.renderer.addActor(obj.resliceActor);
+//       // 遍历并将该视图中的球体演员添加到渲染器中
+//       obj.sphereActors.forEach((actor) => {
+//         obj.renderer.addActor(actor);
+//         view3D.renderer.addActor(actor);
+//       });
+
+//       const reslice = obj.reslice;
+//       console.log("viewType",i);
+//       const viewType = xyzToViewType[i];
+
+//       // 对所有视图进行操作，确保在当前视图进行交互时能够正确更新切片
+//       viewAttributes
+//         .forEach((v) => {
+//           // 在交互开始时，更新重采样器的状态
+//           v.widgetInstance.onStartInteractionEvent(() => {
+//             updateReslice({
+//               viewType,
+//               reslice,
+//               actor: obj.resliceActor,
+//               renderer: obj.renderer,
+//               resetFocalPoint: false, // 交互开始时不重置焦点位置
+//               computeFocalPointOffset: true, // 允许计算焦点偏移
+//               sphereSources: obj.sphereSources,
+//               slider: obj.slider,
+//             });
+//           });
+
+//           // 在交互过程中，更新切片的位置和焦点
+//           v.widgetInstance.onInteractionEvent(
+//             // 可以根据当前交互方法判断是否允许更新焦点
+//             (interactionMethodName) => {
+//               const canUpdateFocalPoint =
+//                 interactionMethodName === InteractionMethodsName.RotateLine;
+//               const activeViewType = widget.getWidgetState().getActiveViewType();
+//               // 如果当前视图是活动视图或不能更新焦点，则允许计算焦点偏移
+//               const computeFocalPointOffset = activeViewType === viewType || !canUpdateFocalPoint;
+//               updateReslice({
+//                 viewType,
+//                 reslice,
+//                 actor: obj.resliceActor,
+//                 renderer: obj.renderer,
+//                 resetFocalPoint: false,
+//                 computeFocalPointOffset,
+//                 sphereSources: obj.sphereSources,
+//                 slider: obj.slider,
+//               });
+//             }
+//           );
+//         });
+
+//       // 初始化时，更新切片的状态，并将焦点设置为图像中心
+//       updateReslice({
+//         viewType,
+//         reslice,
+//         actor: obj.resliceActor,
+//         renderer: obj.renderer,
+//         resetFocalPoint: true, // 重置焦点到图像中心
+//         computeFocalPointOffset: true, // 允许计算当前偏移
+//         sphereSources: obj.sphereSources,
+//         slider: obj.slider,
+//       });
+//       // 渲染当前视图
+//       obj.interactor.render();
+//     });
+
+//     // 重置 3D 渲染器的相机，确保视图显示正确
+//     view3D.renderer.resetCamera();
+//     // 重置相机的裁剪范围
+//     view3D.renderer.resetCameraClippingRange();
+
+//     // 设置最大切片数量到滑块的最大值
+//     const maxNumberOfSlices = vec3.length(image.getDimensions());
+//     document.getElementById("slabNumber").max = maxNumberOfSlices;
+//   });
+// });
+
+// ----------------------------------------------------------------------------
+// Define panel interactions
+// ----------------------------------------------------------------------------
+function updateViews() {
+  viewAttributes.forEach((obj, i) => {
+    updateReslice({
+      viewType: xyzToViewType[i],
+      reslice: obj.reslice,
+      actor: obj.resliceActor,
+      renderer: obj.renderer,
+      resetFocalPoint: true,
+      computeFocalPointOffset: true,
+      sphereSources: obj.sphereSources,
+      resetViewUp: true,
+    });
+    obj.renderWindow.render();
+  });
+  view3D.renderer.resetCamera();
+  view3D.renderer.resetCameraClippingRange();
+}
+
+checkboxTranslation.addEventListener("change", (ev) => {
+  viewAttributes.forEach((obj) =>
+    obj.widgetInstance.setEnableTranslation(checkboxTranslation.checked)
+  );
+});
+
+checkboxShowRotation.addEventListener("change", (ev) => {
+  widgetState
+    .getStatesWithLabel("rotation")
+    .forEach((handle) => handle.setVisible(checkboxShowRotation.checked));
+  viewAttributes.forEach((obj) => {
+    obj.interactor.render();
+  });
+  checkboxRotation.checked = checkboxShowRotation.checked;
+  checkboxRotation.disabled = !checkboxShowRotation.checked;
+  checkboxRotation.dispatchEvent(new Event("change"));
+});
+
+checkboxRotation.addEventListener("change", (ev) => {
+  viewAttributes.forEach((obj) => obj.widgetInstance.setEnableRotation(checkboxRotation.checked));
+  checkboxOrthogonality.disabled = !checkboxRotation.checked;
+  checkboxOrthogonality.dispatchEvent(new Event("change"));
+});
+
+checkboxOrthogonality.addEventListener("change", (ev) => {
+  viewAttributes.forEach((obj) =>
+    obj.widgetInstance.setKeepOrthogonality(checkboxOrthogonality.checked)
+  );
+});
+
+const checkboxScaleInPixels = document.getElementById("checkboxScaleInPixels");
+checkboxScaleInPixels.addEventListener("change", (ev) => {
+  widget.setScaleInPixels(checkboxScaleInPixels.checked);
+  viewAttributes.forEach((obj) => {
+    obj.interactor.render();
+  });
+});
+
+const opacity = document.getElementById("opacity");
+opacity.addEventListener("input", (ev) => {
+  const opacityValue = document.getElementById("opacityValue");
+  opacityValue.innerHTML = ev.target.value;
+  widget
+    .getWidgetState()
+    .getStatesWithLabel("handles")
+    .forEach((handle) => handle.setOpacity(ev.target.value));
+  viewAttributes.forEach((obj) => {
+    obj.interactor.render();
+  });
+});
+
+const optionSlabModeMin = document.getElementById("slabModeMin");
+optionSlabModeMin.value = SlabMode.MIN;
+const optionSlabModeMax = document.getElementById("slabModeMax");
+optionSlabModeMax.value = SlabMode.MAX;
+const optionSlabModeMean = document.getElementById("slabModeMean");
+optionSlabModeMean.value = SlabMode.MEAN;
+const optionSlabModeSum = document.getElementById("slabModeSum");
+optionSlabModeSum.value = SlabMode.SUM;
+const selectSlabMode = document.getElementById("slabMode");
+selectSlabMode.addEventListener("change", (ev) => {
+  viewAttributes.forEach((obj) => {
+    obj.reslice.setSlabMode(Number(ev.target.value));
+  });
+  updateViews();
+});
+
+const sliderSlabNumberofSlices = document.getElementById("slabNumber");
+sliderSlabNumberofSlices.addEventListener("change", (ev) => {
+  const trSlabNumberValue = document.getElementById("slabNumberValue");
+  trSlabNumberValue.innerHTML = ev.target.value;
+  viewAttributes.forEach((obj) => {
+    obj.reslice.setSlabNumberOfSlices(ev.target.value);
+  });
+  updateViews();
+});
+
+const buttonReset = document.getElementById("buttonReset");
+buttonReset.addEventListener("click", () => {
+  widgetState.setPlanes({ ...initialPlanesState });
+  widget.setCenter(widget.getWidgetState().getImage().getCenter());
+  updateViews();
+});
+
+const selectInterpolationMode = document.getElementById("selectInterpolation");
+selectInterpolationMode.addEventListener("change", (ev) => {
+  viewAttributes.forEach((obj) => {
+    obj.reslice.setInterpolationMode(Number(ev.target.selectedIndex));
+  });
+  updateViews();
+});
+
+const checkboxWindowLevel = document.getElementById("checkboxWindowLevel");
+checkboxWindowLevel.addEventListener("change", (ev) => {
+  viewAttributes.forEach((obj, index) => {
+    if (index < 3) {
+      obj.interactor.setInteractorStyle(
+        checkboxWindowLevel.checked
+          ? vtkInteractorStyleImage.newInstance()
+          : vtkInteractorStyleTrackballCamera.newInstance()
+      );
+    }
+  });
+});
+
+//-----------------------------------------------------------------------------------------------------
+const dicomTags = {
+  imagePositionPatient: {
+    id: "0020,0032", //图像在患者坐标系中的位置
+    description: "Image Position (Patient)",
+  },
+  imageOrientationPatient: {
+    id: "0020,0037", //图像方向矩阵
+    description: "Image Orientation (Patient)",
+  },
+  pixelSpacing: {
+    id: "0028,0030", //像素的物理间距
+    description: "Pixel Spacing",
+  },
+  sliceThickness: {
+    id: "0018,0050", //切片厚度
+    description: "Slice Thickness",
+  },
+  instanceNumber: {
+    id: "0020,0013", //当前影像序号
+    description: "Instance Number",
+  },
+  sopInstanceUID: {
+    id: "0008,0018", //唯一标识影像的
+    UIDdescription: "SOP Instance UID",
+  },
+  rescaleIntercept: {
+    id: "0028,1052", //像素值的物理转换截距
+    description: "Rescale Intercept",
+  },
+  rescaleSlope: {
+    id: "0028,1053", //像素值的物理转换斜率
+    description: "Rescale Slope",
+  },
+  pixelData: {
+    id: "7FE0,0010", //实际影像像素数据
+    description: "Pixel Data",
+  },
+};
+
+export async function load(ArrayBuffer) {
+  let arrayBuffer = [];
+  for (var i = 0; i < Object.keys(ArrayBuffer).length; i++) {
+    const buffer = await ArrayBuffer[i]; // Resolve each promise
+    if (buffer && buffer.byteLength > 0) {
+      arrayBuffer.push(buffer);
+    }
+  }
+  const loader = new Loader()
+  loader.MPR(arrayBuffer)
+}
+export class Loader {
+  MPR(array_Buffer) {
+    let dicom_info = getTags(array_Buffer, dicomTags);
+    let imageData = createImageData(dicom_info);
+    MultiSliceImageMapper(imageData)
+  }
+}
+
+// ---------------------------------------------------------------------------------------------------
+function MultiSliceImageMapper(imageData) {
+  // 将加载的图像数据设置到一个假设的控件 `widget` 中进行显示
+  widget.setImage(imageData);
+
+  // 创建一个轮廓过滤器，用于生成图像的边界框
+  const outline = vtkOutlineFilter.newInstance();
+  // 设置输入数据为当前加载的图像数据
+  outline.setInputData(imageData);
+  // 创建一个映射器，用于将轮廓数据渲染到视图中
+  const outlineMapper = vtkMapper.newInstance();
+  // 设置映射器输入为轮廓数据的输出
+  outlineMapper.setInputData(outline.getOutputData());
+  // 创建一个演员（Actor），将轮廓渲染到 3D 视图中
+  const outlineActor = vtkActor.newInstance();
+  // 将轮廓映射器绑定到演员上
+  outlineActor.setMapper(outlineMapper);
+  // 将演员添加到 3D 渲染器中进行显示
+  view3D.renderer.addActor(outlineActor);
+
+  // 对每个视图的属性进行操作，`viewAttributes` 是包含多个视图属性的数组
+  viewAttributes.forEach((obj, i) => {
+    // 设置该视图的重采样输入数据为加载的图像数据
+    obj.reslice.setInputData(imageData);
+    // 将该视图的重采样演员添加到渲染器中
+    obj.renderer.addActor(obj.resliceActor);
+    // 将重采样演员添加到 3D 渲染器中进行显示
+    view3D.renderer.addActor(obj.resliceActor);
+    // 遍历并将该视图中的球体演员添加到渲染器中
+    obj.sphereActors.forEach((actor) => {
+      obj.renderer.addActor(actor);
+      view3D.renderer.addActor(actor);
+    });
+
+    const reslice = obj.reslice;
+    const viewType = xyzToViewType[i];
+
+    // 对所有视图进行操作，确保在当前视图进行交互时能够正确更新切片
+    viewAttributes.forEach((v) => {
+      // 在交互开始时，更新重采样器的状态
+      v.widgetInstance.onStartInteractionEvent(() => {
+        updateReslice({
+          viewType,
+          reslice,
+          actor: obj.resliceActor,
+          renderer: obj.renderer,
+          resetFocalPoint: false, // 交互开始时不重置焦点位置
+          computeFocalPointOffset: true, // 允许计算焦点偏移
+          sphereSources: obj.sphereSources,
+          slider: obj.slider,
+        });
+      });
+
+      // 在交互过程中，更新切片的位置和焦点
+      v.widgetInstance.onInteractionEvent(
+        // 可以根据当前交互方法判断是否允许更新焦点
+        (interactionMethodName) => {
+          const canUpdateFocalPoint = interactionMethodName === InteractionMethodsName.RotateLine;
+          const activeViewType = widget.getWidgetState().getActiveViewType();
+          // 如果当前视图是活动视图或不能更新焦点，则允许计算焦点偏移
+          const computeFocalPointOffset = activeViewType === viewType || !canUpdateFocalPoint;
+          updateReslice({
+            viewType,
+            reslice,
+            actor: obj.resliceActor,
+            renderer: obj.renderer,
+            resetFocalPoint: false,
+            computeFocalPointOffset,
+            sphereSources: obj.sphereSources,
+            slider: obj.slider,
+          });
+        }
+      );
+    });
+
+    // 初始化时，更新切片的状态，并将焦点设置为图像中心
+    updateReslice({
+      viewType,
+      reslice,
+      actor: obj.resliceActor,
+      renderer: obj.renderer,
+      resetFocalPoint: true, // 重置焦点到图像中心
+      computeFocalPointOffset: true, // 允许计算当前偏移
+      sphereSources: obj.sphereSources,
+      slider: obj.slider,
+    });
+    // 渲染当前视图
+    obj.interactor.render();
+  });
+
+  // 重置 3D 渲染器的相机，确保视图显示正确
+  view3D.renderer.resetCamera();
+  // 重置相机的裁剪范围
+  view3D.renderer.resetCameraClippingRange();
+
+  // 设置最大切片数量到滑块的最大值
+  const maxNumberOfSlices = vec3.length(imageData.getDimensions());
+  document.getElementById("slabNumber").max = maxNumberOfSlices;
+}
+
+function getTags(arrayBuffer, dicomTags) {
+  console.log("arrayBuffer", arrayBuffer);
+  let dicom_info = [];
+  if (arrayBuffer.length == 0) {
+    console.error("获取文件buffer为空,不支持获取tags数据");
+  } else {
+    arrayBuffer.forEach((buffer) => {
+      const data_a = new DataView(buffer);
+      daikon.Parser.verbose = true;
+      const dicom_data = daikon.Series.parseImage(data_a);
+      let tagsInfo = {};
+      for (const key in dicomTags) {
+        const tag = dicomTags[key];
+        const idWithoutComma = tag.id.replace(/,/g, ""); // 去除逗号
+        let info = {};
+        if (idWithoutComma == "7FE00010") {
+          var hit_bit = dicom_data.getInterpretedData(false, true);
+          Object.assign(info, { ID: idWithoutComma, Description: hit_bit });
+          tagsInfo[key] = info;
+        }
+        if (idWithoutComma in dicom_data.tags && idWithoutComma != "7FE00010") {
+          Object.assign(info, {
+            ID: idWithoutComma,
+            Description: dicom_data.tags[idWithoutComma].value,
+          });
+          tagsInfo[key] = info;
+        }
+      }
+      dicom_info.push(tagsInfo);
+    });
+  }
+  return dicom_info;
 }
 export async function processTagsInfo(tagsData, dicomTags) {
   let allTags = [];
