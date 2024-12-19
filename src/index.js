@@ -1,5 +1,4 @@
 import daikon from "./halo_200804";
-import createImageData from "./data/createImage";
 import "@kitware/vtk.js/favicon";
 
 // Load the rendering pieces we want to use (for both WebGL and WebGPU)
@@ -9,7 +8,6 @@ import vtkActor from "@kitware/vtk.js/Rendering/Core/Actor";
 import vtkAnnotatedCubeActor from "@kitware/vtk.js/Rendering/Core/AnnotatedCubeActor";
 import vtkDataArray from "@kitware/vtk.js/Common/Core/DataArray";
 import vtkGenericRenderWindow from "@kitware/vtk.js/Rendering/Misc/GenericRenderWindow";
-import vtkImageData from "@kitware/vtk.js/Common/DataModel/ImageData";
 import vtkImageMapper from "@kitware/vtk.js/Rendering/Core/ImageMapper";
 import vtkImageReslice from "@kitware/vtk.js/Imaging/Core/ImageReslice";
 import vtkImageSlice from "@kitware/vtk.js/Rendering/Core/ImageSlice";
@@ -27,7 +25,7 @@ import { CaptureOn } from "@kitware/vtk.js/Widgets/Core/WidgetManager/Constants"
 
 import { vec3 } from "gl-matrix";
 import { SlabMode } from "@kitware/vtk.js/Imaging/Core/ImageReslice/Constants";
-
+import vtkImageData from "@kitware/vtk.js/Common/DataModel/ImageData";
 import {
   xyzToViewType,
   InteractionMethodsName,
@@ -722,6 +720,37 @@ function MultiSliceImageMapper(imageData) {
   // 设置最大切片数量到滑块的最大值
   const maxNumberOfSlices = vec3.length(imageData.getDimensions());
   document.getElementById("slabNumber").max = maxNumberOfSlices;
+}
+
+function createImageData(dicomSlices) {
+  const imageData = vtkImageData.newInstance();
+  const dimensions = [
+    dicomSlices[0].pixelData.Description.numCols,
+    dicomSlices[0].pixelData.Description.numRows,
+    dicomSlices.length,
+  ];
+  imageData.setDimensions(...dimensions);
+
+  // 设置图像数据的维度和体素间距
+  let pixelSpacing = dicomSlices[0].pixelSpacing.Description;
+  let sliceThickness = dicomSlices[0].sliceThickness.Description;
+  let spacing = [pixelSpacing[0], pixelSpacing[1], sliceThickness[0]];
+  imageData.setSpacing(spacing);
+  imageData.setOrigin([0, 0, 0]);
+  const typedPixelArray = new Float32Array(dimensions[0] * dimensions[1] * dimensions[2]);
+  dicomSlices.forEach((slice, index) => {
+    const slicePixelData = slice.pixelData.Description.data;
+    const sliceOffset = dimensions[0] * dimensions[1] * index;
+    typedPixelArray.set(slicePixelData, sliceOffset);
+  });
+  const scalarArray = vtkDataArray.newInstance({
+    name: "Pixels",
+    dataType: "Float32Array",
+    numberOfComponents: 1,
+    values: typedPixelArray,
+  });
+  imageData.getPointData().setScalars(scalarArray);
+  return imageData;
 }
 
 function getTags(arrayBuffer, dicomTags) {
