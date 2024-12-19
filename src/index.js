@@ -737,8 +737,12 @@ export async function load(ArrayBuffer) {
 export class Loader {
   MPR(array_Buffer) {
     let dicom_info = getTags(array_Buffer, dicomTags);
-    let imageData = createImageData(dicom_info);
-    MultiSliceImageMapper(imageData)
+    if (dicom_info.length==0){
+      console.error("获取 dicom 信息数据为空");
+    }else{
+      let imageData = createImageData(dicom_info);
+      MultiSliceImageMapper(imageData)
+    }
   }
 }
 
@@ -874,41 +878,6 @@ function getTags(arrayBuffer, dicomTags) {
     });
   }
   return dicom_info;
-}
-export async function processTagsInfo(tagsData, dicomTags) {
-  let allTags = [];
-  if (Object.keys(dicomTags).length === 0) {
-    console.error("入参为空");
-  }
-  try {
-    const dicom = await tagsData; // Resolve each promise
-    for (var i = 0; i < Object.keys(dicom).length; i++) {
-      let tagsInfo = {};
-      for (const key in dicomTags) {
-        const tag = dicomTags[key];
-        const idWithoutComma = tag.id.replace(/,/g, ""); // 去除逗号
-        let info = {};
-        if (idWithoutComma == "7FE00010") {
-          var hit_bit = dicom[i].getInterpretedData(false, true);
-          Object.assign(info, { ID: idWithoutComma, Description: hit_bit });
-          tagsInfo[key] = info;
-        }
-        if (idWithoutComma in dicom[i].tags && idWithoutComma != "7FE00010") {
-          Object.assign(info, {
-            ID: idWithoutComma,
-            Description: dicom[i].tags[idWithoutComma].value,
-          });
-          tagsInfo[key] = info;
-        }
-      }
-      allTags.push(tagsInfo);
-    }
-  } catch (error) {
-    console.error("处理 tags 数据时出错:", error);
-  }
-
-  // console.log("allTags",allTags);
-  return allTags;
 }
 export function f_load_directory(selectFiles) {
   let dicom_arraybuffer = [];
