@@ -50,7 +50,7 @@ const widgetState = widget.getWidgetState();
 // Set size in CSS pixel space because scaleInPixels defaults to true
 widgetState.getStatesWithLabel("sphere").forEach((handle) => handle.setScale1(20));
 const showDebugActors = true;
-
+const windowWidthCenter = []
 const appCursorStyles = {
   translateCenter: "move",
   rotateLine: "alias",
@@ -127,7 +127,7 @@ for (let i = 0; i < 4; i++) {
   // 设置父容器的宽度为页面宽度的 50%
   elementParent.style.width = "50%";
   // 设置父容器的高度为 300px
-  elementParent.style.height = "300px";
+  elementParent.style.height = "450px";
   // 设置父容器的显示方式为 inline-block，确保它会与其他元素并排显示
   elementParent.style.display = "inline-block"; // 保留上下外边距/内边距
 
@@ -170,7 +170,6 @@ for (let i = 0; i < 4; i++) {
 
   // 将渲染器添加到渲染窗口中，这样渲染器才能在窗口中显示
   obj.renderWindow.addRenderer(obj.renderer);
-
   // 将 OpenGL 窗口添加到渲染窗口，确保渲染窗口能够显示 3D 图形
   obj.renderWindow.addView(obj.GLWindow);
 
@@ -651,6 +650,9 @@ function MultiSliceImageMapper(imageData) {
   viewAttributes.forEach((obj, i) => {
     // 设置该视图的重采样输入数据为加载的图像数据
     obj.reslice.setInputData(imageData);
+    const property = obj.resliceActor.getProperty();
+    property.setColorWindow(windowWidthCenter[0]); // 设置窗口宽度
+    property.setColorLevel(windowWidthCenter[1]); // 设置窗口中心
     // 将该视图的重采样演员添加到渲染器中
     obj.renderer.addActor(obj.resliceActor);
     // 将重采样演员添加到 3D 渲染器中进行显示
@@ -735,7 +737,11 @@ function createImageData(dicomSlices) {
     dicomSlices.length,
   ];
   imageData.setDimensions(...dimensions);
-  console.log();
+  // console.log("windowCenter",dicomSlices[0].windowCenter.Description);
+  // console.log("windowWidth",dicomSlices[0].windowWidth.Description);
+  windowWidthCenter.push(dicomSlices[0].windowWidth.Description[0])
+  windowWidthCenter.push(dicomSlices[0].windowCenter.Description[0])
+  console.log("windowWidthCenter",windowWidthCenter);
   // 设置图像数据的维度和体素间距
   let pixelSpacing = dicomSlices[0].pixelSpacing.Description;
   let sliceThickness = dicomSlices[0].sliceThickness.Description;
