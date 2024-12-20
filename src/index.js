@@ -675,14 +675,7 @@ buttonClearAll.addEventListener("click", () => {
   const image = widget.getWidgetState().getImage();
   if (image) {
     // 调用封装函数，创建一个 vtkCursor3D 边框
-    setupCursor3D(view3D, [0, 0, 0], [-20, 20, -20, 20, -20, 20], {
-      zShadows: false,
-      xShadows: false,
-      yShadows: false,
-      outline: true,
-      axes: false,
-      center: false,
-    });
+    setupCursor3D(view3D);
   } else {
     alert("当前未加载有效图像，无法执行清除操作。");
   }
@@ -760,42 +753,61 @@ checkboxWindowLevel.addEventListener("change", (ev) => {
  * @param {vtkImageData} imageData - 用于生成边界框的图像数据
  * @returns {vtkActor} - 创建的边界框 Actor
  */
-function updateOutline(view3D, imageData) {
+ function updateOutline(view3D, imageData) {
   if (!imageData) {
     alert("imageData is not loaded or initialized.");
     return;
   }
-  // 清除渲染器中的所有演员
+
+  // 清除渲染器中的所有演员，只移除旧的轮廓和重采样演员
+  const actorsToRemove = [];
   view3D.renderer.getActors().forEach((actor) => {
+    if (actor !== view3D.outlineActor) {
+      actorsToRemove.push(actor); // 将旧的演员保存在数组中
+    }
+  });
+
+  // 移除旧的演员
+  actorsToRemove.forEach(actor => {
     view3D.renderer.removeActor(actor);
   });
 
-  // 创建一个轮廓过滤器，用于生成图像的边界框
+  // 创建一个新的轮廓过滤器，生成图像的边界框
   const outline = vtkOutlineFilter.newInstance();
-  outline.setInputData(imageData); // 设置输入数据为当前加载的图像数据
+  outline.setInputData(imageData);
 
-  // 创建一个映射器，用于将轮廓数据渲染到视图中
+  // 创建一个新的轮廓映射器，并将其输入设置为轮廓过滤器的输出
   const outlineMapper = vtkMapper.newInstance();
-  outlineMapper.setInputData(outline.getOutputData()); // 设置映射器输入为轮廓数据的输出
+  outlineMapper.setInputData(outline.getOutputData());
 
-  // 创建一个演员（Actor），将轮廓渲染到 3D 视图中
+  // 创建轮廓演员，并将映射器设置为其输入
   const outlineActor = vtkActor.newInstance();
-  outlineActor.setMapper(outlineMapper); // 将轮廓映射器绑定到演员上
+  outlineActor.setMapper(outlineMapper);
 
-  // 将演员添加到 3D 渲染器中进行显示
+  // 将新的轮廓演员存储在 view3D 对象中，以便以后参考和重用
+  view3D.outlineActor = outlineActor;
+
+  // 将新的轮廓演员添加到渲染器中
   view3D.renderer.addActor(outlineActor);
+
+  // 根据 ACS3D 中的值，决定是否显示其他重采样演员
   viewAttributes.forEach((obj, i) => {
-    // 检查 ACS3D 是否包含当前对象对应的值
     if (ACS3D.includes(i)) {
-      // 假设 i 对应于 ACS3D 中的某个值
-      // 将重采样演员添加到 3D 渲染器中进行显示
+      // 如果 ACS3D 包含该值，则添加对应的重采样演员
       view3D.renderer.addActor(obj.resliceActor);
     }
   });
-  // 更新视图
+
+  // 如果 ACS3D 为空，设置 3D 游标（如没有加载有效的图像）
+  if (ACS3D.length === 0) {
+    setupCursor3D(view3D);
+  }
+
+  // 更新视图并重置相机
   view3D.renderer.resetCamera();
   view3D.renderWindow.render();
 }
+
 
 //-----------------------------------------------------------------------------------------------------
 const dicomTags = {
@@ -876,14 +888,7 @@ function MultiSliceImageMapper(imageData) {
   }
   // 将加载的图像数据设置到一个假设的控件 `widget` 中进行显示
   widget.setImage(imageData);
-  setupCursor3D(view3D, [0, 0, 0], [-20, 20, -20, 20, -20, 20], {
-    zShadows: false,
-    xShadows: false,
-    yShadows: false,
-    outline: true,
-    axes: false,
-    center: false,
-  });
+  setupCursor3D(view3D);
   // 对每个视图的属性进行操作，`viewAttributes` 是包含多个视图属性的数组
   viewAttributes.forEach((obj, i) => {
     // 设置该视图的重采样输入数据为加载的图像数据
