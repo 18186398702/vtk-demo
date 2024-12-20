@@ -35,9 +35,9 @@ import {
 // ----------------------------------------------------------------------------
 
 const viewColors = [
-  [1, 0, 0], // sagittal
-  [0, 1, 0], // coronal
   [0, 0, 1], // axial
+  [0, 1, 0], // coronal
+  [1, 0, 0], // sagittal
   [0.5, 0.5, 0.5], // 3D
 ];
 
@@ -699,11 +699,9 @@ function handleCheckboxChange(checkbox, value, label) {
     alert(`当前未加载有效图像，无法执行查看${label}操作。`);
   }
 }
-
 // 绑定事件处理
 const buttonAxial = document.getElementById("checkboxAxial");
 buttonAxial.addEventListener("change", () => handleCheckboxChange(buttonAxial, 0, "轴向截面"));
-
 const checkboxCoronal = document.getElementById("checkboxCoronal");
 checkboxCoronal.addEventListener("change", () =>
   handleCheckboxChange(checkboxCoronal, 1, "冠状面")
