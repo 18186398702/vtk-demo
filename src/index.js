@@ -446,6 +446,19 @@ function setupCursor3D(
   view3D.cursor3D = cursor3D;
   view3D.cursor3DMapper = cursor3DMapper;
   view3D.cursor3DActor = cursor3DActor;
+  
+   // 获取三个复选框元素
+   const checkboxAxial = document.getElementById("checkboxAxial");
+   const checkboxCoronal = document.getElementById("checkboxCoronal");
+   const checkboxSagittal = document.getElementById("checkboxSagittal");
+ 
+   // 设置复选框为未选中状态
+   checkboxAxial.checked = false;
+   checkboxCoronal.checked = false;
+   checkboxSagittal.checked = false;
+ 
+   // 更新 ACS3D 数组，清空选择
+   ACS3D = [];
 }
 
 // ----------------------------------------------------------------------------
