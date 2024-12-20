@@ -290,14 +290,7 @@ for (let i = 0; i < 4; i++) {
   } else {
     view3D = obj;
     // 调用封装函数，创建一个 vtkCursor3D 边框
-    setupCursor3D(view3D, [0, 0, 0], [-20, 20, -20, 20, -20, 20], {
-      zShadows: false,
-      xShadows: false,
-      yShadows: false,
-      outline: true,
-      axes: false,
-      center: false,
-    });
+    setupCursor3D(view3D);
   }
 
   // create axes
@@ -374,7 +367,7 @@ for (let i = 0; i < 4; i++) {
         // 获取当前平面的法向量（用于表示平面的方向）
         const dirProj = widget.getWidgetState().getPlanes()[xyzToViewType[i]].normal;
 
-        // 获取当前平面的边界点（通常是平面的两个端点）
+        // // 获取当前平面的边界点（通常是平面的两个端点）
         const planeExtremities = widget.getPlaneExtremities(xyzToViewType[i]);
 
         // 计算新的平面中心点：
@@ -386,7 +379,6 @@ for (let i = 0; i < 4; i++) {
           Number(newDistanceToP1), // 滑块值转换为数字
           [] // 结果存储在一个新数组中
         );
-
         // 设置平面的新中心点
         widget.setCenter(newCenter);
 
@@ -695,7 +687,7 @@ function handleCheckboxChange(checkbox, value, label) {
     updateOutline(view3D, imageData);
   } else {
     // 图像无效，确保复选框保持为 false 并提示
-    checkbox.checked = false;  // 取消勾选复选框
+    checkbox.checked = false; // 取消勾选复选框
     alert(`当前未加载有效图像，无法执行查看${label}操作。`);
   }
 }
@@ -751,7 +743,7 @@ checkboxWindowLevel.addEventListener("change", (ev) => {
  * @param {vtkImageData} imageData - 用于生成边界框的图像数据
  * @returns {vtkActor} - 创建的边界框 Actor
  */
- function updateOutline(view3D, imageData) {
+function updateOutline(view3D, imageData) {
   if (!imageData) {
     alert("imageData is not loaded or initialized.");
     return;
@@ -766,7 +758,7 @@ checkboxWindowLevel.addEventListener("change", (ev) => {
   });
 
   // 移除旧的演员
-  actorsToRemove.forEach(actor => {
+  actorsToRemove.forEach((actor) => {
     view3D.renderer.removeActor(actor);
   });
 
@@ -805,7 +797,6 @@ checkboxWindowLevel.addEventListener("change", (ev) => {
   view3D.renderer.resetCamera();
   view3D.renderWindow.render();
 }
-
 
 //-----------------------------------------------------------------------------------------------------
 const dicomTags = {
@@ -886,6 +877,8 @@ function MultiSliceImageMapper(imageData) {
   }
   // 将加载的图像数据设置到一个假设的控件 `widget` 中进行显示
   widget.setImage(imageData);
+  // 调用封装函数，创建一个 vtkCursor3D 边框
+  setupCursor3D(view3D);
   // 对每个视图的属性进行操作，`viewAttributes` 是包含多个视图属性的数组
   viewAttributes.forEach((obj, i) => {
     // 设置该视图的重采样输入数据为加载的图像数据
