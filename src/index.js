@@ -888,7 +888,6 @@ function MultiSliceImageMapper(imageData) {
   }
   // 将加载的图像数据设置到一个假设的控件 `widget` 中进行显示
   widget.setImage(imageData);
-  setupCursor3D(view3D);
   // 对每个视图的属性进行操作，`viewAttributes` 是包含多个视图属性的数组
   viewAttributes.forEach((obj, i) => {
     // 设置该视图的重采样输入数据为加载的图像数据
