@@ -119,6 +119,7 @@ const initialPlanesState = { ...widgetState.getPlanes() };
 let view3D = null;
 // 创建空的 vtkImageData 实例
 let imageData = null;
+let ACS3D = [];
 
 for (let i = 0; i < 4; i++) {
   // 创建一个新的 div 元素作为容器，父级容器，用来放置视图
@@ -686,17 +687,39 @@ buttonClearAll.addEventListener("click", () => {
     alert("当前未加载有效图像，无法执行清除操作。");
   }
 });
-
-const buttonViewAll = document.getElementById("buttonViewAll");
-buttonViewAll.addEventListener("click", () => {
-  // 检查是否存在有效的图像
+// 统一处理复选框变更事件的函数
+function handleCheckboxChange(checkbox, value, label) {
   const image = widget.getWidgetState().getImage();
   if (image) {
+    // 更新ACS3D数组
+    if (checkbox.checked) {
+      // 选中时，确保ACS3D中包含相应值，并保持唯一性
+      ACS3D = [...new Set([...ACS3D, value])];
+    } else {
+      // 取消选中时，移除相应值
+      ACS3D = ACS3D.filter((item) => item !== value);
+    }
     updateOutline(view3D, imageData);
   } else {
-    alert("当前未加载有效图像，无法执行查看全部操作。");
+    // 图像无效，确保复选框保持为 false 并提示
+    checkbox.checked = false;  // 取消勾选复选框
+    alert(`当前未加载有效图像，无法执行查看${label}操作。`);
   }
-});
+}
+
+// 绑定事件处理
+const buttonAxial = document.getElementById("checkboxAxial");
+buttonAxial.addEventListener("change", () => handleCheckboxChange(buttonAxial, 0, "轴向截面"));
+
+const checkboxCoronal = document.getElementById("checkboxCoronal");
+checkboxCoronal.addEventListener("change", () =>
+  handleCheckboxChange(checkboxCoronal, 1, "冠状面")
+);
+
+const checkboxSagittal = document.getElementById("checkboxSagittal");
+checkboxSagittal.addEventListener("change", () =>
+  handleCheckboxChange(checkboxSagittal, 2, "矢状面")
+);
 
 const selectInterpolationMode = document.getElementById("selectInterpolation");
 selectInterpolationMode.addEventListener("change", (ev) => {
@@ -762,7 +785,9 @@ function updateOutline(view3D, imageData) {
   // 将演员添加到 3D 渲染器中进行显示
   view3D.renderer.addActor(outlineActor);
   viewAttributes.forEach((obj, i) => {
-    if (i == 0) {
+    // 检查 ACS3D 是否包含当前对象对应的值
+    if (ACS3D.includes(i)) {
+      // 假设 i 对应于 ACS3D 中的某个值
       // 将重采样演员添加到 3D 渲染器中进行显示
       view3D.renderer.addActor(obj.resliceActor);
     }
