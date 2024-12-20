@@ -118,7 +118,7 @@ const initialPlanesState = { ...widgetState.getPlanes() };
 
 let view3D = null;
 // 创建空的 vtkImageData 实例
-let imageData = null
+let imageData = null;
 
 for (let i = 0; i < 4; i++) {
   // 创建一个新的 div 元素作为容器，父级容器，用来放置视图
@@ -523,54 +523,90 @@ function updateViews() {
 }
 
 checkboxTranslation.addEventListener("change", (ev) => {
-  viewAttributes.forEach((obj) =>
-    obj.widgetInstance.setEnableTranslation(checkboxTranslation.checked)
-  );
+  // 检查是否存在有效的图像
+  const image = widget.getWidgetState().getImage();
+  if (image) {
+    viewAttributes.forEach((obj) =>
+      obj.widgetInstance.setEnableTranslation(checkboxTranslation.checked)
+    );
+  } else {
+    alert("当前未加载有效图像，无法执行平移操作。");
+  }
 });
 
 checkboxShowRotation.addEventListener("change", (ev) => {
-  widgetState
-    .getStatesWithLabel("rotation")
-    .forEach((handle) => handle.setVisible(checkboxShowRotation.checked));
-  viewAttributes.forEach((obj) => {
-    obj.interactor.render();
-  });
-  checkboxRotation.checked = checkboxShowRotation.checked;
-  checkboxRotation.disabled = !checkboxShowRotation.checked;
-  checkboxRotation.dispatchEvent(new Event("change"));
+  // 检查是否存在有效的图像
+  const image = widget.getWidgetState().getImage();
+  if (image) {
+    widgetState
+      .getStatesWithLabel("rotation")
+      .forEach((handle) => handle.setVisible(checkboxShowRotation.checked));
+    viewAttributes.forEach((obj) => {
+      obj.interactor.render();
+    });
+    checkboxRotation.checked = checkboxShowRotation.checked;
+    checkboxRotation.disabled = !checkboxShowRotation.checked;
+    checkboxRotation.dispatchEvent(new Event("change"));
+  } else {
+    alert("当前未加载有效图像，无法执行旋转操作。");
+  }
 });
 
 checkboxRotation.addEventListener("change", (ev) => {
-  viewAttributes.forEach((obj) => obj.widgetInstance.setEnableRotation(checkboxRotation.checked));
-  checkboxOrthogonality.disabled = !checkboxRotation.checked;
-  checkboxOrthogonality.dispatchEvent(new Event("change"));
+  // 检查是否存在有效的图像
+  const image = widget.getWidgetState().getImage();
+  if (image) {
+    viewAttributes.forEach((obj) => obj.widgetInstance.setEnableRotation(checkboxRotation.checked));
+    checkboxOrthogonality.disabled = !checkboxRotation.checked;
+    checkboxOrthogonality.dispatchEvent(new Event("change"));
+  } else {
+    alert("当前未加载有效图像，无法执行旋转操作。");
+  }
 });
 
 checkboxOrthogonality.addEventListener("change", (ev) => {
-  viewAttributes.forEach((obj) =>
-    obj.widgetInstance.setKeepOrthogonality(checkboxOrthogonality.checked)
-  );
+  // 检查是否存在有效的图像
+  const image = widget.getWidgetState().getImage();
+  if (image) {
+    viewAttributes.forEach((obj) =>
+      obj.widgetInstance.setKeepOrthogonality(checkboxOrthogonality.checked)
+    );
+  } else {
+    alert("当前未加载有效图像，无法执行保持正交操作。");
+  }
 });
 
 const checkboxScaleInPixels = document.getElementById("checkboxScaleInPixels");
 checkboxScaleInPixels.addEventListener("change", (ev) => {
-  widget.setScaleInPixels(checkboxScaleInPixels.checked);
-  viewAttributes.forEach((obj) => {
-    obj.interactor.render();
-  });
+  // 检查是否存在有效的图像
+  const image = widget.getWidgetState().getImage();
+  if (image) {
+    widget.setScaleInPixels(checkboxScaleInPixels.checked);
+    viewAttributes.forEach((obj) => {
+      obj.interactor.render();
+    });
+  } else {
+    alert("当前未加载有效图像，无法执行像素缩放操作。");
+  }
 });
 
 const opacity = document.getElementById("opacity");
 opacity.addEventListener("input", (ev) => {
-  const opacityValue = document.getElementById("opacityValue");
-  opacityValue.innerHTML = ev.target.value;
-  widget
-    .getWidgetState()
-    .getStatesWithLabel("handles")
-    .forEach((handle) => handle.setOpacity(ev.target.value));
-  viewAttributes.forEach((obj) => {
-    obj.interactor.render();
-  });
+  // 检查是否存在有效的图像
+  const image = widget.getWidgetState().getImage();
+  if (image) {
+    const opacityValue = document.getElementById("opacityValue");
+    opacityValue.innerHTML = ev.target.value;
+    widget
+      .getWidgetState()
+      .getStatesWithLabel("handles")
+      .forEach((handle) => handle.setOpacity(ev.target.value));
+    viewAttributes.forEach((obj) => {
+      obj.interactor.render();
+    });
+  } else {
+    alert("当前未加载有效图像，无法执行透明度操作。");
+  }
 });
 
 const optionSlabModeMin = document.getElementById("slabModeMin");
@@ -583,71 +619,111 @@ const optionSlabModeSum = document.getElementById("slabModeSum");
 optionSlabModeSum.value = SlabMode.SUM;
 const selectSlabMode = document.getElementById("slabMode");
 selectSlabMode.addEventListener("change", (ev) => {
-  viewAttributes.forEach((obj) => {
-    obj.reslice.setSlabMode(Number(ev.target.value));
-  });
-  updateViews();
+  // 检查是否存在有效的图像
+  const image = widget.getWidgetState().getImage();
+  if (image) {
+    viewAttributes.forEach((obj) => {
+      obj.reslice.setSlabMode(Number(ev.target.value));
+    });
+    updateViews();
+  } else {
+    alert("No valid image found. slab mode operation skipped for center.");
+  }
 });
 
 const sliderSlabNumberofSlices = document.getElementById("slabNumber");
 sliderSlabNumberofSlices.addEventListener("change", (ev) => {
-  const trSlabNumberValue = document.getElementById("slabNumberValue");
-  trSlabNumberValue.innerHTML = ev.target.value;
-  viewAttributes.forEach((obj) => {
-    obj.reslice.setSlabNumberOfSlices(ev.target.value);
-  });
-  updateViews();
+  // 检查是否存在有效的图像
+  const image = widget.getWidgetState().getImage();
+  if (image) {
+    const trSlabNumberValue = document.getElementById("slabNumberValue");
+    trSlabNumberValue.innerHTML = ev.target.value;
+    viewAttributes.forEach((obj) => {
+      obj.reslice.setSlabNumberOfSlices(ev.target.value);
+    });
+    updateViews();
+  } else {
+    alert("当前未加载有效图像，无法执行层切片操作。");
+  }
 });
 
 const buttonReset = document.getElementById("buttonReset");
 buttonReset.addEventListener("click", () => {
-  widgetState.setPlanes({ ...initialPlanesState });
   // 检查是否存在有效的图像
   const image = widget.getWidgetState().getImage();
   if (image) {
+    widgetState.setPlanes({ ...initialPlanesState });
     // 设置中心点为图像中心
     widget.setCenter(image.getCenter());
     updateViews();
   } else {
-    console.warn("No valid image found. Reset operation skipped for center.");
+    alert("当前未加载有效图像，无法执行重置操作。");
   }
 });
+
 const buttonClearAll = document.getElementById("buttonClearAll");
 buttonClearAll.addEventListener("click", () => {
-  // 调用封装函数，创建一个 vtkCursor3D 边框
-  setupCursor3D(view3D, [0, 0, 0], [-20, 20, -20, 20, -20, 20], {
-    zShadows: false,
-    xShadows: false,
-    yShadows: false,
-    outline: true,
-    axes: false,
-    center: false,
-  });
+  // 检查是否存在有效的图像
+  const image = widget.getWidgetState().getImage();
+  if (image) {
+    // 调用封装函数，创建一个 vtkCursor3D 边框
+    setupCursor3D(view3D, [0, 0, 0], [-20, 20, -20, 20, -20, 20], {
+      zShadows: false,
+      xShadows: false,
+      yShadows: false,
+      outline: true,
+      axes: false,
+      center: false,
+    });
+  } else {
+    alert("当前未加载有效图像，无法执行清除操作。");
+  }
 });
+
 const buttonViewAll = document.getElementById("buttonViewAll");
 buttonViewAll.addEventListener("click", () => {
-  updateOutline(view3D, imageData)
+  // 检查是否存在有效的图像
+  const image = widget.getWidgetState().getImage();
+  if (image) {
+    updateOutline(view3D, imageData);
+  } else {
+    alert("当前未加载有效图像，无法执行查看全部操作。");
+  }
 });
+
 const selectInterpolationMode = document.getElementById("selectInterpolation");
 selectInterpolationMode.addEventListener("change", (ev) => {
-  viewAttributes.forEach((obj) => {
-    obj.reslice.setInterpolationMode(Number(ev.target.selectedIndex));
-  });
-  updateViews();
+  // 检查是否存在有效的图像
+  const image = widget.getWidgetState().getImage();
+  if (image) {
+    viewAttributes.forEach((obj) => {
+      obj.reslice.setInterpolationMode(Number(ev.target.selectedIndex));
+    });
+    updateViews();
+  } else {
+    alert("未加载有效图像，无法应用插值模式更改。");
+  }
 });
 
 const checkboxWindowLevel = document.getElementById("checkboxWindowLevel");
 checkboxWindowLevel.addEventListener("change", (ev) => {
-  viewAttributes.forEach((obj, index) => {
-    if (index < 3) {
-      obj.interactor.setInteractorStyle(
-        checkboxWindowLevel.checked
-          ? vtkInteractorStyleImage.newInstance()
-          : vtkInteractorStyleTrackballCamera.newInstance()
-      );
-    }
-  });
+  // 检查是否存在有效的图像
+  const image = widget.getWidgetState().getImage();
+  if (image) {
+    viewAttributes.forEach((obj, index) => {
+      if (index < 3) {
+        obj.interactor.setInteractorStyle(
+          checkboxWindowLevel.checked
+            ? vtkInteractorStyleImage.newInstance()
+            : vtkInteractorStyleTrackballCamera.newInstance()
+        );
+      }
+    });
+  } else {
+    alert("未加载有效图像，无法切换窗口/级别操作。");
+  }
 });
+
 /**
  * 清除已有边框并添加图像数据的边界框到 3D 视图
  * @param {Object} view3D - 包含 renderer 和 renderWindow 的对象
@@ -655,6 +731,10 @@ checkboxWindowLevel.addEventListener("change", (ev) => {
  * @returns {vtkActor} - 创建的边界框 Actor
  */
 function updateOutline(view3D, imageData) {
+  if (!imageData) {
+    alert("imageData is not loaded or initialized.");
+    return;
+  }
   // 清除渲染器中的所有演员
   view3D.renderer.getActors().forEach((actor) => {
     view3D.renderer.removeActor(actor);
@@ -675,11 +755,11 @@ function updateOutline(view3D, imageData) {
   // 将演员添加到 3D 渲染器中进行显示
   view3D.renderer.addActor(outlineActor);
   viewAttributes.forEach((obj, i) => {
-    if (i==0){
+    if (i == 0) {
       // 将重采样演员添加到 3D 渲染器中进行显示
       view3D.renderer.addActor(obj.resliceActor);
     }
-  })
+  });
   // 更新视图
   view3D.renderer.resetCamera();
   view3D.renderWindow.render();
@@ -764,14 +844,14 @@ function MultiSliceImageMapper(imageData) {
   }
   // 将加载的图像数据设置到一个假设的控件 `widget` 中进行显示
   widget.setImage(imageData);
-    setupCursor3D(view3D, [0, 0, 0], [-20, 20, -20, 20, -20, 20], {
-      zShadows: false,
-      xShadows: false,
-      yShadows: false,
-      outline: true,
-      axes: false,
-      center: false,
-    });
+  setupCursor3D(view3D, [0, 0, 0], [-20, 20, -20, 20, -20, 20], {
+    zShadows: false,
+    xShadows: false,
+    yShadows: false,
+    outline: true,
+    axes: false,
+    center: false,
+  });
   // 对每个视图的属性进行操作，`viewAttributes` 是包含多个视图属性的数组
   viewAttributes.forEach((obj, i) => {
     // 设置该视图的重采样输入数据为加载的图像数据
