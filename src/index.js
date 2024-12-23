@@ -3,7 +3,7 @@ import "@kitware/vtk.js/favicon";
 
 // Load the rendering pieces we want to use (for both WebGL and WebGPU)
 import "@kitware/vtk.js/Rendering/Profiles/All";
-
+import vtkMatrixBuilder from "@kitware/vtk.js/Common/Core/MatrixBuilder";
 import vtkActor from "@kitware/vtk.js/Rendering/Core/Actor";
 import vtkAnnotatedCubeActor from "@kitware/vtk.js/Rendering/Core/AnnotatedCubeActor";
 import vtkDataArray from "@kitware/vtk.js/Common/Core/DataArray";
@@ -151,6 +151,7 @@ for (let i = 0; i < 4; i++) {
   const grw = vtkGenericRenderWindow.newInstance();
   // 将刚才创建的视图容器赋给渲染窗口容器
   grw.setContainer(element);
+
   // 调用 resize 方法确保渲染窗口的尺寸与视图容器一致
   grw.resize();
 
@@ -163,7 +164,6 @@ for (let i = 0; i < 4; i++) {
     widgetManager: vtkWidgetManager.newInstance(), // 创建一个新的小部件管理器实例，管理各种交互小部件
     orientationWidget: null, // 当前没有设置方向小部件（通常用于显示视图方向等信息）
   };
-
   // 设置当前活跃相机为平行投影（不使用透视效果）
   obj.renderer.getActiveCamera().setParallelProjection(true);
 
@@ -221,7 +221,6 @@ for (let i = 0; i < 4; i++) {
 
   // 创建一个 vtkImageReslice 实例，用于图像重切割操作
   obj.reslice = vtkImageReslice.newInstance();
-
   // 设置重切割模式为 SlabMode.MEAN，表示在切割方向上对多个切片取平均
   obj.reslice.setSlabMode(SlabMode.MEAN);
 
@@ -236,13 +235,11 @@ for (let i = 0; i < 4; i++) {
 
   // 设置输出图像的维度为 2，表示输出为 2D 图像（通常用于切片视图）
   obj.reslice.setOutputDimensionality(2);
-
   // 创建一个 vtkImageMapper 实例，用于映射图像数据
   obj.resliceMapper = vtkImageMapper.newInstance();
 
   // 将 vtkImageReslice 的输出连接到映射器，确保映射器能渲染重切割后的图像
   obj.resliceMapper.setInputConnection(obj.reslice.getOutputPort());
-
   // 创建一个 vtkImageSlice 实例，用于显示图像切片
   obj.resliceActor = vtkImageSlice.newInstance();
   // 将映射器应用到 vtkImageSlice 上，以便它能够渲染图像
@@ -690,7 +687,7 @@ buttonImageCropping.addEventListener("click", () => {
   // 检查是否存在有效的图像
   const image = widget.getWidgetState().getImage();
   if (image) {
-    setupCubeAndVolume(view3D, imageData) 
+    setupCubeAndVolume(view3D, imageData);
   } else {
     alert("当前未加载有效图像，无法执行清除操作。");
   }
@@ -877,11 +874,11 @@ export async function load(ArrayBuffer) {
       arrayBuffer.push(buffer);
     }
   }
-  if (arrayBuffer.length != 0){
+  if (arrayBuffer.length != 0) {
     const loader = new Loader();
     loader.MPR(arrayBuffer);
-  }else{
-    alert("没有数据可加载MPR")
+  } else {
+    alert("没有数据可加载MPR");
   }
 }
 export class Loader {
@@ -926,7 +923,6 @@ function MultiSliceImageMapper(imageData) {
 
     const reslice = obj.reslice;
     const viewType = xyzToViewType[i];
-
     // 对所有视图进行操作，确保在当前视图进行交互时能够正确更新切片
     viewAttributes.forEach((v) => {
       // 在交互开始时，更新重采样器的状态
@@ -1041,12 +1037,12 @@ function createImageData(dicomSlices) {
 }
 /**
  * 从 DICOM 文件的 ArrayBuffer 中提取指定的标签数据，并记录执行时间。
- * 
+ *
  * @param {Array} arrayBuffer - 包含多个 DICOM 文件的 ArrayBuffer 列表。
  * @param {Object} dicomTags - 需要提取的 DICOM 标签集合，格式为 { key: { id: 'xxxx,xxxx' } }。
  * @returns {Array} - 返回包含每个文件标签信息的数组。
  */
- function getTags(arrayBuffer, dicomTags) {
+function getTags(arrayBuffer, dicomTags) {
   console.log("arrayBuffer", arrayBuffer); // 输出传入的 ArrayBuffer 信息，便于调试
 
   // 记录开始时间
@@ -1074,7 +1070,7 @@ function createImageData(dicomSlices) {
       if (idWithoutComma === "7FE00010") {
         const hit_bit = dicom_data.getInterpretedData(false, true); // 提取图像数据
         tagsInfo[key] = { ID: idWithoutComma, Description: hit_bit }; // 保存图像数据
-      } 
+      }
       // 提取其他指定标签的数据
       else if (idWithoutComma in dicom_data.tags) {
         tagsInfo[key] = {
