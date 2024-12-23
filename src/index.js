@@ -446,19 +446,19 @@ function setupCursor3D(
   view3D.cursor3D = cursor3D;
   view3D.cursor3DMapper = cursor3DMapper;
   view3D.cursor3DActor = cursor3DActor;
-  
-   // 获取三个复选框元素
-   const checkboxAxial = document.getElementById("checkboxAxial");
-   const checkboxCoronal = document.getElementById("checkboxCoronal");
-   const checkboxSagittal = document.getElementById("checkboxSagittal");
- 
-   // 设置复选框为未选中状态
-   checkboxAxial.checked = false;
-   checkboxCoronal.checked = false;
-   checkboxSagittal.checked = false;
- 
-   // 更新 ACS3D 数组，清空选择
-   ACS3D = [];
+
+  // 获取三个复选框元素
+  const checkboxAxial = document.getElementById("checkboxAxial");
+  const checkboxCoronal = document.getElementById("checkboxCoronal");
+  const checkboxSagittal = document.getElementById("checkboxSagittal");
+
+  // 设置复选框为未选中状态
+  checkboxAxial.checked = false;
+  checkboxCoronal.checked = false;
+  checkboxSagittal.checked = false;
+
+  // 更新 ACS3D 数组，清空选择
+  ACS3D = [];
 }
 
 // ----------------------------------------------------------------------------
@@ -685,6 +685,16 @@ buttonClearAll.addEventListener("click", () => {
     alert("当前未加载有效图像，无法执行清除操作。");
   }
 });
+const buttonImageCropping = document.getElementById("buttonImageCropping");
+buttonImageCropping.addEventListener("click", () => {
+  // 检查是否存在有效的图像
+  const image = widget.getWidgetState().getImage();
+  if (image) {
+    setupCubeAndVolume(view3D, imageData) 
+  } else {
+    alert("当前未加载有效图像，无法执行清除操作。");
+  }
+});
 // 统一处理复选框变更事件的函数
 function handleCheckboxChange(checkbox, value, label) {
   const image = widget.getWidgetState().getImage();
@@ -867,8 +877,12 @@ export async function load(ArrayBuffer) {
       arrayBuffer.push(buffer);
     }
   }
-  const loader = new Loader();
-  loader.MPR(arrayBuffer);
+  if (arrayBuffer.length != 0){
+    const loader = new Loader();
+    loader.MPR(arrayBuffer);
+  }else{
+    alert("没有数据可加载MPR")
+  }
 }
 export class Loader {
   MPR(array_Buffer) {
