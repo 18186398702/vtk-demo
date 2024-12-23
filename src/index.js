@@ -431,7 +431,10 @@ function setupCursor3D(
   cursor3DMapper.setInputConnection(cursor3D.getOutputPort());
   const cursor3DActor = vtkActor.newInstance();
   cursor3DActor.setMapper(cursor3DMapper);
-
+  // 设置 Actor 的颜色为白色
+  cursor3DActor.getProperty().setColor(1.0, 1.0, 1.0); // RGB(1, 1, 1) 表示白色
+  // 设置线条加粗（设置线宽）
+  cursor3DActor.getProperty().setLineWidth(3.0); // 将线宽设置为 3（默认是 1）
   // 添加到渲染器
   view3D.renderer.addActor(cursor3DActor);
 
@@ -793,7 +796,10 @@ function updateOutline(view3D, imageData) {
   // 创建轮廓演员，并将映射器设置为其输入
   const outlineActor = vtkActor.newInstance();
   outlineActor.setMapper(outlineMapper);
-
+  // 设置 Actor 的颜色为白色
+  outlineActor.getProperty().setColor(1.0, 1.0, 1.0); // RGB(1, 1, 1) 表示白色
+  // 设置线条加粗（设置线宽）
+  outlineActor.getProperty().setLineWidth(3.0); // 将线宽设置为 3（默认是 1）
   // 将新的轮廓演员存储在 view3D 对象中，以便以后参考和重用
   view3D.outlineActor = outlineActor;
 
