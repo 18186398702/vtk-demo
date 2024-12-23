@@ -3,7 +3,7 @@ import "@kitware/vtk.js/favicon";
 
 // Load the rendering pieces we want to use (for both WebGL and WebGPU)
 import "@kitware/vtk.js/Rendering/Profiles/All";
-
+import vtkMatrixBuilder from "@kitware/vtk.js/Common/Core/MatrixBuilder";
 import vtkActor from "@kitware/vtk.js/Rendering/Core/Actor";
 import vtkAnnotatedCubeActor from "@kitware/vtk.js/Rendering/Core/AnnotatedCubeActor";
 import vtkDataArray from "@kitware/vtk.js/Common/Core/DataArray";
@@ -151,6 +151,7 @@ for (let i = 0; i < 4; i++) {
   const grw = vtkGenericRenderWindow.newInstance();
   // 将刚才创建的视图容器赋给渲染窗口容器
   grw.setContainer(element);
+
   // 调用 resize 方法确保渲染窗口的尺寸与视图容器一致
   grw.resize();
 
@@ -163,7 +164,6 @@ for (let i = 0; i < 4; i++) {
     widgetManager: vtkWidgetManager.newInstance(), // 创建一个新的小部件管理器实例，管理各种交互小部件
     orientationWidget: null, // 当前没有设置方向小部件（通常用于显示视图方向等信息）
   };
-
   // 设置当前活跃相机为平行投影（不使用透视效果）
   obj.renderer.getActiveCamera().setParallelProjection(true);
 
@@ -221,7 +221,6 @@ for (let i = 0; i < 4; i++) {
 
   // 创建一个 vtkImageReslice 实例，用于图像重切割操作
   obj.reslice = vtkImageReslice.newInstance();
-
   // 设置重切割模式为 SlabMode.MEAN，表示在切割方向上对多个切片取平均
   obj.reslice.setSlabMode(SlabMode.MEAN);
 
@@ -236,13 +235,11 @@ for (let i = 0; i < 4; i++) {
 
   // 设置输出图像的维度为 2，表示输出为 2D 图像（通常用于切片视图）
   obj.reslice.setOutputDimensionality(2);
-
   // 创建一个 vtkImageMapper 实例，用于映射图像数据
   obj.resliceMapper = vtkImageMapper.newInstance();
 
   // 将 vtkImageReslice 的输出连接到映射器，确保映射器能渲染重切割后的图像
   obj.resliceMapper.setInputConnection(obj.reslice.getOutputPort());
-
   // 创建一个 vtkImageSlice 实例，用于显示图像切片
   obj.resliceActor = vtkImageSlice.newInstance();
   // 将映射器应用到 vtkImageSlice 上，以便它能够渲染图像
@@ -446,19 +443,19 @@ function setupCursor3D(
   view3D.cursor3D = cursor3D;
   view3D.cursor3DMapper = cursor3DMapper;
   view3D.cursor3DActor = cursor3DActor;
-  
-   // 获取三个复选框元素
-   const checkboxAxial = document.getElementById("checkboxAxial");
-   const checkboxCoronal = document.getElementById("checkboxCoronal");
-   const checkboxSagittal = document.getElementById("checkboxSagittal");
- 
-   // 设置复选框为未选中状态
-   checkboxAxial.checked = false;
-   checkboxCoronal.checked = false;
-   checkboxSagittal.checked = false;
- 
-   // 更新 ACS3D 数组，清空选择
-   ACS3D = [];
+
+  // 获取三个复选框元素
+  const checkboxAxial = document.getElementById("checkboxAxial");
+  const checkboxCoronal = document.getElementById("checkboxCoronal");
+  const checkboxSagittal = document.getElementById("checkboxSagittal");
+
+  // 设置复选框为未选中状态
+  checkboxAxial.checked = false;
+  checkboxCoronal.checked = false;
+  checkboxSagittal.checked = false;
+
+  // 更新 ACS3D 数组，清空选择
+  ACS3D = [];
 }
 
 // ----------------------------------------------------------------------------
@@ -685,6 +682,16 @@ buttonClearAll.addEventListener("click", () => {
     alert("当前未加载有效图像，无法执行清除操作。");
   }
 });
+const buttonImageCropping = document.getElementById("buttonImageCropping");
+buttonImageCropping.addEventListener("click", () => {
+  // 检查是否存在有效的图像
+  const image = widget.getWidgetState().getImage();
+  if (image) {
+    setupCubeAndVolume(view3D, imageData);
+  } else {
+    alert("当前未加载有效图像，无法执行清除操作。");
+  }
+});
 // 统一处理复选框变更事件的函数
 function handleCheckboxChange(checkbox, value, label) {
   const image = widget.getWidgetState().getImage();
@@ -867,12 +874,19 @@ export async function load(ArrayBuffer) {
       arrayBuffer.push(buffer);
     }
   }
-  const loader = new Loader();
-  loader.MPR(arrayBuffer);
+  if (arrayBuffer.length != 0) {
+    const loader = new Loader();
+    loader.MPR(arrayBuffer);
+  } else {
+    alert("没有数据可加载MPR");
+  }
 }
 export class Loader {
   MPR(array_Buffer) {
+    const startTime = Date.now();
     let dicom_info = getTags(array_Buffer, dicomTags);
+    const endTime = Date.now();
+    console.log(`Execution Time: ${endTime - startTime}ms`);
     if (dicom_info.length == 0) {
       console.error("获取 dicom 信息数据为空");
     } else {
@@ -909,7 +923,6 @@ function MultiSliceImageMapper(imageData) {
 
     const reslice = obj.reslice;
     const viewType = xyzToViewType[i];
-
     // 对所有视图进行操作，确保在当前视图进行交互时能够正确更新切片
     viewAttributes.forEach((v) => {
       // 在交互开始时，更新重采样器的状态
@@ -1022,39 +1035,58 @@ function createImageData(dicomSlices) {
   imageData.getPointData().setScalars(scalarArray);
   return imageData;
 }
-
+/**
+ * 从 DICOM 文件的 ArrayBuffer 中提取指定的标签数据，并记录执行时间。
+ *
+ * @param {Array} arrayBuffer - 包含多个 DICOM 文件的 ArrayBuffer 列表。
+ * @param {Object} dicomTags - 需要提取的 DICOM 标签集合，格式为 { key: { id: 'xxxx,xxxx' } }。
+ * @returns {Array} - 返回包含每个文件标签信息的数组。
+ */
 function getTags(arrayBuffer, dicomTags) {
-  console.log("arrayBuffer", arrayBuffer);
-  let dicom_info = [];
-  if (arrayBuffer.length == 0) {
-    console.error("获取文件buffer为空,不支持获取tags数据");
-  } else {
-    arrayBuffer.forEach((buffer) => {
-      const data_a = new DataView(buffer);
-      daikon.Parser.verbose = true;
-      const dicom_data = daikon.Series.parseImage(data_a);
-      let tagsInfo = {};
-      for (const key in dicomTags) {
-        const tag = dicomTags[key];
-        const idWithoutComma = tag.id.replace(/,/g, ""); // 去除逗号
-        let info = {};
-        if (idWithoutComma == "7FE00010") {
-          var hit_bit = dicom_data.getInterpretedData(false, true);
-          Object.assign(info, { ID: idWithoutComma, Description: hit_bit });
-          tagsInfo[key] = info;
-        }
-        if (idWithoutComma in dicom_data.tags && idWithoutComma != "7FE00010") {
-          Object.assign(info, {
-            ID: idWithoutComma,
-            Description: dicom_data.tags[idWithoutComma].value,
-          });
-          tagsInfo[key] = info;
-        }
-      }
-      dicom_info.push(tagsInfo);
-    });
+  console.log("arrayBuffer", arrayBuffer); // 输出传入的 ArrayBuffer 信息，便于调试
+
+  // 记录开始时间
+  console.time("getTags Execution Time"); // 或者使用 const startTime = Date.now();
+
+  if (arrayBuffer.length === 0) {
+    console.error("文件 buffer 为空，不支持获取 tags 数据");
+    return [];
   }
-  return dicom_info;
+
+  const dicom_info = []; // 存储所有 DICOM 文件的标签信息
+
+  arrayBuffer.forEach((buffer) => {
+    const data_a = new DataView(buffer); // 使用 DataView 读取 ArrayBuffer 数据
+    daikon.Parser.verbose = false; // 关闭 daikon 的详细日志输出，提高性能
+    const dicom_data = daikon.Series.parseImage(data_a); // 解析 DICOM 数据，生成解析结果
+
+    const tagsInfo = {}; // 存储当前 DICOM 文件的标签信息
+
+    Object.keys(dicomTags).forEach((key) => {
+      const tag = dicomTags[key];
+      const idWithoutComma = tag.id.replace(/,/g, ""); // 去掉标签 ID 中的逗号，便于匹配
+
+      // 特殊处理图像数据标签（7FE0,0010）
+      if (idWithoutComma === "7FE00010") {
+        const hit_bit = dicom_data.getInterpretedData(false, true); // 提取图像数据
+        tagsInfo[key] = { ID: idWithoutComma, Description: hit_bit }; // 保存图像数据
+      }
+      // 提取其他指定标签的数据
+      else if (idWithoutComma in dicom_data.tags) {
+        tagsInfo[key] = {
+          ID: idWithoutComma,
+          Description: dicom_data.tags[idWithoutComma].value, // 提取标签值
+        };
+      }
+    });
+
+    dicom_info.push(tagsInfo); // 将当前文件的标签信息存入结果数组
+  });
+
+  // 记录结束时间
+  console.timeEnd("getTags Execution Time"); // 或者使用 const endTime = Date.now(); console.log(`Execution Time: ${endTime - startTime}ms`);
+
+  return dicom_info; // 返回所有文件的标签信息
 }
 export function f_load_directory(selectFiles) {
   let dicom_arraybuffer = [];
