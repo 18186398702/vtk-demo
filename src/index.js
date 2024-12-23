@@ -886,7 +886,10 @@ export async function load(ArrayBuffer) {
 }
 export class Loader {
   MPR(array_Buffer) {
+    const startTime = Date.now();
     let dicom_info = getTags(array_Buffer, dicomTags);
+    const endTime = Date.now();
+    console.log(`Execution Time: ${endTime - startTime}ms`);
     if (dicom_info.length == 0) {
       console.error("获取 dicom 信息数据为空");
     } else {
@@ -1036,39 +1039,58 @@ function createImageData(dicomSlices) {
   imageData.getPointData().setScalars(scalarArray);
   return imageData;
 }
+/**
+ * 从 DICOM 文件的 ArrayBuffer 中提取指定的标签数据，并记录执行时间。
+ * 
+ * @param {Array} arrayBuffer - 包含多个 DICOM 文件的 ArrayBuffer 列表。
+ * @param {Object} dicomTags - 需要提取的 DICOM 标签集合，格式为 { key: { id: 'xxxx,xxxx' } }。
+ * @returns {Array} - 返回包含每个文件标签信息的数组。
+ */
+ function getTags(arrayBuffer, dicomTags) {
+  console.log("arrayBuffer", arrayBuffer); // 输出传入的 ArrayBuffer 信息，便于调试
 
-function getTags(arrayBuffer, dicomTags) {
-  console.log("arrayBuffer", arrayBuffer);
-  let dicom_info = [];
-  if (arrayBuffer.length == 0) {
-    console.error("获取文件buffer为空,不支持获取tags数据");
-  } else {
-    arrayBuffer.forEach((buffer) => {
-      const data_a = new DataView(buffer);
-      daikon.Parser.verbose = true;
-      const dicom_data = daikon.Series.parseImage(data_a);
-      let tagsInfo = {};
-      for (const key in dicomTags) {
-        const tag = dicomTags[key];
-        const idWithoutComma = tag.id.replace(/,/g, ""); // 去除逗号
-        let info = {};
-        if (idWithoutComma == "7FE00010") {
-          var hit_bit = dicom_data.getInterpretedData(false, true);
-          Object.assign(info, { ID: idWithoutComma, Description: hit_bit });
-          tagsInfo[key] = info;
-        }
-        if (idWithoutComma in dicom_data.tags && idWithoutComma != "7FE00010") {
-          Object.assign(info, {
-            ID: idWithoutComma,
-            Description: dicom_data.tags[idWithoutComma].value,
-          });
-          tagsInfo[key] = info;
-        }
-      }
-      dicom_info.push(tagsInfo);
-    });
+  // 记录开始时间
+  console.time("getTags Execution Time"); // 或者使用 const startTime = Date.now();
+
+  if (arrayBuffer.length === 0) {
+    console.error("文件 buffer 为空，不支持获取 tags 数据");
+    return [];
   }
-  return dicom_info;
+
+  const dicom_info = []; // 存储所有 DICOM 文件的标签信息
+
+  arrayBuffer.forEach((buffer) => {
+    const data_a = new DataView(buffer); // 使用 DataView 读取 ArrayBuffer 数据
+    daikon.Parser.verbose = false; // 关闭 daikon 的详细日志输出，提高性能
+    const dicom_data = daikon.Series.parseImage(data_a); // 解析 DICOM 数据，生成解析结果
+
+    const tagsInfo = {}; // 存储当前 DICOM 文件的标签信息
+
+    Object.keys(dicomTags).forEach((key) => {
+      const tag = dicomTags[key];
+      const idWithoutComma = tag.id.replace(/,/g, ""); // 去掉标签 ID 中的逗号，便于匹配
+
+      // 特殊处理图像数据标签（7FE0,0010）
+      if (idWithoutComma === "7FE00010") {
+        const hit_bit = dicom_data.getInterpretedData(false, true); // 提取图像数据
+        tagsInfo[key] = { ID: idWithoutComma, Description: hit_bit }; // 保存图像数据
+      } 
+      // 提取其他指定标签的数据
+      else if (idWithoutComma in dicom_data.tags) {
+        tagsInfo[key] = {
+          ID: idWithoutComma,
+          Description: dicom_data.tags[idWithoutComma].value, // 提取标签值
+        };
+      }
+    });
+
+    dicom_info.push(tagsInfo); // 将当前文件的标签信息存入结果数组
+  });
+
+  // 记录结束时间
+  console.timeEnd("getTags Execution Time"); // 或者使用 const endTime = Date.now(); console.log(`Execution Time: ${endTime - startTime}ms`);
+
+  return dicom_info; // 返回所有文件的标签信息
 }
 export function f_load_directory(selectFiles) {
   let dicom_arraybuffer = [];
