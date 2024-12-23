@@ -3,8 +3,7 @@ import "@kitware/vtk.js/favicon";
 
 // Load the rendering pieces we want to use (for both WebGL and WebGPU)
 import "@kitware/vtk.js/Rendering/Profiles/All";
-import vtkMatrixBuilder from "@kitware/vtk.js/Common/Core/MatrixBuilder";
-import vtkActor from "@kitware/vtk.js/Rendering/Core/Actor";
+
 import vtkAnnotatedCubeActor from "@kitware/vtk.js/Rendering/Core/AnnotatedCubeActor";
 import vtkDataArray from "@kitware/vtk.js/Common/Core/DataArray";
 import vtkGenericRenderWindow from "@kitware/vtk.js/Rendering/Misc/GenericRenderWindow";
@@ -14,7 +13,6 @@ import vtkImageSlice from "@kitware/vtk.js/Rendering/Core/ImageSlice";
 import vtkInteractorStyleImage from "@kitware/vtk.js/Interaction/Style/InteractorStyleImage";
 import vtkInteractorStyleTrackballCamera from "@kitware/vtk.js/Interaction/Style/InteractorStyleTrackballCamera";
 import vtkMath from "@kitware/vtk.js/Common/Core/Math";
-import vtkMapper from "@kitware/vtk.js/Rendering/Core/Mapper";
 import vtkOutlineFilter from "@kitware/vtk.js/Filters/General/OutlineFilter";
 import vtkOrientationMarkerWidget from "@kitware/vtk.js/Interaction/Widgets/OrientationMarkerWidget";
 import vtkResliceCursorWidget from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget";
@@ -30,6 +28,11 @@ import {
   xyzToViewType,
   InteractionMethodsName,
 } from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants";
+
+import vtkVolume from "@kitware/vtk.js/Rendering/Core/Volume";
+import vtkActor from "@kitware/vtk.js/Rendering/Core/Actor";
+import vtkVolumeMapper from "@kitware/vtk.js/Rendering/Core/VolumeMapper";
+import vtkMapper from "@kitware/vtk.js/Rendering/Core/Mapper";
 // ----------------------------------------------------------------------------
 // Define main attributes
 // ----------------------------------------------------------------------------
@@ -393,6 +396,97 @@ for (let i = 0; i < 4; i++) {
     });
   }
 }
+
+
+// ----------------------------------------------------------------------------
+// Load image
+// ----------------------------------------------------------------------------
+
+function updateReslice(
+  interactionContext = {
+    viewType: "",
+    reslice: null,
+    actor: null,
+    renderer: null,
+    resetFocalPoint: false, // Reset the focal point to the center of the display image
+    computeFocalPointOffset: false, // Defines if the display offset between reslice center and focal point has to be
+    // computed. If so, then this offset will be used to keep the focal point position during rotation.
+    spheres: null,
+    slider: null,
+  }
+) {
+  const modified = widget.updateReslicePlane(
+    interactionContext.reslice,
+    interactionContext.viewType
+  );
+  if (modified) {
+    const resliceAxes = interactionContext.reslice.getResliceAxes();
+    // Get returned modified from setter to know if we have to render
+    interactionContext.actor.setUserMatrix(resliceAxes);
+    const planeSource = widget.getPlaneSource(interactionContext.viewType);
+    interactionContext.sphereSources[0].setCenter(planeSource.getOrigin());
+    interactionContext.sphereSources[1].setCenter(planeSource.getPoint1());
+    interactionContext.sphereSources[2].setCenter(planeSource.getPoint2());
+
+    if (interactionContext.slider) {
+      const planeExtremities = widget.getPlaneExtremities(interactionContext.viewType);
+      const length = Math.sqrt(
+        vtkMath.distance2BetweenPoints(planeExtremities[0], planeExtremities[1])
+      );
+      const dist = Math.sqrt(
+        vtkMath.distance2BetweenPoints(planeExtremities[0], widgetState.getCenter())
+      );
+      interactionContext.slider.min = 0;
+      interactionContext.slider.max = length;
+      interactionContext.slider.value = dist;
+    }
+  }
+  widget.updateCameraPoints(
+    interactionContext.renderer,
+    interactionContext.viewType,
+    interactionContext.resetFocalPoint,
+    interactionContext.computeFocalPointOffset
+  );
+  view3D.renderWindow.render();
+  return modified;
+}
+
+// 统一处理复选框变更事件的函数
+function handleCheckboxChange(checkbox, value, label) {
+  const image = widget.getWidgetState().getImage();
+  if (image) {
+    // 更新ACS3D数组
+    if (checkbox.checked) {
+      // 选中时，确保ACS3D中包含相应值，并保持唯一性
+      ACS3D = [...new Set([...ACS3D, value])];
+    } else {
+      // 取消选中时，移除相应值
+      ACS3D = ACS3D.filter((item) => item !== value);
+    }
+    updateOutline(view3D, imageData);
+  } else {
+    // 图像无效，确保复选框保持为 false 并提示
+    checkbox.checked = false; // 取消勾选复选框
+    alert(`当前未加载有效图像，无法执行查看${label}操作。`);
+  }
+}
+function updateViews() {
+  viewAttributes.forEach((obj, i) => {
+    updateReslice({
+      viewType: xyzToViewType[i],
+      reslice: obj.reslice,
+      actor: obj.resliceActor,
+      renderer: obj.renderer,
+      resetFocalPoint: true,
+      computeFocalPointOffset: true,
+      sphereSources: obj.sphereSources,
+      resetViewUp: true,
+    });
+    obj.renderWindow.render();
+  });
+  view3D.renderer.resetCamera();
+  view3D.renderer.resetCameraClippingRange();
+}
 /**
  * 创建并显示一个 vtkCursor3D 边框
  * @param {Object} view3D - 包含 renderer 和 renderWindow 的对象
@@ -400,7 +494,7 @@ for (let i = 0; i < 4; i++) {
  * @param {Array} modelBounds - 设置模型边界 [xmin, xmax, ymin, ymax, zmin, zmax]
  * @param {Object} options - 配置选项，例如是否显示边框、阴影、坐标轴等
  */
-function setupCursor3D(
+ function setupCursor3D(
   view3D,
   focalPoint = [0, 0, 0],
   modelBounds = [-10, 10, -10, 10, -10, 10],
@@ -461,79 +555,137 @@ function setupCursor3D(
   ACS3D = [];
 }
 
-// ----------------------------------------------------------------------------
-// Load image
-// ----------------------------------------------------------------------------
-
-function updateReslice(
-  interactionContext = {
-    viewType: "",
-    reslice: null,
-    actor: null,
-    renderer: null,
-    resetFocalPoint: false, // Reset the focal point to the center of the display image
-    computeFocalPointOffset: false, // Defines if the display offset between reslice center and focal point has to be
-    // computed. If so, then this offset will be used to keep the focal point position during rotation.
-    spheres: null,
-    slider: null,
+/**
+ * 清除已有边框并添加图像数据的边界框到 3D 视图
+ * @param {Object} view3D - 包含 renderer 和 renderWindow 的对象
+ * @param {vtkImageData} imageData - 用于生成边界框的图像数据
+ * @returns {vtkActor} - 创建的边界框 Actor
+ */
+ function updateOutline(view3D, imageData) {
+  if (!imageData) {
+    alert("imageData is not loaded or initialized.");
+    return;
   }
-) {
-  const modified = widget.updateReslicePlane(
-    interactionContext.reslice,
-    interactionContext.viewType
-  );
-  if (modified) {
-    const resliceAxes = interactionContext.reslice.getResliceAxes();
-    // Get returned modified from setter to know if we have to render
-    interactionContext.actor.setUserMatrix(resliceAxes);
-    const planeSource = widget.getPlaneSource(interactionContext.viewType);
-    interactionContext.sphereSources[0].setCenter(planeSource.getOrigin());
-    interactionContext.sphereSources[1].setCenter(planeSource.getPoint1());
-    interactionContext.sphereSources[2].setCenter(planeSource.getPoint2());
 
-    if (interactionContext.slider) {
-      const planeExtremities = widget.getPlaneExtremities(interactionContext.viewType);
-      const length = Math.sqrt(
-        vtkMath.distance2BetweenPoints(planeExtremities[0], planeExtremities[1])
-      );
-      const dist = Math.sqrt(
-        vtkMath.distance2BetweenPoints(planeExtremities[0], widgetState.getCenter())
-      );
-      interactionContext.slider.min = 0;
-      interactionContext.slider.max = length;
-      interactionContext.slider.value = dist;
+  // 清除渲染器中的所有演员，只移除旧的轮廓和重采样演员
+  const actorsToRemove = [];
+  view3D.renderer.getActors().forEach((actor) => {
+    if (actor !== view3D.outlineActor) {
+      actorsToRemove.push(actor); // 将旧的演员保存在数组中
     }
+  });
+
+  // 移除旧的演员
+  actorsToRemove.forEach((actor) => {
+    view3D.renderer.removeActor(actor);
+  });
+
+  // 创建一个新的轮廓过滤器，生成图像的边界框
+  const outline = vtkOutlineFilter.newInstance();
+  outline.setInputData(imageData);
+
+  // 创建一个新的轮廓映射器，并将其输入设置为轮廓过滤器的输出
+  const outlineMapper = vtkMapper.newInstance();
+  outlineMapper.setInputData(outline.getOutputData());
+
+  // 创建轮廓演员，并将映射器设置为其输入
+  const outlineActor = vtkActor.newInstance();
+  outlineActor.setMapper(outlineMapper);
+  // 设置 Actor 的颜色为白色
+  outlineActor.getProperty().setColor(1.0, 1.0, 1.0); // RGB(1, 1, 1) 表示白色
+  // 设置线条加粗（设置线宽）
+  outlineActor.getProperty().setLineWidth(3.0); // 将线宽设置为 3（默认是 1）
+  // 将新的轮廓演员存储在 view3D 对象中，以便以后参考和重用
+  view3D.outlineActor = outlineActor;
+
+  // 将新的轮廓演员添加到渲染器中
+  view3D.renderer.addActor(outlineActor);
+
+  // 根据 ACS3D 中的值，决定是否显示其他重采样演员
+  viewAttributes.forEach((obj, i) => {
+    if (ACS3D.includes(i)) {
+      // 如果 ACS3D 包含该值，则添加对应的重采样演员
+      view3D.renderer.addActor(obj.resliceActor);
+    }
+  });
+
+  // 如果 ACS3D 为空，设置 3D 游标（如没有加载有效的图像）
+  if (ACS3D.length === 0) {
+    setupCursor3D(view3D);
   }
-  widget.updateCameraPoints(
-    interactionContext.renderer,
-    interactionContext.viewType,
-    interactionContext.resetFocalPoint,
-    interactionContext.computeFocalPointOffset
-  );
+
+  // 更新视图并重置相机
+  view3D.renderer.resetCamera();
   view3D.renderWindow.render();
-  return modified;
+}
+
+// 封装函数，用于初始化 3D 渲染环境并渲染体数据
+function initializeVolumeRendering(view3D, imageData, options = {}) {
+    // 清除渲染器中的所有演员，仅保留轮廓演员 outlineActor
+    const actorsToRemove = [];
+    view3D.renderer.getActors().forEach((actor) => {
+      if (actor !== view3D.outlineActor) {
+        actorsToRemove.push(actor); // 将需要移除的演员存入数组
+      }
+    });
+  
+    // 从渲染器中移除旧的演员
+    actorsToRemove.forEach((actor) => {
+      view3D.renderer.removeActor(actor);
+    });
+  // 检查 imageData 是否有效
+  if (!imageData || !imageData.getPointData() || !imageData.getPointData().getScalars()) {
+    console.error("Invalid imageData or missing scalars");
+    return;
+  }
+  // 获取 imageData 中的标量数据
+  const dataArray = imageData.getPointData().getScalars();
+  if (!dataArray) {
+    console.error("No scalar data found in imageData"); // 如果没有标量数据，打印错误信息并退出
+    return;
+  }
+  // 解构选项参数，设置默认值
+  const { sampleDistance = 1.1, blendMode = "Composite", desiredUpdateRate = 0.05 } = options;
+
+  // 初始化体渲染对象
+  const actor = vtkVolume.newInstance();
+  const mapper = vtkVolumeMapper.newInstance({ sampleDistance });
+  // 设置 RGB 传递函数，根据数据范围调整颜色映射
+  const rgbTransferFunction = actor.getProperty().getRGBTransferFunction(0);
+  rgbTransferFunction.setRange(...dataArray.getRange()); // 设置颜色映射的范围
+  // 设置 mapper 输入数据
+  mapper.setInputData(imageData);
+
+  // 设置混合模式
+  switch (blendMode) {
+    case "MaximumIntensity":
+      mapper.setBlendModeToMaximumIntensity();
+      break;
+    default:
+      console.warn("Unknown blend mode, falling back to Composite.");
+      mapper.setBlendModeToComposite();
+  }
+
+  // 绑定 mapper 和 actor
+  actor.setMapper(mapper);
+  view3D.renderer.addVolume(actor);
+  // 调整相机视图，设置相机的视图向上方向
+  view3D.renderer.getActiveCamera().setViewUp(0, 1, 0);
+  // 调整相机视图
+  view3D.renderer.resetCamera();
+  // 设置渲染窗口交互更新速率
+  view3D.interactor.setDesiredUpdateRate(desiredUpdateRate);
+  // 设置渲染窗口交互更新速率
+  view3D.renderWindow.getInteractor().setDesiredUpdateRate(desiredUpdateRate);
+
+  // 触发渲染
+  view3D.renderWindow.render();
 }
 
 // ----------------------------------------------------------------------------
-// Define panel interactions
+// 定义面板交互
 // ----------------------------------------------------------------------------
-function updateViews() {
-  viewAttributes.forEach((obj, i) => {
-    updateReslice({
-      viewType: xyzToViewType[i],
-      reslice: obj.reslice,
-      actor: obj.resliceActor,
-      renderer: obj.renderer,
-      resetFocalPoint: true,
-      computeFocalPointOffset: true,
-      sphereSources: obj.sphereSources,
-      resetViewUp: true,
-    });
-    obj.renderWindow.render();
-  });
-  view3D.renderer.resetCamera();
-  view3D.renderer.resetCameraClippingRange();
-}
+
 
 checkboxTranslation.addEventListener("change", (ev) => {
   // 检查是否存在有效的图像
@@ -685,35 +837,23 @@ buttonClearAll.addEventListener("click", () => {
     alert("当前未加载有效图像，无法执行清除操作。");
   }
 });
-const buttonImageCropping = document.getElementById("buttonImageCropping");
-buttonImageCropping.addEventListener("click", () => {
-  // 检查是否存在有效的图像
+const blendModeSelect = document.querySelector("#blendModeSelect");
+// 事件监听：切换混合模式
+blendModeSelect.addEventListener("change", () => {
   const image = widget.getWidgetState().getImage();
   if (image) {
-    setupCubeAndVolume(view3D, imageData);
+    const selectedMode = blendModeSelect.value;
+    // 调用渲染函数
+    initializeVolumeRendering(view3D, imageData, {
+      sampleDistance: 1.1, // 自定义采样距离
+      blendMode: selectedMode, // 使用 MIP 模式
+      desiredUpdateRate: 0.05, // 调整更新速率
+    });
   } else {
     alert("当前未加载有效图像，无法执行清除操作。");
   }
 });
-// 统一处理复选框变更事件的函数
-function handleCheckboxChange(checkbox, value, label) {
-  const image = widget.getWidgetState().getImage();
-  if (image) {
-    // 更新ACS3D数组
-    if (checkbox.checked) {
-      // 选中时，确保ACS3D中包含相应值，并保持唯一性
-      ACS3D = [...new Set([...ACS3D, value])];
-    } else {
-      // 取消选中时，移除相应值
-      ACS3D = ACS3D.filter((item) => item !== value);
-    }
-    updateOutline(view3D, imageData);
-  } else {
-    // 图像无效，确保复选框保持为 false 并提示
-    checkbox.checked = false; // 取消勾选复选框
-    alert(`当前未加载有效图像，无法执行查看${label}操作。`);
-  }
-}
+
 // 绑定事件处理
 const buttonAxial = document.getElementById("checkboxAxial");
 buttonAxial.addEventListener("change", () => handleCheckboxChange(buttonAxial, 0, "轴向截面"));
@@ -760,71 +900,12 @@ checkboxWindowLevel.addEventListener("change", (ev) => {
   }
 });
 
-/**
- * 清除已有边框并添加图像数据的边界框到 3D 视图
- * @param {Object} view3D - 包含 renderer 和 renderWindow 的对象
- * @param {vtkImageData} imageData - 用于生成边界框的图像数据
- * @returns {vtkActor} - 创建的边界框 Actor
- */
-function updateOutline(view3D, imageData) {
-  if (!imageData) {
-    alert("imageData is not loaded or initialized.");
-    return;
-  }
 
-  // 清除渲染器中的所有演员，只移除旧的轮廓和重采样演员
-  const actorsToRemove = [];
-  view3D.renderer.getActors().forEach((actor) => {
-    if (actor !== view3D.outlineActor) {
-      actorsToRemove.push(actor); // 将旧的演员保存在数组中
-    }
-  });
+// ----------------------------------------------------------------------------
+// 处理数据
+// ----------------------------------------------------------------------------
 
-  // 移除旧的演员
-  actorsToRemove.forEach((actor) => {
-    view3D.renderer.removeActor(actor);
-  });
 
-  // 创建一个新的轮廓过滤器，生成图像的边界框
-  const outline = vtkOutlineFilter.newInstance();
-  outline.setInputData(imageData);
-
-  // 创建一个新的轮廓映射器，并将其输入设置为轮廓过滤器的输出
-  const outlineMapper = vtkMapper.newInstance();
-  outlineMapper.setInputData(outline.getOutputData());
-
-  // 创建轮廓演员，并将映射器设置为其输入
-  const outlineActor = vtkActor.newInstance();
-  outlineActor.setMapper(outlineMapper);
-  // 设置 Actor 的颜色为白色
-  outlineActor.getProperty().setColor(1.0, 1.0, 1.0); // RGB(1, 1, 1) 表示白色
-  // 设置线条加粗（设置线宽）
-  outlineActor.getProperty().setLineWidth(3.0); // 将线宽设置为 3（默认是 1）
-  // 将新的轮廓演员存储在 view3D 对象中，以便以后参考和重用
-  view3D.outlineActor = outlineActor;
-
-  // 将新的轮廓演员添加到渲染器中
-  view3D.renderer.addActor(outlineActor);
-
-  // 根据 ACS3D 中的值，决定是否显示其他重采样演员
-  viewAttributes.forEach((obj, i) => {
-    if (ACS3D.includes(i)) {
-      // 如果 ACS3D 包含该值，则添加对应的重采样演员
-      view3D.renderer.addActor(obj.resliceActor);
-    }
-  });
-
-  // 如果 ACS3D 为空，设置 3D 游标（如没有加载有效的图像）
-  if (ACS3D.length === 0) {
-    setupCursor3D(view3D);
-  }
-
-  // 更新视图并重置相机
-  view3D.renderer.resetCamera();
-  view3D.renderWindow.render();
-}
-
-//-----------------------------------------------------------------------------------------------------
 const dicomTags = {
   imagePositionPatient: {
     id: "0020,0032", //图像在患者坐标系中的位置
@@ -912,6 +993,7 @@ function MultiSliceImageMapper(imageData) {
   widget.setImage(imageData);
   // 调用封装函数，创建一个 vtkCursor3D 边框
   setupCursor3D(view3D);
+  // renderVolume(imageData, view3D);
   // 对每个视图的属性进行操作，`viewAttributes` 是包含多个视图属性的数组
   viewAttributes.forEach((obj, i) => {
     // 设置该视图的重采样输入数据为加载的图像数据

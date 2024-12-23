@@ -6,25 +6,6 @@
 </head>
 <body>
     <input type="file" id="dicomFileInput" webkitdirectory multiple="multiple" />
-    <!-- <div>
-        <label for="axialSlider">Axial (横断面):</label>
-        <input type="range" id="axialSlider" min="0" max="100" value="30">
-      </div>
-      <div>
-        <label for="coronalSlider">Coronal (冠状面):</label>
-        <input type="range" id="coronalSlider" min="0" max="100" value="50">
-      </div>
-      <div>
-        <label for="sagittalSlider">Sagittal (矢状面):</label>
-        <input type="range" id="sagittalSlider" min="0" max="100" value="20">
-      </div>
-    </div>
-    <div id="vtkContainer">
-      <div id="axialContainer" style="width: 33%; height: 300px; float: left;border: 1px solid red;"></div>
-      <div id="coronalContainer" style="width: 33%; height: 300px; float: left;border: 1px solid red;"></div>
-      <div id="sagittalContainer" style="width: 33%; height: 300px; float: left;border: 1px solid red;"></div>
-      <div id="3DContainer" style="width: 33%; height: 300px; float: left;border: 1px solid red;"></div>
-    </div> -->
     <div>
       <table>
         <tbody>
@@ -120,9 +101,11 @@
             <td>矢状面(Sagittal)</td>
             <td><input type="checkbox" id="checkboxSagittal" /></td>
           </tr>
-          <tr>
-            <td><button id="buttonImageCropping">图像裁剪</button></td>
-          </tr>
+          <label for="blendModeSelect">选择渲染模式：</label>
+          <select id="blendModeSelect">
+            <option value="Composite"></option>
+            <option value="MaximumIntensity">MIP</option>
+          </select>
         </tbody>
       </table>
     </div>
