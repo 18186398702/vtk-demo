@@ -506,8 +506,14 @@ function setupCursor3D(
   options = {}
 ) {
   // 清除渲染器中的所有演员
-  clearOldActors(view3D);
-  removeVolumeActor(view3D);
+  view3D.renderer.getActors().forEach((actor) => {
+    view3D.renderer.removeActor(actor);
+  });;
+
+  // 如果需要移除已有体积演员，执行删除
+  if (view3D.vtkVolumeActor) {
+    removeVolumeActor(view3D); // 删除现有体积演员
+  }
   // 创建新的 vtkCursor3D
   const cursor3D = vtkCursor3D.newInstance();
   cursor3D.setFocalPoint(focalPoint);
@@ -544,7 +550,7 @@ function setupCursor3D(
   view3D.cursor3DMapper = cursor3DMapper;
   view3D.cursor3DActor = cursor3DActor;
 
-  resetCheckboxesAndACS3D()
+  resetCheckboxesAndACS3D();
 }
 function resetCheckboxesAndACS3D() {
   // 获取三个复选框元素
@@ -667,7 +673,10 @@ function initializeVolumeRendering(view3D, imageData, options = {}) {
   const { sampleDistance = 1.0, blendMode = "Composite", desiredUpdateRate = 1.0 } = options;
 
   clearOldActors(view3D);
-
+  // 如果需要移除已有体积演员，执行删除
+  if (view3D.vtkVolumeActor) {
+    removeVolumeActor(view3D); // 删除现有体积演员
+  }
   // 初始化体积渲染对象
   const actor = vtkVolume.newInstance();
   const mapper = vtkVolumeMapper.newInstance({ sampleDistance });
@@ -681,11 +690,15 @@ function initializeVolumeRendering(view3D, imageData, options = {}) {
 
   // 设置混合模式
   switch (blendMode) {
+    case "Composite":
+      mapper.setBlendModeToComposite();
+      break;
     case "MaximumIntensity":
       mapper.setBlendModeToMaximumIntensity();
       break;
     default:
       console.warn("Unknown blend mode, falling back to Composite.");
+      mapper.setBlendModeToComposite(); // 使用合成模式（默认）
       break;
   }
 
@@ -712,7 +725,7 @@ function initializeVolumeRendering(view3D, imageData, options = {}) {
   // 保存体积演员和映射器到 view3D 对象，以便后续操作
   view3D.vtkVolumeActor = actor;
   view3D.vtkVolumeMapper = mapper;
-  resetCheckboxesAndACS3D()
+  resetCheckboxesAndACS3D();
 }
 // 函数：移除体积演员
 function removeVolumeActor(view3D) {
