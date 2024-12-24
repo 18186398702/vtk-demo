@@ -463,6 +463,11 @@ function handleCheckboxChange(checkbox, value, label) {
       // 取消选中时，移除相应值
       ACS3D = ACS3D.filter((item) => item !== value);
     }
+    // 如果需要移除已有体积演员，执行删除
+    if (view3D.vtkVolumeActor) {
+      removeVolumeActor(view3D); // 删除现有体积演员
+    }
+
     updateOutline(view3D, imageData);
   } else {
     // 图像无效，确保复选框保持为 false 并提示
@@ -501,9 +506,8 @@ function setupCursor3D(
   options = {}
 ) {
   // 清除渲染器中的所有演员
-  // view3D.renderer.getActors().forEach((actor) => {
-  //   view3D.renderer.removeActor(actor);
-  // });;
+  clearOldActors(view3D);
+  removeVolumeActor(view3D);
   // 创建新的 vtkCursor3D
   const cursor3D = vtkCursor3D.newInstance();
   cursor3D.setFocalPoint(focalPoint);
@@ -540,6 +544,9 @@ function setupCursor3D(
   view3D.cursor3DMapper = cursor3DMapper;
   view3D.cursor3DActor = cursor3DActor;
 
+  resetCheckboxesAndACS3D()
+}
+function resetCheckboxesAndACS3D() {
   // 获取三个复选框元素
   const checkboxAxial = document.getElementById("checkboxAxial");
   const checkboxCoronal = document.getElementById("checkboxCoronal");
@@ -553,6 +560,7 @@ function setupCursor3D(
   // 更新 ACS3D 数组，清空选择
   ACS3D = [];
 }
+
 /**
  * 创建并渲染图像数据的轮廓（边界框）。
  *
@@ -600,7 +608,10 @@ function updateOutline(view3D, imageData) {
     return;
   }
   // 清除渲染器中的所有演员，只移除旧的轮廓和重采样演员
-  clearOldActors(view3D);
+  view3D.renderer.getActors().forEach((actor) => {
+    view3D.renderer.removeActor(actor);
+  });
+
   createAndRenderOutline(imageData, view3D);
 
   // 根据 ACS3D 中的值，决定是否显示其他重采样演员
@@ -636,37 +647,41 @@ function clearOldActors(view3D) {
     view3D.renderer.removeActor(actor);
   });
 }
-// 封装函数，用于初始化 3D 渲染环境并渲染体数据
+
+// 函数：初始化体积渲染，支持插入显示和删除
 function initializeVolumeRendering(view3D, imageData, options = {}) {
   // 检查 imageData 是否有效
   if (!imageData || !imageData.getPointData() || !imageData.getPointData().getScalars()) {
     console.error("Invalid imageData or missing scalars");
     return;
   }
+
   // 获取 imageData 中的标量数据
   const dataArray = imageData.getPointData().getScalars();
   if (!dataArray) {
-    console.error("No scalar data found in imageData"); // 如果没有标量数据，打印错误信息并退出
+    console.error("No scalar data found in imageData");
     return;
   }
-  // 清除渲染器中的所有演员，仅保留轮廓演员 outlineActor
-  clearOldActors(view3D);
-  createAndRenderOutline(imageData, view3D);
-  // 解构选项参数，设置默认值
-  const { sampleDistance = 1.1, blendMode = "Composite", desiredUpdateRate = 0.02 } = options;
 
-  // 初始化体渲染对象
+  // 解构选项参数，设置默认值
+  const { sampleDistance = 1.0, blendMode = "Composite", desiredUpdateRate = 1.0 } = options;
+
+  clearOldActors(view3D);
+
+  // 初始化体积渲染对象
   const actor = vtkVolume.newInstance();
   const mapper = vtkVolumeMapper.newInstance({ sampleDistance });
+
   // 设置 RGB 传递函数，根据数据范围调整颜色映射
   const rgbTransferFunction = actor.getProperty().getRGBTransferFunction(0);
   rgbTransferFunction.setRange(...dataArray.getRange()); // 设置颜色映射的范围
 
+  // 设置 mapper 输入数据
+  mapper.setInputData(imageData);
+
   // 设置混合模式
   switch (blendMode) {
     case "MaximumIntensity":
-      // 设置 mapper 输入数据
-      mapper.setInputData(imageData);
       mapper.setBlendModeToMaximumIntensity();
       break;
     default:
@@ -676,19 +691,50 @@ function initializeVolumeRendering(view3D, imageData, options = {}) {
 
   // 绑定 mapper 和 actor
   actor.setMapper(mapper);
+
+  // 将体积演员添加到渲染器
   view3D.renderer.addVolume(actor);
-  // 调整相机视图，设置相机的视图向上方向
-  view3D.renderer.getActiveCamera().setViewUp(0, 1, 0);
+
   // 调整相机视图
-  view3D.renderer.resetCamera();
-  // 设置渲染窗口交互更新速率
-  view3D.interactor.setDesiredUpdateRate(desiredUpdateRate);
-  // 设置渲染窗口交互更新速率
+  const camera = view3D.renderer.getActiveCamera();
+  camera.setViewUp(0, 1, 0); // 设置相机视图的“向上”方向
+  view3D.renderer.resetCamera(); // 重置相机
+
+  // 禁用交互式渲染
+  view3D.renderer.setInteractive(false);
+
+  // 设置渲染窗口的交互更新速率
   view3D.renderWindow.getInteractor().setDesiredUpdateRate(desiredUpdateRate);
+
   // 触发渲染
   view3D.renderWindow.render();
-}
 
+  // 保存体积演员和映射器到 view3D 对象，以便后续操作
+  view3D.vtkVolumeActor = actor;
+  view3D.vtkVolumeMapper = mapper;
+  resetCheckboxesAndACS3D()
+}
+// 函数：移除体积演员
+function removeVolumeActor(view3D) {
+  if (view3D.vtkVolumeActor) {
+    console.log("Removing volume actor...");
+    // 从渲染器中移除体积演员
+    view3D.renderer.removeVolume(view3D.vtkVolumeActor);
+
+    // 删除体积演员和映射器对象，释放内存
+    view3D.vtkVolumeActor.delete();
+    view3D.vtkVolumeMapper.delete();
+
+    // 清空存储的体积演员和映射器
+    view3D.vtkVolumeActor = null;
+    view3D.vtkVolumeMapper = null;
+
+    // 重新渲染
+    view3D.renderWindow.render();
+  } else {
+    console.warn("No volume actor to remove.");
+  }
+}
 function initializeVolumeContour(view3D, imageData) {
   clearOldActors(view3D);
   const actor = vtkActor.newInstance();
@@ -894,9 +940,9 @@ blendModeSelect.addEventListener("change", () => {
     } else {
       // 调用渲染函数
       initializeVolumeRendering(view3D, imageData, {
-        sampleDistance: 1.1, // 自定义采样距离
+        sampleDistance: 1.0, // 自定义采样距离
         blendMode: selectedMode, // 使用 MIP 模式
-        desiredUpdateRate: 0.02, // 调整更新速率
+        desiredUpdateRate: 1.0, // 调整更新速率
       });
     }
   } else {
