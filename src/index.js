@@ -28,11 +28,11 @@ import {
   xyzToViewType,
   InteractionMethodsName,
 } from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants";
-
 import vtkVolume from "@kitware/vtk.js/Rendering/Core/Volume";
 import vtkActor from "@kitware/vtk.js/Rendering/Core/Actor";
 import vtkVolumeMapper from "@kitware/vtk.js/Rendering/Core/VolumeMapper";
 import vtkMapper from "@kitware/vtk.js/Rendering/Core/Mapper";
+import vtkImageMarchingCubes from '@kitware/vtk.js/Filters/General/ImageMarchingCubes';
 // ----------------------------------------------------------------------------
 // Define main attributes
 // ----------------------------------------------------------------------------
@@ -397,7 +397,6 @@ for (let i = 0; i < 4; i++) {
   }
 }
 
-
 // ----------------------------------------------------------------------------
 // Load image
 // ----------------------------------------------------------------------------
@@ -494,17 +493,16 @@ function updateViews() {
  * @param {Array} modelBounds - 设置模型边界 [xmin, xmax, ymin, ymax, zmin, zmax]
  * @param {Object} options - 配置选项，例如是否显示边框、阴影、坐标轴等
  */
- function setupCursor3D(
+function setupCursor3D(
   view3D,
   focalPoint = [0, 0, 0],
   modelBounds = [-10, 10, -10, 10, -10, 10],
   options = {}
 ) {
   // 清除渲染器中的所有演员
-  view3D.renderer.getActors().forEach((actor) => {
-    view3D.renderer.removeActor(actor);
-  });
-
+  // view3D.renderer.getActors().forEach((actor) => {
+  //   view3D.renderer.removeActor(actor);
+  // });;
   // 创建新的 vtkCursor3D
   const cursor3D = vtkCursor3D.newInstance();
   cursor3D.setFocalPoint(focalPoint);
@@ -554,32 +552,16 @@ function updateViews() {
   // 更新 ACS3D 数组，清空选择
   ACS3D = [];
 }
-
 /**
- * 清除已有边框并添加图像数据的边界框到 3D 视图
- * @param {Object} view3D - 包含 renderer 和 renderWindow 的对象
- * @param {vtkImageData} imageData - 用于生成边界框的图像数据
- * @returns {vtkActor} - 创建的边界框 Actor
+ * 创建并渲染图像数据的轮廓（边界框）。
+ *
+ * @param {vtkImageData} imageData - 输入的图像数据。
+ * @param {Object} view3D - 3D 渲染环境对象，包含 renderer、outlineActor 等。
+ *   - view3D.renderer: vtkRenderer 实例，用于渲染图像。
+ *
+ * @returns {vtkActor} 返回新创建的轮廓演员（outlineActor）。
  */
- function updateOutline(view3D, imageData) {
-  if (!imageData) {
-    alert("imageData is not loaded or initialized.");
-    return;
-  }
-
-  // 清除渲染器中的所有演员，只移除旧的轮廓和重采样演员
-  const actorsToRemove = [];
-  view3D.renderer.getActors().forEach((actor) => {
-    if (actor !== view3D.outlineActor) {
-      actorsToRemove.push(actor); // 将旧的演员保存在数组中
-    }
-  });
-
-  // 移除旧的演员
-  actorsToRemove.forEach((actor) => {
-    view3D.renderer.removeActor(actor);
-  });
-
+function createAndRenderOutline(imageData, view3D) {
   // 创建一个新的轮廓过滤器，生成图像的边界框
   const outline = vtkOutlineFilter.newInstance();
   outline.setInputData(imageData);
@@ -591,15 +573,34 @@ function updateViews() {
   // 创建轮廓演员，并将映射器设置为其输入
   const outlineActor = vtkActor.newInstance();
   outlineActor.setMapper(outlineMapper);
-  // 设置 Actor 的颜色为白色
+
+  // 设置轮廓演员的颜色为白色
   outlineActor.getProperty().setColor(1.0, 1.0, 1.0); // RGB(1, 1, 1) 表示白色
+
   // 设置线条加粗（设置线宽）
   outlineActor.getProperty().setLineWidth(3.0); // 将线宽设置为 3（默认是 1）
+
   // 将新的轮廓演员存储在 view3D 对象中，以便以后参考和重用
   view3D.outlineActor = outlineActor;
 
   // 将新的轮廓演员添加到渲染器中
   view3D.renderer.addActor(outlineActor);
+}
+
+/**
+ * 清除已有边框并添加图像数据的边界框到 3D 视图
+ * @param {Object} view3D - 包含 renderer 和 renderWindow 的对象
+ * @param {vtkImageData} imageData - 用于生成边界框的图像数据
+ * @returns {vtkActor} - 创建的边界框 Actor
+ */
+function updateOutline(view3D, imageData) {
+  if (!imageData) {
+    alert("imageData is not loaded or initialized.");
+    return;
+  }
+  // 清除渲染器中的所有演员，只移除旧的轮廓和重采样演员
+  clearOldActors(view3D);
+  createAndRenderOutline(imageData, view3D);
 
   // 根据 ACS3D 中的值，决定是否显示其他重采样演员
   viewAttributes.forEach((obj, i) => {
@@ -618,21 +619,24 @@ function updateViews() {
   view3D.renderer.resetCamera();
   view3D.renderWindow.render();
 }
+// 清除渲染器中的所有演员，仅保留轮廓演员 outlineActor
+function clearOldActors(view3D) {
+  const actorsToRemove = [];
 
+  // 遍历所有演员对象，找到需要移除的演员
+  view3D.renderer.getActors().forEach((actor) => {
+    if (actor !== view3D.outlineActor) {
+      actorsToRemove.push(actor); // 将需要移除的演员存入数组
+    }
+  });
+
+  // 从渲染器中移除旧的演员
+  actorsToRemove.forEach((actor) => {
+    view3D.renderer.removeActor(actor);
+  });
+}
 // 封装函数，用于初始化 3D 渲染环境并渲染体数据
 function initializeVolumeRendering(view3D, imageData, options = {}) {
-    // 清除渲染器中的所有演员，仅保留轮廓演员 outlineActor
-    const actorsToRemove = [];
-    view3D.renderer.getActors().forEach((actor) => {
-      if (actor !== view3D.outlineActor) {
-        actorsToRemove.push(actor); // 将需要移除的演员存入数组
-      }
-    });
-  
-    // 从渲染器中移除旧的演员
-    actorsToRemove.forEach((actor) => {
-      view3D.renderer.removeActor(actor);
-    });
   // 检查 imageData 是否有效
   if (!imageData || !imageData.getPointData() || !imageData.getPointData().getScalars()) {
     console.error("Invalid imageData or missing scalars");
@@ -644,8 +648,11 @@ function initializeVolumeRendering(view3D, imageData, options = {}) {
     console.error("No scalar data found in imageData"); // 如果没有标量数据，打印错误信息并退出
     return;
   }
+  // 清除渲染器中的所有演员，仅保留轮廓演员 outlineActor
+  clearOldActors(view3D);
+  createAndRenderOutline(imageData, view3D);
   // 解构选项参数，设置默认值
-  const { sampleDistance = 1.1, blendMode = "Composite", desiredUpdateRate = 0.05 } = options;
+  const { sampleDistance = 1.1, blendMode = "Composite", desiredUpdateRate = 0.02 } = options;
 
   // 初始化体渲染对象
   const actor = vtkVolume.newInstance();
@@ -653,17 +660,17 @@ function initializeVolumeRendering(view3D, imageData, options = {}) {
   // 设置 RGB 传递函数，根据数据范围调整颜色映射
   const rgbTransferFunction = actor.getProperty().getRGBTransferFunction(0);
   rgbTransferFunction.setRange(...dataArray.getRange()); // 设置颜色映射的范围
-  // 设置 mapper 输入数据
-  mapper.setInputData(imageData);
 
   // 设置混合模式
   switch (blendMode) {
     case "MaximumIntensity":
+      // 设置 mapper 输入数据
+      mapper.setInputData(imageData);
       mapper.setBlendModeToMaximumIntensity();
       break;
     default:
       console.warn("Unknown blend mode, falling back to Composite.");
-      mapper.setBlendModeToComposite();
+      break;
   }
 
   // 绑定 mapper 和 actor
@@ -677,7 +684,6 @@ function initializeVolumeRendering(view3D, imageData, options = {}) {
   view3D.interactor.setDesiredUpdateRate(desiredUpdateRate);
   // 设置渲染窗口交互更新速率
   view3D.renderWindow.getInteractor().setDesiredUpdateRate(desiredUpdateRate);
-
   // 触发渲染
   view3D.renderWindow.render();
 }
@@ -685,7 +691,6 @@ function initializeVolumeRendering(view3D, imageData, options = {}) {
 // ----------------------------------------------------------------------------
 // 定义面板交互
 // ----------------------------------------------------------------------------
-
 
 checkboxTranslation.addEventListener("change", (ev) => {
   // 检查是否存在有效的图像
@@ -847,7 +852,7 @@ blendModeSelect.addEventListener("change", () => {
     initializeVolumeRendering(view3D, imageData, {
       sampleDistance: 1.1, // 自定义采样距离
       blendMode: selectedMode, // 使用 MIP 模式
-      desiredUpdateRate: 0.05, // 调整更新速率
+      desiredUpdateRate: 0.02, // 调整更新速率
     });
   } else {
     alert("当前未加载有效图像，无法执行清除操作。");
@@ -900,11 +905,9 @@ checkboxWindowLevel.addEventListener("change", (ev) => {
   }
 });
 
-
 // ----------------------------------------------------------------------------
 // 处理数据
 // ----------------------------------------------------------------------------
-
 
 const dicomTags = {
   imagePositionPatient: {
