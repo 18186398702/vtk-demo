@@ -1,30 +1,11 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
     <input type="file" id="dicomFileInput" webkitdirectory multiple="multiple" />
-    <!-- <div>
-        <label for="axialSlider">Axial (横断面):</label>
-        <input type="range" id="axialSlider" min="0" max="100" value="30">
-      </div>
-      <div>
-        <label for="coronalSlider">Coronal (冠状面):</label>
-        <input type="range" id="coronalSlider" min="0" max="100" value="50">
-      </div>
-      <div>
-        <label for="sagittalSlider">Sagittal (矢状面):</label>
-        <input type="range" id="sagittalSlider" min="0" max="100" value="20">
-      </div>
-    </div>
-    <div id="vtkContainer">
-      <div id="axialContainer" style="width: 33%; height: 300px; float: left;border: 1px solid red;"></div>
-      <div id="coronalContainer" style="width: 33%; height: 300px; float: left;border: 1px solid red;"></div>
-      <div id="sagittalContainer" style="width: 33%; height: 300px; float: left;border: 1px solid red;"></div>
-      <div id="3DContainer" style="width: 33%; height: 300px; float: left;border: 1px solid red;"></div>
-    </div> -->
     <div>
       <table>
         <tbody>
@@ -120,28 +101,43 @@
             <td>矢状面(Sagittal)</td>
             <td><input type="checkbox" id="checkboxSagittal" /></td>
           </tr>
+          <label for="blendModeSelect">选择渲染模式：</label>
+          <select id="blendModeSelect">
+            <option value="Composite">Composite(默认)</option>
+            <option value="MaximumIntensity">MIP</option>
+            <!-- <option value="VolumeContour">VC</option> -->
+          </select>
           <tr>
-            <td><button id="buttonImageCropping">图像裁剪</button></td>
+            <!-- Iso value slider -->
+            <!-- <label for="isoValue">Iso Value</label>
+            <input
+              id="isoValue"
+              class="isoValue"
+              type="range"
+              min="0"
+              max="1"
+              value="0.5"
+              step="0.01"
+              style="width: 100%"
+            /> -->
           </tr>
         </tbody>
       </table>
     </div>
-    <div id="container" style="width: 100%;height:500px;border:1px solid red;">
-
-    </div>
+    <div id="container" style="width: 100%; height: 500px; border: 1px solid red"></div>
     <script src="./webvtk.js"></script>
     <script>
-        // 文件选择框的变化事件
+      // 文件选择框的变化事件
       dicomFileInput.addEventListener("change", function (event) {
         const files = event.target.files;
         if (files.length > 0) {
-           let ArrayBuffer = pian.f_load_directory(files)
-           console.log("ArrayBuffer",ArrayBuffer);
-           pian.load(ArrayBuffer)
+          let ArrayBuffer = pian.f_load_directory(files);
+          console.log("ArrayBuffer", ArrayBuffer);
+          pian.load(ArrayBuffer);
           // const loader = new pian.Loader()
           // loader.MPR(ArrayBuffer)
-        }})
-
+        }
+      });
     </script>
-</body>
+  </body>
 </html>
