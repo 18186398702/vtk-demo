@@ -32,7 +32,8 @@ import vtkVolume from "@kitware/vtk.js/Rendering/Core/Volume";
 import vtkActor from "@kitware/vtk.js/Rendering/Core/Actor";
 import vtkVolumeMapper from "@kitware/vtk.js/Rendering/Core/VolumeMapper";
 import vtkMapper from "@kitware/vtk.js/Rendering/Core/Mapper";
-import vtkImageMarchingCubes from '@kitware/vtk.js/Filters/General/ImageMarchingCubes';
+import vtkImageMarchingCubes from "@kitware/vtk.js/Filters/General/ImageMarchingCubes";
+
 // ----------------------------------------------------------------------------
 // Define main attributes
 // ----------------------------------------------------------------------------
@@ -688,6 +689,46 @@ function initializeVolumeRendering(view3D, imageData, options = {}) {
   view3D.renderWindow.render();
 }
 
+function initializeVolumeContour(view3D, imageData) {
+  clearOldActors(view3D);
+  const actor = vtkActor.newInstance();
+  const mapper = vtkMapper.newInstance();
+  const marchingCube = vtkImageMarchingCubes.newInstance({
+    contourValue: 0.0,
+    computeNormals: true,
+    mergePoints: true,
+  });
+  marchingCube.setInputData(imageData); // Corrected here: use setInputData instead of setInputConnection
+  actor.setMapper(mapper);
+  mapper.setInputConnection(marchingCube.getOutputPort());
+
+  const dataRange = imageData.getPointData().getScalars().getRange();
+  const firstIsoValue = (dataRange[0] + dataRange[1]) / 3;
+
+  const el = document.querySelector(".isoValue");
+  el.setAttribute("min", dataRange[0]);
+  el.setAttribute("max", dataRange[1]);
+  el.setAttribute("value", firstIsoValue);
+  el.addEventListener("input", (e) => updateIsoValue(e, marchingCube, view3D.renderWindow));
+
+  marchingCube.setContourValue(firstIsoValue);
+  view3D.renderer.addActor(actor);
+  view3D.renderer.getActiveCamera().set({ position: [1, 1, 0], viewUp: [0, 0, -1] });
+  view3D.renderer.resetCamera();
+  view3D.renderWindow.render();
+  // 设置渲染窗口交互更新速率
+  view3D.renderWindow.getInteractor().setDesiredUpdateRate(0.1);
+
+  global.actor = actor;
+  global.mapper = mapper;
+  global.marchingCube = marchingCube;
+}
+// Function to update the iso value based on user input
+function updateIsoValue(e, marchingCube, renderWindow) {
+  const isoValue = Number(e.target.value);
+  marchingCube.setContourValue(isoValue);
+  renderWindow.render();
+}
 // ----------------------------------------------------------------------------
 // 定义面板交互
 // ----------------------------------------------------------------------------
@@ -848,12 +889,16 @@ blendModeSelect.addEventListener("change", () => {
   const image = widget.getWidgetState().getImage();
   if (image) {
     const selectedMode = blendModeSelect.value;
-    // 调用渲染函数
-    initializeVolumeRendering(view3D, imageData, {
-      sampleDistance: 1.1, // 自定义采样距离
-      blendMode: selectedMode, // 使用 MIP 模式
-      desiredUpdateRate: 0.02, // 调整更新速率
-    });
+    if (selectedMode == "VolumeContour") {
+      initializeVolumeContour(view3D, imageData);
+    } else {
+      // 调用渲染函数
+      initializeVolumeRendering(view3D, imageData, {
+        sampleDistance: 1.1, // 自定义采样距离
+        blendMode: selectedMode, // 使用 MIP 模式
+        desiredUpdateRate: 0.02, // 调整更新速率
+      });
+    }
   } else {
     alert("当前未加载有效图像，无法执行清除操作。");
   }
