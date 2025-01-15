@@ -20,7 +20,7 @@ import vtkWidgetManager from "@kitware/vtk.js/Widgets/Core/WidgetManager";
 import vtkCursor3D from "@kitware/vtk.js/Filters/Sources/Cursor3D";
 import vtkSphereSource from "@kitware/vtk.js/Filters/Sources/SphereSource";
 import { CaptureOn } from "@kitware/vtk.js/Widgets/Core/WidgetManager/Constants";
-
+import vtkImageCPRMapper from '@kitware/vtk.js/Rendering/Core/ImageCPRMapper';
 import { vec3 } from "gl-matrix";
 import { SlabMode } from "@kitware/vtk.js/Imaging/Core/ImageReslice/Constants";
 import vtkImageData from "@kitware/vtk.js/Common/DataModel/ImageData";
@@ -133,7 +133,7 @@ for (let i = 0; i < 4; i++) {
   // 设置父容器的宽度为页面宽度的 50%
   elementParent.style.width = "50%";
   // 设置父容器的高度为 300px
-  elementParent.style.height = "300px";
+  elementParent.style.height = "400px";
   // 设置父容器的显示方式为 inline-block，确保它会与其他元素并排显示
   elementParent.style.display = "inline-block"; // 保留上下外边距/内边距
 
@@ -225,6 +225,7 @@ for (let i = 0; i < 4; i++) {
 
   // 创建一个 vtkImageReslice 实例，用于图像重切割操作
   obj.reslice = vtkImageReslice.newInstance();
+  
   // 设置重切割模式为 SlabMode.MEAN，表示在切割方向上对多个切片取平均
   obj.reslice.setSlabMode(SlabMode.MEAN);
 
@@ -246,6 +247,8 @@ for (let i = 0; i < 4; i++) {
   obj.resliceMapper.setInputConnection(obj.reslice.getOutputPort());
   // 创建一个 vtkImageSlice 实例，用于显示图像切片
   obj.resliceActor = vtkImageSlice.newInstance();
+  obj.resliceActor.setPosition(-200, -200, 0);  // 调整 X 和 Y 的位置
+  obj.resliceActor.setScale(2.0, 2.0, 1.0);
   // 将映射器应用到 vtkImageSlice 上，以便它能够渲染图像
   obj.resliceActor.setMapper(obj.resliceMapper);
 
@@ -508,7 +511,7 @@ function setupCursor3D(
   // 清除渲染器中的所有演员
   view3D.renderer.getActors().forEach((actor) => {
     view3D.renderer.removeActor(actor);
-  });;
+  });
 
   // 如果需要移除已有体积演员，执行删除
   if (view3D.vtkVolumeActor) {
@@ -710,7 +713,12 @@ function initializeVolumeRendering(view3D, imageData, options = {}) {
 
   // 调整相机视图
   const camera = view3D.renderer.getActiveCamera();
-  camera.setViewUp(0, 1, 0); // 设置相机视图的“向上”方向
+  const position = camera.getPosition();
+
+  camera.setViewUp(0, 0, 1); // 设置相机视图的“向上”方向
+  // 假设相机当前在 [0, 0, 500]，将其移动到 [0, 0, 1000] 以缩小显示
+  console.log(position);
+  camera.setPosition(position[0], position[1], position[2] * 2); // 将相机位置放远
   view3D.renderer.resetCamera(); // 重置相机
 
   // 禁用交互式渲染
