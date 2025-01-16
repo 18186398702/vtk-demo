@@ -65419,238 +65419,6 @@ vtk.register = register;
 
 /***/ }),
 
-/***/ "./webvtkjs/src/SyntheticImageData.js":
-/*!********************************************!*\
-  !*** ./webvtkjs/src/SyntheticImageData.js ***!
-  \********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony import */ var _kitware_vtk_js_Common_DataModel_ImageData__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @kitware/vtk.js/Common/DataModel/ImageData */ "./node_modules/@kitware/vtk.js/Common/DataModel/ImageData.js");
-/* harmony import */ var _kitware_vtk_js_Common_Core_DataArray__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @kitware/vtk.js/Common/Core/DataArray */ "./node_modules/@kitware/vtk.js/Common/Core/DataArray.js");
-/* harmony import */ var _halo_200804__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./halo_200804 */ "./webvtkjs/src/halo_200804.js");
-/* harmony import */ var _halo_200804__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_halo_200804__WEBPACK_IMPORTED_MODULE_2__);
-
-
-
-class SyntheticImageData {
-  ImageData(arrayBuffer) {
-    // 创建一个新的 vtkImageData 实例，用于存储体数据
-    const imageData = _kitware_vtk_js_Common_DataModel_ImageData__WEBPACK_IMPORTED_MODULE_0__["default"].newInstance();
-
-    // 解析第一个 DICOM 文件的数据，获取基础元信息
-    const dicom_data = parseDicomData(arrayBuffer[0]);
-
-    // 获取 DICOM 文件中的像素间距 (Pixel Spacing)
-    const pixel_spacing = dicom_data.tags["00280030"].value;
-
-    // 获取 DICOM 文件中的切片厚度 (Slice Thickness)
-    const slice_thickness = dicom_data.tags["00180050"].value;
-
-    // 获取窗宽 (Window Width) 和窗位 (Window Center) 信息
-    const window_center = dicom_data.tags["00281050"].value;
-    const window_width = dicom_data.tags["00281051"].value;
-
-    // 获取 DICOM 文件中的像素数据，并解析出其位深 (bit depth)
-    const hit_bit = dicom_data.getInterpretedData(false, true);
-
-    // 根据像素数据确定数据类型（如 Int16、Uint8 等）
-    const data_type = getType(hit_bit.data);
-
-    // 设置图像的维度信息：列数、行数以及切片数
-    const dimensions = [hit_bit.numCols, hit_bit.numRows, arrayBuffer.length];
-
-    // 设置图像的间距信息，包括像素间距和切片厚度
-    const spacing = [pixel_spacing[0], pixel_spacing[1], slice_thickness[0]];
-
-    // 设置 vtkImageData 的间距、原点和维度
-    imageData.setSpacing(spacing);
-    imageData.setOrigin([0, 0, 0]);
-    imageData.setDimensions(...dimensions);
-    const scalarArray = createScalarArrayFromDICOM(arrayBuffer, dimensions, data_type);
-    // 将像素数据绑定到 vtkImageData 的点数据（PointData）中
-    imageData.getPointData().setScalars(scalarArray);
-
-    // 返回处理后的 vtkImageData 对象，以及窗宽和窗位信息
-    return {
-      imageData: imageData,
-      windowWidth: window_width,
-      windowCenter: window_center
-    };
-  }
-}
-/*
- * 将多个 DICOM 文件解析并转换为 vtkDataArray 对象
- * @param {ArrayBuffer[]} arrayBuffer - 包含多个 DICOM 文件的字节数组
- * @param {Array} dimensions - 图像的维度信息 [numCols, numRows, numSlices]
- * @param {string} data_type - 像素数据类型（如 Int16、Uint8 等）
- * @returns {vtkDataArray} - 包含像素数据的 vtkDataArray 对象
- */
-function createScalarArrayFromDICOM(arrayBuffer, dimensions, data_type) {
-  // 初始化一个类型为 Float32Array 的数组，用于存储所有切片的像素数据
-  // const typedPixelArray = new Float32Array(dimensions[0] * dimensions[1] * arrayBuffer.length);
-  const typedPixelArray = createTypedArray(data_type, dimensions, arrayBuffer.length);
-
-  // 遍历每个 DICOM 文件，提取其像素数据并写入 typedPixelArray
-  arrayBuffer.forEach((buffer, index) => {
-    const dicomdata = parseDicomData(buffer); // 解析当前切片数据
-    const hitbit = dicomdata.getInterpretedData(false, true); // 获取当前切片的像素数据
-    const sliceOffset = dimensions[0] * dimensions[1] * index; // 计算切片在总体数据中的偏移量
-    typedPixelArray.set(hitbit.data, sliceOffset); // 将当前切片数据填充到对应位置
-  });
-
-  // 创建 vtkDataArray 对象，用于将像素数据与 vtkImageData 关联
-  return _kitware_vtk_js_Common_Core_DataArray__WEBPACK_IMPORTED_MODULE_1__["default"].newInstance({
-    name: "Pixels",
-    // 数据的名称
-    dataType: data_type,
-    // 数据类型（如 Int16、Uint8 等）
-    numberOfComponents: 1,
-    // 每个像素的分量数（单通道图像为 1）
-    values: typedPixelArray // 像素数据
-  });
-}
-
-// 封装读取和解析 DICOM 数据的函数
-function parseDicomData(arrayBuffer) {
-  // 创建一个 DataView 来读取 ArrayBuffer 数据
-  const dataView = new DataView(arrayBuffer);
-
-  // 关闭 daikon 的详细日志输出，提高性能
-  (_halo_200804__WEBPACK_IMPORTED_MODULE_2___default().Parser).verbose = false;
-
-  // 使用 daikon 解析图像数据
-  const dicomData = _halo_200804__WEBPACK_IMPORTED_MODULE_2___default().Series.parseImage(dataView);
-
-  // 返回解析结果
-  return dicomData;
-}
-/**
- * 创建一个指定类型的类型化数组，支持指定维度和长度。
- * @param {string} type - 类型化数组的类型（例如："Int8Array"、"Float32Array"）。
- * @param {number[]} dimensions - 数组的维度（例如：[行数, 列数]）。
- * @param {number} length - 长度的附加倍数，用于扩展总大小。
- * @returns {TypedArray} - 创建的类型化数组。
- * @throws {Error} - 如果提供了未知类型或无效的维度或长度。
- */
-function createTypedArray(type, dimensions, length) {
-  // 输入参数校验
-  if (!Array.isArray(dimensions) || dimensions.length !== 3) {
-    // 检查维度是否为数组，并且包含两个数值
-    throw new Error("无效的维度：必须是一个包含两个数字的数组，例如 [行数, 列数]。");
-  }
-  if (typeof length !== "number" || length <= 0) {
-    // 检查长度是否为正数
-    throw new Error("无效的长度：长度必须是一个正数。");
-  }
-
-  // 计算数组的总大小
-  const totalSize = dimensions[0] * dimensions[1] * length;
-
-  // 检查总大小是否有效
-  if (totalSize <= 0) {
-    throw new Error("无效的总大小：维度和长度的乘积必须是正数。");
-  }
-
-  // 根据指定的类型创建类型化数组
-  switch (type) {
-    case "Int8Array":
-      return new Int8Array(totalSize);
-    // 创建 Int8Array
-    case "Uint8Array":
-      return new Uint8Array(totalSize);
-    // 创建 Uint8Array
-    case "Uint8ClampedArray":
-      return new Uint8ClampedArray(totalSize);
-    // 创建 Uint8ClampedArray
-    case "Int16Array":
-      return new Int16Array(totalSize);
-    // 创建 Int16Array
-    case "Uint16Array":
-      return new Uint16Array(totalSize);
-    // 创建 Uint16Array
-    case "Int32Array":
-      return new Int32Array(totalSize);
-    // 创建 Int32Array
-    case "Uint32Array":
-      return new Uint32Array(totalSize);
-    // 创建 Uint32Array
-    case "Float32Array":
-      return new Float32Array(totalSize);
-    // 创建 Float32Array
-    case "Float64Array":
-      return new Float64Array(totalSize);
-    // 创建 Float64Array
-    case "BigInt64Array":
-      return new BigInt64Array(totalSize);
-    // 创建 BigInt64Array
-    case "BigUint64Array":
-      return new BigUint64Array(totalSize);
-    // 创建 BigUint64Array
-    default:
-      // 如果类型不匹配，抛出错误
-      throw new Error(`未知的类型化数组类型：${type}`);
-  }
-}
-function getType(value) {
-  return Object.prototype.toString.call(value).slice(8, -1);
-}
-
-// 导出类
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (SyntheticImageData);
-// const dicomTags = {
-//     imagePositionPatient: {
-//       id: "0020,0032", //图像在患者坐标系中的位置
-//       description: "Image Position (Patient)",
-//     },
-//     imageOrientationPatient: {
-//       id: "0020,0037", //图像方向矩阵
-//       description: "Image Orientation (Patient)",
-//     },
-//     pixelSpacing: {
-//       id: "0028,0030", //像素的物理间距
-//       description: "Pixel Spacing",
-//     },
-//     sliceThickness: {
-//       id: "0018,0050", //切片厚度
-//       description: "Slice Thickness",
-//     },
-//     instanceNumber: {
-//       id: "0020,0013", //当前影像序号
-//       description: "Instance Number",
-//     },
-//     sopInstanceUID: {
-//       id: "0008,0018", //唯一标识影像的
-//       UIDdescription: "SOP Instance UID",
-//     },
-//     rescaleIntercept: {
-//       id: "0028,1052", //像素值的物理转换截距
-//       description: "Rescale Intercept",
-//     },
-//     rescaleSlope: {
-//       id: "0028,1053", //像素值的物理转换斜率
-//       description: "Rescale Slope",
-//     },
-//     pixelData: {
-//       id: "7FE0,0010", //实际影像像素数据
-//       description: "Pixel Data",
-//     },
-//     windowCenter: {
-//       id: "0028,1050",
-//       description: "Window Center",
-//     },
-//     windowWidth: {
-//       id: "0028,1051",
-//       description: "Window Width",
-//     },
-//   };
-
-/***/ }),
-
 /***/ "./webvtkjs/src/halo_200804.js":
 /*!*************************************!*\
   !*** ./webvtkjs/src/halo_200804.js ***!
@@ -68755,6 +68523,364 @@ daikon.Utils.isString=function(s){return typeof s==='string'||s instanceof Strin
 daikon.Utils.isValidDate=function(d){if(Object.prototype.toString.call(d)==="[object Date]"){if(isNaN(d.getTime())){return false;}else{return true;}}else{return false;}};daikon.Utils.swap32=function(val){/*jslint bitwise: true */return(val&0xFF)<<24|(val&0xFF00)<<8|val>>8&0xFF00|val>>24&0xFF;};daikon.Utils.swap16=function(val){/*jslint bitwise: true */return((val&0xFF)<<8|val>>8&0xFF)<<16>>16;// since JS uses 32-bit when bit shifting
 };// http://stackoverflow.com/questions/18638900/javascript-crc32
 daikon.Utils.makeCRCTable=function(){var c;var crcTable=[];for(var n=0;n<256;n++){c=n;for(var k=0;k<8;k++){c=c&1?0xEDB88320^c>>>1:c>>>1;}crcTable[n]=c;}return crcTable;};daikon.Utils.crc32=function(dataView){var crcTable=daikon.Utils.crcTable||(daikon.Utils.crcTable=daikon.Utils.makeCRCTable());var crc=0^-1;for(var i=0;i<dataView.byteLength;i++){crc=crc>>>8^crcTable[(crc^dataView.getUint8(i))&0xFF];}return(crc^-1)>>>0;};daikon.Utils.createBitMask=function(numBytes,bitsStored,unsigned){var mask=0xFFFFFFFF;mask>>>=(4-numBytes)*8+(numBytes*8-bitsStored);if(unsigned){if(numBytes==1){mask&=0x000000FF;}else if(numBytes==2){mask&=0x0000FFFF;}else if(numBytes==4){mask&=0xFFFFFFFF;}else if(numBytes==8){mask=0xFFFFFFFF;}}else{mask=0xFFFFFFFF;}return mask;};/*** Exports ***/var moduleType=typeof module;if(moduleType!=='undefined'&&module.exports){module.exports=daikon.Utils;}},{}]},{},[38])(38);});
+
+/***/ }),
+
+/***/ "./webvtkjs/src/load3d.js":
+/*!********************************!*\
+  !*** ./webvtkjs/src/load3d.js ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _kitware_vtk_js_Filters_Sources_Cursor3D__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @kitware/vtk.js/Filters/Sources/Cursor3D */ "./node_modules/@kitware/vtk.js/Filters/Sources/Cursor3D.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_Mapper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Mapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/Mapper.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_Actor__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Actor */ "./node_modules/@kitware/vtk.js/Rendering/Core/Actor.js");
+
+
+
+class Display3D {
+  /**
+  * 创建并显示一个 vtkCursor3D 边框
+  * @param {Object} view3D - 包含 renderer 和 renderWindow 的对象
+  * @param {Array} focalPoint - 设置焦点 [x, y, z]
+  * @param {Array} modelBounds - 设置模型边界 [xmin, xmax, ymin, ymax, zmin, zmax]
+  * @param {Object} options - 配置选项，例如是否显示边框、阴影、坐标轴等
+  */
+  setupCursor3D(view3D, focalPoint = [0, 0, 0], modelBounds = [-10, 10, -10, 10, -10, 10], options = {}) {
+    // 清除渲染器中的所有演员
+    view3D.renderer.getActors().forEach(actor => {
+      view3D.renderer.removeActor(actor);
+    });
+
+    // 创建新的 vtkCursor3D
+    const cursor3D = _kitware_vtk_js_Filters_Sources_Cursor3D__WEBPACK_IMPORTED_MODULE_0__["default"].newInstance();
+    cursor3D.setFocalPoint(focalPoint);
+    cursor3D.setModelBounds(modelBounds);
+
+    // 设置选项，默认只显示边框
+    cursor3D.set({
+      zShadows: options.zShadows ?? false,
+      xShadows: options.xShadows ?? false,
+      yShadows: options.yShadows ?? false,
+      outline: options.outline ?? true,
+      axes: options.axes ?? false,
+      center: options.center ?? false
+    });
+
+    // 创建 Mapper 和 Actor
+    const cursor3DMapper = _kitware_vtk_js_Rendering_Core_Mapper__WEBPACK_IMPORTED_MODULE_1__["default"].newInstance();
+    cursor3DMapper.setInputConnection(cursor3D.getOutputPort());
+    const cursor3DActor = _kitware_vtk_js_Rendering_Core_Actor__WEBPACK_IMPORTED_MODULE_2__["default"].newInstance();
+    cursor3DActor.setMapper(cursor3DMapper);
+    // 设置 Actor 的颜色为白色
+    cursor3DActor.getProperty().setColor(1.0, 1.0, 1.0); // RGB(1, 1, 1) 表示白色
+    // 设置线条加粗（设置线宽）
+    cursor3DActor.getProperty().setLineWidth(3.0); // 将线宽设置为 3（默认是 1）
+    // 添加到渲染器
+    view3D.renderer.addActor(cursor3DActor);
+
+    // 更新渲染器
+    view3D.renderer.resetCamera();
+    view3D.renderWindow.render();
+
+    // 更新 view3D 引用
+    view3D.cursor3D = cursor3D;
+    view3D.cursor3DMapper = cursor3DMapper;
+    view3D.cursor3DActor = cursor3DActor;
+  }
+}
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Display3D);
+
+/***/ }),
+
+/***/ "./webvtkjs/src/loadimage.js":
+/*!***********************************!*\
+  !*** ./webvtkjs/src/loadimage.js ***!
+  \***********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _kitware_vtk_js_Common_Core_Math__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @kitware/vtk.js/Common/Core/Math */ "./node_modules/@kitware/vtk.js/Common/Core/Math.js");
+
+class LoadImage {
+  updateReslice(view3D, widget, widgetState, interactionContext = {
+    viewType: "",
+    reslice: null,
+    actor: null,
+    renderer: null,
+    resetFocalPoint: false,
+    // Reset the focal point to the center of the display image
+    computeFocalPointOffset: false,
+    // Defines if the display offset between reslice center and focal point has to be
+    // computed. If so, then this offset will be used to keep the focal point position during rotation.
+    spheres: null,
+    slider: null
+  }) {
+    const modified = widget.updateReslicePlane(interactionContext.reslice, interactionContext.viewType);
+    if (modified) {
+      const resliceAxes = interactionContext.reslice.getResliceAxes();
+      // Get returned modified from setter to know if we have to render
+      interactionContext.actor.setUserMatrix(resliceAxes);
+      const planeSource = widget.getPlaneSource(interactionContext.viewType);
+      interactionContext.sphereSources[0].setCenter(planeSource.getOrigin());
+      interactionContext.sphereSources[1].setCenter(planeSource.getPoint1());
+      interactionContext.sphereSources[2].setCenter(planeSource.getPoint2());
+      if (interactionContext.slider) {
+        const planeExtremities = widget.getPlaneExtremities(interactionContext.viewType);
+        const length = Math.sqrt(_kitware_vtk_js_Common_Core_Math__WEBPACK_IMPORTED_MODULE_0__["default"].distance2BetweenPoints(planeExtremities[0], planeExtremities[1]));
+        const dist = Math.sqrt(_kitware_vtk_js_Common_Core_Math__WEBPACK_IMPORTED_MODULE_0__["default"].distance2BetweenPoints(planeExtremities[0], widgetState.getCenter()));
+        interactionContext.slider.min = 0;
+        interactionContext.slider.max = length;
+        interactionContext.slider.value = dist;
+      }
+    }
+    widget.updateCameraPoints(interactionContext.renderer, interactionContext.viewType, interactionContext.resetFocalPoint, interactionContext.computeFocalPointOffset);
+    view3D.renderWindow.render();
+    return modified;
+  }
+}
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (LoadImage);
+
+/***/ }),
+
+/***/ "./webvtkjs/src/syntheticimage.js":
+/*!****************************************!*\
+  !*** ./webvtkjs/src/syntheticimage.js ***!
+  \****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _kitware_vtk_js_Common_DataModel_ImageData__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @kitware/vtk.js/Common/DataModel/ImageData */ "./node_modules/@kitware/vtk.js/Common/DataModel/ImageData.js");
+/* harmony import */ var _kitware_vtk_js_Common_Core_DataArray__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @kitware/vtk.js/Common/Core/DataArray */ "./node_modules/@kitware/vtk.js/Common/Core/DataArray.js");
+/* harmony import */ var _halo_200804__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./halo_200804 */ "./webvtkjs/src/halo_200804.js");
+/* harmony import */ var _halo_200804__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_halo_200804__WEBPACK_IMPORTED_MODULE_2__);
+
+
+
+class SyntheticImageData {
+  ImageData(arrayBuffer) {
+    // 创建一个新的 vtkImageData 实例，用于存储体数据
+    const imageData = _kitware_vtk_js_Common_DataModel_ImageData__WEBPACK_IMPORTED_MODULE_0__["default"].newInstance();
+
+    // 解析第一个 DICOM 文件的数据，获取基础元信息
+    const dicom_data = parseDicomData(arrayBuffer[0]);
+
+    // 获取 DICOM 文件中的像素间距 (Pixel Spacing)
+    const pixel_spacing = dicom_data.tags["00280030"].value;
+
+    // 获取 DICOM 文件中的切片厚度 (Slice Thickness)
+    const slice_thickness = dicom_data.tags["00180050"].value;
+
+    // 获取窗宽 (Window Width) 和窗位 (Window Center) 信息
+    const window_center = dicom_data.tags["00281050"].value;
+    const window_width = dicom_data.tags["00281051"].value;
+
+    // 获取 DICOM 文件中的像素数据，并解析出其位深 (bit depth)
+    const hit_bit = dicom_data.getInterpretedData(false, true);
+
+    // 根据像素数据确定数据类型（如 Int16、Uint8 等）
+    const data_type = getType(hit_bit.data);
+
+    // 设置图像的维度信息：列数、行数以及切片数
+    const dimensions = [hit_bit.numCols, hit_bit.numRows, arrayBuffer.length];
+
+    // 设置图像的间距信息，包括像素间距和切片厚度
+    const spacing = [pixel_spacing[0], pixel_spacing[1], slice_thickness[0]];
+
+    // 设置 vtkImageData 的间距、原点和维度
+    imageData.setSpacing(spacing);
+    imageData.setOrigin([0, 0, 0]);
+    imageData.setDimensions(...dimensions);
+    const scalarArray = createScalarArrayFromDICOM(arrayBuffer, dimensions, data_type);
+    // 将像素数据绑定到 vtkImageData 的点数据（PointData）中
+    imageData.getPointData().setScalars(scalarArray);
+
+    // 返回处理后的 vtkImageData 对象，以及窗宽和窗位信息
+    return {
+      imageData: imageData,
+      windowWidth: window_width,
+      windowCenter: window_center
+    };
+  }
+}
+/*
+ * 将多个 DICOM 文件解析并转换为 vtkDataArray 对象
+ * @param {ArrayBuffer[]} arrayBuffer - 包含多个 DICOM 文件的字节数组
+ * @param {Array} dimensions - 图像的维度信息 [numCols, numRows, numSlices]
+ * @param {string} data_type - 像素数据类型（如 Int16、Uint8 等）
+ * @returns {vtkDataArray} - 包含像素数据的 vtkDataArray 对象
+ */
+function createScalarArrayFromDICOM(arrayBuffer, dimensions, data_type) {
+  // 初始化一个类型为 Float32Array 的数组，用于存储所有切片的像素数据
+  // const typedPixelArray = new Float32Array(dimensions[0] * dimensions[1] * arrayBuffer.length);
+  const typedPixelArray = createTypedArray(data_type, dimensions, arrayBuffer.length);
+
+  // 遍历每个 DICOM 文件，提取其像素数据并写入 typedPixelArray
+  arrayBuffer.forEach((buffer, index) => {
+    const dicomdata = parseDicomData(buffer); // 解析当前切片数据
+    const hitbit = dicomdata.getInterpretedData(false, true); // 获取当前切片的像素数据
+    const sliceOffset = dimensions[0] * dimensions[1] * index; // 计算切片在总体数据中的偏移量
+    typedPixelArray.set(hitbit.data, sliceOffset); // 将当前切片数据填充到对应位置
+  });
+
+  // 创建 vtkDataArray 对象，用于将像素数据与 vtkImageData 关联
+  return _kitware_vtk_js_Common_Core_DataArray__WEBPACK_IMPORTED_MODULE_1__["default"].newInstance({
+    name: "Pixels",
+    // 数据的名称
+    dataType: data_type,
+    // 数据类型（如 Int16、Uint8 等）
+    numberOfComponents: 1,
+    // 每个像素的分量数（单通道图像为 1）
+    values: typedPixelArray // 像素数据
+  });
+}
+
+// 封装读取和解析 DICOM 数据的函数
+function parseDicomData(arrayBuffer) {
+  // 创建一个 DataView 来读取 ArrayBuffer 数据
+  const dataView = new DataView(arrayBuffer);
+
+  // 关闭 daikon 的详细日志输出，提高性能
+  (_halo_200804__WEBPACK_IMPORTED_MODULE_2___default().Parser).verbose = false;
+
+  // 使用 daikon 解析图像数据
+  const dicomData = _halo_200804__WEBPACK_IMPORTED_MODULE_2___default().Series.parseImage(dataView);
+
+  // 返回解析结果
+  return dicomData;
+}
+/**
+ * 创建一个指定类型的类型化数组，支持指定维度和长度。
+ * @param {string} type - 类型化数组的类型（例如："Int8Array"、"Float32Array"）。
+ * @param {number[]} dimensions - 数组的维度（例如：[行数, 列数]）。
+ * @param {number} length - 长度的附加倍数，用于扩展总大小。
+ * @returns {TypedArray} - 创建的类型化数组。
+ * @throws {Error} - 如果提供了未知类型或无效的维度或长度。
+ */
+function createTypedArray(type, dimensions, length) {
+  // 输入参数校验
+  if (!Array.isArray(dimensions) || dimensions.length !== 3) {
+    // 检查维度是否为数组，并且包含两个数值
+    throw new Error("无效的维度：必须是一个包含两个数字的数组，例如 [行数, 列数]。");
+  }
+  if (typeof length !== "number" || length <= 0) {
+    // 检查长度是否为正数
+    throw new Error("无效的长度：长度必须是一个正数。");
+  }
+
+  // 计算数组的总大小
+  const totalSize = dimensions[0] * dimensions[1] * length;
+
+  // 检查总大小是否有效
+  if (totalSize <= 0) {
+    throw new Error("无效的总大小：维度和长度的乘积必须是正数。");
+  }
+
+  // 根据指定的类型创建类型化数组
+  switch (type) {
+    case "Int8Array":
+      return new Int8Array(totalSize);
+    // 创建 Int8Array
+    case "Uint8Array":
+      return new Uint8Array(totalSize);
+    // 创建 Uint8Array
+    case "Uint8ClampedArray":
+      return new Uint8ClampedArray(totalSize);
+    // 创建 Uint8ClampedArray
+    case "Int16Array":
+      return new Int16Array(totalSize);
+    // 创建 Int16Array
+    case "Uint16Array":
+      return new Uint16Array(totalSize);
+    // 创建 Uint16Array
+    case "Int32Array":
+      return new Int32Array(totalSize);
+    // 创建 Int32Array
+    case "Uint32Array":
+      return new Uint32Array(totalSize);
+    // 创建 Uint32Array
+    case "Float32Array":
+      return new Float32Array(totalSize);
+    // 创建 Float32Array
+    case "Float64Array":
+      return new Float64Array(totalSize);
+    // 创建 Float64Array
+    case "BigInt64Array":
+      return new BigInt64Array(totalSize);
+    // 创建 BigInt64Array
+    case "BigUint64Array":
+      return new BigUint64Array(totalSize);
+    // 创建 BigUint64Array
+    default:
+      // 如果类型不匹配，抛出错误
+      throw new Error(`未知的类型化数组类型：${type}`);
+  }
+}
+function getType(value) {
+  return Object.prototype.toString.call(value).slice(8, -1);
+}
+
+// 导出类
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (SyntheticImageData);
+// const dicomTags = {
+//     imagePositionPatient: {
+//       id: "0020,0032", //图像在患者坐标系中的位置
+//       description: "Image Position (Patient)",
+//     },
+//     imageOrientationPatient: {
+//       id: "0020,0037", //图像方向矩阵
+//       description: "Image Orientation (Patient)",
+//     },
+//     pixelSpacing: {
+//       id: "0028,0030", //像素的物理间距
+//       description: "Pixel Spacing",
+//     },
+//     sliceThickness: {
+//       id: "0018,0050", //切片厚度
+//       description: "Slice Thickness",
+//     },
+//     instanceNumber: {
+//       id: "0020,0013", //当前影像序号
+//       description: "Instance Number",
+//     },
+//     sopInstanceUID: {
+//       id: "0008,0018", //唯一标识影像的
+//       UIDdescription: "SOP Instance UID",
+//     },
+//     rescaleIntercept: {
+//       id: "0028,1052", //像素值的物理转换截距
+//       description: "Rescale Intercept",
+//     },
+//     rescaleSlope: {
+//       id: "0028,1053", //像素值的物理转换斜率
+//       description: "Rescale Slope",
+//     },
+//     pixelData: {
+//       id: "7FE0,0010", //实际影像像素数据
+//       description: "Pixel Data",
+//     },
+//     windowCenter: {
+//       id: "0028,1050",
+//       description: "Window Center",
+//     },
+//     windowWidth: {
+//       id: "0028,1051",
+//       description: "Window Width",
+//     },
+//   };
 
 /***/ }),
 
@@ -78517,6 +78643,17 @@ function tickFormat(start, stop, count, specifier) {
 }
 
 
+/***/ }),
+
+/***/ "./webvtkjs/src/config.json":
+/*!**********************************!*\
+  !*** ./webvtkjs/src/config.json ***!
+  \**********************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = /*#__PURE__*/JSON.parse('{"viewColors":[[1,0,0],[0,1,0],[0,0,1],[0.5,0.5,0.5]]}');
+
 /***/ })
 
 /******/ 	});
@@ -78632,44 +78769,42 @@ var __webpack_exports__ = {};
   \*******************************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   Loader: () => (/* binding */ Loader),
 /* harmony export */   f_load_directory: () => (/* binding */ f_load_directory),
 /* harmony export */   load: () => (/* binding */ load),
 /* harmony export */   loadMPR: () => (/* binding */ loadMPR)
 /* harmony export */ });
-/* harmony import */ var _halo_200804__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./halo_200804 */ "./webvtkjs/src/halo_200804.js");
-/* harmony import */ var _halo_200804__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_halo_200804__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _kitware_vtk_js_favicon__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @kitware/vtk.js/favicon */ "./node_modules/@kitware/vtk.js/favicon.js");
-/* harmony import */ var _kitware_vtk_js_favicon__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_kitware_vtk_js_favicon__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _kitware_vtk_js_Rendering_Profiles_All__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Profiles/All */ "./node_modules/@kitware/vtk.js/Rendering/Profiles/All.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_AnnotatedCubeActor__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/AnnotatedCubeActor */ "./node_modules/@kitware/vtk.js/Rendering/Core/AnnotatedCubeActor.js");
-/* harmony import */ var _kitware_vtk_js_Common_Core_DataArray__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @kitware/vtk.js/Common/Core/DataArray */ "./node_modules/@kitware/vtk.js/Common/Core/DataArray.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Misc_GenericRenderWindow__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Misc/GenericRenderWindow */ "./node_modules/@kitware/vtk.js/Rendering/Misc/GenericRenderWindow.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_ImageMapper__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ImageMapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/ImageMapper.js");
-/* harmony import */ var _kitware_vtk_js_Imaging_Core_ImageReslice__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @kitware/vtk.js/Imaging/Core/ImageReslice */ "./node_modules/@kitware/vtk.js/Imaging/Core/ImageReslice.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_ImageSlice__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ImageSlice */ "./node_modules/@kitware/vtk.js/Rendering/Core/ImageSlice.js");
-/* harmony import */ var _kitware_vtk_js_Interaction_Style_InteractorStyleImage__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Style/InteractorStyleImage */ "./node_modules/@kitware/vtk.js/Interaction/Style/InteractorStyleImage.js");
-/* harmony import */ var _kitware_vtk_js_Interaction_Style_InteractorStyleTrackballCamera__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Style/InteractorStyleTrackballCamera */ "./node_modules/@kitware/vtk.js/Interaction/Style/InteractorStyleTrackballCamera.js");
-/* harmony import */ var _kitware_vtk_js_Common_Core_Math__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @kitware/vtk.js/Common/Core/Math */ "./node_modules/@kitware/vtk.js/Common/Core/Math.js");
-/* harmony import */ var _kitware_vtk_js_Filters_General_OutlineFilter__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @kitware/vtk.js/Filters/General/OutlineFilter */ "./node_modules/@kitware/vtk.js/Filters/General/OutlineFilter.js");
-/* harmony import */ var _kitware_vtk_js_Interaction_Widgets_OrientationMarkerWidget__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Widgets/OrientationMarkerWidget */ "./node_modules/@kitware/vtk.js/Interaction/Widgets/OrientationMarkerWidget.js");
-/* harmony import */ var _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget */ "./node_modules/@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget.js");
-/* harmony import */ var _kitware_vtk_js_Widgets_Core_WidgetManager__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Core/WidgetManager */ "./node_modules/@kitware/vtk.js/Widgets/Core/WidgetManager.js");
-/* harmony import */ var _kitware_vtk_js_Filters_Sources_Cursor3D__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @kitware/vtk.js/Filters/Sources/Cursor3D */ "./node_modules/@kitware/vtk.js/Filters/Sources/Cursor3D.js");
-/* harmony import */ var _kitware_vtk_js_Filters_Sources_SphereSource__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @kitware/vtk.js/Filters/Sources/SphereSource */ "./node_modules/@kitware/vtk.js/Filters/Sources/SphereSource.js");
-/* harmony import */ var _kitware_vtk_js_Widgets_Core_WidgetManager_Constants__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Core/WidgetManager/Constants */ "./node_modules/@kitware/vtk.js/Widgets/Core/WidgetManager/Constants.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_ImageCPRMapper__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ImageCPRMapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/ImageCPRMapper.js");
-/* harmony import */ var gl_matrix__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! gl-matrix */ "./node_modules/gl-matrix/esm/vec3.js");
-/* harmony import */ var _kitware_vtk_js_Imaging_Core_ImageReslice_Constants__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! @kitware/vtk.js/Imaging/Core/ImageReslice/Constants */ "./node_modules/@kitware/vtk.js/Imaging/Core/ImageReslice/Constants.js");
-/* harmony import */ var _kitware_vtk_js_Common_DataModel_ImageData__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! @kitware/vtk.js/Common/DataModel/ImageData */ "./node_modules/@kitware/vtk.js/Common/DataModel/ImageData.js");
-/* harmony import */ var _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants */ "./node_modules/@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_Volume__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Volume */ "./node_modules/@kitware/vtk.js/Rendering/Core/Volume.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_Actor__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Actor */ "./node_modules/@kitware/vtk.js/Rendering/Core/Actor.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_VolumeMapper__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/VolumeMapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/VolumeMapper.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_Mapper__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Mapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/Mapper.js");
-/* harmony import */ var _kitware_vtk_js_Filters_General_ImageMarchingCubes__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! @kitware/vtk.js/Filters/General/ImageMarchingCubes */ "./node_modules/@kitware/vtk.js/Filters/General/ImageMarchingCubes.js");
-/* harmony import */ var _SyntheticImageData__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! ./SyntheticImageData */ "./webvtkjs/src/SyntheticImageData.js");
-
+/* harmony import */ var _kitware_vtk_js_favicon__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @kitware/vtk.js/favicon */ "./node_modules/@kitware/vtk.js/favicon.js");
+/* harmony import */ var _kitware_vtk_js_favicon__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_kitware_vtk_js_favicon__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _kitware_vtk_js_Rendering_Profiles_All__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Profiles/All */ "./node_modules/@kitware/vtk.js/Rendering/Profiles/All.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_AnnotatedCubeActor__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/AnnotatedCubeActor */ "./node_modules/@kitware/vtk.js/Rendering/Core/AnnotatedCubeActor.js");
+/* harmony import */ var _kitware_vtk_js_Common_Core_DataArray__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @kitware/vtk.js/Common/Core/DataArray */ "./node_modules/@kitware/vtk.js/Common/Core/DataArray.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Misc_GenericRenderWindow__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Misc/GenericRenderWindow */ "./node_modules/@kitware/vtk.js/Rendering/Misc/GenericRenderWindow.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_ImageMapper__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ImageMapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/ImageMapper.js");
+/* harmony import */ var _kitware_vtk_js_Imaging_Core_ImageReslice__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @kitware/vtk.js/Imaging/Core/ImageReslice */ "./node_modules/@kitware/vtk.js/Imaging/Core/ImageReslice.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_ImageSlice__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ImageSlice */ "./node_modules/@kitware/vtk.js/Rendering/Core/ImageSlice.js");
+/* harmony import */ var _kitware_vtk_js_Interaction_Style_InteractorStyleImage__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Style/InteractorStyleImage */ "./node_modules/@kitware/vtk.js/Interaction/Style/InteractorStyleImage.js");
+/* harmony import */ var _kitware_vtk_js_Interaction_Style_InteractorStyleTrackballCamera__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Style/InteractorStyleTrackballCamera */ "./node_modules/@kitware/vtk.js/Interaction/Style/InteractorStyleTrackballCamera.js");
+/* harmony import */ var _kitware_vtk_js_Common_Core_Math__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @kitware/vtk.js/Common/Core/Math */ "./node_modules/@kitware/vtk.js/Common/Core/Math.js");
+/* harmony import */ var _kitware_vtk_js_Filters_General_OutlineFilter__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @kitware/vtk.js/Filters/General/OutlineFilter */ "./node_modules/@kitware/vtk.js/Filters/General/OutlineFilter.js");
+/* harmony import */ var _kitware_vtk_js_Interaction_Widgets_OrientationMarkerWidget__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Widgets/OrientationMarkerWidget */ "./node_modules/@kitware/vtk.js/Interaction/Widgets/OrientationMarkerWidget.js");
+/* harmony import */ var _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget */ "./node_modules/@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget.js");
+/* harmony import */ var _kitware_vtk_js_Widgets_Core_WidgetManager__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Core/WidgetManager */ "./node_modules/@kitware/vtk.js/Widgets/Core/WidgetManager.js");
+/* harmony import */ var _kitware_vtk_js_Filters_Sources_SphereSource__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @kitware/vtk.js/Filters/Sources/SphereSource */ "./node_modules/@kitware/vtk.js/Filters/Sources/SphereSource.js");
+/* harmony import */ var _kitware_vtk_js_Widgets_Core_WidgetManager_Constants__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Core/WidgetManager/Constants */ "./node_modules/@kitware/vtk.js/Widgets/Core/WidgetManager/Constants.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_ImageCPRMapper__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ImageCPRMapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/ImageCPRMapper.js");
+/* harmony import */ var gl_matrix__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! gl-matrix */ "./node_modules/gl-matrix/esm/vec3.js");
+/* harmony import */ var _kitware_vtk_js_Imaging_Core_ImageReslice_Constants__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @kitware/vtk.js/Imaging/Core/ImageReslice/Constants */ "./node_modules/@kitware/vtk.js/Imaging/Core/ImageReslice/Constants.js");
+/* harmony import */ var _kitware_vtk_js_Common_DataModel_ImageData__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @kitware/vtk.js/Common/DataModel/ImageData */ "./node_modules/@kitware/vtk.js/Common/DataModel/ImageData.js");
+/* harmony import */ var _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants */ "./node_modules/@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_Volume__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Volume */ "./node_modules/@kitware/vtk.js/Rendering/Core/Volume.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_Actor__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Actor */ "./node_modules/@kitware/vtk.js/Rendering/Core/Actor.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_VolumeMapper__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/VolumeMapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/VolumeMapper.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_Mapper__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Mapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/Mapper.js");
+/* harmony import */ var _kitware_vtk_js_Filters_General_ImageMarchingCubes__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! @kitware/vtk.js/Filters/General/ImageMarchingCubes */ "./node_modules/@kitware/vtk.js/Filters/General/ImageMarchingCubes.js");
+/* harmony import */ var _syntheticimage__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! ./syntheticimage */ "./webvtkjs/src/syntheticimage.js");
+/* harmony import */ var _load3d__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! ./load3d */ "./webvtkjs/src/load3d.js");
+/* harmony import */ var _loadimage__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! ./loadimage */ "./webvtkjs/src/loadimage.js");
+/* harmony import */ var _config_json__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! ./config.json */ "./webvtkjs/src/config.json");
 
 
 // Load the rendering pieces we want to use (for both WebGL and WebGPU)
@@ -78701,24 +78836,19 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-// ----------------------------------------------------------------------------
-// Define main attributes
-// ----------------------------------------------------------------------------
 
-const viewColors = [[1, 0, 0],
-// axial
-[0, 1, 0],
-// coronal
-[0, 0, 1],
-// sagittal
-[0.5, 0.5, 0.5] // 3D
-];
+
+
+// ----------------------------------------------------------------------------
+// 定义主要属性
+// ----------------------------------------------------------------------------
 const viewAttributes = [];
+let view3D = null;
+let imageData = null;
 window.va = viewAttributes;
-const widget = _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget__WEBPACK_IMPORTED_MODULE_14__["default"].newInstance();
+const widget = _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget__WEBPACK_IMPORTED_MODULE_13__["default"].newInstance();
 window.widget = widget;
 const widgetState = widget.getWidgetState();
-// Set size in CSS pixel space because scaleInPixels defaults to true
 widgetState.getStatesWithLabel("sphere").forEach(handle => handle.setScale1(20));
 const showDebugActors = true;
 const windowWidthCenter = [];
@@ -78728,98 +78858,67 @@ const appCursorStyles = {
   translateAxis: "pointer",
   default: "default"
 };
-
 // ----------------------------------------------------------------------------
-// Define html structure
+// 配置文件参数
 // ----------------------------------------------------------------------------
-
+const viewColors = _config_json__WEBPACK_IMPORTED_MODULE_29__.viewColors && _config_json__WEBPACK_IMPORTED_MODULE_29__.viewColors.length > 0 ? _config_json__WEBPACK_IMPORTED_MODULE_29__.viewColors : [[1, 0, 0],
+// axial
+[0, 1, 0],
+// coronal
+[0, 0, 1],
+// sagittal
+[0.5, 0.5, 0.5] // 3D
+];
+const syntheticImageData = new _syntheticimage__WEBPACK_IMPORTED_MODULE_26__["default"]();
+const display3d = new _load3d__WEBPACK_IMPORTED_MODULE_27__["default"]();
+const loadimage = new _loadimage__WEBPACK_IMPORTED_MODULE_28__["default"]();
+// ----------------------------------------------------------------------------
+// 定义 html 结构
+// ----------------------------------------------------------------------------
 const container = document.getElementById("container");
+container.style.display = "flex";
+container.style.flexFlow = "wrap-reverse";
+container.style.justifyContent = "space-between";
 const controlContainer = document.createElement("div");
 container.appendChild(controlContainer);
 const checkboxTranslation = document.getElementById("checkboxTranslation");
 const checkboxShowRotation = document.getElementById("checkboxShowRotation");
 const checkboxRotation = document.getElementById("checkboxRotation");
 const checkboxOrthogonality = document.getElementById("checkboxOrthogonality");
-
-// ----------------------------------------------------------------------------
-// Setup rendering code
-// ----------------------------------------------------------------------------
-
-/**
- * Function to create synthetic image data with correct dimensions
- * Can be use for debug
- * @param {Array[Int]} dims
- */
-// eslint-disable-next-line no-unused-vars
-function createSyntheticImageData(dims) {
-  const imageData = _kitware_vtk_js_Common_DataModel_ImageData__WEBPACK_IMPORTED_MODULE_21__["default"].newInstance();
-  const newArray = new Uint8Array(dims[0] * dims[1] * dims[2]);
-  const s = 0.1;
-  imageData.setSpacing(s, s, s);
-  imageData.setExtent(0, 127, 0, 127, 0, 127);
-  let i = 0;
-  for (let z = 0; z < dims[2]; z++) {
-    for (let y = 0; y < dims[1]; y++) {
-      for (let x = 0; x < dims[0]; x++) {
-        newArray[i++] = 256 * (i % (dims[0] * dims[1])) / (dims[0] * dims[1]);
-      }
-    }
-  }
-  const da = _kitware_vtk_js_Common_Core_DataArray__WEBPACK_IMPORTED_MODULE_4__["default"].newInstance({
-    numberOfComponents: 1,
-    values: newArray
-  });
-  da.setName("scalars");
-  imageData.getPointData().setScalars(da);
-  return imageData;
-}
-function createRGBStringFromRGBValues(rgb) {
-  if (rgb.length !== 3) {
-    return "rgb(0, 0, 0)";
-  }
-  return `rgb(${(rgb[0] * 255).toString()}, ${(rgb[1] * 255).toString()}, ${(rgb[2] * 255).toString()})`;
-}
-const initialPlanesState = {
-  ...widgetState.getPlanes()
-};
-let view3D = null;
-// 创建空的 vtkImageData 实例
-let imageData = null;
-let ACS3D = [];
 for (let i = 0; i < 4; i++) {
   // 创建一个新的 div 元素作为容器，父级容器，用来放置视图
   const elementParent = document.createElement("div");
   // 为父容器设置 CSS 类名
-  elementParent.setAttribute("class", "view");
+  // elementParent.setAttribute("class", "view");
   // 设置父容器的宽度为页面宽度的 50%
   elementParent.style.width = "50%";
   // 设置父容器的高度为 300px
-  elementParent.style.height = "300px";
+  elementParent.style.height = "400px";
   // 设置父容器的显示方式为 inline-block，确保它会与其他元素并排显示
   elementParent.style.display = "inline-block"; // 保留上下外边距/内边距
-
   // 创建一个新的 div 元素作为实际的视图容器
   const element = document.createElement("div");
   // 为视图容器设置 CSS 类名
-  element.setAttribute("class", "view");
+  // element.setAttribute("class", "view");
   // 设置视图容器的宽度为父容器的 100%
   element.style.width = "100%";
   // 设置视图容器的高度为父容器的 100%
-  element.style.height = "100%";
+  element.style.height = "90%";
+  element.style.display = "inline-block"; // 保留上下外边距/内边距
   // 将实际的视图容器添加到父容器中
   elementParent.appendChild(element);
-
   // 将父容器添加到页面的指定容器（container）中
   container.appendChild(elementParent);
-
+  //-------------------------------------------------------------------------------------------------------------------------------
+  //-------------------------------------------------------------------------------------------------------------------------------
   // 创建一个 vtkGenericRenderWindow 实例，负责管理 VTK 渲染窗口
-  const grw = _kitware_vtk_js_Rendering_Misc_GenericRenderWindow__WEBPACK_IMPORTED_MODULE_5__["default"].newInstance();
+  const grw = _kitware_vtk_js_Rendering_Misc_GenericRenderWindow__WEBPACK_IMPORTED_MODULE_4__["default"].newInstance();
   // 将刚才创建的视图容器赋给渲染窗口容器
   grw.setContainer(element);
-
   // 调用 resize 方法确保渲染窗口的尺寸与视图容器一致
   grw.resize();
-
+  //-------------------------------------------------------------------------------------------------------------------------------
+  //-------------------------------------------------------------------------------------------------------------------------------
   // 创建一个对象，用于存储渲染窗口、渲染器、GL 渲染窗口等属性
   const obj = {
     renderWindow: grw.getRenderWindow(),
@@ -78830,7 +78929,7 @@ for (let i = 0; i < 4; i++) {
     // 获取与 API 相关的渲染窗口对象
     interactor: grw.getInteractor(),
     // 获取交互器对象，用于处理用户输入（例如鼠标操作）
-    widgetManager: _kitware_vtk_js_Widgets_Core_WidgetManager__WEBPACK_IMPORTED_MODULE_15__["default"].newInstance(),
+    widgetManager: _kitware_vtk_js_Widgets_Core_WidgetManager__WEBPACK_IMPORTED_MODULE_14__["default"].newInstance(),
     // 创建一个新的小部件管理器实例，管理各种交互小部件
     orientationWidget: null // 当前没有设置方向小部件（通常用于显示视图方向等信息）
   };
@@ -78859,11 +78958,13 @@ for (let i = 0; i < 4; i++) {
 
   // 设置小部件管理器的渲染器，这样小部件可以在正确的渲染器上渲染
   obj.widgetManager.setRenderer(obj.renderer);
+  //----------------------------线-------------------------------------------------------------------------------------------------
+  //-------------------------------------------------------------------------------------------------------------------------------
   if (i < 3) {
     // 设置交互器的样式为 vtk.js 提供的 `vtkInteractorStyleImage` 实例
-    obj.interactor.setInteractorStyle(_kitware_vtk_js_Interaction_Style_InteractorStyleImage__WEBPACK_IMPORTED_MODULE_9__["default"].newInstance());
+    obj.interactor.setInteractorStyle(_kitware_vtk_js_Interaction_Style_InteractorStyleImage__WEBPACK_IMPORTED_MODULE_8__["default"].newInstance());
     // 添加一个小部件（widget）到 widgetManager，并根据 xyzToViewType[i] 设置其类型
-    obj.widgetInstance = obj.widgetManager.addWidget(widget, _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_22__.xyzToViewType[i]);
+    obj.widgetInstance = obj.widgetManager.addWidget(widget, _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_20__.xyzToViewType[i]);
     // 将小部件的缩放方式设置为基于像素
     obj.widgetInstance.setScaleInPixels(true);
     // 调整小部件的孔宽度为 2
@@ -78883,16 +78984,17 @@ for (let i = 0; i < 4; i++) {
     // 启用小部件的拾取功能（即可以通过鼠标交互选择小部件）
     obj.widgetManager.enablePicking();
     // 设置小部件管理器在鼠标移动时捕获渲染器缓冲区的行为
-    obj.widgetManager.setCaptureOn(_kitware_vtk_js_Widgets_Core_WidgetManager_Constants__WEBPACK_IMPORTED_MODULE_18__.CaptureOn.MOUSE_MOVE);
+    obj.widgetManager.setCaptureOn(_kitware_vtk_js_Widgets_Core_WidgetManager_Constants__WEBPACK_IMPORTED_MODULE_16__.CaptureOn.MOUSE_MOVE);
   } else {
-    obj.interactor.setInteractorStyle(_kitware_vtk_js_Interaction_Style_InteractorStyleTrackballCamera__WEBPACK_IMPORTED_MODULE_10__["default"].newInstance());
+    obj.interactor.setInteractorStyle(_kitware_vtk_js_Interaction_Style_InteractorStyleTrackballCamera__WEBPACK_IMPORTED_MODULE_9__["default"].newInstance());
   }
-
+  //--------------------------------图像-----------------------------------------------------------------------------------------------
+  //-------------------------------------------------------------------------------------------------------------------------------
   // 创建一个 vtkImageReslice 实例，用于图像重切割操作
-  obj.reslice = _kitware_vtk_js_Imaging_Core_ImageReslice__WEBPACK_IMPORTED_MODULE_7__["default"].newInstance();
+  obj.reslice = _kitware_vtk_js_Imaging_Core_ImageReslice__WEBPACK_IMPORTED_MODULE_6__["default"].newInstance();
 
   // 设置重切割模式为 SlabMode.MEAN，表示在切割方向上对多个切片取平均
-  obj.reslice.setSlabMode(_kitware_vtk_js_Imaging_Core_ImageReslice_Constants__WEBPACK_IMPORTED_MODULE_20__.SlabMode.MEAN);
+  obj.reslice.setSlabMode(_kitware_vtk_js_Imaging_Core_ImageReslice_Constants__WEBPACK_IMPORTED_MODULE_18__.SlabMode.MEAN);
 
   // 设置重切割操作的切片数量为 1，表示只取一个切片
   obj.reslice.setSlabNumberOfSlices(1);
@@ -78906,12 +79008,12 @@ for (let i = 0; i < 4; i++) {
   // 设置输出图像的维度为 2，表示输出为 2D 图像（通常用于切片视图）
   obj.reslice.setOutputDimensionality(2);
   // 创建一个 vtkImageMapper 实例，用于映射图像数据
-  obj.resliceMapper = _kitware_vtk_js_Rendering_Core_ImageMapper__WEBPACK_IMPORTED_MODULE_6__["default"].newInstance();
+  obj.resliceMapper = _kitware_vtk_js_Rendering_Core_ImageMapper__WEBPACK_IMPORTED_MODULE_5__["default"].newInstance();
 
   // 将 vtkImageReslice 的输出连接到映射器，确保映射器能渲染重切割后的图像
   obj.resliceMapper.setInputConnection(obj.reslice.getOutputPort());
   // 创建一个 vtkImageSlice 实例，用于显示图像切片
-  obj.resliceActor = _kitware_vtk_js_Rendering_Core_ImageSlice__WEBPACK_IMPORTED_MODULE_8__["default"].newInstance();
+  obj.resliceActor = _kitware_vtk_js_Rendering_Core_ImageSlice__WEBPACK_IMPORTED_MODULE_7__["default"].newInstance();
   // obj.resliceActor.setPosition(-200, -200, 0);  // 调整 X 和 Y 的位置
   // obj.resliceActor.setScale(2.0, 2.0, 1.0);
   // 将映射器应用到 vtkImageSlice 上，以便它能够渲染图像
@@ -78922,22 +79024,23 @@ for (let i = 0; i < 4; i++) {
 
   // 初始化一个空数组，用于存储球体源对象
   obj.sphereSources = [];
-
+  //-------------------------------------------------------------------------------------------------------------------------------
+  //-------------------------------------------------------------------------------------------------------------------------------
   // Create sphere for each 2D views which will be displayed in 3D
   // Define origin, point1 and point2 of the plane used to reslice the volume
   for (let j = 0; j < 3; j++) {
     // 创建一个新的 vtkSphereSource 实例，用于生成球体
-    const sphere = _kitware_vtk_js_Filters_Sources_SphereSource__WEBPACK_IMPORTED_MODULE_17__["default"].newInstance();
+    const sphere = _kitware_vtk_js_Filters_Sources_SphereSource__WEBPACK_IMPORTED_MODULE_15__["default"].newInstance();
     // 设置球体的半径为 10
     sphere.setRadius(1);
 
     // 创建一个新的 vtkMapper 实例，负责将数据映射到渲染中
-    const mapper = _kitware_vtk_js_Rendering_Core_Mapper__WEBPACK_IMPORTED_MODULE_26__["default"].newInstance();
+    const mapper = _kitware_vtk_js_Rendering_Core_Mapper__WEBPACK_IMPORTED_MODULE_24__["default"].newInstance();
     // 将球体的输出连接到映射器，以便映射器可以渲染球体
     mapper.setInputConnection(sphere.getOutputPort());
 
     // 创建一个新的 vtkActor 实例，负责在渲染中显示数据
-    const actor = _kitware_vtk_js_Rendering_Core_Actor__WEBPACK_IMPORTED_MODULE_24__["default"].newInstance();
+    const actor = _kitware_vtk_js_Rendering_Core_Actor__WEBPACK_IMPORTED_MODULE_22__["default"].newInstance();
     // 将映射器应用到演员上，使其渲染球体
     actor.setMapper(mapper);
 
@@ -78958,11 +79061,10 @@ for (let i = 0; i < 4; i++) {
   } else {
     view3D = obj;
     // 调用封装函数，创建一个 vtkCursor3D 边框
-    setupCursor3D(view3D);
+    display3d.setupCursor3D(view3D);
   }
-
   // create axes
-  const axes = _kitware_vtk_js_Rendering_Core_AnnotatedCubeActor__WEBPACK_IMPORTED_MODULE_3__["default"].newInstance();
+  const axes = _kitware_vtk_js_Rendering_Core_AnnotatedCubeActor__WEBPACK_IMPORTED_MODULE_2__["default"].newInstance();
   axes.setDefaultStyle({
     text: "+X",
     fontStyle: "bold",
@@ -79003,27 +79105,77 @@ for (let i = 0; i < 4; i++) {
   });
 
   // create orientation widget
-  obj.orientationWidget = _kitware_vtk_js_Interaction_Widgets_OrientationMarkerWidget__WEBPACK_IMPORTED_MODULE_13__["default"].newInstance({
+  obj.orientationWidget = _kitware_vtk_js_Interaction_Widgets_OrientationMarkerWidget__WEBPACK_IMPORTED_MODULE_12__["default"].newInstance({
     actor: axes,
     interactor: obj.renderWindow.getInteractor()
   });
   obj.orientationWidget.setEnabled(true);
-  obj.orientationWidget.setViewportCorner(_kitware_vtk_js_Interaction_Widgets_OrientationMarkerWidget__WEBPACK_IMPORTED_MODULE_13__["default"].Corners.BOTTOM_RIGHT);
+  obj.orientationWidget.setViewportCorner(_kitware_vtk_js_Interaction_Widgets_OrientationMarkerWidget__WEBPACK_IMPORTED_MODULE_12__["default"].Corners.BOTTOM_RIGHT);
   obj.orientationWidget.setViewportSize(0.15);
   obj.orientationWidget.setMinPixelSize(100);
   obj.orientationWidget.setMaxPixelSize(300);
-
-  // create sliders
+  const bottomDisplay = document.createElement("div");
+  // bottomDisplay.setAttribute("class", "view");
+  bottomDisplay.style.top = "0px";
+  bottomDisplay.style.width = "100%";
+  bottomDisplay.style.height = "10%";
+  element.appendChild(bottomDisplay);
   if (i < 3) {
+    const bottomDiv = document.createElement("div");
+    // bottomDiv.setAttribute("class", "view");
+    bottomDiv.style.width = "100%";
+    bottomDiv.style.height = "100%";
+    bottomDiv.style.display = "flex";
+    // bottomDiv0.innerText = "这是底部显示文本";  // 你可以修改这里的文本内容
+    // const buttonContainer = document.createElement("div");
+    // // buttonContainer.setAttribute("class", "view");
+    // buttonContainer.style.width = "30%";
+    // buttonContainer.style.height = "100%";
+    // buttonContainer.style.display = "flex";
+    // buttonContainer.style.border = "2px solid black"; // 2px 宽的黑色实线边框
+
+    const slide = document.createElement("div");
+    // slide.setAttribute("class", "view");
+    slide.style.width = "100%";
+    slide.style.height = "100%";
+    slide.style.display = "flex";
+    // slide.style.border = "2px solid black"; // 2px 宽的黑色实线边框
     const slider = document.createElement("input");
     slider.type = "range";
     slider.min = 0;
     slider.max = 300;
     slider.style.bottom = "0px";
     slider.style.width = "100%";
-    elementParent.appendChild(slider);
-    obj.slider = slider;
+    slide.appendChild(slider);
 
+    // const axialButton = createColorCheckbox("轴向截面(Axial)", "axial");
+    // slide.appendChild(axialButton);
+    // axialButton.addEventListener("input",(ev) => {
+    //   alert("达到最高点击次数！",ev);
+    // });
+    // if (i==0){
+    //   const axialButton = createColorButton("轴向截面(Axial)", "axial");
+    //   buttonContainer.appendChild(axialButton);
+    //   axialButton.addEventListener("click", function() {
+
+    //     alert("达到最高点击次数！");
+
+    // });
+    // }
+
+    // if (i==1){
+    //   const coronalButton = createColorButton("冠状面(Coronal)", "coronal");
+    //   buttonContainer.appendChild(coronalButton);
+    // }
+    // if (i==2){
+    //   const sagittalButton = createColorButton("矢状面(Sagittal)", "sagittal");
+    //   buttonContainer.appendChild(sagittalButton);
+    // }
+
+    // bottomDiv.appendChild(buttonContainer);
+    bottomDiv.appendChild(slide);
+    bottomDisplay.appendChild(bottomDiv);
+    obj.slider = slider;
     // 为滑块添加事件监听器，当滑块值发生改变时触发
     slider.addEventListener("input", ev => {
       // 检查是否存在有效的图像
@@ -79033,15 +79185,15 @@ for (let i = 0; i < 4; i++) {
         const newDistanceToP1 = ev.target.value;
 
         // 获取当前平面的法向量（用于表示平面的方向）
-        const dirProj = widget.getWidgetState().getPlanes()[_kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_22__.xyzToViewType[i]].normal;
+        const dirProj = widget.getWidgetState().getPlanes()[_kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_20__.xyzToViewType[i]].normal;
 
         // // 获取当前平面的边界点（通常是平面的两个端点）
-        const planeExtremities = widget.getPlaneExtremities(_kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_22__.xyzToViewType[i]);
+        const planeExtremities = widget.getPlaneExtremities(_kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_20__.xyzToViewType[i]);
 
         // 计算新的平面中心点：
         // 从平面起始点 planeExtremities[0] 出发，
         // 沿法向量 dirProj 移动 newDistanceToP1 的距离
-        const newCenter = _kitware_vtk_js_Common_Core_Math__WEBPACK_IMPORTED_MODULE_11__["default"].multiplyAccumulate(planeExtremities[0],
+        const newCenter = _kitware_vtk_js_Common_Core_Math__WEBPACK_IMPORTED_MODULE_10__["default"].multiplyAccumulate(planeExtremities[0],
         // 起始点
         dirProj,
         // 法向量
@@ -79065,640 +79217,126 @@ for (let i = 0; i < 4; i++) {
       }
     });
   }
-}
+  // if (i==3){
+  //   const bottomDiv3 = document.createElement("div")
+  //   bottomDiv3.setAttribute("class", "view");
+  //   bottomDiv3.style.width = "100%";
+  //   bottomDiv3.style.height = "100%";
+  //   bottomDiv3.innerText = "这是底部显示文本";  // 你可以修改这里的文本内容
+  //   bottomDisplay.appendChild(bottomDiv3);
+  // }
 
-// ----------------------------------------------------------------------------
-// Load image
-// ----------------------------------------------------------------------------
+  // create sliders
+  // if (i < 3) {
+  //   const slider = document.createElement("input");
+  //   slider.type = "range";
+  //   slider.min = 0;
+  //   slider.max = 300;
+  //   slider.style.bottom = "0px";
+  //   slider.style.width = "100%";
+  //   elementParent.appendChild(slider);
+  //   obj.slider = slider;
 
-function updateReslice(interactionContext = {
-  viewType: "",
-  reslice: null,
-  actor: null,
-  renderer: null,
-  resetFocalPoint: false,
-  // Reset the focal point to the center of the display image
-  computeFocalPointOffset: false,
-  // Defines if the display offset between reslice center and focal point has to be
-  // computed. If so, then this offset will be used to keep the focal point position during rotation.
-  spheres: null,
-  slider: null
-}) {
-  const modified = widget.updateReslicePlane(interactionContext.reslice, interactionContext.viewType);
-  if (modified) {
-    const resliceAxes = interactionContext.reslice.getResliceAxes();
-    // Get returned modified from setter to know if we have to render
-    interactionContext.actor.setUserMatrix(resliceAxes);
-    const planeSource = widget.getPlaneSource(interactionContext.viewType);
-    interactionContext.sphereSources[0].setCenter(planeSource.getOrigin());
-    interactionContext.sphereSources[1].setCenter(planeSource.getPoint1());
-    interactionContext.sphereSources[2].setCenter(planeSource.getPoint2());
-    if (interactionContext.slider) {
-      const planeExtremities = widget.getPlaneExtremities(interactionContext.viewType);
-      const length = Math.sqrt(_kitware_vtk_js_Common_Core_Math__WEBPACK_IMPORTED_MODULE_11__["default"].distance2BetweenPoints(planeExtremities[0], planeExtremities[1]));
-      const dist = Math.sqrt(_kitware_vtk_js_Common_Core_Math__WEBPACK_IMPORTED_MODULE_11__["default"].distance2BetweenPoints(planeExtremities[0], widgetState.getCenter()));
-      interactionContext.slider.min = 0;
-      interactionContext.slider.max = length;
-      interactionContext.slider.value = dist;
-    }
-  }
-  widget.updateCameraPoints(interactionContext.renderer, interactionContext.viewType, interactionContext.resetFocalPoint, interactionContext.computeFocalPointOffset);
-  view3D.renderWindow.render();
-  return modified;
-}
+  //   // 为滑块添加事件监听器，当滑块值发生改变时触发
+  //   slider.addEventListener("input", (ev) => {
+  //     // 检查是否存在有效的图像
+  //     const image = widget.getWidgetState().getImage();
+  //     if (image) {
+  //       // 获取滑块的新值（用户拖动后的数值）
+  //       const newDistanceToP1 = ev.target.value;
 
-// 统一处理复选框变更事件的函数
-function handleCheckboxChange(checkbox, value, label) {
-  const image = widget.getWidgetState().getImage();
-  if (image) {
-    // 更新ACS3D数组
-    if (checkbox.checked) {
-      // 选中时，确保ACS3D中包含相应值，并保持唯一性
-      ACS3D = [...new Set([...ACS3D, value])];
-    } else {
-      // 取消选中时，移除相应值
-      ACS3D = ACS3D.filter(item => item !== value);
-    }
-    // 如果需要移除已有体积演员，执行删除
-    if (view3D.vtkVolumeActor) {
-      removeVolumeActor(view3D); // 删除现有体积演员
-    }
-    updateOutline(view3D, imageData);
-  } else {
-    // 图像无效，确保复选框保持为 false 并提示
-    checkbox.checked = false; // 取消勾选复选框
-    alert(`当前未加载有效图像，无法执行查看${label}操作。`);
-  }
-}
-function updateViews() {
-  viewAttributes.forEach((obj, i) => {
-    updateReslice({
-      viewType: _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_22__.xyzToViewType[i],
-      reslice: obj.reslice,
-      actor: obj.resliceActor,
-      renderer: obj.renderer,
-      resetFocalPoint: true,
-      computeFocalPointOffset: true,
-      sphereSources: obj.sphereSources,
-      resetViewUp: true
-    });
-    obj.renderWindow.render();
-  });
-  view3D.renderer.resetCamera();
-  view3D.renderer.resetCameraClippingRange();
-}
-/**
- * 创建并显示一个 vtkCursor3D 边框
- * @param {Object} view3D - 包含 renderer 和 renderWindow 的对象
- * @param {Array} focalPoint - 设置焦点 [x, y, z]
- * @param {Array} modelBounds - 设置模型边界 [xmin, xmax, ymin, ymax, zmin, zmax]
- * @param {Object} options - 配置选项，例如是否显示边框、阴影、坐标轴等
- */
-function setupCursor3D(view3D, focalPoint = [0, 0, 0], modelBounds = [-10, 10, -10, 10, -10, 10], options = {}) {
-  // 清除渲染器中的所有演员
-  view3D.renderer.getActors().forEach(actor => {
-    view3D.renderer.removeActor(actor);
-  });
+  //       // 获取当前平面的法向量（用于表示平面的方向）
+  //       const dirProj = widget.getWidgetState().getPlanes()[xyzToViewType[i]].normal;
 
-  // 如果需要移除已有体积演员，执行删除
-  if (view3D.vtkVolumeActor) {
-    removeVolumeActor(view3D); // 删除现有体积演员
-  }
-  // 创建新的 vtkCursor3D
-  const cursor3D = _kitware_vtk_js_Filters_Sources_Cursor3D__WEBPACK_IMPORTED_MODULE_16__["default"].newInstance();
-  cursor3D.setFocalPoint(focalPoint);
-  cursor3D.setModelBounds(modelBounds);
+  //       // // 获取当前平面的边界点（通常是平面的两个端点）
+  //       const planeExtremities = widget.getPlaneExtremities(xyzToViewType[i]);
 
-  // 设置选项，默认只显示边框
-  cursor3D.set({
-    zShadows: options.zShadows ?? false,
-    xShadows: options.xShadows ?? false,
-    yShadows: options.yShadows ?? false,
-    outline: options.outline ?? true,
-    axes: options.axes ?? false,
-    center: options.center ?? false
-  });
+  //       // 计算新的平面中心点：
+  //       // 从平面起始点 planeExtremities[0] 出发，
+  //       // 沿法向量 dirProj 移动 newDistanceToP1 的距离
+  //       const newCenter = vtkMath.multiplyAccumulate(
+  //         planeExtremities[0], // 起始点
+  //         dirProj, // 法向量
+  //         Number(newDistanceToP1), // 滑块值转换为数字
+  //         [] // 结果存储在一个新数组中
+  //       );
+  //       // 设置平面的新中心点
+  //       widget.setCenter(newCenter);
 
-  // 创建 Mapper 和 Actor
-  const cursor3DMapper = _kitware_vtk_js_Rendering_Core_Mapper__WEBPACK_IMPORTED_MODULE_26__["default"].newInstance();
-  cursor3DMapper.setInputConnection(cursor3D.getOutputPort());
-  const cursor3DActor = _kitware_vtk_js_Rendering_Core_Actor__WEBPACK_IMPORTED_MODULE_24__["default"].newInstance();
-  cursor3DActor.setMapper(cursor3DMapper);
-  // 设置 Actor 的颜色为白色
-  cursor3DActor.getProperty().setColor(1.0, 1.0, 1.0); // RGB(1, 1, 1) 表示白色
-  // 设置线条加粗（设置线宽）
-  cursor3DActor.getProperty().setLineWidth(3.0); // 将线宽设置为 3（默认是 1）
-  // 添加到渲染器
-  view3D.renderer.addActor(cursor3DActor);
+  //       // 模拟用户交互，触发小部件的交互事件，确保状态更新
+  //       obj.widgetInstance.invokeInteractionEvent(obj.widgetInstance.getActiveInteraction());
 
-  // 更新渲染器
-  view3D.renderer.resetCamera();
-  view3D.renderWindow.render();
-
-  // 更新 view3D 引用
-  view3D.cursor3D = cursor3D;
-  view3D.cursor3DMapper = cursor3DMapper;
-  view3D.cursor3DActor = cursor3DActor;
-  resetCheckboxesAndACS3D();
-}
-function resetCheckboxesAndACS3D() {
-  // 获取三个复选框元素
-  const checkboxAxial = document.getElementById("checkboxAxial");
-  const checkboxCoronal = document.getElementById("checkboxCoronal");
-  const checkboxSagittal = document.getElementById("checkboxSagittal");
-
-  // 设置复选框为未选中状态
-  checkboxAxial.checked = false;
-  checkboxCoronal.checked = false;
-  checkboxSagittal.checked = false;
-
-  // 更新 ACS3D 数组，清空选择
-  ACS3D = [];
-}
-
-/**
- * 创建并渲染图像数据的轮廓（边界框）。
- *
- * @param {vtkImageData} imageData - 输入的图像数据。
- * @param {Object} view3D - 3D 渲染环境对象，包含 renderer、outlineActor 等。
- *   - view3D.renderer: vtkRenderer 实例，用于渲染图像。
- *
- * @returns {vtkActor} 返回新创建的轮廓演员（outlineActor）。
- */
-function createAndRenderOutline(imageData, view3D) {
-  // 创建一个新的轮廓过滤器，生成图像的边界框
-  const outline = _kitware_vtk_js_Filters_General_OutlineFilter__WEBPACK_IMPORTED_MODULE_12__["default"].newInstance();
-  outline.setInputData(imageData);
-
-  // 创建一个新的轮廓映射器，并将其输入设置为轮廓过滤器的输出
-  const outlineMapper = _kitware_vtk_js_Rendering_Core_Mapper__WEBPACK_IMPORTED_MODULE_26__["default"].newInstance();
-  outlineMapper.setInputData(outline.getOutputData());
-
-  // 创建轮廓演员，并将映射器设置为其输入
-  const outlineActor = _kitware_vtk_js_Rendering_Core_Actor__WEBPACK_IMPORTED_MODULE_24__["default"].newInstance();
-  outlineActor.setMapper(outlineMapper);
-
-  // 设置轮廓演员的颜色为白色
-  outlineActor.getProperty().setColor(1.0, 1.0, 1.0); // RGB(1, 1, 1) 表示白色
-
-  // 设置线条加粗（设置线宽）
-  outlineActor.getProperty().setLineWidth(3.0); // 将线宽设置为 3（默认是 1）
-
-  // 将新的轮廓演员存储在 view3D 对象中，以便以后参考和重用
-  view3D.outlineActor = outlineActor;
-
-  // 将新的轮廓演员添加到渲染器中
-  view3D.renderer.addActor(outlineActor);
-}
-
-/**
- * 清除已有边框并添加图像数据的边界框到 3D 视图
- * @param {Object} view3D - 包含 renderer 和 renderWindow 的对象
- * @param {vtkImageData} imageData - 用于生成边界框的图像数据
- * @returns {vtkActor} - 创建的边界框 Actor
- */
-function updateOutline(view3D, imageData) {
-  if (!imageData) {
-    alert("imageData is not loaded or initialized.");
-    return;
-  }
-  // 清除渲染器中的所有演员，只移除旧的轮廓和重采样演员
-  view3D.renderer.getActors().forEach(actor => {
-    view3D.renderer.removeActor(actor);
-  });
-  createAndRenderOutline(imageData, view3D);
-
-  // 根据 ACS3D 中的值，决定是否显示其他重采样演员
-  viewAttributes.forEach((obj, i) => {
-    if (ACS3D.includes(i)) {
-      // 如果 ACS3D 包含该值，则添加对应的重采样演员
-      view3D.renderer.addActor(obj.resliceActor);
-    }
-  });
-
-  // 如果 ACS3D 为空，设置 3D 游标（如没有加载有效的图像）
-  if (ACS3D.length === 0) {
-    setupCursor3D(view3D);
-  }
-
-  // 更新视图并重置相机
-  view3D.renderer.resetCamera();
-  view3D.renderWindow.render();
-}
-// 清除渲染器中的所有演员，仅保留轮廓演员 outlineActor
-function clearOldActors(view3D) {
-  const actorsToRemove = [];
-
-  // 遍历所有演员对象，找到需要移除的演员
-  view3D.renderer.getActors().forEach(actor => {
-    if (actor !== view3D.outlineActor) {
-      actorsToRemove.push(actor); // 将需要移除的演员存入数组
-    }
-  });
-
-  // 从渲染器中移除旧的演员
-  actorsToRemove.forEach(actor => {
-    view3D.renderer.removeActor(actor);
-  });
-}
-
-// 函数：初始化体积渲染，支持插入显示和删除
-function initializeVolumeRendering(view3D, imageData, options = {}) {
-  // 检查 imageData 是否有效
-  if (!imageData || !imageData.getPointData() || !imageData.getPointData().getScalars()) {
-    console.error("Invalid imageData or missing scalars");
-    return;
-  }
-
-  // 获取 imageData 中的标量数据
-  const dataArray = imageData.getPointData().getScalars();
-  if (!dataArray) {
-    console.error("No scalar data found in imageData");
-    return;
-  }
-
-  // 解构选项参数，设置默认值
-  const {
-    sampleDistance = 1.0,
-    blendMode = "Composite",
-    desiredUpdateRate = 1.0
-  } = options;
-  clearOldActors(view3D);
-  // 如果需要移除已有体积演员，执行删除
-  if (view3D.vtkVolumeActor) {
-    removeVolumeActor(view3D); // 删除现有体积演员
-  }
-  // 初始化体积渲染对象
-  const actor = _kitware_vtk_js_Rendering_Core_Volume__WEBPACK_IMPORTED_MODULE_23__["default"].newInstance();
-  const mapper = _kitware_vtk_js_Rendering_Core_VolumeMapper__WEBPACK_IMPORTED_MODULE_25__["default"].newInstance({
-    sampleDistance
-  });
-
-  // 设置 RGB 传递函数，根据数据范围调整颜色映射
-  const rgbTransferFunction = actor.getProperty().getRGBTransferFunction(0);
-  rgbTransferFunction.setRange(...dataArray.getRange()); // 设置颜色映射的范围
-
-  // 设置 mapper 输入数据
-  mapper.setInputData(imageData);
-
-  // 设置混合模式
-  switch (blendMode) {
-    case "Composite":
-      mapper.setBlendModeToComposite();
-      break;
-    case "MaximumIntensity":
-      mapper.setBlendModeToMaximumIntensity();
-      break;
-    default:
-      console.warn("Unknown blend mode, falling back to Composite.");
-      mapper.setBlendModeToComposite(); // 使用合成模式（默认）
-      break;
-  }
-
-  // 绑定 mapper 和 actor
-  actor.setMapper(mapper);
-
-  // 将体积演员添加到渲染器
-  view3D.renderer.addVolume(actor);
-
-  // 调整相机视图
-  const camera = view3D.renderer.getActiveCamera();
-  const position = camera.getPosition();
-  camera.setViewUp(0, 0, 1); // 设置相机视图的“向上”方向
-  // 假设相机当前在 [0, 0, 500]，将其移动到 [0, 0, 1000] 以缩小显示
-  console.log(position);
-  camera.setPosition(position[0], position[1], position[2] * 2); // 将相机位置放远
-  view3D.renderer.resetCamera(); // 重置相机
-
-  // 禁用交互式渲染
-  view3D.renderer.setInteractive(false);
-
-  // 设置渲染窗口的交互更新速率
-  view3D.renderWindow.getInteractor().setDesiredUpdateRate(desiredUpdateRate);
-
-  // 触发渲染
-  view3D.renderWindow.render();
-
-  // 保存体积演员和映射器到 view3D 对象，以便后续操作
-  view3D.vtkVolumeActor = actor;
-  view3D.vtkVolumeMapper = mapper;
-  resetCheckboxesAndACS3D();
-}
-// 函数：移除体积演员
-function removeVolumeActor(view3D) {
-  if (view3D.vtkVolumeActor) {
-    console.log("Removing volume actor...");
-    // 从渲染器中移除体积演员
-    view3D.renderer.removeVolume(view3D.vtkVolumeActor);
-
-    // 删除体积演员和映射器对象，释放内存
-    view3D.vtkVolumeActor.delete();
-    view3D.vtkVolumeMapper.delete();
-
-    // 清空存储的体积演员和映射器
-    view3D.vtkVolumeActor = null;
-    view3D.vtkVolumeMapper = null;
-
-    // 重新渲染
-    view3D.renderWindow.render();
-  } else {
-    console.warn("No volume actor to remove.");
-  }
-}
-function initializeVolumeContour(view3D, imageData) {
-  clearOldActors(view3D);
-  const actor = _kitware_vtk_js_Rendering_Core_Actor__WEBPACK_IMPORTED_MODULE_24__["default"].newInstance();
-  const mapper = _kitware_vtk_js_Rendering_Core_Mapper__WEBPACK_IMPORTED_MODULE_26__["default"].newInstance();
-  const marchingCube = _kitware_vtk_js_Filters_General_ImageMarchingCubes__WEBPACK_IMPORTED_MODULE_27__["default"].newInstance({
-    contourValue: 0.0,
-    computeNormals: true,
-    mergePoints: true
-  });
-  marchingCube.setInputData(imageData); // Corrected here: use setInputData instead of setInputConnection
-  actor.setMapper(mapper);
-  mapper.setInputConnection(marchingCube.getOutputPort());
-  const dataRange = imageData.getPointData().getScalars().getRange();
-  const firstIsoValue = (dataRange[0] + dataRange[1]) / 3;
-  const el = document.querySelector(".isoValue");
-  el.setAttribute("min", dataRange[0]);
-  el.setAttribute("max", dataRange[1]);
-  el.setAttribute("value", firstIsoValue);
-  el.addEventListener("input", e => updateIsoValue(e, marchingCube, view3D.renderWindow));
-  marchingCube.setContourValue(firstIsoValue);
-  view3D.renderer.addActor(actor);
-  view3D.renderer.getActiveCamera().set({
-    position: [1, 1, 0],
-    viewUp: [0, 0, -1]
-  });
-  view3D.renderer.resetCamera();
-  view3D.renderWindow.render();
-  // 设置渲染窗口交互更新速率
-  view3D.renderWindow.getInteractor().setDesiredUpdateRate(0.1);
-  __webpack_require__.g.actor = actor;
-  __webpack_require__.g.mapper = mapper;
-  __webpack_require__.g.marchingCube = marchingCube;
-}
-// Function to update the iso value based on user input
-function updateIsoValue(e, marchingCube, renderWindow) {
-  const isoValue = Number(e.target.value);
-  marchingCube.setContourValue(isoValue);
-  renderWindow.render();
+  //       // 遍历所有视图属性，逐一渲染每个视图以更新显示
+  //       viewAttributes.forEach((obj2) => {
+  //         obj2.interactor.render(); // 重新渲染视图
+  //       });
+  //     } else {
+  //       // 弹出提示信息，提示用户未加载有效的图像
+  //       alert("当前未加载有效图像，无法执行操作。");
+  //     }
+  //   });
+  // }
 }
 // ----------------------------------------------------------------------------
-// 定义面板交互
+// UI 控件处理
 // ----------------------------------------------------------------------------
+// 创建一个按钮的辅助函数
+function createColorButton(labelText, buttonId) {
+  const button = document.createElement("button");
+  button.id = buttonId;
+  button.textContent = labelText;
+  button.style.width = "100%";
+  button.style.height = "100%";
+  button.style.backgroundColor = "lightgray"; // 初始颜色
+  button.style.cursor = "pointer"; // 设置鼠标指针样式为“手形”，表示可以点击
+  button.style.pointerEvents = "auto"; // 确保可以响应点击事件
+  return button;
+}
+function createColorCheckbox(labelText, checkboxId) {
+  const checkboxContainer = document.createElement("div");
 
-checkboxTranslation.addEventListener("change", ev => {
-  // 检查是否存在有效的图像
-  const image = widget.getWidgetState().getImage();
-  if (image) {
-    viewAttributes.forEach(obj => obj.widgetInstance.setEnableTranslation(checkboxTranslation.checked));
-  } else {
-    alert("当前未加载有效图像，无法执行平移操作。");
-  }
-});
-checkboxShowRotation.addEventListener("change", ev => {
-  // 检查是否存在有效的图像
-  const image = widget.getWidgetState().getImage();
-  if (image) {
-    widgetState.getStatesWithLabel("rotation").forEach(handle => handle.setVisible(checkboxShowRotation.checked));
-    viewAttributes.forEach(obj => {
-      obj.interactor.render();
-    });
-    checkboxRotation.checked = checkboxShowRotation.checked;
-    checkboxRotation.disabled = !checkboxShowRotation.checked;
-    checkboxRotation.dispatchEvent(new Event("change"));
-  } else {
-    alert("当前未加载有效图像，无法执行旋转操作。");
-  }
-});
-checkboxRotation.addEventListener("change", ev => {
-  // 检查是否存在有效的图像
-  const image = widget.getWidgetState().getImage();
-  if (image) {
-    viewAttributes.forEach(obj => obj.widgetInstance.setEnableRotation(checkboxRotation.checked));
-    checkboxOrthogonality.disabled = !checkboxRotation.checked;
-    checkboxOrthogonality.dispatchEvent(new Event("change"));
-  } else {
-    alert("当前未加载有效图像，无法执行旋转操作。");
-  }
-});
-checkboxOrthogonality.addEventListener("change", ev => {
-  // 检查是否存在有效的图像
-  const image = widget.getWidgetState().getImage();
-  if (image) {
-    viewAttributes.forEach(obj => obj.widgetInstance.setKeepOrthogonality(checkboxOrthogonality.checked));
-  } else {
-    alert("当前未加载有效图像，无法执行保持正交操作。");
-  }
-});
-const checkboxScaleInPixels = document.getElementById("checkboxScaleInPixels");
-checkboxScaleInPixels.addEventListener("change", ev => {
-  // 检查是否存在有效的图像
-  const image = widget.getWidgetState().getImage();
-  if (image) {
-    widget.setScaleInPixels(checkboxScaleInPixels.checked);
-    viewAttributes.forEach(obj => {
-      obj.interactor.render();
-    });
-  } else {
-    alert("当前未加载有效图像，无法执行像素缩放操作。");
-  }
-});
-const opacity = document.getElementById("opacity");
-opacity.addEventListener("input", ev => {
-  // 检查是否存在有效的图像
-  const image = widget.getWidgetState().getImage();
-  if (image) {
-    const opacityValue = document.getElementById("opacityValue");
-    opacityValue.innerHTML = ev.target.value;
-    widget.getWidgetState().getStatesWithLabel("handles").forEach(handle => handle.setOpacity(ev.target.value));
-    viewAttributes.forEach(obj => {
-      obj.interactor.render();
-    });
-  } else {
-    alert("当前未加载有效图像，无法执行透明度操作。");
-  }
-});
-const optionSlabModeMin = document.getElementById("slabModeMin");
-optionSlabModeMin.value = _kitware_vtk_js_Imaging_Core_ImageReslice_Constants__WEBPACK_IMPORTED_MODULE_20__.SlabMode.MIN;
-const optionSlabModeMax = document.getElementById("slabModeMax");
-optionSlabModeMax.value = _kitware_vtk_js_Imaging_Core_ImageReslice_Constants__WEBPACK_IMPORTED_MODULE_20__.SlabMode.MAX;
-const optionSlabModeMean = document.getElementById("slabModeMean");
-optionSlabModeMean.value = _kitware_vtk_js_Imaging_Core_ImageReslice_Constants__WEBPACK_IMPORTED_MODULE_20__.SlabMode.MEAN;
-const optionSlabModeSum = document.getElementById("slabModeSum");
-optionSlabModeSum.value = _kitware_vtk_js_Imaging_Core_ImageReslice_Constants__WEBPACK_IMPORTED_MODULE_20__.SlabMode.SUM;
-const selectSlabMode = document.getElementById("slabMode");
-selectSlabMode.addEventListener("change", ev => {
-  // 检查是否存在有效的图像
-  const image = widget.getWidgetState().getImage();
-  if (image) {
-    viewAttributes.forEach(obj => {
-      obj.reslice.setSlabMode(Number(ev.target.value));
-    });
-    updateViews();
-  } else {
-    alert("No valid image found. slab mode operation skipped for center.");
-  }
-});
-const sliderSlabNumberofSlices = document.getElementById("slabNumber");
-sliderSlabNumberofSlices.addEventListener("change", ev => {
-  // 检查是否存在有效的图像
-  const image = widget.getWidgetState().getImage();
-  if (image) {
-    const trSlabNumberValue = document.getElementById("slabNumberValue");
-    trSlabNumberValue.innerHTML = ev.target.value;
-    viewAttributes.forEach(obj => {
-      obj.reslice.setSlabNumberOfSlices(ev.target.value);
-    });
-    updateViews();
-  } else {
-    alert("当前未加载有效图像，无法执行层切片操作。");
-  }
-});
-const buttonReset = document.getElementById("buttonReset");
-buttonReset.addEventListener("click", () => {
-  // 检查是否存在有效的图像
-  const image = widget.getWidgetState().getImage();
-  if (image) {
-    widgetState.setPlanes({
-      ...initialPlanesState
-    });
-    // 设置中心点为图像中心
-    widget.setCenter(image.getCenter());
-    updateViews();
-  } else {
-    alert("当前未加载有效图像，无法执行重置操作。");
-  }
-});
-const buttonClearAll = document.getElementById("buttonClearAll");
-buttonClearAll.addEventListener("click", () => {
-  // 检查是否存在有效的图像
-  const image = widget.getWidgetState().getImage();
-  if (image) {
-    // 调用封装函数，创建一个 vtkCursor3D 边框
-    setupCursor3D(view3D);
-  } else {
-    alert("当前未加载有效图像，无法执行清除操作。");
-  }
-});
-const blendModeSelect = document.querySelector("#blendModeSelect");
-// 事件监听：切换混合模式
-blendModeSelect.addEventListener("change", () => {
-  const image = widget.getWidgetState().getImage();
-  if (image) {
-    const selectedMode = blendModeSelect.value;
-    if (selectedMode == "VolumeContour") {
-      initializeVolumeContour(view3D, imageData);
-    } else {
-      // 调用渲染函数
-      initializeVolumeRendering(view3D, imageData, {
-        sampleDistance: 1.0,
-        // 自定义采样距离
-        blendMode: selectedMode,
-        // 使用 MIP 模式
-        desiredUpdateRate: 1.0 // 调整更新速率
-      });
-    }
-  } else {
-    alert("当前未加载有效图像，无法执行清除操作。");
-  }
-});
+  // Create the checkbox element
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.id = checkboxId;
 
-// 绑定事件处理
-const buttonAxial = document.getElementById("checkboxAxial");
-buttonAxial.addEventListener("change", () => handleCheckboxChange(buttonAxial, 0, "轴向截面"));
-const checkboxCoronal = document.getElementById("checkboxCoronal");
-checkboxCoronal.addEventListener("change", () => handleCheckboxChange(checkboxCoronal, 1, "冠状面"));
-const checkboxSagittal = document.getElementById("checkboxSagittal");
-checkboxSagittal.addEventListener("change", () => handleCheckboxChange(checkboxSagittal, 2, "矢状面"));
-const selectInterpolationMode = document.getElementById("selectInterpolation");
-selectInterpolationMode.addEventListener("change", ev => {
-  // 检查是否存在有效的图像
-  const image = widget.getWidgetState().getImage();
-  if (image) {
-    viewAttributes.forEach(obj => {
-      obj.reslice.setInterpolationMode(Number(ev.target.selectedIndex));
-    });
-    updateViews();
-  } else {
-    alert("未加载有效图像，无法应用插值模式更改。");
-  }
-});
-const checkboxWindowLevel = document.getElementById("checkboxWindowLevel");
-checkboxWindowLevel.addEventListener("change", ev => {
-  // 检查是否存在有效的图像
-  const image = widget.getWidgetState().getImage();
-  if (image) {
-    viewAttributes.forEach((obj, index) => {
-      if (index < 3) {
-        obj.interactor.setInteractorStyle(checkboxWindowLevel.checked ? _kitware_vtk_js_Interaction_Style_InteractorStyleImage__WEBPACK_IMPORTED_MODULE_9__["default"].newInstance() : _kitware_vtk_js_Interaction_Style_InteractorStyleTrackballCamera__WEBPACK_IMPORTED_MODULE_10__["default"].newInstance());
-      }
-    });
-  } else {
-    alert("未加载有效图像，无法切换窗口/级别操作。");
-  }
-});
+  // Create the label element
+  const label = document.createElement("label");
+  label.textContent = labelText;
+  label.setAttribute("for", checkboxId);
 
+  // Style the checkbox
+  checkbox.style.cursor = "pointer"; // Ensure cursor shows as "pointer" on hover
+
+  // Optional: Style the container for layout
+  checkboxContainer.style.width = "100%";
+  checkboxContainer.style.height = "100%";
+  checkboxContainer.style.display = "flex";
+  checkboxContainer.style.alignItems = "center";
+  checkboxContainer.style.justifyContent = "center";
+  checkboxContainer.style.bottom = "0px";
+  // Append the checkbox and label to the container
+  checkboxContainer.appendChild(checkbox);
+  checkboxContainer.appendChild(label);
+  return checkboxContainer;
+}
+
+//-----------------------------------------矢状面--------------------------------------------------------------
+
+// 创建切换按钮颜色的函数
+function toggleButtonColor(button) {
+  alert(button.style.backgroundColor);
+  if (button.style.backgroundColor === "lightgray") {
+    // 如果当前颜色是灰色，切换为选中颜色
+    button.style.backgroundColor = "red"; // 选中颜色
+  } else {
+    // 如果当前颜色是选中颜色，切换为未选中颜色
+    button.style.backgroundColor = "lightgray"; // 未选中颜色
+  }
+}
 // ----------------------------------------------------------------------------
-// 处理数据
+// 逻辑代码
 // ----------------------------------------------------------------------------
-
-const dicomTags = {
-  imagePositionPatient: {
-    id: "0020,0032",
-    //图像在患者坐标系中的位置
-    description: "Image Position (Patient)"
-  },
-  imageOrientationPatient: {
-    id: "0020,0037",
-    //图像方向矩阵
-    description: "Image Orientation (Patient)"
-  },
-  pixelSpacing: {
-    id: "0028,0030",
-    //像素的物理间距
-    description: "Pixel Spacing"
-  },
-  sliceThickness: {
-    id: "0018,0050",
-    //切片厚度
-    description: "Slice Thickness"
-  },
-  instanceNumber: {
-    id: "0020,0013",
-    //当前影像序号
-    description: "Instance Number"
-  },
-  sopInstanceUID: {
-    id: "0008,0018",
-    //唯一标识影像的
-    UIDdescription: "SOP Instance UID"
-  },
-  rescaleIntercept: {
-    id: "0028,1052",
-    //像素值的物理转换截距
-    description: "Rescale Intercept"
-  },
-  rescaleSlope: {
-    id: "0028,1053",
-    //像素值的物理转换斜率
-    description: "Rescale Slope"
-  },
-  pixelData: {
-    id: "7FE0,0010",
-    //实际影像像素数据
-    description: "Pixel Data"
-  },
-  windowCenter: {
-    id: "0028,1050",
-    description: "Window Center"
-  },
-  windowWidth: {
-    id: "0028,1051",
-    description: "Window Width"
-  }
-};
 async function load(ArrayBuffer) {
   let arrayBuffer = [];
   for (var i = 0; i < Object.keys(ArrayBuffer).length; i++) {
@@ -79708,12 +79346,6 @@ async function load(ArrayBuffer) {
     }
   }
   return arrayBuffer;
-  // if (arrayBuffer.length != 0) {
-  //   const loader = new Loader();
-  //   loader.MPR(arrayBuffer);
-  // } else {
-  //   alert("没有数据可加载MPR");
-  // }
 }
 /**
  * 加载 MPR 数据并渲染多切片图像。
@@ -79724,12 +79356,8 @@ function loadMPR(arrayBuffer) {
     // 检查输入是否有效
     throw new Error("arrayBuffer 不能为空！");
   }
-
-  // 创建 SyntheticImageData 实例
-  const syntheticImageData = new _SyntheticImageData__WEBPACK_IMPORTED_MODULE_28__["default"]();
-
   // 解析输入数据以生成图像数据和窗口设置
-  const {
+  let {
     imageData,
     windowWidth,
     windowCenter
@@ -79740,53 +79368,24 @@ function loadMPR(arrayBuffer) {
   }
 
   // 使用生成的图像数据渲染多切片图像
-  MultiSliceImageMapper(imageData);
+  MultiSliceImageMapper(imageData, windowWidth, windowCenter);
 
   // 可选：日志输出调试信息
   console.log(`MPR 加载完成，窗口宽度: ${windowWidth}, 窗口中心: ${windowCenter}`);
 }
-class Loader {
-  MPR(array_Buffer) {
-    const startTime = Date.now();
-    // 创建类实例
-    const syntheticImageData = new _SyntheticImageData__WEBPACK_IMPORTED_MODULE_28__["default"]();
-    const {
-      imageData,
-      windowWidth,
-      windowCenter
-    } = syntheticImageData.ImageData(array_Buffer);
-    console.log(imageData, "imageData", windowWidth, "windowWidth", windowCenter, "windowCenter");
-    // let dicom_info = getTags(array_Buffer, dicomTags);
-    const endTime = Date.now();
-    console.log(`Execution Time: ${endTime - startTime}ms`);
-    // if (dicom_info.length == 0) {
-    //   console.error("获取 dicom 信息数据为空");
-    // } else {
-    // imageData = createImageData(dicom_info);
-    // imageData = image
-    MultiSliceImageMapper(imageData);
-    // }
-  }
-}
-
-// ---------------------------------------------------------------------------------------------------
-function MultiSliceImageMapper(imageData) {
-  if (!imageData) {
-    console.error("imageData is not loaded or initialized.");
-    return;
-  }
+function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
   // 将加载的图像数据设置到一个假设的控件 `widget` 中进行显示
   widget.setImage(imageData);
   // 调用封装函数，创建一个 vtkCursor3D 边框
-  setupCursor3D(view3D);
+  display3d.setupCursor3D(view3D);
   // renderVolume(imageData, view3D);
   // 对每个视图的属性进行操作，`viewAttributes` 是包含多个视图属性的数组
   viewAttributes.forEach((obj, i) => {
     // 设置该视图的重采样输入数据为加载的图像数据
     obj.reslice.setInputData(imageData);
-    // const property = obj.resliceActor.getProperty();
-    // property.setColorWindow(windowWidthCenter[0]); // 设置窗口宽度
-    // property.setColorLevel(windowWidthCenter[1]); // 设置窗口中心
+    const property = obj.resliceActor.getProperty();
+    property.setColorWindow(windowWidth); // 设置窗口宽度
+    property.setColorLevel(windowCenter); // 设置窗口中心
     // 将该视图的重采样演员添加到渲染器中
     obj.renderer.addActor(obj.resliceActor);
     // 遍历并将该视图中的球体演员添加到渲染器中
@@ -79795,12 +79394,12 @@ function MultiSliceImageMapper(imageData) {
       // view3D.renderer.addActor(actor);
     });
     const reslice = obj.reslice;
-    const viewType = _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_22__.xyzToViewType[i];
+    const viewType = _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_20__.xyzToViewType[i];
     // 对所有视图进行操作，确保在当前视图进行交互时能够正确更新切片
     viewAttributes.forEach(v => {
       // 在交互开始时，更新重采样器的状态
       v.widgetInstance.onStartInteractionEvent(() => {
-        updateReslice({
+        loadimage.updateReslice(view3D, widget, widgetState, {
           viewType,
           reslice,
           actor: obj.resliceActor,
@@ -79818,11 +79417,11 @@ function MultiSliceImageMapper(imageData) {
       v.widgetInstance.onInteractionEvent(
       // 可以根据当前交互方法判断是否允许更新焦点
       interactionMethodName => {
-        const canUpdateFocalPoint = interactionMethodName === _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_22__.InteractionMethodsName.RotateLine;
+        const canUpdateFocalPoint = interactionMethodName === _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_20__.InteractionMethodsName.RotateLine;
         const activeViewType = widget.getWidgetState().getActiveViewType();
         // 如果当前视图是活动视图或不能更新焦点，则允许计算焦点偏移
         const computeFocalPointOffset = activeViewType === viewType || !canUpdateFocalPoint;
-        updateReslice({
+        loadimage.updateReslice(view3D, widget, widgetState, {
           viewType,
           reslice,
           actor: obj.resliceActor,
@@ -79836,7 +79435,7 @@ function MultiSliceImageMapper(imageData) {
     });
 
     // 初始化时，更新切片的状态，并将焦点设置为图像中心
-    updateReslice({
+    loadimage.updateReslice(view3D, widget, widgetState, {
       viewType,
       reslice,
       actor: obj.resliceActor,
@@ -79858,118 +79457,8 @@ function MultiSliceImageMapper(imageData) {
   view3D.renderer.resetCameraClippingRange();
   view3D.renderWindow.render();
   // 设置最大切片数量到滑块的最大值
-  const maxNumberOfSlices = gl_matrix__WEBPACK_IMPORTED_MODULE_29__.length(imageData.getDimensions());
+  const maxNumberOfSlices = gl_matrix__WEBPACK_IMPORTED_MODULE_30__.length(imageData.getDimensions());
   document.getElementById("slabNumber").max = maxNumberOfSlices;
-}
-function createImageData(dicomSlices) {
-  // 判断 dicomSlices 是否是一个有效数组
-  if (!Array.isArray(dicomSlices) || dicomSlices.length === 0) {
-    console.log("dicomSlices 不是一个有效的数组或数组为空");
-    return null; // 返回 null 或者其他合适的值表示创建失败
-  }
-  // 提取第一个 dicomSlice 的必要信息
-  const firstSlice = dicomSlices[0];
-  console.log(firstSlice, "firstSlice");
-  const {
-    pixelData,
-    windowCenter,
-    windowWidth,
-    sliceThickness,
-    pixelSpacing
-  } = firstSlice;
-  const {
-    Description: pixelDataDescription
-  } = pixelData;
-  const {
-    Description: windowCenterDescription
-  } = windowCenter;
-  const {
-    Description: windowWidthDescription
-  } = windowWidth;
-  const {
-    Description: sliceThicknessDescription
-  } = sliceThickness;
-  const {
-    Description: pixelSpacingDescription
-  } = pixelSpacing;
-  const imageData = _kitware_vtk_js_Common_DataModel_ImageData__WEBPACK_IMPORTED_MODULE_21__["default"].newInstance();
-  const dimensions = [pixelDataDescription.numCols, pixelDataDescription.numRows, dicomSlices.length];
-  imageData.setDimensions(...dimensions);
-  windowWidthCenter.push(windowWidthDescription[0]);
-  windowWidthCenter.push(windowCenterDescription[0]);
-  console.log("windowWidthCenter", windowWidthCenter);
-  // 设置图像数据的维度和体素间距
-  let spacing = [pixelSpacingDescription[0], pixelSpacingDescription[1], sliceThicknessDescription[0]];
-  imageData.setSpacing(spacing);
-  imageData.setOrigin([0, 0, 0]);
-  const typedPixelArray = new Float32Array(dimensions[0] * dimensions[1] * dimensions[2]);
-  dicomSlices.forEach((slice, index) => {
-    const slicePixelData = slice.pixelData.Description.data;
-    const sliceOffset = dimensions[0] * dimensions[1] * index;
-    typedPixelArray.set(slicePixelData, sliceOffset);
-  });
-  const scalarArray = _kitware_vtk_js_Common_Core_DataArray__WEBPACK_IMPORTED_MODULE_4__["default"].newInstance({
-    name: "Pixels",
-    dataType: "Float32Array",
-    numberOfComponents: 1,
-    values: typedPixelArray
-  });
-  imageData.getPointData().setScalars(scalarArray);
-  return imageData;
-}
-/**
- * 从 DICOM 文件的 ArrayBuffer 中提取指定的标签数据，并记录执行时间。
- *
- * @param {Array} arrayBuffer - 包含多个 DICOM 文件的 ArrayBuffer 列表。
- * @param {Object} dicomTags - 需要提取的 DICOM 标签集合，格式为 { key: { id: 'xxxx,xxxx' } }。
- * @returns {Array} - 返回包含每个文件标签信息的数组。
- */
-function getTags(arrayBuffer, dicomTags) {
-  console.log("arrayBuffer", arrayBuffer); // 输出传入的 ArrayBuffer 信息，便于调试
-
-  // 记录开始时间
-  console.time("getTags Execution Time"); // 或者使用 const startTime = Date.now();
-
-  if (arrayBuffer.length === 0) {
-    console.error("文件 buffer 为空，不支持获取 tags 数据");
-    return [];
-  }
-  const dicom_info = []; // 存储所有 DICOM 文件的标签信息
-
-  arrayBuffer.forEach(buffer => {
-    const data_a = new DataView(buffer); // 使用 DataView 读取 ArrayBuffer 数据
-    (_halo_200804__WEBPACK_IMPORTED_MODULE_0___default().Parser).verbose = false; // 关闭 daikon 的详细日志输出，提高性能
-    const dicom_data = _halo_200804__WEBPACK_IMPORTED_MODULE_0___default().Series.parseImage(data_a); // 解析 DICOM 数据，生成解析结果
-
-    const tagsInfo = {}; // 存储当前 DICOM 文件的标签信息
-
-    Object.keys(dicomTags).forEach(key => {
-      const tag = dicomTags[key];
-      const idWithoutComma = tag.id.replace(/,/g, ""); // 去掉标签 ID 中的逗号，便于匹配
-
-      // 特殊处理图像数据标签（7FE0,0010）
-      if (idWithoutComma === "7FE00010") {
-        const hit_bit = dicom_data.getInterpretedData(false, true); // 提取图像数据
-        tagsInfo[key] = {
-          ID: idWithoutComma,
-          Description: hit_bit
-        }; // 保存图像数据
-      }
-      // 提取其他指定标签的数据
-      else if (idWithoutComma in dicom_data.tags) {
-        tagsInfo[key] = {
-          ID: idWithoutComma,
-          Description: dicom_data.tags[idWithoutComma].value // 提取标签值
-        };
-      }
-    });
-    dicom_info.push(tagsInfo); // 将当前文件的标签信息存入结果数组
-  });
-
-  // 记录结束时间
-  console.timeEnd("getTags Execution Time"); // 或者使用 const endTime = Date.now(); console.log(`Execution Time: ${endTime - startTime}ms`);
-
-  return dicom_info; // 返回所有文件的标签信息
 }
 function f_load_directory(selectFiles) {
   let dicom_arraybuffer = [];
@@ -79982,6 +79471,15 @@ function f_load_directory(selectFiles) {
     dicom_arraybuffer.push(readFileAsync(file));
   }
   return dicom_arraybuffer;
+}
+// ----------------------------------------------------------------------------
+// 设置渲染代码
+// ----------------------------------------------------------------------------
+function createRGBStringFromRGBValues(rgb) {
+  if (rgb.length !== 3) {
+    return "rgb(0, 0, 0)";
+  }
+  return `rgb(${(rgb[0] * 255).toString()}, ${(rgb[1] * 255).toString()}, ${(rgb[2] * 255).toString()})`;
 }
 })();
 
