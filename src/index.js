@@ -60,24 +60,28 @@ const appCursorStyles = {
 // ----------------------------------------------------------------------------
 // 配置文件参数
 // ----------------------------------------------------------------------------
-const viewColors = config.viewColors && config.viewColors.length > 0 
-  ? config.viewColors 
-  : [
-      [1, 0, 0],    // axial
-      [0, 1, 0],    // coronal
-      [0, 0, 1],    // sagittal
-      [0.5, 0.5, 0.5], // 3D
-    ];
+const viewColors =
+  config.viewColors && config.viewColors.length > 0
+    ? config.viewColors
+    : [
+        [1, 0, 0], // axial
+        [0, 1, 0], // coronal
+        [0, 0, 1], // sagittal
+        [0.5, 0.5, 0.5], // 3D
+      ];
+
 const syntheticImageData = new SyntheticImageData();
-const display3d = new Display3D
-const loadimage = new LoadImage
+const display3d = new Display3D();
+const loadimage = new LoadImage();
 // ----------------------------------------------------------------------------
 // 定义 html 结构
 // ----------------------------------------------------------------------------
 const container = document.getElementById("container");
+container.style.display = "flex";
+container.style.flexFlow = "wrap-reverse";
+container.style.justifyContent = "space-between";
 const controlContainer = document.createElement("div");
 container.appendChild(controlContainer);
-
 const checkboxTranslation = document.getElementById("checkboxTranslation");
 const checkboxShowRotation = document.getElementById("checkboxShowRotation");
 const checkboxRotation = document.getElementById("checkboxRotation");
@@ -86,21 +90,22 @@ for (let i = 0; i < 4; i++) {
   // 创建一个新的 div 元素作为容器，父级容器，用来放置视图
   const elementParent = document.createElement("div");
   // 为父容器设置 CSS 类名
-  elementParent.setAttribute("class", "view");
+  // elementParent.setAttribute("class", "view");
   // 设置父容器的宽度为页面宽度的 50%
   elementParent.style.width = "50%";
   // 设置父容器的高度为 300px
-  elementParent.style.height = "300px";
+  elementParent.style.height = "400px";
   // 设置父容器的显示方式为 inline-block，确保它会与其他元素并排显示
   elementParent.style.display = "inline-block"; // 保留上下外边距/内边距
   // 创建一个新的 div 元素作为实际的视图容器
   const element = document.createElement("div");
   // 为视图容器设置 CSS 类名
-  element.setAttribute("class", "view");
+  // element.setAttribute("class", "view");
   // 设置视图容器的宽度为父容器的 100%
   element.style.width = "100%";
   // 设置视图容器的高度为父容器的 100%
-  element.style.height = "100%";
+  element.style.height = "90%";
+  element.style.display = "inline-block"; // 保留上下外边距/内边距
   // 将实际的视图容器添加到父容器中
   elementParent.appendChild(element);
   // 将父容器添加到页面的指定容器（container）中
@@ -162,7 +167,7 @@ for (let i = 0; i < 4; i++) {
     obj.widgetInstance.setHoleWidth(0);
     // 设置小部件为非无限线（即长度有限）
     obj.widgetInstance.setInfiniteLine(false);
-    // 调整标签为 'line' 的所有状态的缩放比例  
+    // 调整标签为 'line' 的所有状态的缩放比例
     // x 和 y 轴方向的缩放因子为 2（变宽和变高）
     // z 轴方向的缩放因子为 300（在深度方向拉长）
     widgetState.getStatesWithLabel("line").forEach((state) => state.setScale3(2, 2, 1000));
@@ -183,7 +188,7 @@ for (let i = 0; i < 4; i++) {
   //-------------------------------------------------------------------------------------------------------------------------------
   // 创建一个 vtkImageReslice 实例，用于图像重切割操作
   obj.reslice = vtkImageReslice.newInstance();
-  
+
   // 设置重切割模式为 SlabMode.MEAN，表示在切割方向上对多个切片取平均
   obj.reslice.setSlabMode(SlabMode.MEAN);
 
@@ -215,7 +220,7 @@ for (let i = 0; i < 4; i++) {
 
   // 初始化一个空数组，用于存储球体源对象
   obj.sphereSources = [];
-    //-------------------------------------------------------------------------------------------------------------------------------
+  //-------------------------------------------------------------------------------------------------------------------------------
   //-------------------------------------------------------------------------------------------------------------------------------
   // Create sphere for each 2D views which will be displayed in 3D
   // Define origin, point1 and point2 of the plane used to reslice the volume
@@ -307,17 +312,71 @@ for (let i = 0; i < 4; i++) {
   obj.orientationWidget.setMinPixelSize(100);
   obj.orientationWidget.setMaxPixelSize(300);
 
-  // create sliders
+  const bottomDisplay = document.createElement("div");
+  // bottomDisplay.setAttribute("class", "view");
+  bottomDisplay.style.top = "0px";
+  bottomDisplay.style.width = "100%";
+  bottomDisplay.style.height = "10%";
+
+  element.appendChild(bottomDisplay);
   if (i < 3) {
+    const bottomDiv = document.createElement("div");
+    // bottomDiv.setAttribute("class", "view");
+    bottomDiv.style.width = "100%";
+    bottomDiv.style.height = "100%";
+    bottomDiv.style.display = "flex";
+    // bottomDiv0.innerText = "这是底部显示文本";  // 你可以修改这里的文本内容
+    // const buttonContainer = document.createElement("div");
+    // // buttonContainer.setAttribute("class", "view");
+    // buttonContainer.style.width = "30%";
+    // buttonContainer.style.height = "100%";
+    // buttonContainer.style.display = "flex";
+    // buttonContainer.style.border = "2px solid black"; // 2px 宽的黑色实线边框
+
+    const slide = document.createElement("div");
+    // slide.setAttribute("class", "view");
+    slide.style.width = "100%";
+    slide.style.height = "100%";
+    slide.style.display = "flex";
+    // slide.style.border = "2px solid black"; // 2px 宽的黑色实线边框
     const slider = document.createElement("input");
     slider.type = "range";
     slider.min = 0;
     slider.max = 300;
     slider.style.bottom = "0px";
     slider.style.width = "100%";
-    elementParent.appendChild(slider);
-    obj.slider = slider;
+    slide.appendChild(slider);
 
+    // const axialButton = createColorCheckbox("轴向截面(Axial)", "axial");
+    // slide.appendChild(axialButton);
+    // axialButton.addEventListener("input",(ev) => {
+    //   alert("达到最高点击次数！",ev);
+    // });
+    // if (i==0){
+    //   const axialButton = createColorButton("轴向截面(Axial)", "axial");
+    //   buttonContainer.appendChild(axialButton);
+    //   axialButton.addEventListener("click", function() {
+
+    //     alert("达到最高点击次数！");
+
+    // });
+    // }
+
+    // if (i==1){
+    //   const coronalButton = createColorButton("冠状面(Coronal)", "coronal");
+    //   buttonContainer.appendChild(coronalButton);
+    // }
+    // if (i==2){
+    //   const sagittalButton = createColorButton("矢状面(Sagittal)", "sagittal");
+    //   buttonContainer.appendChild(sagittalButton);
+    // }
+
+    // bottomDiv.appendChild(buttonContainer);
+    bottomDiv.appendChild(slide);
+
+    bottomDisplay.appendChild(bottomDiv);
+
+    obj.slider = slider;
     // 为滑块添加事件监听器，当滑块值发生改变时触发
     slider.addEventListener("input", (ev) => {
       // 检查是否存在有效的图像
@@ -357,10 +416,125 @@ for (let i = 0; i < 4; i++) {
       }
     });
   }
+  // if (i==3){
+  //   const bottomDiv3 = document.createElement("div")
+  //   bottomDiv3.setAttribute("class", "view");
+  //   bottomDiv3.style.width = "100%";
+  //   bottomDiv3.style.height = "100%";
+  //   bottomDiv3.innerText = "这是底部显示文本";  // 你可以修改这里的文本内容
+  //   bottomDisplay.appendChild(bottomDiv3);
+  // }
+
+  // create sliders
+  // if (i < 3) {
+  //   const slider = document.createElement("input");
+  //   slider.type = "range";
+  //   slider.min = 0;
+  //   slider.max = 300;
+  //   slider.style.bottom = "0px";
+  //   slider.style.width = "100%";
+  //   elementParent.appendChild(slider);
+  //   obj.slider = slider;
+
+  //   // 为滑块添加事件监听器，当滑块值发生改变时触发
+  //   slider.addEventListener("input", (ev) => {
+  //     // 检查是否存在有效的图像
+  //     const image = widget.getWidgetState().getImage();
+  //     if (image) {
+  //       // 获取滑块的新值（用户拖动后的数值）
+  //       const newDistanceToP1 = ev.target.value;
+
+  //       // 获取当前平面的法向量（用于表示平面的方向）
+  //       const dirProj = widget.getWidgetState().getPlanes()[xyzToViewType[i]].normal;
+
+  //       // // 获取当前平面的边界点（通常是平面的两个端点）
+  //       const planeExtremities = widget.getPlaneExtremities(xyzToViewType[i]);
+
+  //       // 计算新的平面中心点：
+  //       // 从平面起始点 planeExtremities[0] 出发，
+  //       // 沿法向量 dirProj 移动 newDistanceToP1 的距离
+  //       const newCenter = vtkMath.multiplyAccumulate(
+  //         planeExtremities[0], // 起始点
+  //         dirProj, // 法向量
+  //         Number(newDistanceToP1), // 滑块值转换为数字
+  //         [] // 结果存储在一个新数组中
+  //       );
+  //       // 设置平面的新中心点
+  //       widget.setCenter(newCenter);
+
+  //       // 模拟用户交互，触发小部件的交互事件，确保状态更新
+  //       obj.widgetInstance.invokeInteractionEvent(obj.widgetInstance.getActiveInteraction());
+
+  //       // 遍历所有视图属性，逐一渲染每个视图以更新显示
+  //       viewAttributes.forEach((obj2) => {
+  //         obj2.interactor.render(); // 重新渲染视图
+  //       });
+  //     } else {
+  //       // 弹出提示信息，提示用户未加载有效的图像
+  //       alert("当前未加载有效图像，无法执行操作。");
+  //     }
+  //   });
+  // }
 }
 // ----------------------------------------------------------------------------
 // UI 控件处理
 // ----------------------------------------------------------------------------
+// 创建一个按钮的辅助函数
+function createColorButton(labelText, buttonId) {
+  const button = document.createElement("button");
+  button.id = buttonId;
+  button.textContent = labelText;
+  button.style.width = "100%";
+  button.style.height = "100%";
+  button.style.backgroundColor = "lightgray"; // 初始颜色
+  button.style.cursor = "pointer"; // 设置鼠标指针样式为“手形”，表示可以点击
+  button.style.pointerEvents = "auto"; // 确保可以响应点击事件
+  return button;
+}
+function createColorCheckbox(labelText, checkboxId) {
+  const checkboxContainer = document.createElement("div");
+
+  // Create the checkbox element
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.id = checkboxId;
+
+  // Create the label element
+  const label = document.createElement("label");
+  label.textContent = labelText;
+  label.setAttribute("for", checkboxId);
+
+  // Style the checkbox
+  checkbox.style.cursor = "pointer"; // Ensure cursor shows as "pointer" on hover
+
+  // Optional: Style the container for layout
+  checkboxContainer.style.width = "100%";
+  checkboxContainer.style.height = "100%";
+  checkboxContainer.style.display = "flex";
+  checkboxContainer.style.alignItems = "center";
+  checkboxContainer.style.justifyContent = "center";
+  checkboxContainer.style.bottom = "0px";
+  // Append the checkbox and label to the container
+  checkboxContainer.appendChild(checkbox);
+  checkboxContainer.appendChild(label);
+
+  return checkboxContainer;
+}
+
+
+//-----------------------------------------矢状面--------------------------------------------------------------
+
+// 创建切换按钮颜色的函数
+function toggleButtonColor(button) {
+  alert(button.style.backgroundColor);
+  if (button.style.backgroundColor === "lightgray") {
+    // 如果当前颜色是灰色，切换为选中颜色
+    button.style.backgroundColor = "red"; // 选中颜色
+  } else {
+    // 如果当前颜色是选中颜色，切换为未选中颜色
+    button.style.backgroundColor = "lightgray"; // 未选中颜色
+  }
+}
 // ----------------------------------------------------------------------------
 // 逻辑代码
 // ----------------------------------------------------------------------------
@@ -372,32 +546,32 @@ export async function load(ArrayBuffer) {
       arrayBuffer.push(buffer);
     }
   }
-  return arrayBuffer
+  return arrayBuffer;
 }
 /**
  * 加载 MPR 数据并渲染多切片图像。
  * @param {ArrayBuffer} arrayBuffer - 输入的二进制数据缓冲区。
  */
- export function loadMPR(arrayBuffer) {
+export function loadMPR(arrayBuffer) {
   if (!arrayBuffer) {
-      // 检查输入是否有效
-      throw new Error("arrayBuffer 不能为空！");
+    // 检查输入是否有效
+    throw new Error("arrayBuffer 不能为空！");
   }
   // 解析输入数据以生成图像数据和窗口设置
   let { imageData, windowWidth, windowCenter } = syntheticImageData.ImageData(arrayBuffer);
 
   if (!imageData) {
-      // 确保解析结果有效
-      throw new Error("图像数据生成失败，请检查输入的 arrayBuffer 格式是否正确。");
+    // 确保解析结果有效
+    throw new Error("图像数据生成失败，请检查输入的 arrayBuffer 格式是否正确。");
   }
 
   // 使用生成的图像数据渲染多切片图像
-  MultiSliceImageMapper(imageData,windowWidth, windowCenter);
+  MultiSliceImageMapper(imageData, windowWidth, windowCenter);
 
   // 可选：日志输出调试信息
   console.log(`MPR 加载完成，窗口宽度: ${windowWidth}, 窗口中心: ${windowCenter}`);
 }
-function MultiSliceImageMapper(imageData,windowWidth, windowCenter) {
+function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
   // 将加载的图像数据设置到一个假设的控件 `widget` 中进行显示
   widget.setImage(imageData);
   // 调用封装函数，创建一个 vtkCursor3D 边框
@@ -424,7 +598,7 @@ function MultiSliceImageMapper(imageData,windowWidth, windowCenter) {
     viewAttributes.forEach((v) => {
       // 在交互开始时，更新重采样器的状态
       v.widgetInstance.onStartInteractionEvent(() => {
-        loadimage.updateReslice(view3D,widget,widgetState,{
+        loadimage.updateReslice(view3D, widget, widgetState, {
           viewType,
           reslice,
           actor: obj.resliceActor,
@@ -444,7 +618,7 @@ function MultiSliceImageMapper(imageData,windowWidth, windowCenter) {
           const activeViewType = widget.getWidgetState().getActiveViewType();
           // 如果当前视图是活动视图或不能更新焦点，则允许计算焦点偏移
           const computeFocalPointOffset = activeViewType === viewType || !canUpdateFocalPoint;
-          loadimage.updateReslice(view3D,widget,widgetState,{
+          loadimage.updateReslice(view3D, widget, widgetState, {
             viewType,
             reslice,
             actor: obj.resliceActor,
@@ -459,7 +633,7 @@ function MultiSliceImageMapper(imageData,windowWidth, windowCenter) {
     });
 
     // 初始化时，更新切片的状态，并将焦点设置为图像中心
-    loadimage.updateReslice(view3D,widget,widgetState,{
+    loadimage.updateReslice(view3D, widget, widgetState, {
       viewType,
       reslice,
       actor: obj.resliceActor,
