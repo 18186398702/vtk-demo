@@ -20,7 +20,7 @@ import vtkWidgetManager from "@kitware/vtk.js/Widgets/Core/WidgetManager";
 import vtkCursor3D from "@kitware/vtk.js/Filters/Sources/Cursor3D";
 import vtkSphereSource from "@kitware/vtk.js/Filters/Sources/SphereSource";
 import { CaptureOn } from "@kitware/vtk.js/Widgets/Core/WidgetManager/Constants";
-
+import vtkImageCPRMapper from '@kitware/vtk.js/Rendering/Core/ImageCPRMapper';
 import { vec3 } from "gl-matrix";
 import { SlabMode } from "@kitware/vtk.js/Imaging/Core/ImageReslice/Constants";
 import vtkImageData from "@kitware/vtk.js/Common/DataModel/ImageData";
@@ -33,7 +33,7 @@ import vtkActor from "@kitware/vtk.js/Rendering/Core/Actor";
 import vtkVolumeMapper from "@kitware/vtk.js/Rendering/Core/VolumeMapper";
 import vtkMapper from "@kitware/vtk.js/Rendering/Core/Mapper";
 import vtkImageMarchingCubes from "@kitware/vtk.js/Filters/General/ImageMarchingCubes";
-
+import SyntheticImageData from "./SyntheticImageData"
 // ----------------------------------------------------------------------------
 // Define main attributes
 // ----------------------------------------------------------------------------
@@ -225,6 +225,7 @@ for (let i = 0; i < 4; i++) {
 
   // 创建一个 vtkImageReslice 实例，用于图像重切割操作
   obj.reslice = vtkImageReslice.newInstance();
+  
   // 设置重切割模式为 SlabMode.MEAN，表示在切割方向上对多个切片取平均
   obj.reslice.setSlabMode(SlabMode.MEAN);
 
@@ -246,6 +247,8 @@ for (let i = 0; i < 4; i++) {
   obj.resliceMapper.setInputConnection(obj.reslice.getOutputPort());
   // 创建一个 vtkImageSlice 实例，用于显示图像切片
   obj.resliceActor = vtkImageSlice.newInstance();
+  // obj.resliceActor.setPosition(-200, -200, 0);  // 调整 X 和 Y 的位置
+  // obj.resliceActor.setScale(2.0, 2.0, 1.0);
   // 将映射器应用到 vtkImageSlice 上，以便它能够渲染图像
   obj.resliceActor.setMapper(obj.resliceMapper);
 
@@ -508,7 +511,7 @@ function setupCursor3D(
   // 清除渲染器中的所有演员
   view3D.renderer.getActors().forEach((actor) => {
     view3D.renderer.removeActor(actor);
-  });;
+  });
 
   // 如果需要移除已有体积演员，执行删除
   if (view3D.vtkVolumeActor) {
@@ -710,7 +713,12 @@ function initializeVolumeRendering(view3D, imageData, options = {}) {
 
   // 调整相机视图
   const camera = view3D.renderer.getActiveCamera();
-  camera.setViewUp(0, 1, 0); // 设置相机视图的“向上”方向
+  const position = camera.getPosition();
+
+  camera.setViewUp(0, 0, 1); // 设置相机视图的“向上”方向
+  // 假设相机当前在 [0, 0, 500]，将其移动到 [0, 0, 1000] 以缩小显示
+  console.log(position);
+  camera.setPosition(position[0], position[1], position[2] * 2); // 将相机位置放远
   view3D.renderer.resetCamera(); // 重置相机
 
   // 禁用交互式渲染
@@ -1068,25 +1076,60 @@ export async function load(ArrayBuffer) {
       arrayBuffer.push(buffer);
     }
   }
-  if (arrayBuffer.length != 0) {
-    const loader = new Loader();
-    loader.MPR(arrayBuffer);
-  } else {
-    alert("没有数据可加载MPR");
-  }
+  return arrayBuffer
+  // if (arrayBuffer.length != 0) {
+  //   const loader = new Loader();
+  //   loader.MPR(arrayBuffer);
+  // } else {
+  //   alert("没有数据可加载MPR");
+  // }
+
 }
+/**
+ * 加载 MPR 数据并渲染多切片图像。
+ * @param {ArrayBuffer} arrayBuffer - 输入的二进制数据缓冲区。
+ */
+ export function loadMPR(arrayBuffer) {
+  if (!arrayBuffer) {
+      // 检查输入是否有效
+      throw new Error("arrayBuffer 不能为空！");
+  }
+
+  // 创建 SyntheticImageData 实例
+  const syntheticImageData = new SyntheticImageData();
+
+  // 解析输入数据以生成图像数据和窗口设置
+  const { imageData, windowWidth, windowCenter } = syntheticImageData.ImageData(arrayBuffer);
+
+  if (!imageData) {
+      // 确保解析结果有效
+      throw new Error("图像数据生成失败，请检查输入的 arrayBuffer 格式是否正确。");
+  }
+
+  // 使用生成的图像数据渲染多切片图像
+  MultiSliceImageMapper(imageData);
+
+  // 可选：日志输出调试信息
+  console.log(`MPR 加载完成，窗口宽度: ${windowWidth}, 窗口中心: ${windowCenter}`);
+}
+
 export class Loader {
   MPR(array_Buffer) {
     const startTime = Date.now();
-    let dicom_info = getTags(array_Buffer, dicomTags);
+    // 创建类实例
+    const syntheticImageData = new SyntheticImageData();
+    const { imageData, windowWidth, windowCenter } = syntheticImageData.ImageData(array_Buffer);
+    console.log(imageData,"imageData",windowWidth,"windowWidth",windowCenter,"windowCenter");
+    // let dicom_info = getTags(array_Buffer, dicomTags);
     const endTime = Date.now();
     console.log(`Execution Time: ${endTime - startTime}ms`);
-    if (dicom_info.length == 0) {
-      console.error("获取 dicom 信息数据为空");
-    } else {
-      imageData = createImageData(dicom_info);
+    // if (dicom_info.length == 0) {
+    //   console.error("获取 dicom 信息数据为空");
+    // } else {
+      // imageData = createImageData(dicom_info);
+      // imageData = image
       MultiSliceImageMapper(imageData);
-    }
+    // }
   }
 }
 
@@ -1105,9 +1148,9 @@ function MultiSliceImageMapper(imageData) {
   viewAttributes.forEach((obj, i) => {
     // 设置该视图的重采样输入数据为加载的图像数据
     obj.reslice.setInputData(imageData);
-    const property = obj.resliceActor.getProperty();
-    property.setColorWindow(windowWidthCenter[0]); // 设置窗口宽度
-    property.setColorLevel(windowWidthCenter[1]); // 设置窗口中心
+    // const property = obj.resliceActor.getProperty();
+    // property.setColorWindow(windowWidthCenter[0]); // 设置窗口宽度
+    // property.setColorLevel(windowWidthCenter[1]); // 设置窗口中心
     // 将该视图的重采样演员添加到渲染器中
     obj.renderer.addActor(obj.resliceActor);
     // 遍历并将该视图中的球体演员添加到渲染器中
@@ -1189,6 +1232,7 @@ function createImageData(dicomSlices) {
   }
   // 提取第一个 dicomSlice 的必要信息
   const firstSlice = dicomSlices[0];
+  console.log(firstSlice,"firstSlice");
   const { pixelData, windowCenter, windowWidth, sliceThickness, pixelSpacing } = firstSlice;
 
   const { Description: pixelDataDescription } = pixelData;
