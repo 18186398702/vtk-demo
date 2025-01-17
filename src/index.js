@@ -60,9 +60,7 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
   viewAttributes.forEach((obj, i) => {
     // 设置该视图的重采样输入数据为加载的图像数据
     obj.reslice.setInputData(imageData);
-    const property = obj.resliceActor.getProperty();
-    property.setColorWindow(windowWidth); // 设置窗口宽度
-    property.setColorLevel(windowCenter); // 设置窗口中心
+    setColorProperties(obj, windowWidth, windowCenter);
     // 将该视图的重采样演员添加到渲染器中
     obj.renderer.addActor(obj.resliceActor);
     // 遍历并将该视图中的球体演员添加到渲染器中
@@ -158,6 +156,25 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
     viewAttributes
   );
 }
+// 封装函数，检查数组有效性并设置颜色窗口和颜色中心
+function setColorProperties(obj, windowWidth, windowCenter) {
+  const property = obj.resliceActor.getProperty();
+  
+  // 验证并设置窗口宽度
+  if (Array.isArray(windowWidth) && windowWidth.length > 0) {
+      property.setColorWindow(windowWidth[0]); // 假设使用第一个值，或者根据具体需求使用
+  } else {
+      console.warn("windowWidth 不是有效的数组或数组为空");
+  }
+
+  // 验证并设置窗口中心
+  if (Array.isArray(windowCenter) && windowCenter.length > 0) {
+      property.setColorLevel(windowCenter[0]); // 假设使用第一个值，或者根据具体需求使用
+  } else {
+      console.warn("windowCenter 不是有效的数组或数组为空");
+  }
+}
+
 function handleButtonResetClick(
   buttonReset,
   widget,
