@@ -62,7 +62,10 @@ class MPRRendering {
     const display3d = new Display3D();
     // 创建vtk的ResliceCursor Widget实例
     const widget = vtkResliceCursorWidget.newInstance();
+    window.va = viewAttributes;
+    window.widget = widget;
     const widgetState = widget.getWidgetState();
+
     widgetState.getStatesWithLabel("sphere").forEach((handle) => handle.setScale1(20));
     const checkboxOrthogonality = document.getElementById("checkboxOrthogonality");
     // 获取容器元素并设置样式
