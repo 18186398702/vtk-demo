@@ -35,7 +35,7 @@ import vtkImageMarchingCubes from "@kitware/vtk.js/Filters/General/ImageMarching
 import SyntheticImageData from "./syntheticimage";
 import Display3D from "./load3d";
 import LoadImage from "./loadimage";
-import MPRRendering from "./rendingmpr"
+import MPRRendering from "./rendingmpr";
 
 const syntheticImageData = new SyntheticImageData();
 const display3d = new Display3D();
@@ -75,7 +75,8 @@ export function loadMPR(arrayBuffer) {
   console.log(`MPR 加载完成，窗口宽度: ${windowWidth}, 窗口中心: ${windowCenter}`);
 }
 function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
-  const {viewAttributes,view3D,widget,widgetState} = mprrendering.createRenderingPage()
+  const { viewAttributes, view3D, widget, widgetState } = mprrendering.createRenderingPage();
+  const initialPlanesState = { ...widgetState.getPlanes() };
   // 将加载的图像数据设置到一个假设的控件 `widget` 中进行显示
   widget.setImage(imageData);
   // 调用封装函数，创建一个 vtkCursor3D 边框
@@ -157,9 +158,111 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
   view3D.renderer.resetCameraClippingRange();
   view3D.renderWindow.render();
   // 设置最大切片数量到滑块的最大值
-  const maxNumberOfSlices = vec3.length(imageData.getDimensions());
+  // const maxNumberOfSlices = vec3.length(imageData.getDimensions());
   // document.getElementById("slabNumber").max = maxNumberOfSlices;
+  const checkboxShowRotation = document.getElementById("checkboxShowRotation");
+  const checkboxRotation = document.getElementById("checkboxRotation");
+  // 假设 `widget` 和 `widgetState` 已经被正确初始化
+  handleCheckboxShowRotationChange(
+    checkboxShowRotation,
+    checkboxRotation,
+    widget,
+    widgetState,
+    viewAttributes
+  );
+  const checkboxTranslation = document.getElementById("checkboxTranslation");
+  // 假设 `widget` 和 `viewAttributes` 已经被正确初始化
+  handleCheckboxTranslationChange(checkboxTranslation, widget, viewAttributes);
+  const buttonReset = document.getElementById("buttonReset");
+  // 假设 `widget`、`widgetState`、`initialPlanesState`、`view3D`、`viewAttributes` 已经被正确初始化
+  handleButtonResetClick(
+    buttonReset,
+    widget,
+    widgetState,
+    initialPlanesState,
+    view3D,
+    viewAttributes
+  );
 }
+function handleButtonResetClick(
+  buttonReset,
+  widget,
+  widgetState,
+  initialPlanesState,
+  view3D,
+  viewAttributes
+) {
+  buttonReset.addEventListener("click", () => {
+    // 检查是否存在有效的图像
+    const image = widget.getWidgetState().getImage();
+    if (image) {
+      widgetState.setPlanes({ ...initialPlanesState });
+      // 设置中心点为图像中心
+      widget.setCenter(image.getCenter());
+      updateViews(view3D, viewAttributes, widget, widgetState);
+    } else {
+      alert("当前未加载有效图像，无法执行重置操作。");
+    }
+  });
+}
+
+function updateViews(view3D, viewAttributes, widget, widgetState) {
+  viewAttributes.forEach((obj, i) => {
+    loadimage.updateReslice(view3D, widget, widgetState, {
+      viewType: xyzToViewType[i],
+      reslice: obj.reslice,
+      actor: obj.resliceActor,
+      renderer: obj.renderer,
+      resetFocalPoint: true,
+      computeFocalPointOffset: true,
+      sphereSources: obj.sphereSources,
+      resetViewUp: true,
+    });
+    obj.renderWindow.render();
+  });
+  view3D.renderer.resetCamera();
+  view3D.renderer.resetCameraClippingRange();
+}
+function handleCheckboxTranslationChange(checkboxTranslation, widget, viewAttributes) {
+  checkboxTranslation.addEventListener("change", (ev) => {
+    // 检查是否存在有效的图像
+    const image = widget.getWidgetState().getImage();
+    if (image) {
+      viewAttributes.forEach((obj) =>
+        obj.widgetInstance.setEnableTranslation(checkboxTranslation.checked)
+      );
+    } else {
+      alert("当前未加载有效图像，无法执行平移操作。");
+    }
+  });
+}
+
+function handleCheckboxShowRotationChange(
+  checkboxShowRotation,
+  checkboxRotation,
+  widget,
+  widgetState,
+  viewAttributes
+) {
+  checkboxShowRotation.addEventListener("change", (ev) => {
+    // 检查是否存在有效的图像
+    const image = widget.getWidgetState().getImage();
+    if (image) {
+      widgetState
+        .getStatesWithLabel("rotation")
+        .forEach((handle) => handle.setVisible(checkboxShowRotation.checked));
+      viewAttributes.forEach((obj) => {
+        obj.interactor.render();
+      });
+      checkboxRotation.checked = checkboxShowRotation.checked;
+      checkboxRotation.disabled = !checkboxShowRotation.checked;
+      checkboxRotation.dispatchEvent(new Event("change"));
+    } else {
+      alert("当前未加载有效图像，无法执行旋转操作。");
+    }
+  });
+}
+
 export function f_load_directory(selectFiles) {
   let dicom_arraybuffer = [];
   for (var file of selectFiles) {

@@ -73,9 +73,6 @@ class MPRRendering {
     const widget = vtkResliceCursorWidget.newInstance();
     const widgetState = widget.getWidgetState();
     widgetState.getStatesWithLabel("sphere").forEach((handle) => handle.setScale1(20));
-    const checkboxTranslation = document.getElementById("checkboxTranslation");
-    const checkboxShowRotation = document.getElementById("checkboxShowRotation");
-    const checkboxRotation = document.getElementById("checkboxRotation");
     const checkboxOrthogonality = document.getElementById("checkboxOrthogonality");
     // 获取容器元素并设置样式
     const container = document.getElementById("container");
@@ -372,7 +369,7 @@ class MPRRendering {
     for (let i = 0; i < numElements; i++) {
       // 创建父级容器，放置视图和按钮
       const elementParent = document.createElement("div");
-      elementParent.style.width = "49.7%";
+      elementParent.style.width = "50%";
       elementParent.style.height = "100%";
       elementParent.style.display = "inline-block";
       controlContainer.appendChild(elementParent);
