@@ -2,36 +2,10 @@ import "@kitware/vtk.js/favicon";
 
 // Load the rendering pieces we want to use (for both WebGL and WebGPU)
 import "@kitware/vtk.js/Rendering/Profiles/All";
-
-import vtkAnnotatedCubeActor from "@kitware/vtk.js/Rendering/Core/AnnotatedCubeActor";
-import vtkDataArray from "@kitware/vtk.js/Common/Core/DataArray";
-import vtkGenericRenderWindow from "@kitware/vtk.js/Rendering/Misc/GenericRenderWindow";
-import vtkImageMapper from "@kitware/vtk.js/Rendering/Core/ImageMapper";
-import vtkImageReslice from "@kitware/vtk.js/Imaging/Core/ImageReslice";
-import vtkImageSlice from "@kitware/vtk.js/Rendering/Core/ImageSlice";
-import vtkInteractorStyleImage from "@kitware/vtk.js/Interaction/Style/InteractorStyleImage";
-import vtkInteractorStyleTrackballCamera from "@kitware/vtk.js/Interaction/Style/InteractorStyleTrackballCamera";
-import vtkMath from "@kitware/vtk.js/Common/Core/Math";
-import vtkOutlineFilter from "@kitware/vtk.js/Filters/General/OutlineFilter";
-import vtkOrientationMarkerWidget from "@kitware/vtk.js/Interaction/Widgets/OrientationMarkerWidget";
-import vtkResliceCursorWidget from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget";
-import vtkWidgetManager from "@kitware/vtk.js/Widgets/Core/WidgetManager";
-
-import vtkSphereSource from "@kitware/vtk.js/Filters/Sources/SphereSource";
-import { CaptureOn } from "@kitware/vtk.js/Widgets/Core/WidgetManager/Constants";
-import vtkImageCPRMapper from "@kitware/vtk.js/Rendering/Core/ImageCPRMapper";
-import { vec3 } from "gl-matrix";
-import { SlabMode } from "@kitware/vtk.js/Imaging/Core/ImageReslice/Constants";
-import vtkImageData from "@kitware/vtk.js/Common/DataModel/ImageData";
 import {
   xyzToViewType,
   InteractionMethodsName,
 } from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants";
-import vtkVolume from "@kitware/vtk.js/Rendering/Core/Volume";
-import vtkActor from "@kitware/vtk.js/Rendering/Core/Actor";
-import vtkVolumeMapper from "@kitware/vtk.js/Rendering/Core/VolumeMapper";
-import vtkMapper from "@kitware/vtk.js/Rendering/Core/Mapper";
-import vtkImageMarchingCubes from "@kitware/vtk.js/Filters/General/ImageMarchingCubes";
 import SyntheticImageData from "./syntheticimage";
 import Display3D from "./load3d";
 import LoadImage from "./loadimage";
