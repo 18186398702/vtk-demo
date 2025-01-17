@@ -67,6 +67,7 @@ class MPRRendering {
     const checkboxOrthogonality = document.getElementById("checkboxOrthogonality");
     // 获取容器元素并设置样式
     const container = document.getElementById("container");
+    container.innerHTML = "";
     // 调用封装函数并获取控制面板容器
     const controlContainer = this.createControlPanel();
     // 将创建的控制面板容器添加到页面中的父容器
