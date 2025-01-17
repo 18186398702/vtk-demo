@@ -72,7 +72,7 @@ class MPRRendering {
     // 将创建的控制面板容器添加到页面中的父容器
     container.appendChild(controlContainer);
     // controlContainer.style.border = "2px solid black"; // 2px 宽的黑色实线边框
-    container.appendChild(controlContainer);
+    // container.appendChild(controlContainer);
     const { createdElements, createdSliderElements } = this.createViewWithButtons(
       controlContainer,
       4
