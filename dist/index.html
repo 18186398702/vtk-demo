@@ -9,22 +9,8 @@
     <div>
       <table>
         <tbody>
-          <tr>
-            <td>Allow translation:</td>
-            <td><input type="checkbox" id="checkboxTranslation" checked="checked" /></td>
-          </tr>
-          <tr>
-            <td>Show rotation:</td>
-            <td><input type="checkbox" id="checkboxShowRotation" checked="checked" /></td>
-          </tr>
-          <tr>
-            <td>Allow rotation:</td>
-            <td><input type="checkbox" id="checkboxRotation" checked="checked" /></td>
-          </tr>
-          <tr>
-            <td>Keep orthogonality:</td>
-            <td><input type="checkbox" id="checkboxOrthogonality" checked="checked" /></td>
-          </tr>
+          <!-- 
+
           <tr>
             <td>Scale in pixels:</td>
             <td><input type="checkbox" id="checkboxScaleInPixels" checked="checked" /></td>
@@ -82,10 +68,19 @@
           <tr>
             <td>Window Level:</td>
             <td><input type="checkbox" id="checkboxWindowLevel" checked="checked" /></td>
-          </tr>
-          <tr>
-            <td><button id="buttonReset">Reset views</button></td>
-          </tr>
+          </tr> -->
+          <span>允许平移:</span>
+          <span><input type="checkbox" id="checkboxTranslation" checked="checked" /></span>
+
+          <span>显示旋转:</span>
+          <span><input type="checkbox" id="checkboxShowRotation" checked="checked" /></span>
+
+          <span>允许旋转:</span>
+          <span><input type="checkbox" id="checkboxRotation" checked="checked" /></span>
+
+          <span>保持垂直:</span>
+          <span><input type="checkbox" id="checkboxOrthogonality" checked="checked" /></span>
+          <span><button id="buttonReset">重置视图</button></span>
           <!-- <tr>
             <td><button id="buttonClearAll">清除3D显示</button></td>
           </tr> -->
@@ -114,34 +109,34 @@
     <div id="container" style="width: 100%; border: 1px solid red"></div>
     <script src="./webvtk.js"></script>
     <script>
-            // 文件选择框的变化事件
-        dicomFileInput.addEventListener("change", function (event) {
-          const files = event.target.files;
-          if (files.length > 0) {
-            const ArrayBuffer = pian.f_load_directory(files);
-            loadAndLogBuffer(ArrayBuffer);
-          }
-        });
-        /**
-         * 加载和日志输出 ArrayBuffer
-         * @param {ArrayBuffer} arrayBuffer - 输入的二进制缓冲区
-         */
-        async function loadAndLogBuffer(arrayBuffer) {
-            try {
-                // 调用 pian.load，返回一个 Promise
-                const bufferPromise = pian.load(arrayBuffer);
-
-                // 使用 await 获取 Promise 的结果
-                const buffer = await bufferPromise;
-
-                // 输出结果
-                console.log(buffer);
-                pian.loadMPR(buffer)
-            } catch (error) {
-                // 捕获并处理 pian.load 中的错误
-                console.error("加载 buffer 时发生错误:", error);
-            }
+      // 文件选择框的变化事件
+      dicomFileInput.addEventListener("change", function (event) {
+        const files = event.target.files;
+        if (files.length > 0) {
+          const ArrayBuffer = pian.f_load_directory(files);
+          loadAndLogBuffer(ArrayBuffer);
         }
+      });
+      /**
+       * 加载和日志输出 ArrayBuffer
+       * @param {ArrayBuffer} arrayBuffer - 输入的二进制缓冲区
+       */
+      async function loadAndLogBuffer(arrayBuffer) {
+        try {
+          // 调用 pian.load，返回一个 Promise
+          const bufferPromise = pian.load(arrayBuffer);
+
+          // 使用 await 获取 Promise 的结果
+          const buffer = await bufferPromise;
+
+          // 输出结果
+          console.log(buffer);
+          pian.loadMPR(buffer);
+        } catch (error) {
+          // 捕获并处理 pian.load 中的错误
+          console.error("加载 buffer 时发生错误:", error);
+        }
+      }
     </script>
   </body>
 </html>
