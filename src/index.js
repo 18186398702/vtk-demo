@@ -11,10 +11,6 @@ import Display3D from "./load3d";
 import LoadImage from "./loadimage";
 import MPRRendering from "./rendingmpr";
 
-const syntheticImageData = new SyntheticImageData();
-const display3d = new Display3D();
-const loadimage = new LoadImage();
-const mprrendering = new MPRRendering();
 export async function load(ArrayBuffer) {
   let arrayBuffer = [];
   for (var i = 0; i < Object.keys(ArrayBuffer).length; i++) {
@@ -34,8 +30,9 @@ export function loadMPR(arrayBuffer) {
     // 检查输入是否有效
     throw new Error("arrayBuffer 不能为空！");
   }
+  const syntheticImageData = new SyntheticImageData();
   // 解析输入数据以生成图像数据和窗口设置
-  let { imageData, windowWidth, windowCenter } = syntheticImageData.ImageData(arrayBuffer);
+  const { imageData, windowWidth, windowCenter } = syntheticImageData.ImageData(arrayBuffer);
 
   if (!imageData) {
     // 确保解析结果有效
@@ -49,6 +46,9 @@ export function loadMPR(arrayBuffer) {
   console.log(`MPR 加载完成，窗口宽度: ${windowWidth}, 窗口中心: ${windowCenter}`);
 }
 function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
+  const display3d = new Display3D();
+  const loadimage = new LoadImage();
+  const mprrendering = new MPRRendering();
   const { viewAttributes, view3D, widget, widgetState } = mprrendering.createRenderingPage();
   const initialPlanesState = { ...widgetState.getPlanes() };
   // 将加载的图像数据设置到一个假设的控件 `widget` 中进行显示
