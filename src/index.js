@@ -10,7 +10,8 @@ import SyntheticImageData from "./syntheticimage";
 import Display3D from "./load3d";
 import LoadImage from "./loadimage";
 import MPRRendering from "./rendingmpr";
-
+// const mprrendering = new MPRRendering();
+// mprrendering.createRenderingPage();
 export async function load(ArrayBuffer) {
   let arrayBuffer = [];
   for (var i = 0; i < Object.keys(ArrayBuffer).length; i++) {
