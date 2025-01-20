@@ -198,6 +198,7 @@ function handleButtonResetClick(
 }
 
 function updateViews(view3D, viewAttributes, widget, widgetState) {
+  const loadimage = new LoadImage();
   viewAttributes.forEach((obj, i) => {
     loadimage.updateReslice(view3D, widget, widgetState, {
       viewType: xyzToViewType[i],
