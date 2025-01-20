@@ -17,9 +17,7 @@ import vtkWidgetManager from "@kitware/vtk.js/Widgets/Core/WidgetManager";
 import vtkSphereSource from "@kitware/vtk.js/Filters/Sources/SphereSource";
 import { CaptureOn } from "@kitware/vtk.js/Widgets/Core/WidgetManager/Constants";
 import { SlabMode } from "@kitware/vtk.js/Imaging/Core/ImageReslice/Constants";
-import {
-  xyzToViewType,
-} from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants";
+import { xyzToViewType } from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants";
 import vtkActor from "@kitware/vtk.js/Rendering/Core/Actor";
 import vtkMapper from "@kitware/vtk.js/Rendering/Core/Mapper";
 import Display3D from "./load3d";
@@ -71,16 +69,8 @@ class MPRRendering {
     // 获取容器元素并设置样式
     const container = document.getElementById("container");
     container.innerHTML = "";
-    // 调用封装函数并获取控制面板容器
-    const controlContainer = this.createControlPanel();
-    // 将创建的控制面板容器添加到页面中的父容器
-    container.appendChild(controlContainer);
-    // controlContainer.style.border = "2px solid black"; // 2px 宽的黑色实线边框
-    // container.appendChild(controlContainer);
-    const { createdElements, createdSliderElements } = this.createViewWithButtons(
-      controlContainer,
-      4
-    );
+
+    const { createdElements, createdSliderElements } = this.createViewWithButtons(container, 4);
     // 通过访问 createdViews 数组来操作这些视图元素
     createdElements.forEach((element, i) => {
       // 例如，修改第一个视图的背景颜色
@@ -333,30 +323,6 @@ class MPRRendering {
     // 返回视图属性和3D视图对象
     return { viewAttributes, view3D, widget, widgetState };
   }
-  // 封装函数：创建并返回控制面板容器
-  createControlPanel() {
-    // 创建控制面板容器
-    const controlContainer = document.createElement("div");
-
-    // 设置容器的样式
-    controlContainer.style.padding = "0%"; // 设置内边距，增加一些间距
-    controlContainer.style.width = "100%";
-    controlContainer.style.minHeight = "100%"; // 设置最小高度，容器高度至少为 300px
-    controlContainer.style.textAlign = "center"; // 文本居中显示
-    controlContainer.style.flexShrink = "0"; // 防止控制容器收缩
-
-    // 设置父容器为flex布局，支持换行
-    controlContainer.style.display = "flex";
-    controlContainer.style.flexWrap = "wrap"; // 允许换行
-    controlContainer.style.justifyContent = "space-between"; // 分布空间
-
-    // 取消或打开边框（可选）
-    // controlContainer.style.border = "2px solid black"; // 2px 宽的黑色实线边框
-
-    // 返回创建的控制面板容器
-    return controlContainer;
-  }
-
   // 封装函数，创建视图容器并添加按钮，返回创建的元素
   createViewWithButtons(controlContainer, numElements = 4) {
     const createdElements = []; // 用于存储创建的元素
@@ -365,35 +331,42 @@ class MPRRendering {
       // 创建父级容器，放置视图和按钮
       const elementParent = document.createElement("div");
       elementParent.style.width = "50%";
-      elementParent.style.height = "100%";
+      elementParent.style.height="50%"
       elementParent.style.display = "inline-block";
-      controlContainer.appendChild(elementParent);
-
+      const element = document.createElement("div");
+      element.style.width = "100%";
+      element.style.height="100%"
+   
+      element.style.display = "flex";
+      element.style.flexDirection = "column"; // 按列显示按钮和图片
+      elementParent.appendChild(element);
+            // 创建按钮容器
+      const elementbutton = document.createElement("div");
+      elementbutton.style.width = "100%";
+      elementbutton.style.height = "10%";
+      // elementbutton.style.display = "flex";
+      element.appendChild(elementbutton);
       // 创建图像容器
       const elementImage = document.createElement("div");
       elementImage.style.width = "100%";
       elementImage.style.height = "90%";
-      //   elementImage.style.border = "1px solid black"; // 可选，便于调试
-      elementParent.appendChild(elementImage);
-
-      // 创建按钮容器
-      const elementbutton = document.createElement("div");
-      elementbutton.style.width = "100%";
-      elementbutton.style.height = "10%";
-      elementbutton.style.display = "flex";
-      elementParent.appendChild(elementbutton);
+      // elementImage.style.display = "flex";
+      // elementImage.innerText = "这是底部显示文本"; // 你可以修改这里的文本内容
+        // elementImage.style.border = "1px solid black"; // 可选，便于调试
+        element.appendChild(elementImage);
 
       // 创建按钮的左右部分
-      //   const elementleft = document.createElement("div");
-      //   elementleft.style.width = "40%";
-      //   elementleft.style.height = "100%";
+        // const elementleft = document.createElement("div");
+        // elementleft.style.width = "40%";
+        // elementleft.style.height = "100%";
       //   elementleft.style.border = "1px solid red"; // 可选，便于调试
+              // elementbutton.appendChild(elementleft);
       const elementright = document.createElement("div");
       elementright.style.width = "100%";
       elementright.style.height = "100%";
       elementright.style.display = "flex";
-      //   elementright.style.border = "1px solid red"; // 可选，便于调试
-      //   elementbutton.appendChild(elementleft);
+        // elementright.style.border = "1px solid red"; // 可选，便于调试
+
       if (i < 3) {
         const slider = document.createElement("input");
         slider.type = "range";
@@ -401,17 +374,18 @@ class MPRRendering {
         slider.max = 300;
         slider.style.bottom = "0px";
         slider.style.width = "100%";
+        slider.style.margin = "1px"
         elementright.appendChild(slider);
         createdSliderElements.push(slider);
       }
       elementbutton.appendChild(elementright);
-
+      controlContainer.appendChild(elementParent);
       // 创建按钮并添加到左侧部分
-      //   const axialButton = this.createColorButton("Axial", "axial_" + i); // 每个按钮的 id 保持唯一
-      //   elementleft.appendChild(axialButton);
-      //   axialButton.addEventListener("click", function () {
-      //     alert("达到最高点击次数！");
-      //   });
+        // const axialButton = this.createColorButton("Axial", "axial_" + i); // 每个按钮的 id 保持唯一
+        // elementleft.appendChild(axialButton);
+        // axialButton.addEventListener("click", function () {
+        //   alert("达到最高点击次数！");
+        // });
 
       // 将创建的 elementParent 存储在数组中
       createdElements.push(elementImage);
