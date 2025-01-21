@@ -1,4 +1,4 @@
-import "@kitware/vtk.js/favicon";
+// import "@kitware/vtk.js/favicon";
 
 // Load the rendering pieces we want to use (for both WebGL and WebGPU)
 import "@kitware/vtk.js/Rendering/Profiles/All";
