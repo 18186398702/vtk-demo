@@ -85,6 +85,13 @@ class MPRRendering {
       grw.setContainer(element);
       // 调用 resize 方法确保渲染窗口的尺寸与视图容器一致
       grw.resize();
+      // 使用 ResizeObserver 监听容器大小变化
+      const resizeObserver = new ResizeObserver(() => {
+        grw.resize();
+      });
+
+      // 开始监听容器
+      resizeObserver.observe(container);
       //-------------------------------------------------------------------------------------------------------------------------------
       //-------------------------------------------------------------------------------------------------------------------------------
       // 创建一个对象，用于存储渲染窗口、渲染器、GL 渲染窗口等属性
@@ -323,86 +330,72 @@ class MPRRendering {
     // 返回视图属性和3D视图对象
     return { viewAttributes, view3D, widget, widgetState };
   }
-  // 封装函数，创建视图容器并添加按钮，返回创建的元素
-  createViewWithButtons(controlContainer, numElements = 4) {
-    const createdElements = []; // 用于存储创建的元素
-    const createdSliderElements = [];
-    for (let i = 0; i < numElements; i++) {
-      // 创建父级容器，放置视图和按钮
-      const elementParent = document.createElement("div");
-      elementParent.style.width = "50%";
-      elementParent.style.height = "50%";
-      elementParent.style.display = "inline-block";
+    // 封装函数，创建视图容器并添加按钮，返回创建的元素
+    createViewWithButtons(controlContainer, numElements = 4) {
+      const createdElements = []; // 用于存储创建的元素
+      const createdSliderElements = [];
       const element = document.createElement("div");
       element.style.width = "100%";
       element.style.height = "100%";
+      element.style.display = 'grid';
+      element.style.gridTemplateRows = '50% 50%';  // 两行等高
+      element.style.gridTemplateColumns = '50% 50%';  // 两列等宽
+      // element.style.border = "1px solid black"; // 可选，便于调试
+      controlContainer.appendChild(element);
+      for (let i = 0; i < numElements; i++) {
+        // 创建父级容器，放置视图和按钮
+        const elementParent = document.createElement("div");
+        elementParent.style.width = "100%";
+        elementParent.style.height = "100%";
+        // elementParent.style.border = "1px solid black"; // 可选，便于调试
+        element.appendChild(elementParent);
+        // 创建按钮容器
+        const elementbutton = document.createElement("div");
+        elementbutton.style.width = "100%";
+        elementbutton.style.height = "10%";
+        // elementbutton.style.border = "1px solid black"; // 可选，便于调试
+        elementParent.appendChild(elementbutton);
+        const button = document.createElement("div");
+        button.style.width = "100%";
+        button.style.height = "100%";
+        button.style.display = "flex";
+        // button.style.border = "1px solid black"; // 可选，便于调试
+        elementbutton.appendChild(button);
+        if (i < 3) {
+          const slider = document.createElement("input");
+          slider.type = "range";
+          slider.min = 0;
+          slider.max = 300;
+          slider.style.bottom = "0px";
+          slider.style.width = "100%";
+          slider.style.height = "100%";
+          slider.style.margin = "0px";
+          button.appendChild(slider);
+          createdSliderElements.push(slider);
+        }
 
-      element.style.display = "flex";
-      element.style.flexDirection = "column"; // 按列显示按钮和图片
-      elementParent.appendChild(element);
-      // 创建按钮容器
-      const elementbutton = document.createElement("div");
-      elementbutton.style.width = "100%";
-      elementbutton.style.height = "10%";
-      // elementbutton.style.display = "flex";
-      element.appendChild(elementbutton);
-      // 创建图像容器
-      const elementImage = document.createElement("div");
-      elementImage.style.width = "100%";
-      elementImage.style.height = "90%";
-      // elementImage.style.display = "flex";
-      // elementImage.innerText = "这是底部显示文本"; // 你可以修改这里的文本内容
-      // elementImage.style.border = "1px solid black"; // 可选，便于调试
-      element.appendChild(elementImage);
-      const button = document.createElement("div");
-      button.style.width = "100%";
-      button.style.height = "100%";
-      //  button.style.border = "1px solid red"; // 可选，便于调试
-
-      elementbutton.appendChild(button);
-      const Image = document.createElement("div");
-      Image.style.width = "100%";
-      Image.style.height = "100%";
-      elementImage.appendChild(Image);
-      // 创建按钮的左右部分
-      // const elementleft = document.createElement("div");
-      // elementleft.style.width = "40%";
-      // elementleft.style.height = "100%";
-      // elementleft.style.border = "1px solid red"; // 可选，便于调试
-      // button.appendChild(elementleft);
-      const elementright = document.createElement("div");
-      elementright.style.width = "100%";
-      elementright.style.height = "100%";
-      elementright.style.display = "flex";
-      // elementright.style.border = "1px solid red"; // 可选，便于调试
-      button.appendChild(elementright);
-      if (i < 3) {
-        const slider = document.createElement("input");
-        slider.type = "range";
-        slider.min = 0;
-        slider.max = 300;
-        slider.style.bottom = "0px";
-        slider.style.width = "100%";
-        slider.style.margin = "0px";
-        elementright.appendChild(slider);
-        createdSliderElements.push(slider);
+        // 创建图像容器
+        const elementImage = document.createElement("div");
+        elementImage.style.width = "100%";
+        elementImage.style.height = "90%";
+        // elementImage.style.display = "flex";
+        // elementImage.innerText = "这是底部显示文本"; // 你可以修改这里的文本内容
+        // elementImage.style.border = "1px solid red"; // 可选，便于调试
+        elementParent.appendChild(elementImage);
+        // 创建按钮并添加到左侧部分
+        // const axialButton = this.createColorButton("Axial", "axial_" + i); // 每个按钮的 id 保持唯一
+        // elementleft.appendChild(axialButton);
+        // axialButton.addEventListener("click", function () {
+        //   alert("达到最高点击次数！");
+        // });
+  
+        // 将创建的 elementParent 存储在数组中
+        createdElements.push(elementImage);
       }
-
-      controlContainer.appendChild(elementParent);
-      // 创建按钮并添加到左侧部分
-      // const axialButton = this.createColorButton("Axial", "axial_" + i); // 每个按钮的 id 保持唯一
-      // elementleft.appendChild(axialButton);
-      // axialButton.addEventListener("click", function () {
-      //   alert("达到最高点击次数！");
-      // });
-
-      // 将创建的 elementParent 存储在数组中
-      createdElements.push(Image);
+  
+      // 返回包含所有创建元素的数组
+      return { createdElements, createdSliderElements };
     }
-
-    // 返回包含所有创建元素的数组
-    return { createdElements, createdSliderElements };
-  }
   // 创建一个按钮的辅助函数
   createColorButton(labelText, buttonId) {
     const button = document.createElement("button");
