@@ -7363,81 +7363,6 @@ var Constants = {
 
 /***/ }),
 
-/***/ "./node_modules/@kitware/vtk.js/Common/DataModel/EdgeLocator.js":
-/*!**********************************************************************!*\
-  !*** ./node_modules/@kitware/vtk.js/Common/DataModel/EdgeLocator.js ***!
-  \**********************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ vtkEdgeLocator)
-/* harmony export */ });
-class EdgeLocator {
-  constructor() {
-    let oriented = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-    this.oriented = oriented;
-    this.edgeMap = new Map();
-  }
-  initialize() {
-    this.edgeMap.clear();
-  }
-  computeEdgeKey(pointId0, pointId1) {
-    return this.oriented || pointId0 < pointId1 ?
-    // Cantor pairing function:
-    0.5 * (pointId0 * pointId1) * (pointId0 * pointId1 + 1) + pointId1 : 0.5 * (pointId1 * pointId0) * (pointId1 * pointId0 + 1) + pointId0;
-  }
-  insertUniqueEdge(pointId0, pointId1, newEdgeValue) {
-    // Generate a unique key
-    const key = this.computeEdgeKey(pointId0, pointId1);
-    let node = this.edgeMap.get(key);
-    if (!node) {
-      // Didn't find key, so add a new edge entry
-      node = {
-        key,
-        edgeId: this.edgeMap.size,
-        value: newEdgeValue
-      };
-      this.edgeMap.set(key, node);
-    }
-    return node;
-  }
-  insertEdge(pointId0, pointId1, newEdgeValue) {
-    // Generate a unique key
-    const key = this.computeEdgeKey(pointId0, pointId1);
-    const node = {
-      key,
-      edgeId: this.edgeMap.size,
-      value: newEdgeValue
-    };
-    this.edgeMap.set(key, node);
-    return node;
-  }
-  isInsertedEdge(pointId0, pointId1) {
-    const key = this.computeEdgeKey(pointId0, pointId1);
-    return this.edgeMap.get(key);
-  }
-  static getEdgePointIds(node) {
-    const n = 0.5 * (-1 + Math.sqrt(8 * node.key + 1));
-    const pointId0 = node.key - 0.5 * (n + 1) * n;
-    const pointId1 = n - pointId0;
-    return [pointId0, pointId1];
-  }
-}
-function newInstance() {
-  let initialValues = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  return new EdgeLocator(initialValues.oriented);
-}
-var vtkEdgeLocator = {
-  newInstance
-};
-
-
-
-
-/***/ }),
-
 /***/ "./node_modules/@kitware/vtk.js/Common/DataModel/ImageData.js":
 /*!********************************************************************!*\
   !*** ./node_modules/@kitware/vtk.js/Common/DataModel/ImageData.js ***!
@@ -8223,604 +8148,6 @@ var Constants = {
 
 /***/ }),
 
-/***/ "./node_modules/@kitware/vtk.js/Common/DataModel/PiecewiseFunction.js":
-/*!****************************************************************************!*\
-  !*** ./node_modules/@kitware/vtk.js/Common/DataModel/PiecewiseFunction.js ***!
-  \****************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ vtkPiecewiseFunction$1),
-/* harmony export */   extend: () => (/* binding */ extend),
-/* harmony export */   newInstance: () => (/* binding */ newInstance)
-/* harmony export */ });
-/* harmony import */ var _macros2_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../macros2.js */ "./node_modules/@kitware/vtk.js/macros2.js");
-
-
-const {
-  vtkErrorMacro
-} = _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m;
-
-// ----------------------------------------------------------------------------
-// vtkPiecewiseFunction methods
-// ----------------------------------------------------------------------------
-
-function vtkPiecewiseFunction(publicAPI, model) {
-  // Set our className
-  model.classHierarchy.push('vtkPiecewiseFunction');
-
-  // Return the number of points which specify this function
-  publicAPI.getSize = () => model.nodes.length;
-
-  // Return the type of function stored in object:
-  // Function Types:
-  //    0 : Constant        (No change in slope between end points)
-  //    1 : NonDecreasing   (Always increasing or zero slope)
-  //    2 : NonIncreasing   (Always decreasing or zero slope)
-  //    3 : Varied          (Contains both decreasing and increasing slopes)
-  //    4 : Unknown         (Error condition)
-  //
-  publicAPI.getType = () => {
-    let value;
-    let prevValue = 0.0;
-    let functionType = 0;
-    if (model.nodes.length > 0) {
-      prevValue = model.nodes[0].y;
-    }
-    for (let i = 1; i < model.nodes.length; i++) {
-      value = model.nodes[i].y;
-
-      // Do not change the function type if equal
-      if (value !== prevValue) {
-        if (value > prevValue) {
-          switch (functionType) {
-            case 0:
-            case 1:
-              // NonDecreasing
-              functionType = 1;
-              break;
-            case 2:
-            default:
-              // Varied
-              functionType = 3;
-              break;
-          }
-        } else {
-          // value < prev_value
-          switch (functionType) {
-            case 0:
-            case 2:
-              // NonIncreasing
-              functionType = 2;
-              break;
-            case 1:
-            default:
-              // Varied
-              functionType = 3;
-              break;
-          }
-        }
-      }
-      prevValue = value;
-
-      // Exit loop if we find a Varied function
-      if (functionType === 3) {
-        break;
-      }
-    }
-    switch (functionType) {
-      case 0:
-        return 'Constant';
-      case 1:
-        return 'NonDecreasing';
-      case 2:
-        return 'NonIncreasing';
-      case 3:
-      default:
-        return 'Varied';
-    }
-  };
-
-  // Since we no longer store the data in an array, we must
-  // copy out of the vector into an array. No modified check -
-  // could be added if performance is a problem
-  publicAPI.getDataPointer = () => {
-    const size = model.nodes.length;
-    model.function = null;
-    if (size > 0) {
-      model.function = [];
-      for (let i = 0; i < size; i++) {
-        model.function[2 * i] = model.nodes[i].x;
-        model.function[2 * i + 1] = model.nodes[i].y;
-      }
-    }
-    return model.function;
-  };
-
-  // Returns the first point location which starts a non-zero segment of the
-  // function. Note that the value at this point may be zero.
-  publicAPI.getFirstNonZeroValue = () => {
-    // Check if no points specified
-    if (model.nodes.length === 0) {
-      return 0;
-    }
-    let allZero = 1;
-    let x = 0.0;
-    let i = 0;
-    for (; i < model.nodes.length; i++) {
-      if (model.nodes[i].y !== 0.0) {
-        allZero = 0;
-        break;
-      }
-    }
-
-    // If every specified point has a zero value then return
-    // a large value
-    if (allZero) {
-      x = Number.MAX_VALUE;
-    } else if (i > 0) {
-      // A point was found with a non-zero value
-      // Return the value of the point that precedes this one
-      x = model.nodes[i - 1].x;
-    } else if (model.clamping) {
-      // If this is the first point in the function, return its
-      // value is clamping is off, otherwise VTK_DOUBLE_MIN if
-      // clamping is on.
-      x = -Number.MAX_VALUE;
-    } else {
-      x = model.nodes[0].x;
-    }
-    return x;
-  };
-
-  // For a specified index value, get the node parameters
-  publicAPI.getNodeValue = (index, val) => {
-    const size = model.nodes.length;
-    if (index < 0 || index >= size) {
-      vtkErrorMacro('Index out of range!');
-      return -1;
-    }
-    val[0] = model.nodes[index].x;
-    val[1] = model.nodes[index].y;
-    val[2] = model.nodes[index].midpoint;
-    val[3] = model.nodes[index].sharpness;
-    return 1;
-  };
-
-  // For a specified index value, get the node parameters
-  publicAPI.setNodeValue = (index, val) => {
-    const size = model.nodes.length;
-    if (index < 0 || index >= size) {
-      vtkErrorMacro('Index out of range!');
-      return -1;
-    }
-    const oldX = model.nodes[index].x;
-    model.nodes[index].x = val[0];
-    model.nodes[index].y = val[1];
-    model.nodes[index].midpoint = val[2];
-    model.nodes[index].sharpness = val[3];
-    if (oldX !== val[0]) {
-      // The point has been moved, the order of points or the range might have
-      // been modified.
-      publicAPI.sortAndUpdateRange();
-      // No need to call Modified() here because SortAndUpdateRange() has done it
-      // already.
-    } else {
-      publicAPI.modified();
-    }
-    return 1;
-  };
-
-  // Adds a point to the function. If a duplicate point is inserted
-  // then the function value at that location is set to the new value.
-  // This is the legacy version that assumes midpoint = 0.5 and
-  // sharpness = 0.0
-  publicAPI.addPoint = (x, y) => publicAPI.addPointLong(x, y, 0.5, 0.0);
-
-  // Adds a point to the function and returns the array index of the point.
-  publicAPI.addPointLong = (x, y, midpoint, sharpness) => {
-    // Error check
-    if (midpoint < 0.0 || midpoint > 1.0) {
-      vtkErrorMacro('Midpoint outside range [0.0, 1.0]');
-      return -1;
-    }
-    if (sharpness < 0.0 || sharpness > 1.0) {
-      vtkErrorMacro('Sharpness outside range [0.0, 1.0]');
-      return -1;
-    }
-
-    // remove any node already at this X location
-    if (!model.allowDuplicateScalars) {
-      publicAPI.removePoint(x);
-    }
-
-    // Create the new node
-    const node = {
-      x,
-      y,
-      midpoint,
-      sharpness
-    };
-
-    // Add it, then sort to get everything in order
-    model.nodes.push(node);
-    publicAPI.sortAndUpdateRange();
-
-    // Now find this node so we can return the index
-    let i;
-    for (i = 0; i < model.nodes.length; i++) {
-      if (model.nodes[i].x === x) {
-        break;
-      }
-    }
-
-    // If we didn't find it, something went horribly wrong so
-    // return -1
-    if (i < model.nodes.length) {
-      return i;
-    }
-    return -1;
-  };
-  publicAPI.setNodes = nodes => {
-    if (model.nodes !== nodes) {
-      model.nodes = nodes;
-      publicAPI.sortAndUpdateRange();
-    }
-  };
-
-  // Sort the vector in increasing order, then fill in
-  // the Range
-  publicAPI.sortAndUpdateRange = () => {
-    model.nodes.sort((a, b) => a.x - b.x);
-    const modifiedInvoked = publicAPI.updateRange();
-    // If range is updated, Modified() has been called, don't call it again.
-    if (!modifiedInvoked) {
-      publicAPI.modified();
-    }
-  };
-
-  //----------------------------------------------------------------------------
-  publicAPI.updateRange = () => {
-    const oldRange = model.range.slice();
-    const size = model.nodes.length;
-    if (size) {
-      model.range[0] = model.nodes[0].x;
-      model.range[1] = model.nodes[size - 1].x;
-    } else {
-      model.range[0] = 0;
-      model.range[1] = 0;
-    }
-    // If the rage is the same, then no need to call Modified()
-    if (oldRange[0] === model.range[0] && oldRange[1] === model.range[1]) {
-      return false;
-    }
-    publicAPI.modified();
-    return true;
-  };
-
-  // Removes a point from the function. If no point is found then function
-  // remains the same.
-  publicAPI.removePoint = x => {
-    // First find the node since we need to know its
-    // index as our return value
-    let i;
-    for (i = 0; i < model.nodes.length; i++) {
-      if (model.nodes[i].x === x) {
-        break;
-      }
-    }
-
-    // If the node doesn't exist, we return -1
-    if (i >= model.nodes.length) {
-      return -1;
-    }
-    const retVal = i;
-
-    // If the first or last point has been removed, then we update the range
-    // No need to sort here as the order of points hasn't changed.
-    let modifiedInvoked = false;
-    model.nodes.splice(i, 1);
-    if (i === 0 || i === model.nodes.length) {
-      modifiedInvoked = publicAPI.updateRange();
-    }
-    if (!modifiedInvoked) {
-      publicAPI.modified();
-    }
-    return retVal;
-  };
-
-  // Removes all points from the function.
-  publicAPI.removeAllPoints = () => {
-    model.nodes = [];
-    publicAPI.sortAndUpdateRange();
-  };
-
-  // Add in end points of line and remove any points between them
-  // Legacy method with no way to specify midpoint and sharpness
-  publicAPI.addSegment = (x1, y1, x2, y2) => {
-    // First, find all points in this range and remove them
-    publicAPI.sortAndUpdateRange();
-    for (let i = 0; i < model.nodes.length;) {
-      if (model.nodes[i].x >= x1 && model.nodes[i].x <= x2) {
-        model.nodes.splice(i, 1);
-      } else {
-        i++;
-      }
-    }
-
-    // Now add the points
-    publicAPI.addPoint(x1, y1, 0.5, 0.0);
-    publicAPI.addPoint(x2, y2, 0.5, 0.0);
-  };
-
-  // Return the value of the function at a position
-  publicAPI.getValue = x => {
-    const table = [];
-    publicAPI.getTable(x, x, 1, table);
-    return table[0];
-  };
-
-  // Remove all points outside the range, and make sure a point
-  // exists at each end of the range. Used as a convenience method
-  // for transfer function editors
-  publicAPI.adjustRange = range => {
-    if (range.length < 2) {
-      return 0;
-    }
-    const functionRange = publicAPI.getRange();
-
-    // Make sure we have points at each end of the range
-    if (functionRange[0] < range[0]) {
-      publicAPI.addPoint(range[0], publicAPI.getValue(range[0]));
-    } else {
-      publicAPI.addPoint(range[0], publicAPI.getValue(functionRange[0]));
-    }
-    if (functionRange[1] > range[1]) {
-      publicAPI.addPoint(range[1], publicAPI.getValue(range[1]));
-    } else {
-      publicAPI.addPoint(range[1], publicAPI.getValue(functionRange[1]));
-    }
-
-    // Remove all points out-of-range
-    publicAPI.sortAndUpdateRange();
-    for (let i = 0; i < model.nodes.length;) {
-      if (model.nodes[i].x >= range[0] && model.nodes[i].x <= range[1]) {
-        model.nodes.splice(i, 1);
-      } else {
-        ++i;
-      }
-    }
-    publicAPI.sortAndUpdateRange();
-    return 1;
-  };
-
-  //--------------------------------------------------------------------------
-  publicAPI.estimateMinNumberOfSamples = (x1, x2) => {
-    const d = publicAPI.findMinimumXDistance();
-    return Math.ceil((x2 - x1) / d);
-  };
-
-  //----------------------------------------------------------------------------
-  publicAPI.findMinimumXDistance = () => {
-    const size = model.nodes.length;
-    if (size < 2) {
-      return -1.0;
-    }
-    let distance = model.nodes[1].x - model.nodes[0].x;
-    for (let i = 0; i < size - 1; i++) {
-      const currentDist = model.nodes[i + 1].x - model.nodes[i].x;
-      if (currentDist < distance) {
-        distance = currentDist;
-      }
-    }
-    return distance;
-  };
-
-  // Returns a table of function values evaluated at regular intervals
-  /* eslint-disable prefer-destructuring */
-  /* eslint-disable no-continue */
-  publicAPI.getTable = function (xStart, xEnd, size, table) {
-    let stride = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 1;
-    let i;
-    let idx = 0;
-    const numNodes = model.nodes.length;
-
-    // Need to keep track of the last value so that
-    // we can fill in table locations past this with
-    // this value if Clamping is On.
-    let lastValue = 0.0;
-    if (numNodes !== 0) {
-      lastValue = model.nodes[numNodes - 1].y;
-    }
-    let x = 0.0;
-    let x1 = 0.0;
-    let x2 = 0.0;
-    let y1 = 0.0;
-    let y2 = 0.0;
-    let midpoint = 0.0;
-    let sharpness = 0.0;
-
-    // For each table entry
-    for (i = 0; i < size; i++) {
-      // Find our location in the table
-      const tidx = stride * i;
-
-      // Find our X location. If we are taking only 1 sample, make
-      // it halfway between start and end (usually start and end will
-      // be the same in this case)
-      if (size > 1) {
-        x = xStart + i / (size - 1.0) * (xEnd - xStart);
-      } else {
-        x = 0.5 * (xStart + xEnd);
-      }
-
-      // Do we need to move to the next node?
-      while (idx < numNodes && x > model.nodes[idx].x) {
-        idx++;
-        // If we are at a valid point index, fill in
-        // the value at this node, and the one before (the
-        // two that surround our current sample location)
-        // idx cannot be 0 since we just incremented it.
-        if (idx < numNodes) {
-          x1 = model.nodes[idx - 1].x;
-          x2 = model.nodes[idx].x;
-          y1 = model.nodes[idx - 1].y;
-          y2 = model.nodes[idx].y;
-
-          // We only need the previous midpoint and sharpness
-          // since these control this region
-          midpoint = model.nodes[idx - 1].midpoint;
-          sharpness = model.nodes[idx - 1].sharpness;
-
-          // Move midpoint away from extreme ends of range to avoid
-          // degenerate math
-          if (midpoint < 0.00001) {
-            midpoint = 0.00001;
-          }
-          if (midpoint > 0.99999) {
-            midpoint = 0.99999;
-          }
-        }
-      }
-
-      // Are we at the end? If so, just use the last value
-      if (idx >= numNodes) {
-        table[tidx] = model.clamping ? lastValue : 0.0;
-      } else if (idx === 0) {
-        // Are we before the first node? If so, duplicate this nodes values
-        table[tidx] = model.clamping ? model.nodes[0].y : 0.0;
-      } else {
-        // Otherwise, we are between two nodes - interpolate
-        // Our first attempt at a normalized location [0,1] -
-        // we will be modifying this based on midpoint and
-        // sharpness to get the curve shape we want and to have
-        // it pass through (y1+y2)/2 at the midpoint.
-        let s = (x - x1) / (x2 - x1);
-
-        // Readjust based on the midpoint - linear adjustment
-        if (s < midpoint) {
-          s = 0.5 * s / midpoint;
-        } else {
-          s = 0.5 + 0.5 * (s - midpoint) / (1.0 - midpoint);
-        }
-
-        // override for sharpness > 0.99
-        // In this case we just want piecewise constant
-        if (sharpness > 0.99) {
-          // Use the first value since we are below the midpoint
-          if (s < 0.5) {
-            table[tidx] = y1;
-            continue;
-          } else {
-            // Use the second value at or above the midpoint
-            table[tidx] = y2;
-            continue;
-          }
-        }
-
-        // Override for sharpness < 0.01
-        // In this case we want piecewise linear
-        if (sharpness < 0.01) {
-          // Simple linear interpolation
-          table[tidx] = (1 - s) * y1 + s * y2;
-          continue;
-        }
-
-        // We have a sharpness between [0.01, 0.99] - we will
-        // used a modified hermite curve interpolation where we
-        // derive the slope based on the sharpness, and we compress
-        // the curve non-linearly based on the sharpness
-
-        // First, we will adjust our position based on sharpness in
-        // order to make the curve sharper (closer to piecewise constant)
-        if (s < 0.5) {
-          s = 0.5 * (s * 2) ** (1.0 + 10 * sharpness);
-        } else if (s > 0.5) {
-          s = 1.0 - 0.5 * ((1.0 - s) * 2) ** (1 + 10 * sharpness);
-        }
-
-        // Compute some coefficients we will need for the hermite curve
-        const ss = s * s;
-        const sss = ss * s;
-        const h1 = 2 * sss - 3 * ss + 1;
-        const h2 = -2 * sss + 3 * ss;
-        const h3 = sss - 2 * ss + s;
-        const h4 = sss - ss;
-
-        // Use one slope for both end points
-        const slope = y2 - y1;
-        const t = (1.0 - sharpness) * slope;
-
-        // Compute the value
-        table[tidx] = h1 * y1 + h2 * y2 + h3 * t + h4 * t;
-
-        // Final error check to make sure we don't go outside
-        // the Y range
-        const min = y1 < y2 ? y1 : y2;
-        const max = y1 > y2 ? y1 : y2;
-        table[tidx] = table[tidx] < min ? min : table[tidx];
-        table[tidx] = table[tidx] > max ? max : table[tidx];
-      }
-    }
-  };
-}
-/* eslint-enable prefer-destructuring */
-/* eslint-enable no-continue */
-
-// ----------------------------------------------------------------------------
-// Object factory
-// ----------------------------------------------------------------------------
-
-const DEFAULT_VALUES = {
-  // model.function = NULL;
-  range: [0, 0],
-  clamping: true,
-  allowDuplicateScalars: false
-};
-
-// ----------------------------------------------------------------------------
-
-function extend(publicAPI, model) {
-  let initialValues = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-  Object.assign(model, DEFAULT_VALUES, initialValues);
-
-  // Inheritance
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.obj(publicAPI, model);
-
-  // Internal objects initialization
-  model.nodes = [];
-
-  // Create get-set macros
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.setGet(publicAPI, model, ['allowDuplicateScalars', 'clamping']);
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.setArray(publicAPI, model, ['range'], 2);
-
-  // Create get macros for array
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.getArray(publicAPI, model, ['range']);
-
-  // For more macro methods, see "Sources/macros.js"
-
-  // Object specific methods
-  vtkPiecewiseFunction(publicAPI, model);
-}
-
-// ----------------------------------------------------------------------------
-
-const newInstance = _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.newInstance(extend, 'vtkPiecewiseFunction');
-
-// ----------------------------------------------------------------------------
-
-var vtkPiecewiseFunction$1 = {
-  newInstance,
-  extend
-};
-
-
-
-
-/***/ }),
-
 /***/ "./node_modules/@kitware/vtk.js/Common/DataModel/Plane.js":
 /*!****************************************************************!*\
   !*** ./node_modules/@kitware/vtk.js/Common/DataModel/Plane.js ***!
@@ -9477,160 +8804,6 @@ __webpack_require__.r(__webpack_exports__);
 const POLYDATA_FIELDS = ['verts', 'lines', 'polys', 'strips'];
 var Constants = {
   POLYDATA_FIELDS
-};
-
-
-
-
-/***/ }),
-
-/***/ "./node_modules/@kitware/vtk.js/Common/DataModel/PolyLine.js":
-/*!*******************************************************************!*\
-  !*** ./node_modules/@kitware/vtk.js/Common/DataModel/PolyLine.js ***!
-  \*******************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ vtkPolyLine$1),
-/* harmony export */   extend: () => (/* binding */ extend),
-/* harmony export */   newInstance: () => (/* binding */ newInstance)
-/* harmony export */ });
-/* harmony import */ var _macros2_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../macros2.js */ "./node_modules/@kitware/vtk.js/macros2.js");
-/* harmony import */ var _Cell_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Cell.js */ "./node_modules/@kitware/vtk.js/Common/DataModel/Cell.js");
-/* harmony import */ var _Line_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Line.js */ "./node_modules/@kitware/vtk.js/Common/DataModel/Line.js");
-/* harmony import */ var gl_matrix__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! gl-matrix */ "./node_modules/gl-matrix/esm/vec3.js");
-
-
-
-
-
-function vtkPolyLine(publicAPI, model) {
-  model.classHierarchy.push('vtkPolyLine');
-  const line = _Line_js__WEBPACK_IMPORTED_MODULE_2__["default"].newInstance();
-  line.getPoints().setNumberOfPoints(2);
-  publicAPI.getCellDimension = () => 1;
-  publicAPI.intersectWithLine = (t1, t2, p1, p2, tol, x, pcoords) => {
-    const outObj = {
-      intersect: 0,
-      t: Number.MAX_VALUE,
-      subId: 0,
-      betweenPoints: null
-    };
-    const numLines = publicAPI.getNumberOfPoints() - 1;
-    let pDistMin = Number.MAX_VALUE;
-    for (let subId = 0; subId < numLines; subId++) {
-      const pCoords = [0, 0, 0];
-      line.getPoints().getData().set(model.points.getData().subarray(3 * subId, 3 * (subId + 2)));
-      const lineIntersected = line.intersectWithLine(p1, p2, tol, x, pcoords);
-      if (lineIntersected.intersect === 1 && lineIntersected.t <= outObj.t + tol && lineIntersected.t >= t1 && lineIntersected.t <= t2) {
-        outObj.intersect = 1;
-        const pDist = line.getParametricDistance(pCoords);
-        if (pDist < pDistMin || pDist === pDistMin && lineIntersected.t < outObj.t) {
-          outObj.subId = subId;
-          outObj.t = lineIntersected.t;
-          pDistMin = pDist;
-        }
-      }
-    }
-    return outObj;
-  };
-  publicAPI.evaluateLocation = (subId, pcoords, x, weights) => {
-    line.getPoints().getData().set(model.points.getData().subarray(3 * subId, 3 * (subId + 2)));
-    return line.evaluateLocation(pcoords, x, weights);
-  };
-  publicAPI.evaluateOrientation = (subId, pcoords, q, weights) => {
-    if (model.orientations) {
-      line.setOrientations([model.orientations[subId], model.orientations[subId + 1]]);
-    } else {
-      line.setOrientations(null);
-    }
-    return line.evaluateOrientation(pcoords, q, weights);
-  };
-  publicAPI.getDistancesToFirstPoint = () => {
-    const dTime = model.distancesTime.getMTime();
-    if (dTime < model.points.getMTime() || dTime < publicAPI.getMTime()) {
-      const numPoints = publicAPI.getNumberOfPoints();
-      if (!model.distances) {
-        model.distances = new Array(numPoints);
-      } else {
-        model.distances.length = numPoints;
-      }
-      if (numPoints > 0) {
-        const previousPoint = new Array(3);
-        const currentPoint = new Array(3);
-        let totalDistance = 0;
-        model.distances[0] = totalDistance;
-        model.points.getPoint(0, previousPoint);
-        for (let i = 1; i < numPoints; ++i) {
-          model.points.getPoint(i, currentPoint);
-          totalDistance += model.distanceFunction(previousPoint, currentPoint);
-          model.distances[i] = totalDistance;
-          gl_matrix__WEBPACK_IMPORTED_MODULE_3__.copy(previousPoint, currentPoint);
-        }
-      }
-      model.distancesTime.modified();
-    }
-    return model.distances;
-  };
-  publicAPI.findPointIdAtDistanceFromFirstPoint = distance => {
-    const distances = publicAPI.getDistancesToFirstPoint();
-    // At least two points to return an ID
-    if (distances.length < 2) {
-      return -1;
-    }
-    // Binary search in the distance array
-    let minId = 0;
-    let maxId = distances.length - 1;
-    if (distance < distances[minId] || distance > distances[maxId] || distances[maxId] === 0) {
-      return -1;
-    }
-    while (maxId - minId > 1) {
-      const midId = Math.floor((minId + maxId) / 2);
-      if (distances[midId] <= distance) {
-        minId = midId;
-      } else {
-        maxId = midId;
-      }
-    }
-    return minId;
-  };
-}
-
-// ----------------------------------------------------------------------------
-// Object factory
-// ----------------------------------------------------------------------------
-
-const DEFAULT_VALUES = {
-  orientations: null,
-  // an array of quat or null
-  distanceFunction: gl_matrix__WEBPACK_IMPORTED_MODULE_3__.dist
-};
-
-// ----------------------------------------------------------------------------
-
-function extend(publicAPI, model) {
-  let initialValues = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-  Object.assign(model, DEFAULT_VALUES, initialValues);
-  _Cell_js__WEBPACK_IMPORTED_MODULE_1__["default"].extend(publicAPI, model, initialValues);
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.setGet(publicAPI, model, ['orientations', 'distanceFunction']);
-  model.distancesTime = {};
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.obj(model.distancesTime, {
-    mtime: 0
-  });
-  vtkPolyLine(publicAPI, model);
-}
-
-// ----------------------------------------------------------------------------
-
-const newInstance = _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.newInstance(extend, 'vtkPolyLine');
-
-// ----------------------------------------------------------------------------
-
-var vtkPolyLine$1 = {
-  newInstance,
-  extend
 };
 
 
@@ -11233,489 +10406,6 @@ const newInstance = _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.newInstance(exten
 var vtkImageDataOutlineFilter$1 = {
   newInstance,
   extend
-};
-
-
-
-
-/***/ }),
-
-/***/ "./node_modules/@kitware/vtk.js/Filters/General/ImageMarchingCubes.js":
-/*!****************************************************************************!*\
-  !*** ./node_modules/@kitware/vtk.js/Filters/General/ImageMarchingCubes.js ***!
-  \****************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ vtkImageMarchingCubes$1),
-/* harmony export */   extend: () => (/* binding */ extend),
-/* harmony export */   newInstance: () => (/* binding */ newInstance)
-/* harmony export */ });
-/* harmony import */ var _macros2_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../macros2.js */ "./node_modules/@kitware/vtk.js/macros2.js");
-/* harmony import */ var _Common_Core_DataArray_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../Common/Core/DataArray.js */ "./node_modules/@kitware/vtk.js/Common/Core/DataArray.js");
-/* harmony import */ var _Common_DataModel_EdgeLocator_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../Common/DataModel/EdgeLocator.js */ "./node_modules/@kitware/vtk.js/Common/DataModel/EdgeLocator.js");
-/* harmony import */ var _Common_DataModel_PolyData_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../Common/DataModel/PolyData.js */ "./node_modules/@kitware/vtk.js/Common/DataModel/PolyData.js");
-/* harmony import */ var _Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../Common/Core/Math/index.js */ "./node_modules/@kitware/vtk.js/Common/Core/Math/index.js");
-/* harmony import */ var _ImageMarchingCubes_caseTable_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./ImageMarchingCubes/caseTable.js */ "./node_modules/@kitware/vtk.js/Filters/General/ImageMarchingCubes/caseTable.js");
-
-
-
-
-
-
-
-const {
-  vtkErrorMacro,
-  vtkDebugMacro
-} = _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m;
-
-// ----------------------------------------------------------------------------
-// vtkImageMarchingCubes methods
-// ----------------------------------------------------------------------------
-
-function vtkImageMarchingCubes(publicAPI, model) {
-  // Set our className
-  model.classHierarchy.push('vtkImageMarchingCubes');
-  const ids = [];
-  const voxelScalars = [];
-  const voxelGradients = [];
-  const voxelPts = [];
-  const edgeLocator = _Common_DataModel_EdgeLocator_js__WEBPACK_IMPORTED_MODULE_2__["default"].newInstance();
-
-  // Retrieve scalars and voxel coordinates. i-j-k is origin of voxel.
-  publicAPI.getVoxelScalars = (i, j, k, slice, dims, origin, spacing, s) => {
-    // First get the indices for the voxel
-    ids[0] = k * slice + j * dims[0] + i; // i, j, k
-    ids[1] = ids[0] + 1; // i+1, j, k
-    ids[2] = ids[0] + dims[0]; // i, j+1, k
-    ids[3] = ids[2] + 1; // i+1, j+1, k
-    ids[4] = ids[0] + slice; // i, j, k+1
-    ids[5] = ids[4] + 1; // i+1, j, k+1
-    ids[6] = ids[4] + dims[0]; // i, j+1, k+1
-    ids[7] = ids[6] + 1; // i+1, j+1, k+1
-
-    // Now retrieve the scalars
-    for (let ii = 0; ii < 8; ++ii) {
-      voxelScalars[ii] = s[ids[ii]];
-    }
-  };
-
-  // Retrieve voxel coordinates. i-j-k is origin of voxel.
-  publicAPI.getVoxelPoints = (i, j, k, origin, spacing) => {
-    // (i,i+1),(j,j+1),(k,k+1) - i varies fastest; then j; then k
-    voxelPts[0] = origin[0] + i * spacing[0]; // 0
-    voxelPts[1] = origin[1] + j * spacing[1];
-    voxelPts[2] = origin[2] + k * spacing[2];
-    voxelPts[3] = voxelPts[0] + spacing[0]; // 1
-    voxelPts[4] = voxelPts[1];
-    voxelPts[5] = voxelPts[2];
-    voxelPts[6] = voxelPts[0]; // 2
-    voxelPts[7] = voxelPts[1] + spacing[1];
-    voxelPts[8] = voxelPts[2];
-    voxelPts[9] = voxelPts[3]; // 3
-    voxelPts[10] = voxelPts[7];
-    voxelPts[11] = voxelPts[2];
-    voxelPts[12] = voxelPts[0]; // 4
-    voxelPts[13] = voxelPts[1];
-    voxelPts[14] = voxelPts[2] + spacing[2];
-    voxelPts[15] = voxelPts[3]; // 5
-    voxelPts[16] = voxelPts[1];
-    voxelPts[17] = voxelPts[14];
-    voxelPts[18] = voxelPts[0]; // 6
-    voxelPts[19] = voxelPts[7];
-    voxelPts[20] = voxelPts[14];
-    voxelPts[21] = voxelPts[3]; // 7
-    voxelPts[22] = voxelPts[7];
-    voxelPts[23] = voxelPts[14];
-  };
-
-  // Compute point gradient at i-j-k location
-  publicAPI.getPointGradient = (i, j, k, dims, slice, spacing, s, g) => {
-    let sp;
-    let sm;
-
-    // x-direction
-    if (i === 0) {
-      sp = s[i + 1 + j * dims[0] + k * slice];
-      sm = s[i + j * dims[0] + k * slice];
-      g[0] = (sm - sp) / spacing[0];
-    } else if (i === dims[0] - 1) {
-      sp = s[i + j * dims[0] + k * slice];
-      sm = s[i - 1 + j * dims[0] + k * slice];
-      g[0] = (sm - sp) / spacing[0];
-    } else {
-      sp = s[i + 1 + j * dims[0] + k * slice];
-      sm = s[i - 1 + j * dims[0] + k * slice];
-      g[0] = 0.5 * (sm - sp) / spacing[0];
-    }
-
-    // y-direction
-    if (j === 0) {
-      sp = s[i + (j + 1) * dims[0] + k * slice];
-      sm = s[i + j * dims[0] + k * slice];
-      g[1] = (sm - sp) / spacing[1];
-    } else if (j === dims[1] - 1) {
-      sp = s[i + j * dims[0] + k * slice];
-      sm = s[i + (j - 1) * dims[0] + k * slice];
-      g[1] = (sm - sp) / spacing[1];
-    } else {
-      sp = s[i + (j + 1) * dims[0] + k * slice];
-      sm = s[i + (j - 1) * dims[0] + k * slice];
-      g[1] = 0.5 * (sm - sp) / spacing[1];
-    }
-
-    // z-direction
-    if (k === 0) {
-      sp = s[i + j * dims[0] + (k + 1) * slice];
-      sm = s[i + j * dims[0] + k * slice];
-      g[2] = (sm - sp) / spacing[2];
-    } else if (k === dims[2] - 1) {
-      sp = s[i + j * dims[0] + k * slice];
-      sm = s[i + j * dims[0] + (k - 1) * slice];
-      g[2] = (sm - sp) / spacing[2];
-    } else {
-      sp = s[i + j * dims[0] + (k + 1) * slice];
-      sm = s[i + j * dims[0] + (k - 1) * slice];
-      g[2] = 0.5 * (sm - sp) / spacing[2];
-    }
-  };
-
-  // Compute voxel gradient values. I-j-k is origin point of voxel.
-  publicAPI.getVoxelGradients = (i, j, k, dims, slice, spacing, scalars) => {
-    const g = [];
-    publicAPI.getPointGradient(i, j, k, dims, slice, spacing, scalars, g);
-    voxelGradients[0] = g[0];
-    voxelGradients[1] = g[1];
-    voxelGradients[2] = g[2];
-    publicAPI.getPointGradient(i + 1, j, k, dims, slice, spacing, scalars, g);
-    voxelGradients[3] = g[0];
-    voxelGradients[4] = g[1];
-    voxelGradients[5] = g[2];
-    publicAPI.getPointGradient(i, j + 1, k, dims, slice, spacing, scalars, g);
-    voxelGradients[6] = g[0];
-    voxelGradients[7] = g[1];
-    voxelGradients[8] = g[2];
-    publicAPI.getPointGradient(i + 1, j + 1, k, dims, slice, spacing, scalars, g);
-    voxelGradients[9] = g[0];
-    voxelGradients[10] = g[1];
-    voxelGradients[11] = g[2];
-    publicAPI.getPointGradient(i, j, k + 1, dims, slice, spacing, scalars, g);
-    voxelGradients[12] = g[0];
-    voxelGradients[13] = g[1];
-    voxelGradients[14] = g[2];
-    publicAPI.getPointGradient(i + 1, j, k + 1, dims, slice, spacing, scalars, g);
-    voxelGradients[15] = g[0];
-    voxelGradients[16] = g[1];
-    voxelGradients[17] = g[2];
-    publicAPI.getPointGradient(i, j + 1, k + 1, dims, slice, spacing, scalars, g);
-    voxelGradients[18] = g[0];
-    voxelGradients[19] = g[1];
-    voxelGradients[20] = g[2];
-    publicAPI.getPointGradient(i + 1, j + 1, k + 1, dims, slice, spacing, scalars, g);
-    voxelGradients[21] = g[0];
-    voxelGradients[22] = g[1];
-    voxelGradients[23] = g[2];
-  };
-  publicAPI.produceTriangles = (cVal, i, j, k, extent, slice, dims, origin, spacing, scalars, points, tris, normals) => {
-    const CASE_MASK = [1, 2, 4, 8, 16, 32, 64, 128];
-    const VERT_MAP = [0, 1, 3, 2, 4, 5, 7, 6];
-    const xyz = [];
-    const n = [];
-    let pId;
-    publicAPI.getVoxelScalars(i, j, k, slice, dims, origin, spacing, scalars);
-    let index = 0;
-    for (let idx = 0; idx < 8; idx++) {
-      if (voxelScalars[VERT_MAP[idx]] >= cVal) {
-        index |= CASE_MASK[idx]; // eslint-disable-line no-bitwise
-      }
-    }
-
-    const voxelTris = _ImageMarchingCubes_caseTable_js__WEBPACK_IMPORTED_MODULE_5__["default"].getCase(index);
-    if (voxelTris[0] < 0) {
-      return; // don't get the voxel coordinates, nothing to do
-    }
-
-    publicAPI.getVoxelPoints(i + extent[0], j + extent[2], k + extent[4], origin, spacing);
-    if (model.computeNormals) {
-      publicAPI.getVoxelGradients(i, j, k, dims, slice, spacing, scalars);
-    }
-    for (let idx = 0; voxelTris[idx] >= 0; idx += 3) {
-      tris.push(3);
-      for (let eid = 0; eid < 3; eid++) {
-        const edgeVerts = _ImageMarchingCubes_caseTable_js__WEBPACK_IMPORTED_MODULE_5__["default"].getEdge(voxelTris[idx + eid]);
-        pId = undefined;
-        if (model.mergePoints) {
-          pId = edgeLocator.isInsertedEdge(ids[edgeVerts[0]], ids[edgeVerts[1]])?.value;
-        }
-        if (pId === undefined) {
-          const t = (cVal - voxelScalars[edgeVerts[0]]) / (voxelScalars[edgeVerts[1]] - voxelScalars[edgeVerts[0]]);
-          const x0 = voxelPts.slice(edgeVerts[0] * 3, (edgeVerts[0] + 1) * 3);
-          const x1 = voxelPts.slice(edgeVerts[1] * 3, (edgeVerts[1] + 1) * 3);
-          xyz[0] = x0[0] + t * (x1[0] - x0[0]);
-          xyz[1] = x0[1] + t * (x1[1] - x0[1]);
-          xyz[2] = x0[2] + t * (x1[2] - x0[2]);
-          pId = points.length / 3;
-          points.push(xyz[0], xyz[1], xyz[2]);
-          if (model.computeNormals) {
-            const n0 = voxelGradients.slice(edgeVerts[0] * 3, (edgeVerts[0] + 1) * 3);
-            const n1 = voxelGradients.slice(edgeVerts[1] * 3, (edgeVerts[1] + 1) * 3);
-            n[0] = n0[0] + t * (n1[0] - n0[0]);
-            n[1] = n0[1] + t * (n1[1] - n0[1]);
-            n[2] = n0[2] + t * (n1[2] - n0[2]);
-            (0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_4__.l)(n);
-            normals.push(n[0], n[1], n[2]);
-          }
-          if (model.mergePoints) {
-            edgeLocator.insertEdge(ids[edgeVerts[0]], ids[edgeVerts[1]], pId);
-          }
-        }
-        tris.push(pId);
-      }
-    }
-  };
-  publicAPI.requestData = (inData, outData) => {
-    // implement requestData
-    const input = inData[0];
-    if (!input) {
-      vtkErrorMacro('Invalid or missing input');
-      return;
-    }
-    console.time('mcubes');
-
-    // Retrieve output and volume data
-    const origin = input.getOrigin();
-    const spacing = input.getSpacing();
-    const dims = input.getDimensions();
-    const s = input.getPointData().getScalars().getData();
-
-    // Points - dynamic array
-    const pBuffer = [];
-
-    // Cells - dynamic array
-    const tBuffer = [];
-
-    // Normals
-    const nBuffer = [];
-
-    // Loop over all voxels, determine case and process
-    const extent = input.getExtent();
-    const slice = dims[0] * dims[1];
-    for (let k = 0; k < dims[2] - 1; ++k) {
-      for (let j = 0; j < dims[1] - 1; ++j) {
-        for (let i = 0; i < dims[0] - 1; ++i) {
-          publicAPI.produceTriangles(model.contourValue, i, j, k, extent, slice, dims, origin, spacing, s, pBuffer, tBuffer, nBuffer);
-        }
-      }
-    }
-    edgeLocator.initialize();
-
-    // Update output
-    const polydata = _Common_DataModel_PolyData_js__WEBPACK_IMPORTED_MODULE_3__["default"].newInstance();
-    polydata.getPoints().setData(new Float32Array(pBuffer), 3);
-    polydata.getPolys().setData(new Uint32Array(tBuffer));
-    if (model.computeNormals) {
-      const nData = new Float32Array(nBuffer);
-      const normals = _Common_Core_DataArray_js__WEBPACK_IMPORTED_MODULE_1__["default"].newInstance({
-        numberOfComponents: 3,
-        values: nData,
-        name: 'Normals'
-      });
-      polydata.getPointData().setNormals(normals);
-    }
-    outData[0] = polydata;
-    vtkDebugMacro('Produced output');
-    console.timeEnd('mcubes');
-  };
-}
-
-// ----------------------------------------------------------------------------
-// Object factory
-// ----------------------------------------------------------------------------
-
-const DEFAULT_VALUES = {
-  contourValue: 0,
-  computeNormals: false,
-  mergePoints: false
-};
-
-// ----------------------------------------------------------------------------
-
-function extend(publicAPI, model) {
-  let initialValues = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-  Object.assign(model, DEFAULT_VALUES, initialValues);
-
-  // Make this a VTK object
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.obj(publicAPI, model);
-
-  // Also make it an algorithm with one input and one output
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.algo(publicAPI, model, 1, 1);
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.setGet(publicAPI, model, ['contourValue', 'computeNormals', 'mergePoints']);
-
-  // Object specific methods
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.algo(publicAPI, model, 1, 1);
-  vtkImageMarchingCubes(publicAPI, model);
-}
-
-// ----------------------------------------------------------------------------
-
-const newInstance = _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.newInstance(extend, 'vtkImageMarchingCubes');
-
-// ----------------------------------------------------------------------------
-
-var vtkImageMarchingCubes$1 = {
-  newInstance,
-  extend
-};
-
-
-
-
-/***/ }),
-
-/***/ "./node_modules/@kitware/vtk.js/Filters/General/ImageMarchingCubes/caseTable.js":
-/*!**************************************************************************************!*\
-  !*** ./node_modules/@kitware/vtk.js/Filters/General/ImageMarchingCubes/caseTable.js ***!
-  \**************************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ vtkCaseTable)
-/* harmony export */ });
-// ----------------------------------------------------------------------------
-// Marching cubes case functions (using triangles to complete tessellation).
-// For each case, a list of edge ids that form the triangles. A -1 marks the
-// end of the list of edges. Edges are taken three at a time to generate
-// triangle points.
-// ----------------------------------------------------------------------------
-const MARCHING_CUBE_CASES = [[-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 0 0 */, [0, 3, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 1 1 */, [0, 9, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 2 1 */, [1, 3, 8, 9, 1, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 3 2 */, [1, 11, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 4 1 */, [0, 3, 8, 1, 11, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 5 3 */, [9, 11, 2, 0, 9, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 6 2 */, [2, 3, 8, 2, 8, 11, 11, 8, 9, -1, -1, -1, -1, -1, -1, -1] /* 7 5 */, [3, 2, 10, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 8 1 */, [0, 2, 10, 8, 0, 10, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 9 2 */, [1, 0, 9, 2, 10, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 10 3 */, [1, 2, 10, 1, 10, 9, 9, 10, 8, -1, -1, -1, -1, -1, -1, -1] /* 11 5 */, [3, 1, 11, 10, 3, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 12 2 */, [0, 1, 11, 0, 11, 8, 8, 11, 10, -1, -1, -1, -1, -1, -1, -1] /* 13 5 */, [3, 0, 9, 3, 9, 10, 10, 9, 11, -1, -1, -1, -1, -1, -1, -1] /* 14 5 */, [9, 11, 8, 11, 10, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 15 8 */, [4, 8, 7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 16 1 */, [4, 0, 3, 7, 4, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 17 2 */, [0, 9, 1, 8, 7, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 18 3 */, [4, 9, 1, 4, 1, 7, 7, 1, 3, -1, -1, -1, -1, -1, -1, -1] /* 19 5 */, [1, 11, 2, 8, 7, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 20 4 */, [3, 7, 4, 3, 4, 0, 1, 11, 2, -1, -1, -1, -1, -1, -1, -1] /* 21 7 */, [9, 11, 2, 9, 2, 0, 8, 7, 4, -1, -1, -1, -1, -1, -1, -1] /* 22 7 */, [2, 9, 11, 2, 7, 9, 2, 3, 7, 7, 4, 9, -1, -1, -1, -1] /* 23 14 */, [8, 7, 4, 3, 2, 10, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 24 3 */, [10, 7, 4, 10, 4, 2, 2, 4, 0, -1, -1, -1, -1, -1, -1, -1] /* 25 5 */, [9, 1, 0, 8, 7, 4, 2, 10, 3, -1, -1, -1, -1, -1, -1, -1] /* 26 6 */, [4, 10, 7, 9, 10, 4, 9, 2, 10, 9, 1, 2, -1, -1, -1, -1] /* 27 9 */, [3, 1, 11, 3, 11, 10, 7, 4, 8, -1, -1, -1, -1, -1, -1, -1] /* 28 7 */, [1, 11, 10, 1, 10, 4, 1, 4, 0, 7, 4, 10, -1, -1, -1, -1] /* 29 11 */, [4, 8, 7, 9, 10, 0, 9, 11, 10, 10, 3, 0, -1, -1, -1, -1] /* 30 12 */, [4, 10, 7, 4, 9, 10, 9, 11, 10, -1, -1, -1, -1, -1, -1, -1] /* 31 5 */, [9, 4, 5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 32 1 */, [9, 4, 5, 0, 3, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 33 3 */, [0, 4, 5, 1, 0, 5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 34 2 */, [8, 4, 5, 8, 5, 3, 3, 5, 1, -1, -1, -1, -1, -1, -1, -1] /* 35 5 */, [1, 11, 2, 9, 4, 5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 36 3 */, [3, 8, 0, 1, 11, 2, 4, 5, 9, -1, -1, -1, -1, -1, -1, -1] /* 37 6 */, [5, 11, 2, 5, 2, 4, 4, 2, 0, -1, -1, -1, -1, -1, -1, -1] /* 38 5 */, [2, 5, 11, 3, 5, 2, 3, 4, 5, 3, 8, 4, -1, -1, -1, -1] /* 39 9 */, [9, 4, 5, 2, 10, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 40 4 */, [0, 2, 10, 0, 10, 8, 4, 5, 9, -1, -1, -1, -1, -1, -1, -1] /* 41 7 */, [0, 4, 5, 0, 5, 1, 2, 10, 3, -1, -1, -1, -1, -1, -1, -1] /* 42 7 */, [2, 5, 1, 2, 8, 5, 2, 10, 8, 4, 5, 8, -1, -1, -1, -1] /* 43 11 */, [11, 10, 3, 11, 3, 1, 9, 4, 5, -1, -1, -1, -1, -1, -1, -1] /* 44 7 */, [4, 5, 9, 0, 1, 8, 8, 1, 11, 8, 11, 10, -1, -1, -1, -1] /* 45 12 */, [5, 0, 4, 5, 10, 0, 5, 11, 10, 10, 3, 0, -1, -1, -1, -1] /* 46 14 */, [5, 8, 4, 5, 11, 8, 11, 10, 8, -1, -1, -1, -1, -1, -1, -1] /* 47 5 */, [9, 8, 7, 5, 9, 7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 48 2 */, [9, 0, 3, 9, 3, 5, 5, 3, 7, -1, -1, -1, -1, -1, -1, -1] /* 49 5 */, [0, 8, 7, 0, 7, 1, 1, 7, 5, -1, -1, -1, -1, -1, -1, -1] /* 50 5 */, [1, 3, 5, 3, 7, 5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 51 8 */, [9, 8, 7, 9, 7, 5, 11, 2, 1, -1, -1, -1, -1, -1, -1, -1] /* 52 7 */, [11, 2, 1, 9, 0, 5, 5, 0, 3, 5, 3, 7, -1, -1, -1, -1] /* 53 12 */, [8, 2, 0, 8, 5, 2, 8, 7, 5, 11, 2, 5, -1, -1, -1, -1] /* 54 11 */, [2, 5, 11, 2, 3, 5, 3, 7, 5, -1, -1, -1, -1, -1, -1, -1] /* 55 5 */, [7, 5, 9, 7, 9, 8, 3, 2, 10, -1, -1, -1, -1, -1, -1, -1] /* 56 7 */, [9, 7, 5, 9, 2, 7, 9, 0, 2, 2, 10, 7, -1, -1, -1, -1] /* 57 14 */, [2, 10, 3, 0, 8, 1, 1, 8, 7, 1, 7, 5, -1, -1, -1, -1] /* 58 12 */, [10, 1, 2, 10, 7, 1, 7, 5, 1, -1, -1, -1, -1, -1, -1, -1] /* 59 5 */, [9, 8, 5, 8, 7, 5, 11, 3, 1, 11, 10, 3, -1, -1, -1, -1] /* 60 10 */, [5, 0, 7, 5, 9, 0, 7, 0, 10, 1, 11, 0, 10, 0, 11, -1] /* 61 7 */, [10, 0, 11, 10, 3, 0, 11, 0, 5, 8, 7, 0, 5, 0, 7, -1] /* 62 7 */, [10, 5, 11, 7, 5, 10, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 63 2 */, [11, 5, 6, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 64 1 */, [0, 3, 8, 5, 6, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 65 4 */, [9, 1, 0, 5, 6, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 66 3 */, [1, 3, 8, 1, 8, 9, 5, 6, 11, -1, -1, -1, -1, -1, -1, -1] /* 67 7 */, [1, 5, 6, 2, 1, 6, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 68 2 */, [1, 5, 6, 1, 6, 2, 3, 8, 0, -1, -1, -1, -1, -1, -1, -1] /* 69 7 */, [9, 5, 6, 9, 6, 0, 0, 6, 2, -1, -1, -1, -1, -1, -1, -1] /* 70 5 */, [5, 8, 9, 5, 2, 8, 5, 6, 2, 3, 8, 2, -1, -1, -1, -1] /* 71 11 */, [2, 10, 3, 11, 5, 6, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 72 3 */, [10, 8, 0, 10, 0, 2, 11, 5, 6, -1, -1, -1, -1, -1, -1, -1] /* 73 7 */, [0, 9, 1, 2, 10, 3, 5, 6, 11, -1, -1, -1, -1, -1, -1, -1] /* 74 6 */, [5, 6, 11, 1, 2, 9, 9, 2, 10, 9, 10, 8, -1, -1, -1, -1] /* 75 12 */, [6, 10, 3, 6, 3, 5, 5, 3, 1, -1, -1, -1, -1, -1, -1, -1] /* 76 5 */, [0, 10, 8, 0, 5, 10, 0, 1, 5, 5, 6, 10, -1, -1, -1, -1] /* 77 14 */, [3, 6, 10, 0, 6, 3, 0, 5, 6, 0, 9, 5, -1, -1, -1, -1] /* 78 9 */, [6, 9, 5, 6, 10, 9, 10, 8, 9, -1, -1, -1, -1, -1, -1, -1] /* 79 5 */, [5, 6, 11, 4, 8, 7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 80 3 */, [4, 0, 3, 4, 3, 7, 6, 11, 5, -1, -1, -1, -1, -1, -1, -1] /* 81 7 */, [1, 0, 9, 5, 6, 11, 8, 7, 4, -1, -1, -1, -1, -1, -1, -1] /* 82 6 */, [11, 5, 6, 1, 7, 9, 1, 3, 7, 7, 4, 9, -1, -1, -1, -1] /* 83 12 */, [6, 2, 1, 6, 1, 5, 4, 8, 7, -1, -1, -1, -1, -1, -1, -1] /* 84 7 */, [1, 5, 2, 5, 6, 2, 3, 4, 0, 3, 7, 4, -1, -1, -1, -1] /* 85 10 */, [8, 7, 4, 9, 5, 0, 0, 5, 6, 0, 6, 2, -1, -1, -1, -1] /* 86 12 */, [7, 9, 3, 7, 4, 9, 3, 9, 2, 5, 6, 9, 2, 9, 6, -1] /* 87 7 */, [3, 2, 10, 7, 4, 8, 11, 5, 6, -1, -1, -1, -1, -1, -1, -1] /* 88 6 */, [5, 6, 11, 4, 2, 7, 4, 0, 2, 2, 10, 7, -1, -1, -1, -1] /* 89 12 */, [0, 9, 1, 4, 8, 7, 2, 10, 3, 5, 6, 11, -1, -1, -1, -1] /* 90 13 */, [9, 1, 2, 9, 2, 10, 9, 10, 4, 7, 4, 10, 5, 6, 11, -1] /* 91 6 */, [8, 7, 4, 3, 5, 10, 3, 1, 5, 5, 6, 10, -1, -1, -1, -1] /* 92 12 */, [5, 10, 1, 5, 6, 10, 1, 10, 0, 7, 4, 10, 0, 10, 4, -1] /* 93 7 */, [0, 9, 5, 0, 5, 6, 0, 6, 3, 10, 3, 6, 8, 7, 4, -1] /* 94 6 */, [6, 9, 5, 6, 10, 9, 4, 9, 7, 7, 9, 10, -1, -1, -1, -1] /* 95 3 */, [11, 9, 4, 6, 11, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 96 2 */, [4, 6, 11, 4, 11, 9, 0, 3, 8, -1, -1, -1, -1, -1, -1, -1] /* 97 7 */, [11, 1, 0, 11, 0, 6, 6, 0, 4, -1, -1, -1, -1, -1, -1, -1] /* 98 5 */, [8, 1, 3, 8, 6, 1, 8, 4, 6, 6, 11, 1, -1, -1, -1, -1] /* 99 14 */, [1, 9, 4, 1, 4, 2, 2, 4, 6, -1, -1, -1, -1, -1, -1, -1] /* 100 5 */, [3, 8, 0, 1, 9, 2, 2, 9, 4, 2, 4, 6, -1, -1, -1, -1] /* 101 12 */, [0, 4, 2, 4, 6, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 102 8 */, [8, 2, 3, 8, 4, 2, 4, 6, 2, -1, -1, -1, -1, -1, -1, -1] /* 103 5 */, [11, 9, 4, 11, 4, 6, 10, 3, 2, -1, -1, -1, -1, -1, -1, -1] /* 104 7 */, [0, 2, 8, 2, 10, 8, 4, 11, 9, 4, 6, 11, -1, -1, -1, -1] /* 105 10 */, [3, 2, 10, 0, 6, 1, 0, 4, 6, 6, 11, 1, -1, -1, -1, -1] /* 106 12 */, [6, 1, 4, 6, 11, 1, 4, 1, 8, 2, 10, 1, 8, 1, 10, -1] /* 107 7 */, [9, 4, 6, 9, 6, 3, 9, 3, 1, 10, 3, 6, -1, -1, -1, -1] /* 108 11 */, [8, 1, 10, 8, 0, 1, 10, 1, 6, 9, 4, 1, 6, 1, 4, -1] /* 109 7 */, [3, 6, 10, 3, 0, 6, 0, 4, 6, -1, -1, -1, -1, -1, -1, -1] /* 110 5 */, [6, 8, 4, 10, 8, 6, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 111 2 */, [7, 6, 11, 7, 11, 8, 8, 11, 9, -1, -1, -1, -1, -1, -1, -1] /* 112 5 */, [0, 3, 7, 0, 7, 11, 0, 11, 9, 6, 11, 7, -1, -1, -1, -1] /* 113 11 */, [11, 7, 6, 1, 7, 11, 1, 8, 7, 1, 0, 8, -1, -1, -1, -1] /* 114 9 */, [11, 7, 6, 11, 1, 7, 1, 3, 7, -1, -1, -1, -1, -1, -1, -1] /* 115 5 */, [1, 6, 2, 1, 8, 6, 1, 9, 8, 8, 7, 6, -1, -1, -1, -1] /* 116 14 */, [2, 9, 6, 2, 1, 9, 6, 9, 7, 0, 3, 9, 7, 9, 3, -1] /* 117 7 */, [7, 0, 8, 7, 6, 0, 6, 2, 0, -1, -1, -1, -1, -1, -1, -1] /* 118 5 */, [7, 2, 3, 6, 2, 7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 119 2 */, [2, 10, 3, 11, 8, 6, 11, 9, 8, 8, 7, 6, -1, -1, -1, -1] /* 120 12 */, [2, 7, 0, 2, 10, 7, 0, 7, 9, 6, 11, 7, 9, 7, 11, -1] /* 121 7 */, [1, 0, 8, 1, 8, 7, 1, 7, 11, 6, 11, 7, 2, 10, 3, -1] /* 122 6 */, [10, 1, 2, 10, 7, 1, 11, 1, 6, 6, 1, 7, -1, -1, -1, -1] /* 123 3 */, [8, 6, 9, 8, 7, 6, 9, 6, 1, 10, 3, 6, 1, 6, 3, -1] /* 124 7 */, [0, 1, 9, 10, 7, 6, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 125 4 */, [7, 0, 8, 7, 6, 0, 3, 0, 10, 10, 0, 6, -1, -1, -1, -1] /* 126 3 */, [7, 6, 10, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 127 1 */, [7, 10, 6, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 128 1 */, [3, 8, 0, 10, 6, 7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 129 3 */, [0, 9, 1, 10, 6, 7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 130 4 */, [8, 9, 1, 8, 1, 3, 10, 6, 7, -1, -1, -1, -1, -1, -1, -1] /* 131 7 */, [11, 2, 1, 6, 7, 10, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 132 3 */, [1, 11, 2, 3, 8, 0, 6, 7, 10, -1, -1, -1, -1, -1, -1, -1] /* 133 6 */, [2, 0, 9, 2, 9, 11, 6, 7, 10, -1, -1, -1, -1, -1, -1, -1] /* 134 7 */, [6, 7, 10, 2, 3, 11, 11, 3, 8, 11, 8, 9, -1, -1, -1, -1] /* 135 12 */, [7, 3, 2, 6, 7, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 136 2 */, [7, 8, 0, 7, 0, 6, 6, 0, 2, -1, -1, -1, -1, -1, -1, -1] /* 137 5 */, [2, 6, 7, 2, 7, 3, 0, 9, 1, -1, -1, -1, -1, -1, -1, -1] /* 138 7 */, [1, 2, 6, 1, 6, 8, 1, 8, 9, 8, 6, 7, -1, -1, -1, -1] /* 139 14 */, [11, 6, 7, 11, 7, 1, 1, 7, 3, -1, -1, -1, -1, -1, -1, -1] /* 140 5 */, [11, 6, 7, 1, 11, 7, 1, 7, 8, 1, 8, 0, -1, -1, -1, -1] /* 141 9 */, [0, 7, 3, 0, 11, 7, 0, 9, 11, 6, 7, 11, -1, -1, -1, -1] /* 142 11 */, [7, 11, 6, 7, 8, 11, 8, 9, 11, -1, -1, -1, -1, -1, -1, -1] /* 143 5 */, [6, 4, 8, 10, 6, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 144 2 */, [3, 10, 6, 3, 6, 0, 0, 6, 4, -1, -1, -1, -1, -1, -1, -1] /* 145 5 */, [8, 10, 6, 8, 6, 4, 9, 1, 0, -1, -1, -1, -1, -1, -1, -1] /* 146 7 */, [9, 6, 4, 9, 3, 6, 9, 1, 3, 10, 6, 3, -1, -1, -1, -1] /* 147 11 */, [6, 4, 8, 6, 8, 10, 2, 1, 11, -1, -1, -1, -1, -1, -1, -1] /* 148 7 */, [1, 11, 2, 3, 10, 0, 0, 10, 6, 0, 6, 4, -1, -1, -1, -1] /* 149 12 */, [4, 8, 10, 4, 10, 6, 0, 9, 2, 2, 9, 11, -1, -1, -1, -1] /* 150 10 */, [11, 3, 9, 11, 2, 3, 9, 3, 4, 10, 6, 3, 4, 3, 6, -1] /* 151 7 */, [8, 3, 2, 8, 2, 4, 4, 2, 6, -1, -1, -1, -1, -1, -1, -1] /* 152 5 */, [0, 2, 4, 4, 2, 6, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 153 8 */, [1, 0, 9, 2, 4, 3, 2, 6, 4, 4, 8, 3, -1, -1, -1, -1] /* 154 12 */, [1, 4, 9, 1, 2, 4, 2, 6, 4, -1, -1, -1, -1, -1, -1, -1] /* 155 5 */, [8, 3, 1, 8, 1, 6, 8, 6, 4, 6, 1, 11, -1, -1, -1, -1] /* 156 14 */, [11, 0, 1, 11, 6, 0, 6, 4, 0, -1, -1, -1, -1, -1, -1, -1] /* 157 5 */, [4, 3, 6, 4, 8, 3, 6, 3, 11, 0, 9, 3, 11, 3, 9, -1] /* 158 7 */, [11, 4, 9, 6, 4, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 159 2 */, [4, 5, 9, 7, 10, 6, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 160 3 */, [0, 3, 8, 4, 5, 9, 10, 6, 7, -1, -1, -1, -1, -1, -1, -1] /* 161 6 */, [5, 1, 0, 5, 0, 4, 7, 10, 6, -1, -1, -1, -1, -1, -1, -1] /* 162 7 */, [10, 6, 7, 8, 4, 3, 3, 4, 5, 3, 5, 1, -1, -1, -1, -1] /* 163 12 */, [9, 4, 5, 11, 2, 1, 7, 10, 6, -1, -1, -1, -1, -1, -1, -1] /* 164 6 */, [6, 7, 10, 1, 11, 2, 0, 3, 8, 4, 5, 9, -1, -1, -1, -1] /* 165 13 */, [7, 10, 6, 5, 11, 4, 4, 11, 2, 4, 2, 0, -1, -1, -1, -1] /* 166 12 */, [3, 8, 4, 3, 4, 5, 3, 5, 2, 11, 2, 5, 10, 6, 7, -1] /* 167 6 */, [7, 3, 2, 7, 2, 6, 5, 9, 4, -1, -1, -1, -1, -1, -1, -1] /* 168 7 */, [9, 4, 5, 0, 6, 8, 0, 2, 6, 6, 7, 8, -1, -1, -1, -1] /* 169 12 */, [3, 2, 6, 3, 6, 7, 1, 0, 5, 5, 0, 4, -1, -1, -1, -1] /* 170 10 */, [6, 8, 2, 6, 7, 8, 2, 8, 1, 4, 5, 8, 1, 8, 5, -1] /* 171 7 */, [9, 4, 5, 11, 6, 1, 1, 6, 7, 1, 7, 3, -1, -1, -1, -1] /* 172 12 */, [1, 11, 6, 1, 6, 7, 1, 7, 0, 8, 0, 7, 9, 4, 5, -1] /* 173 6 */, [4, 11, 0, 4, 5, 11, 0, 11, 3, 6, 7, 11, 3, 11, 7, -1] /* 174 7 */, [7, 11, 6, 7, 8, 11, 5, 11, 4, 4, 11, 8, -1, -1, -1, -1] /* 175 3 */, [6, 5, 9, 6, 9, 10, 10, 9, 8, -1, -1, -1, -1, -1, -1, -1] /* 176 5 */, [3, 10, 6, 0, 3, 6, 0, 6, 5, 0, 5, 9, -1, -1, -1, -1] /* 177 9 */, [0, 8, 10, 0, 10, 5, 0, 5, 1, 5, 10, 6, -1, -1, -1, -1] /* 178 14 */, [6, 3, 10, 6, 5, 3, 5, 1, 3, -1, -1, -1, -1, -1, -1, -1] /* 179 5 */, [1, 11, 2, 9, 10, 5, 9, 8, 10, 10, 6, 5, -1, -1, -1, -1] /* 180 12 */, [0, 3, 10, 0, 10, 6, 0, 6, 9, 5, 9, 6, 1, 11, 2, -1] /* 181 6 */, [10, 5, 8, 10, 6, 5, 8, 5, 0, 11, 2, 5, 0, 5, 2, -1] /* 182 7 */, [6, 3, 10, 6, 5, 3, 2, 3, 11, 11, 3, 5, -1, -1, -1, -1] /* 183 3 */, [5, 9, 8, 5, 8, 2, 5, 2, 6, 3, 2, 8, -1, -1, -1, -1] /* 184 11 */, [9, 6, 5, 9, 0, 6, 0, 2, 6, -1, -1, -1, -1, -1, -1, -1] /* 185 5 */, [1, 8, 5, 1, 0, 8, 5, 8, 6, 3, 2, 8, 6, 8, 2, -1] /* 186 7 */, [1, 6, 5, 2, 6, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 187 2 */, [1, 6, 3, 1, 11, 6, 3, 6, 8, 5, 9, 6, 8, 6, 9, -1] /* 188 7 */, [11, 0, 1, 11, 6, 0, 9, 0, 5, 5, 0, 6, -1, -1, -1, -1] /* 189 3 */, [0, 8, 3, 5, 11, 6, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 190 4 */, [11, 6, 5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 191 1 */, [10, 11, 5, 7, 10, 5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 192 2 */, [10, 11, 5, 10, 5, 7, 8, 0, 3, -1, -1, -1, -1, -1, -1, -1] /* 193 7 */, [5, 7, 10, 5, 10, 11, 1, 0, 9, -1, -1, -1, -1, -1, -1, -1] /* 194 7 */, [11, 5, 7, 11, 7, 10, 9, 1, 8, 8, 1, 3, -1, -1, -1, -1] /* 195 10 */, [10, 2, 1, 10, 1, 7, 7, 1, 5, -1, -1, -1, -1, -1, -1, -1] /* 196 5 */, [0, 3, 8, 1, 7, 2, 1, 5, 7, 7, 10, 2, -1, -1, -1, -1] /* 197 12 */, [9, 5, 7, 9, 7, 2, 9, 2, 0, 2, 7, 10, -1, -1, -1, -1] /* 198 14 */, [7, 2, 5, 7, 10, 2, 5, 2, 9, 3, 8, 2, 9, 2, 8, -1] /* 199 7 */, [2, 11, 5, 2, 5, 3, 3, 5, 7, -1, -1, -1, -1, -1, -1, -1] /* 200 5 */, [8, 0, 2, 8, 2, 5, 8, 5, 7, 11, 5, 2, -1, -1, -1, -1] /* 201 11 */, [9, 1, 0, 5, 3, 11, 5, 7, 3, 3, 2, 11, -1, -1, -1, -1] /* 202 12 */, [9, 2, 8, 9, 1, 2, 8, 2, 7, 11, 5, 2, 7, 2, 5, -1] /* 203 7 */, [1, 5, 3, 3, 5, 7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 204 8 */, [0, 7, 8, 0, 1, 7, 1, 5, 7, -1, -1, -1, -1, -1, -1, -1] /* 205 5 */, [9, 3, 0, 9, 5, 3, 5, 7, 3, -1, -1, -1, -1, -1, -1, -1] /* 206 5 */, [9, 7, 8, 5, 7, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 207 2 */, [5, 4, 8, 5, 8, 11, 11, 8, 10, -1, -1, -1, -1, -1, -1, -1] /* 208 5 */, [5, 4, 0, 5, 0, 10, 5, 10, 11, 10, 0, 3, -1, -1, -1, -1] /* 209 14 */, [0, 9, 1, 8, 11, 4, 8, 10, 11, 11, 5, 4, -1, -1, -1, -1] /* 210 12 */, [11, 4, 10, 11, 5, 4, 10, 4, 3, 9, 1, 4, 3, 4, 1, -1] /* 211 7 */, [2, 1, 5, 2, 5, 8, 2, 8, 10, 4, 8, 5, -1, -1, -1, -1] /* 212 11 */, [0, 10, 4, 0, 3, 10, 4, 10, 5, 2, 1, 10, 5, 10, 1, -1] /* 213 7 */, [0, 5, 2, 0, 9, 5, 2, 5, 10, 4, 8, 5, 10, 5, 8, -1] /* 214 7 */, [9, 5, 4, 2, 3, 10, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 215 4 */, [2, 11, 5, 3, 2, 5, 3, 5, 4, 3, 4, 8, -1, -1, -1, -1] /* 216 9 */, [5, 2, 11, 5, 4, 2, 4, 0, 2, -1, -1, -1, -1, -1, -1, -1] /* 217 5 */, [3, 2, 11, 3, 11, 5, 3, 5, 8, 4, 8, 5, 0, 9, 1, -1] /* 218 6 */, [5, 2, 11, 5, 4, 2, 1, 2, 9, 9, 2, 4, -1, -1, -1, -1] /* 219 3 */, [8, 5, 4, 8, 3, 5, 3, 1, 5, -1, -1, -1, -1, -1, -1, -1] /* 220 5 */, [0, 5, 4, 1, 5, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 221 2 */, [8, 5, 4, 8, 3, 5, 9, 5, 0, 0, 5, 3, -1, -1, -1, -1] /* 222 3 */, [9, 5, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 223 1 */, [4, 7, 10, 4, 10, 9, 9, 10, 11, -1, -1, -1, -1, -1, -1, -1] /* 224 5 */, [0, 3, 8, 4, 7, 9, 9, 7, 10, 9, 10, 11, -1, -1, -1, -1] /* 225 12 */, [1, 10, 11, 1, 4, 10, 1, 0, 4, 7, 10, 4, -1, -1, -1, -1] /* 226 11 */, [3, 4, 1, 3, 8, 4, 1, 4, 11, 7, 10, 4, 11, 4, 10, -1] /* 227 7 */, [4, 7, 10, 9, 4, 10, 9, 10, 2, 9, 2, 1, -1, -1, -1, -1] /* 228 9 */, [9, 4, 7, 9, 7, 10, 9, 10, 1, 2, 1, 10, 0, 3, 8, -1] /* 229 6 */, [10, 4, 7, 10, 2, 4, 2, 0, 4, -1, -1, -1, -1, -1, -1, -1] /* 230 5 */, [10, 4, 7, 10, 2, 4, 8, 4, 3, 3, 4, 2, -1, -1, -1, -1] /* 231 3 */, [2, 11, 9, 2, 9, 7, 2, 7, 3, 7, 9, 4, -1, -1, -1, -1] /* 232 14 */, [9, 7, 11, 9, 4, 7, 11, 7, 2, 8, 0, 7, 2, 7, 0, -1] /* 233 7 */, [3, 11, 7, 3, 2, 11, 7, 11, 4, 1, 0, 11, 4, 11, 0, -1] /* 234 7 */, [1, 2, 11, 8, 4, 7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 235 4 */, [4, 1, 9, 4, 7, 1, 7, 3, 1, -1, -1, -1, -1, -1, -1, -1] /* 236 5 */, [4, 1, 9, 4, 7, 1, 0, 1, 8, 8, 1, 7, -1, -1, -1, -1] /* 237 3 */, [4, 3, 0, 7, 3, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 238 2 */, [4, 7, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 239 1 */, [9, 8, 11, 11, 8, 10, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 240 8 */, [3, 9, 0, 3, 10, 9, 10, 11, 9, -1, -1, -1, -1, -1, -1, -1] /* 241 5 */, [0, 11, 1, 0, 8, 11, 8, 10, 11, -1, -1, -1, -1, -1, -1, -1] /* 242 5 */, [3, 11, 1, 10, 11, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 243 2 */, [1, 10, 2, 1, 9, 10, 9, 8, 10, -1, -1, -1, -1, -1, -1, -1] /* 244 5 */, [3, 9, 0, 3, 10, 9, 1, 9, 2, 2, 9, 10, -1, -1, -1, -1] /* 245 3 */, [0, 10, 2, 8, 10, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 246 2 */, [3, 10, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 247 1 */, [2, 8, 3, 2, 11, 8, 11, 9, 8, -1, -1, -1, -1, -1, -1, -1] /* 248 5 */, [9, 2, 11, 0, 2, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 249 2 */, [2, 8, 3, 2, 11, 8, 0, 8, 1, 1, 8, 11, -1, -1, -1, -1] /* 250 3 */, [1, 2, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 251 1 */, [1, 8, 3, 9, 8, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 252 2 */, [0, 1, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 253 1 */, [0, 8, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 254 1 */, [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1] /* 255 0 */];
-
-const EDGES = [[0, 1], [1, 3], [2, 3], [0, 2], [4, 5], [5, 7], [6, 7], [4, 6], [0, 4], [1, 5], [2, 6], [3, 7]];
-function getCase(index) {
-  return MARCHING_CUBE_CASES[index];
-}
-
-// Define the twelve edges of the voxel by the following pairs of vertices
-function getEdge(eid) {
-  return EDGES[eid];
-}
-
-// ----------------------------------------------------------------------------
-// Static API
-// ----------------------------------------------------------------------------
-var vtkCaseTable = {
-  getCase,
-  getEdge
-};
-
-
-
-
-/***/ }),
-
-/***/ "./node_modules/@kitware/vtk.js/Filters/General/OutlineFilter.js":
-/*!***********************************************************************!*\
-  !*** ./node_modules/@kitware/vtk.js/Filters/General/OutlineFilter.js ***!
-  \***********************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   BOUNDS_MAP: () => (/* binding */ BOUNDS_MAP),
-/* harmony export */   LINE_ARRAY: () => (/* binding */ LINE_ARRAY),
-/* harmony export */   "default": () => (/* binding */ vtkOutlineFilter$1),
-/* harmony export */   extend: () => (/* binding */ extend),
-/* harmony export */   newInstance: () => (/* binding */ newInstance)
-/* harmony export */ });
-/* harmony import */ var _macros2_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../macros2.js */ "./node_modules/@kitware/vtk.js/macros2.js");
-/* harmony import */ var _Common_DataModel_PolyData_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../Common/DataModel/PolyData.js */ "./node_modules/@kitware/vtk.js/Common/DataModel/PolyData.js");
-
-
-
-const {
-  vtkErrorMacro
-} = _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m;
-
-// prettier-ignore
-const BOUNDS_MAP = [0, 2, 4,
-// pt 0
-1, 2, 4,
-// pt 1
-0, 3, 4,
-// pt 2
-1, 3, 4,
-// pt 3
-0, 2, 5,
-// pt 4
-1, 2, 5,
-// pt 5
-0, 3, 5,
-// pt 6
-1, 3, 5 // pt 7
-];
-
-// prettier-ignore
-const LINE_ARRAY = [2, 0, 1, 2, 2, 3, 2, 4, 5, 2, 6, 7, 2, 0, 2, 2, 1, 3, 2, 4, 6, 2, 5, 7, 2, 0, 4, 2, 1, 5, 2, 2, 6, 2, 3, 7];
-
-// ----------------------------------------------------------------------------
-// vtkOutlineFilter methods
-// ----------------------------------------------------------------------------
-
-function vtkOutlineFilter(publicAPI, model) {
-  // Set our className
-  model.classHierarchy.push('vtkOutlineFilter');
-  publicAPI.requestData = (inData, outData) => {
-    // implement requestData
-    const input = inData[0];
-    if (!input) {
-      vtkErrorMacro('Invalid or missing input');
-      return;
-    }
-    const bounds = input.getBounds();
-    const output = _Common_DataModel_PolyData_js__WEBPACK_IMPORTED_MODULE_1__["default"].newInstance();
-    output.getPoints().setData(Float32Array.from(BOUNDS_MAP.map(idx => bounds[idx])), 3);
-    output.getLines().setData(Uint16Array.from(LINE_ARRAY));
-    outData[0] = output;
-  };
-}
-
-// ----------------------------------------------------------------------------
-// Object factory
-// ----------------------------------------------------------------------------
-
-const DEFAULT_VALUES = {};
-
-// ----------------------------------------------------------------------------
-
-function extend(publicAPI, model) {
-  let initialValues = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-  Object.assign(model, DEFAULT_VALUES, initialValues);
-
-  // Make this a VTK object
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.obj(publicAPI, model);
-
-  // Also make it an algorithm with one input and one output
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.algo(publicAPI, model, 1, 1);
-
-  // Object specific methods
-  vtkOutlineFilter(publicAPI, model);
-}
-
-// ----------------------------------------------------------------------------
-
-const newInstance = _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.newInstance(extend, 'vtkOutlineFilter');
-
-// ----------------------------------------------------------------------------
-
-var vtkOutlineFilter$1 = {
-  newInstance,
-  extend,
-  BOUNDS_MAP,
-  LINE_ARRAY
 };
 
 
@@ -17919,1289 +16609,6 @@ var vtkCamera$1 = {
 
 /***/ }),
 
-/***/ "./node_modules/@kitware/vtk.js/Rendering/Core/ColorTransferFunction.js":
-/*!******************************************************************************!*\
-  !*** ./node_modules/@kitware/vtk.js/Rendering/Core/ColorTransferFunction.js ***!
-  \******************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ vtkColorTransferFunction$1),
-/* harmony export */   extend: () => (/* binding */ extend),
-/* harmony export */   newInstance: () => (/* binding */ newInstance)
-/* harmony export */ });
-/* harmony import */ var _macros2_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../macros2.js */ "./node_modules/@kitware/vtk.js/macros2.js");
-/* harmony import */ var _Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../Common/Core/Math/index.js */ "./node_modules/@kitware/vtk.js/Common/Core/Math/index.js");
-/* harmony import */ var _Common_Core_ScalarsToColors_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../Common/Core/ScalarsToColors.js */ "./node_modules/@kitware/vtk.js/Common/Core/ScalarsToColors.js");
-/* harmony import */ var _ColorTransferFunction_Constants_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./ColorTransferFunction/Constants.js */ "./node_modules/@kitware/vtk.js/Rendering/Core/ColorTransferFunction/Constants.js");
-
-
-
-
-
-const {
-  ColorSpace,
-  Scale
-} = _ColorTransferFunction_Constants_js__WEBPACK_IMPORTED_MODULE_3__["default"];
-const {
-  ScalarMappingTarget
-} = _Common_Core_ScalarsToColors_js__WEBPACK_IMPORTED_MODULE_2__["default"];
-const {
-  vtkDebugMacro,
-  vtkErrorMacro,
-  vtkWarningMacro
-} = _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m;
-
-// ----------------------------------------------------------------------------
-// Global methods
-// ----------------------------------------------------------------------------
-/* eslint-disable no-continue                                                */
-
-// Convert to and from a special polar version of CIELAB (useful for creating
-// continuous diverging color maps).
-function vtkColorTransferFunctionLabToMsh(lab, msh) {
-  const L = lab[0];
-  const a = lab[1];
-  const b = lab[2];
-  const M = Math.sqrt(L * L + a * a + b * b);
-  const s = M > 0.001 ? Math.acos(L / M) : 0.0;
-  const h = s > 0.001 ? Math.atan2(b, a) : 0.0;
-  msh[0] = M;
-  msh[1] = s;
-  msh[2] = h;
-}
-function vtkColorTransferFunctionMshToLab(msh, lab) {
-  const M = msh[0];
-  const s = msh[1];
-  const h = msh[2];
-  lab[0] = M * Math.cos(s);
-  lab[1] = M * Math.sin(s) * Math.cos(h);
-  lab[2] = M * Math.sin(s) * Math.sin(h);
-}
-
-// For the case when interpolating from a saturated color to an unsaturated
-// color, find a hue for the unsaturated color that makes sense.
-function vtkColorTransferFunctionAdjustHue(msh, unsatM) {
-  if (msh[0] >= unsatM - 0.1) {
-    // The best we can do is hold hue constant.
-    return msh[2];
-  }
-
-  // This equation is designed to make the perceptual change of the
-  // interpolation to be close to constant.
-  const hueSpin = msh[1] * Math.sqrt(unsatM * unsatM - msh[0] * msh[0]) / (msh[0] * Math.sin(msh[1]));
-  // Spin hue away from 0 except in purple hues.
-  if (msh[2] > -0.3 * Math.PI) {
-    return msh[2] + hueSpin;
-  }
-  return msh[2] - hueSpin;
-}
-function vtkColorTransferFunctionAngleDiff(a1, a2) {
-  let adiff = a1 - a2;
-  if (adiff < 0.0) {
-    adiff = -adiff;
-  }
-  while (adiff >= 2.0 * Math.PI) {
-    adiff -= 2.0 * Math.PI;
-  }
-  if (adiff > Math.PI) {
-    adiff = 2.0 * Math.PI - adiff;
-  }
-  return adiff;
-}
-
-// Interpolate a diverging color map.
-function vtkColorTransferFunctionInterpolateDiverging(s, rgb1, rgb2, result) {
-  const lab1 = [];
-  const lab2 = [];
-  (0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__.N)(rgb1, lab1);
-  (0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__.N)(rgb2, lab2);
-  const msh1 = [];
-  const msh2 = [];
-  vtkColorTransferFunctionLabToMsh(lab1, msh1);
-  vtkColorTransferFunctionLabToMsh(lab2, msh2);
-
-  // If the endpoints are distinct saturated colors, then place white in between
-  // them.
-  let localS = s;
-  if (msh1[1] > 0.05 && msh2[1] > 0.05 && vtkColorTransferFunctionAngleDiff(msh1[2], msh2[2]) > 0.33 * Math.PI) {
-    // Insert the white midpoint by setting one end to white and adjusting the
-    // scalar value.
-    let Mmid = Math.max(msh1[0], msh2[0]);
-    Mmid = Math.max(88.0, Mmid);
-    if (s < 0.5) {
-      msh2[0] = Mmid;
-      msh2[1] = 0.0;
-      msh2[2] = 0.0;
-      localS *= 2.0;
-    } else {
-      msh1[0] = Mmid;
-      msh1[1] = 0.0;
-      msh1[2] = 0.0;
-      localS = 2.0 * localS - 1.0;
-    }
-  }
-
-  // If one color has no saturation, then its hue value is invalid.  In this
-  // case, we want to set it to something logical so that the interpolation of
-  // hue makes sense.
-  if (msh1[1] < 0.05 && msh2[1] > 0.05) {
-    msh1[2] = vtkColorTransferFunctionAdjustHue(msh2, msh1[0]);
-  } else if (msh2[1] < 0.05 && msh1[1] > 0.05) {
-    msh2[2] = vtkColorTransferFunctionAdjustHue(msh1, msh2[0]);
-  }
-  const mshTmp = [];
-  mshTmp[0] = (1 - localS) * msh1[0] + localS * msh2[0];
-  mshTmp[1] = (1 - localS) * msh1[1] + localS * msh2[1];
-  mshTmp[2] = (1 - localS) * msh1[2] + localS * msh2[2];
-
-  // Now convert back to RGB
-  const labTmp = [];
-  vtkColorTransferFunctionMshToLab(mshTmp, labTmp);
-  (0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__.O)(labTmp, result);
-}
-
-// ----------------------------------------------------------------------------
-// vtkColorTransferFunction methods
-// ----------------------------------------------------------------------------
-
-function vtkColorTransferFunction(publicAPI, model) {
-  // Set our className
-  model.classHierarchy.push('vtkColorTransferFunction');
-
-  // Return the number of points which specify this function
-  publicAPI.getSize = () => model.nodes.length;
-
-  //----------------------------------------------------------------------------
-  // Add a point defined in RGB
-  publicAPI.addRGBPoint = (x, r, g, b) => publicAPI.addRGBPointLong(x, r, g, b, 0.5, 0.0);
-
-  //----------------------------------------------------------------------------
-  // Add a point defined in RGB
-  publicAPI.addRGBPointLong = function (x, r, g, b) {
-    let midpoint = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0.5;
-    let sharpness = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 0.0;
-    // Error check
-    if (midpoint < 0.0 || midpoint > 1.0) {
-      vtkErrorMacro('Midpoint outside range [0.0, 1.0]');
-      return -1;
-    }
-    if (sharpness < 0.0 || sharpness > 1.0) {
-      vtkErrorMacro('Sharpness outside range [0.0, 1.0]');
-      return -1;
-    }
-
-    // remove any node already at this X location
-    if (!model.allowDuplicateScalars) {
-      publicAPI.removePoint(x);
-    }
-
-    // Create the new node
-    const node = {
-      x,
-      r,
-      g,
-      b,
-      midpoint,
-      sharpness
-    };
-
-    // Add it, then sort to get everything in order
-    model.nodes.push(node);
-    publicAPI.sortAndUpdateRange();
-
-    // We need to find the index of the node we just added in order
-    // to return this value
-    let i = 0;
-    for (; i < model.nodes.length; i++) {
-      if (model.nodes[i].x === x) {
-        break;
-      }
-    }
-
-    // If we didn't find it, something went horribly wrong so
-    // return -1
-    if (i < model.nodes.length) {
-      return i;
-    }
-    return -1;
-  };
-
-  //----------------------------------------------------------------------------
-  // Add a point defined in HSV
-  publicAPI.addHSVPoint = (x, h, s, v) => publicAPI.addHSVPointLong(x, h, s, v, 0.5, 0.0);
-
-  //----------------------------------------------------------------------------
-  // Add a point defined in HSV
-  publicAPI.addHSVPointLong = function (x, h, s, v) {
-    let midpoint = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0.5;
-    let sharpness = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 0.0;
-    const rgb = [];
-    const hsv = [h, s, v];
-    (0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__.h)(hsv, rgb);
-    return publicAPI.addRGBPoint(x, rgb[0], rgb[1], rgb[2], midpoint, sharpness);
-  };
-
-  //----------------------------------------------------------------------------
-  // Set nodes directly
-  publicAPI.setNodes = nodes => {
-    if (model.nodes !== nodes) {
-      const before = JSON.stringify(model.nodes);
-      model.nodes = nodes;
-      const after = JSON.stringify(model.nodes);
-      if (publicAPI.sortAndUpdateRange() || before !== after) {
-        publicAPI.modified();
-        return true;
-      }
-    }
-    return false;
-  };
-
-  //----------------------------------------------------------------------------
-  // Sort the vector in increasing order, then fill in
-  // the Range
-  publicAPI.sortAndUpdateRange = () => {
-    const before = JSON.stringify(model.nodes);
-    model.nodes.sort((a, b) => a.x - b.x);
-    const after = JSON.stringify(model.nodes);
-    const modifiedInvoked = publicAPI.updateRange();
-    // If range is updated, Modified() has been called, don't call it again.
-    if (!modifiedInvoked && before !== after) {
-      publicAPI.modified();
-      return true;
-    }
-    return modifiedInvoked;
-  };
-
-  //----------------------------------------------------------------------------
-  publicAPI.updateRange = () => {
-    const oldRange = [2];
-    oldRange[0] = model.mappingRange[0];
-    oldRange[1] = model.mappingRange[1];
-    const size = model.nodes.length;
-    if (size) {
-      model.mappingRange[0] = model.nodes[0].x;
-      model.mappingRange[1] = model.nodes[size - 1].x;
-    } else {
-      model.mappingRange[0] = 0;
-      model.mappingRange[1] = 0;
-    }
-
-    // If the range is the same, then no need to call Modified()
-    if (oldRange[0] === model.mappingRange[0] && oldRange[1] === model.mappingRange[1]) {
-      return false;
-    }
-    publicAPI.modified();
-    return true;
-  };
-
-  //----------------------------------------------------------------------------
-  // Remove a point
-  publicAPI.removePoint = x => {
-    // First find the node since we need to know its
-    // index as our return value
-    let i = 0;
-    for (; i < model.nodes.length; i++) {
-      if (model.nodes[i].x === x) {
-        break;
-      }
-    }
-    const retVal = i;
-
-    // If the node doesn't exist, we return -1
-    if (i >= model.nodes.length) {
-      return -1;
-    }
-
-    // If the first or last point has been removed, then we update the range
-    // No need to sort here as the order of points hasn't changed.
-    let modifiedInvoked = false;
-    model.nodes.splice(i, 1);
-    if (i === 0 || i === model.nodes.length) {
-      modifiedInvoked = publicAPI.updateRange();
-    }
-    if (!modifiedInvoked) {
-      publicAPI.modified();
-    }
-    return retVal;
-  };
-
-  //----------------------------------------------------------------------------
-  publicAPI.movePoint = (oldX, newX) => {
-    if (oldX === newX) {
-      // Nothing to do.
-      return;
-    }
-    publicAPI.removePoint(newX);
-    for (let i = 0; i < model.nodes.length; i++) {
-      if (model.nodes[i].x === oldX) {
-        model.nodes[i].x = newX;
-        publicAPI.sortAndUpdateRange();
-        break;
-      }
-    }
-  };
-
-  //----------------------------------------------------------------------------
-  // Remove all points
-  publicAPI.removeAllPoints = () => {
-    model.nodes = [];
-    publicAPI.sortAndUpdateRange();
-  };
-
-  //----------------------------------------------------------------------------
-  // Add a line defined in RGB
-  publicAPI.addRGBSegment = (x1, r1, g1, b1, x2, r2, g2, b2) => {
-    // First, find all points in this range and remove them
-    publicAPI.sortAndUpdateRange();
-    for (let i = 0; i < model.nodes.length;) {
-      if (model.nodes[i].x >= x1 && model.nodes[i].x <= x2) {
-        model.nodes.splice(i, 1);
-      } else {
-        i++;
-      }
-    }
-
-    // Now add the points
-    publicAPI.addRGBPointLong(x1, r1, g1, b1, 0.5, 0.0);
-    publicAPI.addRGBPointLong(x2, r2, g2, b2, 0.5, 0.0);
-    publicAPI.modified();
-  };
-
-  //----------------------------------------------------------------------------
-  // Add a line defined in HSV
-  publicAPI.addHSVSegment = (x1, h1, s1, v1, x2, h2, s2, v2) => {
-    const hsv1 = [h1, s1, v1];
-    const hsv2 = [h2, s2, v2];
-    const rgb1 = [];
-    const rgb2 = [];
-    (0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__.h)(hsv1, rgb1);
-    (0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__.h)(hsv2, rgb2);
-    publicAPI.addRGBSegment(x1, rgb1[0], rgb1[1], rgb1[2], x2, rgb2[0], rgb2[1], rgb2[2]);
-  };
-
-  //----------------------------------------------------------------------------
-  // Returns the RGBA color evaluated at the specified location
-  publicAPI.mapValue = x => {
-    const rgb = [];
-    publicAPI.getColor(x, rgb);
-    return [Math.floor(255.0 * rgb[0] + 0.5), Math.floor(255.0 * rgb[1] + 0.5), Math.floor(255.0 * rgb[2] + 0.5), 255];
-  };
-
-  //----------------------------------------------------------------------------
-  // Returns the RGB color evaluated at the specified location
-  publicAPI.getColor = (x, rgb) => {
-    if (model.indexedLookup) {
-      const numNodes = publicAPI.getSize();
-      // todo
-      const idx = publicAPI.getAnnotatedValueIndexInternal(x);
-      if (idx < 0 || numNodes === 0) {
-        const nanColor = publicAPI.getNanColorByReference();
-        rgb[0] = nanColor[0];
-        rgb[1] = nanColor[1];
-        rgb[2] = nanColor[2];
-      } else {
-        const nodeVal = [];
-        publicAPI.getNodeValue(idx % numNodes, nodeVal);
-        // nodeVal[0] is the x value. nodeVal[1...3] is rgb.
-        rgb[0] = nodeVal[1];
-        rgb[1] = nodeVal[2];
-        rgb[2] = nodeVal[3];
-      }
-      return;
-    }
-    publicAPI.getTable(x, x, 1, rgb);
-  };
-
-  //----------------------------------------------------------------------------
-  // Returns the red color evaluated at the specified location
-  publicAPI.getRedValue = x => {
-    const rgb = [];
-    publicAPI.getColor(x, rgb);
-    return rgb[0];
-  };
-
-  //----------------------------------------------------------------------------
-  // Returns the green color evaluated at the specified location
-  publicAPI.getGreenValue = x => {
-    const rgb = [];
-    publicAPI.getColor(x, rgb);
-    return rgb[1];
-  };
-
-  //----------------------------------------------------------------------------
-  // Returns the blue color evaluated at the specified location
-  publicAPI.getBlueValue = x => {
-    const rgb = [];
-    publicAPI.getColor(x, rgb);
-    return rgb[2];
-  };
-
-  //----------------------------------------------------------------------------
-  // Returns a table of RGB colors at regular intervals along the function
-  publicAPI.getTable = (xStart_, xEnd_, size, table) => {
-    // To handle BigInt limitation
-    const xStart = Number(xStart_);
-    const xEnd = Number(xEnd_);
-
-    // Special case: If either the start or end is a NaN, then all any
-    // interpolation done on them is also a NaN.  Therefore, fill the table with
-    // the NaN color.
-    if ((0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__.i)(xStart) || (0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__.i)(xEnd)) {
-      for (let i = 0; i < size; i++) {
-        table[i * 3 + 0] = model.nanColor[0];
-        table[i * 3 + 1] = model.nanColor[1];
-        table[i * 3 + 2] = model.nanColor[2];
-      }
-      return;
-    }
-    let idx = 0;
-    const numNodes = model.nodes.length;
-
-    // Need to keep track of the last value so that
-    // we can fill in table locations past this with
-    // this value if Clamping is On.
-    let lastR = 0.0;
-    let lastG = 0.0;
-    let lastB = 0.0;
-    if (numNodes !== 0) {
-      lastR = model.nodes[numNodes - 1].r;
-      lastG = model.nodes[numNodes - 1].g;
-      lastB = model.nodes[numNodes - 1].b;
-    }
-    let x = 0.0;
-    let x1 = 0.0;
-    let x2 = 0.0;
-    const rgb1 = [0.0, 0.0, 0.0];
-    const rgb2 = [0.0, 0.0, 0.0];
-    let midpoint = 0.0;
-    let sharpness = 0.0;
-    const tmpVec = [];
-
-    // If the scale is logarithmic, make sure the range is valid.
-    let usingLogScale = model.scale === Scale.LOG10;
-    if (usingLogScale) {
-      // Note: This requires range[0] <= range[1].
-      usingLogScale = model.mappingRange[0] > 0.0;
-    }
-    let logStart = 0.0;
-    let logEnd = 0.0;
-    let logX = 0.0;
-    if (usingLogScale) {
-      logStart = Math.log10(xStart);
-      logEnd = Math.log10(xEnd);
-    }
-
-    // For each table entry
-    for (let i = 0; i < size; i++) {
-      // Find our location in the table
-      const tidx = 3 * i;
-
-      // Find our X location. If we are taking only 1 sample, make
-      // it halfway between start and end (usually start and end will
-      // be the same in this case)
-      if (size > 1) {
-        if (usingLogScale) {
-          logX = logStart + i / (size - 1.0) * (logEnd - logStart);
-          x = 10.0 ** logX;
-        } else {
-          x = xStart + i / (size - 1.0) * (xEnd - xStart);
-        }
-      } else if (usingLogScale) {
-        logX = 0.5 * (logStart + logEnd);
-        x = 10.0 ** logX;
-      } else {
-        x = 0.5 * (xStart + xEnd);
-      }
-
-      // Linearly map x from mappingRange to [0, numberOfValues-1],
-      // discretize (round down to the closest integer),
-      // then map back to mappingRange
-      if (model.discretize) {
-        const range = model.mappingRange;
-        if (x >= range[0] && x <= range[1]) {
-          const numberOfValues = model.numberOfValues;
-          const deltaRange = range[1] - range[0];
-          if (numberOfValues <= 1) {
-            x = range[0] + deltaRange / 2.0;
-          } else {
-            // normalize x
-            const xn = (x - range[0]) / deltaRange;
-            // discretize
-            const discretizeIndex = (0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__.K)(numberOfValues * xn);
-            // get discretized x
-            x = range[0] + discretizeIndex / (numberOfValues - 1) * deltaRange;
-          }
-        }
-      }
-
-      // Do we need to move to the next node?
-      while (idx < numNodes && x > model.nodes[idx].x) {
-        idx++;
-        // If we are at a valid point index, fill in
-        // the value at this node, and the one before (the
-        // two that surround our current sample location)
-        // idx cannot be 0 since we just incremented it.
-        if (idx < numNodes) {
-          x1 = model.nodes[idx - 1].x;
-          x2 = model.nodes[idx].x;
-          if (usingLogScale) {
-            x1 = Math.log10(x1);
-            x2 = Math.log10(x2);
-          }
-          rgb1[0] = model.nodes[idx - 1].r;
-          rgb2[0] = model.nodes[idx].r;
-          rgb1[1] = model.nodes[idx - 1].g;
-          rgb2[1] = model.nodes[idx].g;
-          rgb1[2] = model.nodes[idx - 1].b;
-          rgb2[2] = model.nodes[idx].b;
-
-          // We only need the previous midpoint and sharpness
-          // since these control this region
-          midpoint = model.nodes[idx - 1].midpoint;
-          sharpness = model.nodes[idx - 1].sharpness;
-
-          // Move midpoint away from extreme ends of range to avoid
-          // degenerate math
-          if (midpoint < 0.00001) {
-            midpoint = 0.00001;
-          }
-          if (midpoint > 0.99999) {
-            midpoint = 0.99999;
-          }
-        }
-      }
-
-      // Are we at or past the end? If so, just use the last value
-      if (x > model.mappingRange[1]) {
-        table[tidx] = 0.0;
-        table[tidx + 1] = 0.0;
-        table[tidx + 2] = 0.0;
-        if (model.clamping) {
-          if (publicAPI.getUseAboveRangeColor()) {
-            table[tidx] = model.aboveRangeColor[0];
-            table[tidx + 1] = model.aboveRangeColor[1];
-            table[tidx + 2] = model.aboveRangeColor[2];
-          } else {
-            table[tidx] = lastR;
-            table[tidx + 1] = lastG;
-            table[tidx + 2] = lastB;
-          }
-        }
-      } else if (x < model.mappingRange[0] || (0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__.L)(x) && x < 0) {
-        // we are before the first node? If so, duplicate this node's values.
-        // We have to deal with -inf here
-        table[tidx] = 0.0;
-        table[tidx + 1] = 0.0;
-        table[tidx + 2] = 0.0;
-        if (model.clamping) {
-          if (publicAPI.getUseBelowRangeColor()) {
-            table[tidx] = model.belowRangeColor[0];
-            table[tidx + 1] = model.belowRangeColor[1];
-            table[tidx + 2] = model.belowRangeColor[2];
-          } else if (numNodes > 0) {
-            table[tidx] = model.nodes[0].r;
-            table[tidx + 1] = model.nodes[0].g;
-            table[tidx + 2] = model.nodes[0].b;
-          }
-        }
-      } else if (idx === 0 && (Math.abs(x - xStart) < 1e-6 || model.discretize)) {
-        if (numNodes > 0) {
-          table[tidx] = model.nodes[0].r;
-          table[tidx + 1] = model.nodes[0].g;
-          table[tidx + 2] = model.nodes[0].b;
-        } else {
-          table[tidx] = 0.0;
-          table[tidx + 1] = 0.0;
-          table[tidx + 2] = 0.0;
-        }
-      } else {
-        // OK, we are between two nodes - interpolate
-        // Our first attempt at a normalized location [0,1] -
-        // we will be modifying this based on midpoint and
-        // sharpness to get the curve shape we want and to have
-        // it pass through (y1+y2)/2 at the midpoint.
-        let s = 0.0;
-        if (usingLogScale) {
-          s = (logX - x1) / (x2 - x1);
-        } else {
-          s = (x - x1) / (x2 - x1);
-        }
-
-        // Readjust based on the midpoint - linear adjustment
-        if (s < midpoint) {
-          s = 0.5 * s / midpoint;
-        } else {
-          s = 0.5 + 0.5 * (s - midpoint) / (1.0 - midpoint);
-        }
-
-        // override for sharpness > 0.99
-        // In this case we just want piecewise constant
-        if (sharpness > 0.99) {
-          // Use the first value since we are below the midpoint
-          if (s < 0.5) {
-            table[tidx] = rgb1[0];
-            table[tidx + 1] = rgb1[1];
-            table[tidx + 2] = rgb1[2];
-            continue;
-          } else {
-            // Use the second value at or above the midpoint
-            table[tidx] = rgb2[0];
-            table[tidx + 1] = rgb2[1];
-            table[tidx + 2] = rgb2[2];
-            continue;
-          }
-        }
-
-        // Override for sharpness < 0.01
-        // In this case we want piecewise linear
-        if (sharpness < 0.01) {
-          // Simple linear interpolation
-          if (model.colorSpace === ColorSpace.RGB) {
-            table[tidx] = (1 - s) * rgb1[0] + s * rgb2[0];
-            table[tidx + 1] = (1 - s) * rgb1[1] + s * rgb2[1];
-            table[tidx + 2] = (1 - s) * rgb1[2] + s * rgb2[2];
-          } else if (model.colorSpace === ColorSpace.HSV) {
-            const hsv1 = [];
-            const hsv2 = [];
-            (0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__.M)(rgb1, hsv1);
-            (0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__.M)(rgb2, hsv2);
-            if (model.hSVWrap && (hsv1[0] - hsv2[0] > 0.5 || hsv2[0] - hsv1[0] > 0.5)) {
-              if (hsv1[0] > hsv2[0]) {
-                hsv1[0] -= 1.0;
-              } else {
-                hsv2[0] -= 1.0;
-              }
-            }
-            const hsvTmp = [];
-            hsvTmp[0] = (1.0 - s) * hsv1[0] + s * hsv2[0];
-            if (hsvTmp[0] < 0.0) {
-              hsvTmp[0] += 1.0;
-            }
-            hsvTmp[1] = (1.0 - s) * hsv1[1] + s * hsv2[1];
-            hsvTmp[2] = (1.0 - s) * hsv1[2] + s * hsv2[2];
-
-            // Now convert this back to RGB
-            (0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__.h)(hsvTmp, tmpVec);
-            table[tidx] = tmpVec[0];
-            table[tidx + 1] = tmpVec[1];
-            table[tidx + 2] = tmpVec[2];
-          } else if (model.colorSpace === ColorSpace.LAB) {
-            const lab1 = [];
-            const lab2 = [];
-            (0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__.N)(rgb1, lab1);
-            (0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__.N)(rgb2, lab2);
-            const labTmp = [];
-            labTmp[0] = (1 - s) * lab1[0] + s * lab2[0];
-            labTmp[1] = (1 - s) * lab1[1] + s * lab2[1];
-            labTmp[2] = (1 - s) * lab1[2] + s * lab2[2];
-
-            // Now convert back to RGB
-            (0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__.O)(labTmp, tmpVec);
-            table[tidx] = tmpVec[0];
-            table[tidx + 1] = tmpVec[1];
-            table[tidx + 2] = tmpVec[2];
-          } else if (model.colorSpace === ColorSpace.DIVERGING) {
-            vtkColorTransferFunctionInterpolateDiverging(s, rgb1, rgb2, tmpVec);
-            table[tidx] = tmpVec[0];
-            table[tidx + 1] = tmpVec[1];
-            table[tidx + 2] = tmpVec[2];
-          } else {
-            vtkErrorMacro('ColorSpace set to invalid value.', model.colorSpace);
-          }
-          continue;
-        }
-
-        // We have a sharpness between [0.01, 0.99] - we will
-        // used a modified hermite curve interpolation where we
-        // derive the slope based on the sharpness, and we compress
-        // the curve non-linearly based on the sharpness
-
-        // First, we will adjust our position based on sharpness in
-        // order to make the curve sharper (closer to piecewise constant)
-        if (s < 0.5) {
-          s = 0.5 * (s * 2.0) ** (1.0 + 10.0 * sharpness);
-        } else if (s > 0.5) {
-          s = 1.0 - 0.5 * ((1.0 - s) * 2) ** (1 + 10.0 * sharpness);
-        }
-
-        // Compute some coefficients we will need for the hermite curve
-        const ss = s * s;
-        const sss = ss * s;
-        const h1 = 2.0 * sss - 3 * ss + 1;
-        const h2 = -2 * sss + 3 * ss;
-        const h3 = sss - 2 * ss + s;
-        const h4 = sss - ss;
-        let slope;
-        let t;
-        if (model.colorSpace === ColorSpace.RGB) {
-          for (let j = 0; j < 3; j++) {
-            // Use one slope for both end points
-            slope = rgb2[j] - rgb1[j];
-            t = (1.0 - sharpness) * slope;
-
-            // Compute the value
-            table[tidx + j] = h1 * rgb1[j] + h2 * rgb2[j] + h3 * t + h4 * t;
-          }
-        } else if (model.colorSpace === ColorSpace.HSV) {
-          const hsv1 = [];
-          const hsv2 = [];
-          (0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__.M)(rgb1, hsv1);
-          (0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__.M)(rgb2, hsv2);
-          if (model.hSVWrap && (hsv1[0] - hsv2[0] > 0.5 || hsv2[0] - hsv1[0] > 0.5)) {
-            if (hsv1[0] > hsv2[0]) {
-              hsv1[0] -= 1.0;
-            } else {
-              hsv2[0] -= 1.0;
-            }
-          }
-          const hsvTmp = [];
-          for (let j = 0; j < 3; j++) {
-            // Use one slope for both end points
-            slope = hsv2[j] - hsv1[j];
-            t = (1.0 - sharpness) * slope;
-
-            // Compute the value
-            hsvTmp[j] = h1 * hsv1[j] + h2 * hsv2[j] + h3 * t + h4 * t;
-            if (j === 0 && hsvTmp[j] < 0.0) {
-              hsvTmp[j] += 1.0;
-            }
-          }
-          // Now convert this back to RGB
-          (0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__.h)(hsvTmp, tmpVec);
-          table[tidx] = tmpVec[0];
-          table[tidx + 1] = tmpVec[1];
-          table[tidx + 2] = tmpVec[2];
-        } else if (model.colorSpace === ColorSpace.LAB) {
-          const lab1 = [];
-          const lab2 = [];
-          (0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__.N)(rgb1, lab1);
-          (0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__.N)(rgb2, lab2);
-          const labTmp = [];
-          for (let j = 0; j < 3; j++) {
-            // Use one slope for both end points
-            slope = lab2[j] - lab1[j];
-            t = (1.0 - sharpness) * slope;
-
-            // Compute the value
-            labTmp[j] = h1 * lab1[j] + h2 * lab2[j] + h3 * t + h4 * t;
-          }
-          // Now convert this back to RGB
-          (0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__.O)(labTmp, tmpVec);
-          table[tidx] = tmpVec[0];
-          table[tidx + 1] = tmpVec[1];
-          table[tidx + 2] = tmpVec[2];
-        } else if (model.colorSpace === ColorSpace.DIVERGING) {
-          // I have not implemented proper interpolation by a hermite curve for
-          // the diverging color map, but I cannot think of a good use case for
-          // that anyway.
-          vtkColorTransferFunctionInterpolateDiverging(s, rgb1, rgb2, tmpVec);
-          table[tidx] = tmpVec[0];
-          table[tidx + 1] = tmpVec[1];
-          table[tidx + 2] = tmpVec[2];
-        } else {
-          vtkErrorMacro('ColorSpace set to invalid value.');
-        }
-
-        // Final error check to make sure we don't go outside [0,1]
-        for (let j = 0; j < 3; j++) {
-          table[tidx + j] = table[tidx + j] < 0.0 ? 0.0 : table[tidx + j];
-          table[tidx + j] = table[tidx + j] > 1.0 ? 1.0 : table[tidx + j];
-        }
-      }
-    }
-  };
-
-  //----------------------------------------------------------------------------
-  publicAPI.getUint8Table = function (xStart, xEnd, size) {
-    let withAlpha = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
-    if (publicAPI.getMTime() <= model.buildTime && model.tableSize === size && model.tableWithAlpha !== withAlpha) {
-      return model.table;
-    }
-    if (model.nodes.length === 0) {
-      vtkErrorMacro('Attempting to lookup a value with no points in the function');
-      return model.table;
-    }
-    const nbChannels = withAlpha ? 4 : 3;
-    if (model.tableSize !== size || model.tableWithAlpha !== withAlpha) {
-      model.table = new Uint8Array(size * nbChannels);
-      model.tableSize = size;
-      model.tableWithAlpha = withAlpha;
-    }
-    const tmpTable = [];
-    publicAPI.getTable(xStart, xEnd, size, tmpTable);
-    for (let i = 0; i < size; i++) {
-      model.table[i * nbChannels + 0] = Math.floor(tmpTable[i * 3 + 0] * 255.0 + 0.5);
-      model.table[i * nbChannels + 1] = Math.floor(tmpTable[i * 3 + 1] * 255.0 + 0.5);
-      model.table[i * nbChannels + 2] = Math.floor(tmpTable[i * 3 + 2] * 255.0 + 0.5);
-      if (withAlpha) {
-        model.table[i * nbChannels + 3] = 255;
-      }
-    }
-    model.buildTime.modified();
-    return model.table;
-  };
-  publicAPI.buildFunctionFromArray = array => {
-    publicAPI.removeAllPoints();
-    const numComponents = array.getNumberOfComponents();
-    for (let i = 0; i < array.getNumberOfTuples(); i++) {
-      switch (numComponents) {
-        case 3:
-          {
-            model.nodes.push({
-              x: i,
-              r: array.getComponent(i, 0),
-              g: array.getComponent(i, 1),
-              b: array.getComponent(i, 2),
-              midpoint: 0.5,
-              sharpness: 0.0
-            });
-            break;
-          }
-        case 4:
-          {
-            model.nodes.push({
-              x: array.getComponent(i, 0),
-              r: array.getComponent(i, 1),
-              g: array.getComponent(i, 2),
-              b: array.getComponent(i, 3),
-              midpoint: 0.5,
-              sharpness: 0.0
-            });
-            break;
-          }
-        case 5:
-          {
-            model.nodes.push({
-              x: i,
-              r: array.getComponent(i, 0),
-              g: array.getComponent(i, 1),
-              b: array.getComponent(i, 2),
-              midpoint: array.getComponent(i, 4),
-              sharpness: array.getComponent(i, 5)
-            });
-            break;
-          }
-        case 6:
-          {
-            model.nodes.push({
-              x: array.getComponent(i, 0),
-              r: array.getComponent(i, 1),
-              g: array.getComponent(i, 2),
-              b: array.getComponent(i, 3),
-              midpoint: array.getComponent(i, 4),
-              sharpness: array.getComponent(i, 5)
-            });
-            break;
-          }
-      }
-    }
-    publicAPI.sortAndUpdateRange();
-  };
-
-  //----------------------------------------------------------------------------
-  publicAPI.buildFunctionFromTable = (xStart, xEnd, size, table) => {
-    let inc = 0.0;
-    publicAPI.removeAllPoints();
-    if (size > 1) {
-      inc = (xEnd - xStart) / (size - 1.0);
-    }
-    for (let i = 0; i < size; i++) {
-      const node = {
-        x: xStart + inc * i,
-        r: table[i * 3],
-        g: table[i * 3 + 1],
-        b: table[i * 3 + 2],
-        sharpness: 0.0,
-        midpoint: 0.5
-      };
-      model.nodes.push(node);
-    }
-    publicAPI.sortAndUpdateRange();
-  };
-
-  //----------------------------------------------------------------------------
-  // For a specified index value, get the node parameters
-  publicAPI.getNodeValue = (index, val) => {
-    if (index < 0 || index >= model.nodes.length) {
-      vtkErrorMacro('Index out of range!');
-      return -1;
-    }
-    val[0] = model.nodes[index].x;
-    val[1] = model.nodes[index].r;
-    val[2] = model.nodes[index].g;
-    val[3] = model.nodes[index].b;
-    val[4] = model.nodes[index].midpoint;
-    val[5] = model.nodes[index].sharpness;
-    return 1;
-  };
-
-  //----------------------------------------------------------------------------
-  // For a specified index value, get the node parameters
-  publicAPI.setNodeValue = (index, val) => {
-    if (index < 0 || index >= model.nodes.length) {
-      vtkErrorMacro('Index out of range!');
-      return -1;
-    }
-    const oldX = model.nodes[index].x;
-    model.nodes[index].x = val[0];
-    model.nodes[index].r = val[1];
-    model.nodes[index].g = val[2];
-    model.nodes[index].b = val[3];
-    model.nodes[index].midpoint = val[4];
-    model.nodes[index].sharpness = val[5];
-    if (oldX !== val[0]) {
-      // The point has been moved, the order of points or the range might have
-      // been modified.
-      publicAPI.sortAndUpdateRange();
-      // No need to call Modified() here because SortAndUpdateRange() has done it
-      // already.
-    } else {
-      publicAPI.modified();
-    }
-    return 1;
-  };
-
-  //----------------------------------------------------------------------------
-  publicAPI.getNumberOfAvailableColors = () => {
-    if (model.indexedLookup && publicAPI.getSize()) {
-      return publicAPI.getSize();
-    }
-    if (model.tableSize) {
-      // Not sure if this is correct since it is only set if
-      // "const unsigned char *::GetTable(double xStart, double xEnd,int size)"
-      // has been called.
-      return model.tableSize;
-    }
-    const nNodes = model.nodes?.length ?? 0;
-    // The minimum is 4094 colors so that it fills in the 4096 texels texture in `mapScalarsToTexture`
-    return Math.max(4094, nNodes);
-  };
-
-  //----------------------------------------------------------------------------
-  publicAPI.getIndexedColor = (idx, rgba) => {
-    const n = publicAPI.getSize();
-    if (n > 0 && idx >= 0) {
-      const nodeValue = [];
-      publicAPI.getNodeValue(idx % n, nodeValue);
-      for (let j = 0; j < 3; ++j) {
-        rgba[j] = nodeValue[j + 1];
-      }
-      rgba[3] = 1.0; // NodeColor is RGB-only.
-      return;
-    }
-    const nanColor = publicAPI.getNanColorByReference();
-    rgba[0] = nanColor[0];
-    rgba[1] = nanColor[1];
-    rgba[2] = nanColor[2];
-    rgba[3] = 1.0; // NanColor is RGB-only.
-  };
-
-  //----------------------------------------------------------------------------
-  publicAPI.fillFromDataPointer = (nb, ptr) => {
-    if (nb <= 0 || !ptr) {
-      return;
-    }
-    publicAPI.removeAllPoints();
-    for (let i = 0; i < nb; i++) {
-      publicAPI.addRGBPoint(ptr[i * 4], ptr[i * 4 + 1], ptr[i * 4 + 2], ptr[i * 4 + 3]);
-    }
-  };
-
-  //----------------------------------------------------------------------------
-  publicAPI.setMappingRange = (min, max) => {
-    const range = [min, max];
-    const originalRange = publicAPI.getRange();
-    if (originalRange[1] === range[1] && originalRange[0] === range[0]) {
-      return;
-    }
-    if (range[1] === range[0]) {
-      vtkErrorMacro('attempt to set zero width color range');
-      return;
-    }
-    const scale = (range[1] - range[0]) / (originalRange[1] - originalRange[0]);
-    const shift = range[0] - originalRange[0] * scale;
-    for (let i = 0; i < model.nodes.length; ++i) {
-      model.nodes[i].x = model.nodes[i].x * scale + shift;
-    }
-    model.mappingRange[0] = range[0];
-    model.mappingRange[1] = range[1];
-    publicAPI.modified();
-  };
-
-  //----------------------------------------------------------------------------
-  publicAPI.adjustRange = range => {
-    const functionRange = publicAPI.getRange();
-
-    // Make sure we have points at each end of the range
-    const rgb = [];
-    if (functionRange[0] < range[0]) {
-      publicAPI.getColor(range[0], rgb);
-      publicAPI.addRGBPoint(range[0], rgb[0], rgb[1], rgb[2]);
-    } else {
-      publicAPI.getColor(functionRange[0], rgb);
-      publicAPI.addRGBPoint(range[0], rgb[0], rgb[1], rgb[2]);
-    }
-    if (functionRange[1] > range[1]) {
-      publicAPI.getColor(range[1], rgb);
-      publicAPI.addRGBPoint(range[1], rgb[0], rgb[1], rgb[2]);
-    } else {
-      publicAPI.getColor(functionRange[1], rgb);
-      publicAPI.addRGBPoint(range[1], rgb[0], rgb[1], rgb[2]);
-    }
-
-    // Remove all points out-of-range
-    publicAPI.sortAndUpdateRange();
-    for (let i = 0; i < model.nodes.length;) {
-      if (model.nodes[i].x >= range[0] && model.nodes[i].x <= range[1]) {
-        model.nodes.splice(i, 1);
-      } else {
-        ++i;
-      }
-    }
-    return 1;
-  };
-
-  //--------------------------------------------------------------------------
-  publicAPI.estimateMinNumberOfSamples = (x1, x2) => {
-    const d = publicAPI.findMinimumXDistance();
-    return Math.ceil((x2 - x1) / d);
-  };
-
-  //----------------------------------------------------------------------------
-  publicAPI.findMinimumXDistance = () => {
-    if (model.nodes.length < 2) {
-      return -1.0;
-    }
-    let distance = Number.MAX_VALUE;
-    for (let i = 0; i < model.nodes.length - 1; i++) {
-      const currentDist = model.nodes[i + 1].x - model.nodes[i].x;
-      if (currentDist < distance) {
-        distance = currentDist;
-      }
-    }
-    return distance;
-  };
-  publicAPI.mapScalarsThroughTable = (input, output, outFormat, inputOffset) => {
-    if (publicAPI.getSize() === 0) {
-      vtkDebugMacro('Transfer Function Has No Points!');
-      return;
-    }
-    if (model.indexedLookup) {
-      publicAPI.mapDataIndexed(input, output, outFormat, inputOffset);
-    } else {
-      publicAPI.mapData(input, output, outFormat, inputOffset);
-    }
-  };
-
-  //----------------------------------------------------------------------------
-  publicAPI.mapData = (input, output, outFormat, inputOffset) => {
-    if (publicAPI.getSize() === 0) {
-      vtkWarningMacro('Transfer Function Has No Points!');
-      return;
-    }
-    const alpha = Math.floor(publicAPI.getAlpha() * 255.0 + 0.5);
-    const length = input.getNumberOfTuples();
-    const inIncr = input.getNumberOfComponents();
-    const outputV = output.getData();
-    const inputV = input.getData();
-    const rgb = [];
-    if (outFormat === ScalarMappingTarget.RGBA) {
-      for (let i = 0; i < length; i++) {
-        const x = inputV[i * inIncr + inputOffset];
-        publicAPI.getColor(x, rgb);
-        outputV[i * 4] = Math.floor(rgb[0] * 255.0 + 0.5);
-        outputV[i * 4 + 1] = Math.floor(rgb[1] * 255.0 + 0.5);
-        outputV[i * 4 + 2] = Math.floor(rgb[2] * 255.0 + 0.5);
-        outputV[i * 4 + 3] = alpha;
-      }
-    }
-    if (outFormat === ScalarMappingTarget.RGB) {
-      for (let i = 0; i < length; i++) {
-        const x = inputV[i * inIncr + inputOffset];
-        publicAPI.getColor(x, rgb);
-        outputV[i * 3] = Math.floor(rgb[0] * 255.0 + 0.5);
-        outputV[i * 3 + 1] = Math.floor(rgb[1] * 255.0 + 0.5);
-        outputV[i * 3 + 2] = Math.floor(rgb[2] * 255.0 + 0.5);
-      }
-    }
-    if (outFormat === ScalarMappingTarget.LUMINANCE) {
-      for (let i = 0; i < length; i++) {
-        const x = inputV[i * inIncr + inputOffset];
-        publicAPI.getColor(x, rgb);
-        outputV[i] = Math.floor(rgb[0] * 76.5 + rgb[1] * 150.45 + rgb[2] * 28.05 + 0.5);
-      }
-    }
-    if (outFormat === ScalarMappingTarget.LUMINANCE_ALPHA) {
-      for (let i = 0; i < length; i++) {
-        const x = inputV[i * inIncr + inputOffset];
-        publicAPI.getColor(x, rgb);
-        outputV[i * 2] = Math.floor(rgb[0] * 76.5 + rgb[1] * 150.45 + rgb[2] * 28.05 + 0.5);
-        outputV[i * 2 + 1] = alpha;
-      }
-    }
-  };
-
-  //----------------------------------------------------------------------------
-  publicAPI.applyColorMap = colorMap => {
-    const oldColorSpace = JSON.stringify(model.colorSpace);
-    if (colorMap.ColorSpace) {
-      model.colorSpace = ColorSpace[colorMap.ColorSpace.toUpperCase()];
-      if (model.colorSpace === undefined) {
-        vtkErrorMacro(`ColorSpace ${colorMap.ColorSpace} not supported, using RGB instead`);
-        model.colorSpace = ColorSpace.RGB;
-      }
-    }
-    let isModified = oldColorSpace !== JSON.stringify(model.colorSpace);
-    const oldNanColor = isModified || JSON.stringify(model.nanColor);
-    if (colorMap.NanColor) {
-      model.nanColor = [].concat(colorMap.NanColor);
-      while (model.nanColor.length < 4) {
-        model.nanColor.push(1.0);
-      }
-    }
-    isModified = isModified || oldNanColor !== JSON.stringify(model.nanColor);
-    const oldNodes = isModified || JSON.stringify(model.nodes);
-    if (colorMap.RGBPoints) {
-      const size = colorMap.RGBPoints.length;
-      model.nodes = [];
-      const midpoint = 0.5;
-      const sharpness = 0.0;
-      for (let i = 0; i < size; i += 4) {
-        model.nodes.push({
-          x: colorMap.RGBPoints[i],
-          r: colorMap.RGBPoints[i + 1],
-          g: colorMap.RGBPoints[i + 2],
-          b: colorMap.RGBPoints[i + 3],
-          midpoint,
-          sharpness
-        });
-      }
-    }
-    const modifiedInvoked = publicAPI.sortAndUpdateRange();
-    const callModified = !modifiedInvoked && (isModified || oldNodes !== JSON.stringify(model.nodes));
-    if (callModified) publicAPI.modified();
-    return modifiedInvoked || callModified;
-  };
-}
-
-// ----------------------------------------------------------------------------
-// Object factory
-// ----------------------------------------------------------------------------
-
-const DEFAULT_VALUES = {
-  clamping: true,
-  colorSpace: ColorSpace.RGB,
-  hSVWrap: true,
-  scale: Scale.LINEAR,
-  nanColor: null,
-  belowRangeColor: null,
-  aboveRangeColor: null,
-  useAboveRangeColor: false,
-  useBelowRangeColor: false,
-  allowDuplicateScalars: false,
-  table: null,
-  tableSize: 0,
-  buildTime: null,
-  nodes: null,
-  discretize: false,
-  numberOfValues: 256
-};
-
-// ----------------------------------------------------------------------------
-
-function extend(publicAPI, model) {
-  let initialValues = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-  Object.assign(model, DEFAULT_VALUES, initialValues);
-
-  // Inheritance
-  _Common_Core_ScalarsToColors_js__WEBPACK_IMPORTED_MODULE_2__["default"].extend(publicAPI, model, initialValues);
-
-  // Internal objects initialization
-  model.table = [];
-  model.nodes = [];
-  model.nanColor = [0.5, 0.0, 0.0, 1.0];
-  model.belowRangeColor = [0.0, 0.0, 0.0, 1.0];
-  model.aboveRangeColor = [1.0, 1.0, 1.0, 1.0];
-  model.buildTime = {};
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.obj(model.buildTime);
-
-  // Create get-only macros
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.get(publicAPI, model, ['buildTime', 'mappingRange']);
-
-  // Create get-set macros
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.setGet(publicAPI, model, ['useAboveRangeColor', 'useBelowRangeColor', 'discretize', 'numberOfValues', {
-    type: 'enum',
-    name: 'colorSpace',
-    enum: ColorSpace
-  }, {
-    type: 'enum',
-    name: 'scale',
-    enum: Scale
-  }]);
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.setArray(publicAPI, model, ['nanColor', 'belowRangeColor', 'aboveRangeColor'], 4);
-
-  // Create get macros for array
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.getArray(publicAPI, model, ['nanColor', 'belowRangeColor', 'aboveRangeColor']);
-
-  // For more macro methods, see "Sources/macros.js"
-
-  // Object specific methods
-  vtkColorTransferFunction(publicAPI, model);
-}
-
-// ----------------------------------------------------------------------------
-
-const newInstance = _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.newInstance(extend, 'vtkColorTransferFunction');
-
-// ----------------------------------------------------------------------------
-
-var vtkColorTransferFunction$1 = {
-  newInstance,
-  extend,
-  ..._ColorTransferFunction_Constants_js__WEBPACK_IMPORTED_MODULE_3__["default"]
-};
-
-
-
-
-/***/ }),
-
-/***/ "./node_modules/@kitware/vtk.js/Rendering/Core/ColorTransferFunction/Constants.js":
-/*!****************************************************************************************!*\
-  !*** ./node_modules/@kitware/vtk.js/Rendering/Core/ColorTransferFunction/Constants.js ***!
-  \****************************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   ColorSpace: () => (/* binding */ ColorSpace),
-/* harmony export */   Scale: () => (/* binding */ Scale),
-/* harmony export */   "default": () => (/* binding */ Constants)
-/* harmony export */ });
-const ColorSpace = {
-  RGB: 0,
-  HSV: 1,
-  LAB: 2,
-  DIVERGING: 3
-};
-const Scale = {
-  LINEAR: 0,
-  LOG10: 1
-};
-var Constants = {
-  ColorSpace,
-  Scale
-};
-
-
-
-
-/***/ }),
-
 /***/ "./node_modules/@kitware/vtk.js/Rendering/Core/CubeAxesActor.js":
 /*!**********************************************************************!*\
   !*** ./node_modules/@kitware/vtk.js/Rendering/Core/CubeAxesActor.js ***!
@@ -20434,357 +17841,6 @@ const newInstance = _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.newInstance(exten
 var vtkHardwareSelector$1 = {
   newInstance,
   extend
-};
-
-
-
-
-/***/ }),
-
-/***/ "./node_modules/@kitware/vtk.js/Rendering/Core/ImageCPRMapper.js":
-/*!***********************************************************************!*\
-  !*** ./node_modules/@kitware/vtk.js/Rendering/Core/ImageCPRMapper.js ***!
-  \***********************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ index),
-/* harmony export */   extend: () => (/* binding */ extend),
-/* harmony export */   newInstance: () => (/* binding */ newInstance)
-/* harmony export */ });
-/* harmony import */ var gl_matrix__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! gl-matrix */ "./node_modules/gl-matrix/esm/mat4.js");
-/* harmony import */ var gl_matrix__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! gl-matrix */ "./node_modules/gl-matrix/esm/quat.js");
-/* harmony import */ var gl_matrix__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! gl-matrix */ "./node_modules/gl-matrix/esm/vec3.js");
-/* harmony import */ var _Mapper_CoincidentTopologyHelper_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Mapper/CoincidentTopologyHelper.js */ "./node_modules/@kitware/vtk.js/Rendering/Core/Mapper/CoincidentTopologyHelper.js");
-/* harmony import */ var _AbstractImageMapper_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./AbstractImageMapper.js */ "./node_modules/@kitware/vtk.js/Rendering/Core/AbstractImageMapper.js");
-/* harmony import */ var _macros2_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../macros2.js */ "./node_modules/@kitware/vtk.js/macros2.js");
-/* harmony import */ var _Common_Core_Points_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../Common/Core/Points.js */ "./node_modules/@kitware/vtk.js/Common/Core/Points.js");
-/* harmony import */ var _Common_DataModel_PolyLine_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../Common/DataModel/PolyLine.js */ "./node_modules/@kitware/vtk.js/Common/DataModel/PolyLine.js");
-/* harmony import */ var _ImageCPRMapper_Constants_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./ImageCPRMapper/Constants.js */ "./node_modules/@kitware/vtk.js/Rendering/Core/ImageCPRMapper/Constants.js");
-
-
-
-
-
-
-
-
-const {
-  vtkErrorMacro
-} = _macros2_js__WEBPACK_IMPORTED_MODULE_2__.m;
-const {
-  staticOffsetAPI,
-  otherStaticMethods
-} = _Mapper_CoincidentTopologyHelper_js__WEBPACK_IMPORTED_MODULE_0__["default"];
-
-// ----------------------------------------------------------------------------
-// vtkImageCPRMapper methods
-// ----------------------------------------------------------------------------
-
-function vtkImageCPRMapper(publicAPI, model) {
-  // Set our className
-  model.classHierarchy.push('vtkImageCPRMapper');
-  const superClass = {
-    ...publicAPI
-  };
-
-  /**
-   * Public methods
-   */
-  publicAPI.getBounds = () => {
-    const imageWidth = publicAPI.getWidth();
-    const imageHeight = publicAPI.getHeight();
-    return [0, imageWidth, 0, imageHeight, 0, 0];
-  };
-  publicAPI.getOrientationDataArray = () => {
-    const pointData = publicAPI.getInputData(1)?.getPointData();
-    if (!pointData) {
-      return null;
-    }
-    if (model.orientationArrayName !== null) {
-      return pointData.getArrayByName(model.orientationArrayName) || null;
-    }
-    return pointData.getArrayByName('Orientation') || pointData.getArrayByName('Direction') || pointData.getVectors() || pointData.getTensors() || pointData.getNormals() || null;
-  };
-  publicAPI.getOrientedCenterline = () => {
-    const inputPolydata = publicAPI.getInputData(1);
-    if (!inputPolydata) {
-      // No polydata: return previous centerline
-      // Don't reset centerline as it could have been set using setOrientedCenterline
-      return model._orientedCenterline;
-    }
-
-    // Get dependencies of centerline
-    const orientationDataArray = publicAPI.getOrientationDataArray();
-    const linesDataArray = inputPolydata.getLines();
-    const pointsDataArray = inputPolydata.getPoints();
-    if (!model.useUniformOrientation && !orientationDataArray) {
-      vtkErrorMacro('Failed to create oriented centerline from polydata: no orientation');
-      publicAPI._resetOrientedCenterline();
-      return model._orientedCenterline;
-    }
-
-    // If centerline didn't change, don't recompute
-    const centerlineTime = model._orientedCenterline.getMTime();
-    if (centerlineTime >= publicAPI.getMTime() && centerlineTime > linesDataArray.getMTime() && centerlineTime > pointsDataArray.getMTime() && (model.useUniformOrientation || centerlineTime > orientationDataArray.getMTime())) {
-      return model._orientedCenterline;
-    }
-
-    // Get points of the centerline
-    const linesData = linesDataArray.getData();
-    if (linesData.length <= 0) {
-      // No polyline
-      publicAPI._resetOrientedCenterline();
-      return model._orientedCenterline;
-    }
-    const nPoints = linesData[0];
-    if (nPoints <= 1) {
-      // Empty centerline
-      publicAPI._resetOrientedCenterline();
-      return model._orientedCenterline;
-    }
-    const pointIndices = linesData.subarray(1, 1 + nPoints);
-
-    // Get orientations of the centerline
-    const orientations = new Array(nPoints);
-    // Function to convert from mat4, mat3, quat or vec3 to quaternion
-    let convert = () => null;
-    const numComps = model.useUniformOrientation ? model.uniformOrientation.length : orientationDataArray.getNumberOfComponents();
-    switch (numComps) {
-      case 16:
-        convert = (outQuat, inMat) => {
-          gl_matrix__WEBPACK_IMPORTED_MODULE_6__.getRotation(outQuat, inMat);
-          gl_matrix__WEBPACK_IMPORTED_MODULE_7__.normalize(outQuat, outQuat);
-        };
-        break;
-      case 9:
-        convert = (outQuat, inMat) => {
-          gl_matrix__WEBPACK_IMPORTED_MODULE_7__.fromMat3(outQuat, inMat);
-          gl_matrix__WEBPACK_IMPORTED_MODULE_7__.normalize(outQuat, outQuat);
-        };
-        break;
-      case 4:
-        convert = gl_matrix__WEBPACK_IMPORTED_MODULE_7__.copy;
-        break;
-      case 3:
-        convert = (a, b) => gl_matrix__WEBPACK_IMPORTED_MODULE_7__.rotationTo(a, model.tangentDirection, b);
-        break;
-      default:
-        vtkErrorMacro('Orientation doesnt match mat4, mat3, quat or vec3');
-        publicAPI._resetOrientedCenterline();
-        return model._orientedCenterline;
-    }
-    // Function to get orientation from point index
-    let getOrientation = () => null;
-    if (model.useUniformOrientation) {
-      const outQuat = new Float64Array(4);
-      convert(outQuat, model.uniformOrientation);
-      getOrientation = () => outQuat;
-    } else {
-      const temp = new Float64Array(16);
-      getOrientation = i => {
-        const outQuat = new Float64Array(4);
-        orientationDataArray.getTuple(i, temp);
-        convert(outQuat, temp);
-        return outQuat;
-      };
-    }
-    // Fill the orientation array
-    for (let i = 0; i < nPoints; ++i) {
-      const pointIdx = pointIndices[i];
-      orientations[i] = getOrientation(pointIdx);
-    }
-
-    // Done recomputing
-    model._orientedCenterline.initialize(pointsDataArray, pointIndices);
-    model._orientedCenterline.setOrientations(orientations);
-    return model._orientedCenterline;
-  };
-  publicAPI.setOrientedCenterline = centerline => {
-    if (model._orientedCenterline !== centerline) {
-      model._orientedCenterline = centerline;
-      return true;
-    }
-    return false;
-  };
-  publicAPI._resetOrientedCenterline = () => {
-    model._orientedCenterline.initialize(_Common_Core_Points_js__WEBPACK_IMPORTED_MODULE_3__["default"].newInstance());
-    model._orientedCenterline.setOrientations([]);
-  };
-  publicAPI.getMTime = () => {
-    let mTime = superClass.getMTime();
-    if (!model._orientedCenterline) {
-      return mTime;
-    }
-    mTime = Math.max(mTime, model._orientedCenterline.getMTime());
-    return mTime;
-  };
-  publicAPI.getHeight = () => {
-    const accHeights = publicAPI.getOrientedCenterline().getDistancesToFirstPoint();
-    if (accHeights.length === 0) {
-      return 0;
-    }
-    return accHeights[accHeights.length - 1];
-  };
-  publicAPI.getCenterlinePositionAndOrientation = distance => {
-    const centerline = publicAPI.getOrientedCenterline();
-    const subId = centerline.findPointIdAtDistanceFromFirstPoint(distance);
-    if (subId < 0) {
-      return {};
-    }
-    const distances = centerline.getDistancesToFirstPoint();
-    const pcoords = [(distance - distances[subId]) / (distances[subId + 1] - distances[subId])];
-    const weights = new Array(2);
-    const position = new Array(3);
-    centerline.evaluateLocation(subId, pcoords, position, weights);
-    const orientation = new Array(4);
-    if (!centerline.evaluateOrientation(subId, pcoords, orientation, weights)) {
-      // No orientation
-      return {
-        position
-      };
-    }
-    return {
-      position,
-      orientation
-    };
-  };
-  publicAPI.getCenterlineTangentDirections = () => {
-    const centerline = publicAPI.getOrientedCenterline();
-    const directionsTime = model._centerlineTangentDirectionsTime.getMTime();
-    if (directionsTime < centerline.getMTime()) {
-      const orientations = centerline.getOrientations();
-      model._centerlineTangentDirections = new Float32Array(3 * orientations.length);
-      const localDirection = new Array(3);
-      for (let i = 0; i < orientations.length; ++i) {
-        gl_matrix__WEBPACK_IMPORTED_MODULE_8__.transformQuat(localDirection, model.tangentDirection, orientations[i]);
-        model._centerlineTangentDirections.set(localDirection, 3 * i);
-      }
-      model._centerlineTangentDirectionsTime.modified();
-    }
-    return model._centerlineTangentDirections;
-  };
-  publicAPI.getUniformDirection = () => gl_matrix__WEBPACK_IMPORTED_MODULE_8__.transformQuat(new Array(3), model.tangentDirection, model.uniformOrientation);
-  publicAPI.getDirectionMatrix = () => {
-    const tangent = model.tangentDirection;
-    const bitangent = model.bitangentDirection;
-    const normal = model.normalDirection;
-    return new Float64Array([tangent[0], tangent[1], tangent[2], bitangent[0], bitangent[1], bitangent[2], normal[0], normal[1], normal[2]]);
-  };
-  publicAPI.setDirectionMatrix = mat => {
-    if (gl_matrix__WEBPACK_IMPORTED_MODULE_6__.equals(mat, publicAPI.getDirectionMatrix())) {
-      return false;
-    }
-    model.tangentDirection = [mat[0], mat[1], mat[2]];
-    model.bitangentDirection = [mat[3], mat[4], mat[5]];
-    model.normalDirection = [mat[6], mat[7], mat[8]];
-    publicAPI.modified();
-    return true;
-  };
-
-  // Check if the rendering can occur
-  publicAPI.preRenderCheck = () => {
-    if (!publicAPI.getInputData(0)) {
-      vtkErrorMacro('No image data input');
-      return false;
-    }
-    return true;
-  };
-  publicAPI.useStraightenedMode = () => {
-    publicAPI.setCenterPoint(null);
-    publicAPI.setUseUniformOrientation(false);
-    publicAPI.getOrientedCenterline().setDistanceFunction(gl_matrix__WEBPACK_IMPORTED_MODULE_8__.dist);
-  };
-  publicAPI.useStretchedMode = centerPoint => {
-    const centerline = publicAPI.getOrientedCenterline();
-    // Set center point
-    if (!centerPoint) {
-      // Get the first point of the centerline if there is one
-      const centerlinePoints = centerline.getPoints();
-      const newCenterPoint = centerlinePoints.getNumberOfTuples() > 0 ? centerlinePoints.getPoint(0) : [0, 0, 0];
-      publicAPI.setCenterPoint(newCenterPoint);
-    } else {
-      publicAPI.setCenterPoint(centerPoint);
-    }
-    // Enable uniform orientation
-    publicAPI.setUseUniformOrientation(true);
-    // Change distance function
-    centerline.setDistanceFunction((a, b) => {
-      const direction = publicAPI.getUniformDirection();
-      const vec = gl_matrix__WEBPACK_IMPORTED_MODULE_8__.subtract([], a, b);
-      const d2 = gl_matrix__WEBPACK_IMPORTED_MODULE_8__.squaredLength(vec);
-      const x = gl_matrix__WEBPACK_IMPORTED_MODULE_8__.dot(direction, vec);
-      return Math.sqrt(d2 - x * x);
-    });
-  };
-  publicAPI.isProjectionEnabled = () => model.projectionSlabNumberOfSamples > 1;
-  publicAPI.setCenterlineData = centerlineData => publicAPI.setInputData(centerlineData, 1);
-  publicAPI.setCenterlineConnection = centerlineConnection => publicAPI.setInputConnection(centerlineConnection, 1);
-  publicAPI.setImageData = imageData => publicAPI.setInputData(imageData, 0);
-  publicAPI.setImageConnection = imageData => publicAPI.setInputConnection(imageData, 0);
-  publicAPI.getIsOpaque = () => true;
-
-  // One can also call setOrientedCenterline and not provide a polydata centerline to input 1
-  model._orientedCenterline = _Common_DataModel_PolyLine_js__WEBPACK_IMPORTED_MODULE_4__["default"].newInstance();
-  publicAPI._resetOrientedCenterline();
-}
-
-// ----------------------------------------------------------------------------
-// Object factory
-// ----------------------------------------------------------------------------
-
-const DEFAULT_VALUES = {
-  width: 10,
-  uniformOrientation: [0, 0, 0, 1],
-  useUniformOrientation: false,
-  centerPoint: null,
-  preferSizeOverAccuracy: false,
-  orientationArrayName: null,
-  tangentDirection: [1, 0, 0],
-  bitangentDirection: [0, 1, 0],
-  normalDirection: [0, 0, 1],
-  projectionSlabThickness: 1,
-  projectionSlabNumberOfSamples: 1,
-  projectionMode: _ImageCPRMapper_Constants_js__WEBPACK_IMPORTED_MODULE_5__.ProjectionMode.MAX
-};
-
-// ----------------------------------------------------------------------------
-
-function extend(publicAPI, model) {
-  let initialValues = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-  Object.assign(model, DEFAULT_VALUES, initialValues);
-
-  // Inheritance
-  _AbstractImageMapper_js__WEBPACK_IMPORTED_MODULE_1__["default"].extend(publicAPI, model, initialValues);
-
-  // Two inputs: one for the ImageData and one for the PolyData (centerline)
-  _macros2_js__WEBPACK_IMPORTED_MODULE_2__.m.algo(publicAPI, model, 2, 0);
-  model._centerlineTangentDirectionsTime = {};
-  _macros2_js__WEBPACK_IMPORTED_MODULE_2__.m.obj(model._centerlineTangentDirectionsTime, {
-    mtime: 0
-  });
-
-  // Setters and getters
-  _macros2_js__WEBPACK_IMPORTED_MODULE_2__.m.setGet(publicAPI, model, ['width', 'uniformOrientation', 'useUniformOrientation', 'centerPoint', 'preferSizeOverAccuracy', 'orientationArrayName', 'tangentDirection', 'bitangentDirection', 'normalDirection', 'projectionSlabThickness', 'projectionSlabNumberOfSamples', 'projectionMode']);
-  _Mapper_CoincidentTopologyHelper_js__WEBPACK_IMPORTED_MODULE_0__["default"].implementCoincidentTopologyMethods(publicAPI, model);
-
-  // Object methods
-  vtkImageCPRMapper(publicAPI, model);
-}
-
-// ----------------------------------------------------------------------------
-
-const newInstance = _macros2_js__WEBPACK_IMPORTED_MODULE_2__.m.newInstance(extend, 'vtkImageCPRMapper');
-
-// ----------------------------------------------------------------------------
-
-var index = {
-  newInstance,
-  extend,
-  ...staticOffsetAPI,
-  ...otherStaticMethods
 };
 
 
@@ -27456,345 +24512,6 @@ var vtkViewport$1 = {
 
 /***/ }),
 
-/***/ "./node_modules/@kitware/vtk.js/Rendering/Core/Volume.js":
-/*!***************************************************************!*\
-  !*** ./node_modules/@kitware/vtk.js/Rendering/Core/Volume.js ***!
-  \***************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ vtkVolume$1),
-/* harmony export */   extend: () => (/* binding */ extend),
-/* harmony export */   newInstance: () => (/* binding */ newInstance)
-/* harmony export */ });
-/* harmony import */ var gl_matrix__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! gl-matrix */ "./node_modules/gl-matrix/esm/mat4.js");
-/* harmony import */ var gl_matrix__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! gl-matrix */ "./node_modules/gl-matrix/esm/vec3.js");
-/* harmony import */ var _macros2_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../macros2.js */ "./node_modules/@kitware/vtk.js/macros2.js");
-/* harmony import */ var _Common_DataModel_BoundingBox_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../Common/DataModel/BoundingBox.js */ "./node_modules/@kitware/vtk.js/Common/DataModel/BoundingBox.js");
-/* harmony import */ var _Prop3D_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Prop3D.js */ "./node_modules/@kitware/vtk.js/Rendering/Core/Prop3D.js");
-/* harmony import */ var _VolumeProperty_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./VolumeProperty.js */ "./node_modules/@kitware/vtk.js/Rendering/Core/VolumeProperty.js");
-
-
-
-
-
-
-const {
-  vtkDebugMacro
-} = _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m;
-
-// ----------------------------------------------------------------------------
-// vtkVolume methods
-// ----------------------------------------------------------------------------
-
-function vtkVolume(publicAPI, model) {
-  // Set our className
-  model.classHierarchy.push('vtkVolume');
-  publicAPI.getVolumes = () => publicAPI;
-  publicAPI.makeProperty = _VolumeProperty_js__WEBPACK_IMPORTED_MODULE_3__["default"].newInstance;
-  publicAPI.getProperty = () => {
-    if (model.property === null) {
-      model.property = publicAPI.makeProperty();
-    }
-    return model.property;
-  };
-  publicAPI.getBounds = () => {
-    if (model.mapper === null) {
-      return model.bounds;
-    }
-
-    // Check for the special case when the mapper's bounds are unknown
-    const bds = model.mapper.getBounds();
-    if (!bds || bds.length !== 6) {
-      return bds;
-    }
-
-    // Check for the special case when the actor is empty.
-    if (bds[0] > bds[1]) {
-      model.mapperBounds = bds.concat(); // copy the mapper's bounds
-      model.bounds = [1, -1, 1, -1, 1, -1];
-      model.boundsMTime.modified();
-      return bds;
-    }
-
-    // Check if we have cached values for these bounds - we cache the
-    // values returned by model.mapper.getBounds() and we store the time
-    // of caching. If the values returned this time are different, or
-    // the modified time of this class is newer than the cached time,
-    // then we need to rebuild.
-    const zip = rows => rows[0].map((_, c) => rows.map(row => row[c]));
-    if (!model.mapperBounds || !zip([bds, model.mapperBounds]).reduce((a, b) => a && b[0] === b[1], true) || publicAPI.getMTime() > model.boundsMTime.getMTime()) {
-      vtkDebugMacro('Recomputing bounds...');
-      model.mapperBounds = bds.map(x => x);
-      const bbox = [];
-      _Common_DataModel_BoundingBox_js__WEBPACK_IMPORTED_MODULE_1__["default"].getCorners(bds, bbox);
-      publicAPI.computeMatrix();
-      const tmp4 = new Float64Array(16);
-      gl_matrix__WEBPACK_IMPORTED_MODULE_4__.transpose(tmp4, model.matrix);
-      bbox.forEach(pt => gl_matrix__WEBPACK_IMPORTED_MODULE_5__.transformMat4(pt, pt, tmp4));
-
-      /* eslint-disable no-multi-assign */
-      model.bounds[0] = model.bounds[2] = model.bounds[4] = Number.MAX_VALUE;
-      model.bounds[1] = model.bounds[3] = model.bounds[5] = -Number.MAX_VALUE;
-      /* eslint-enable no-multi-assign */
-      model.bounds = model.bounds.map((d, i) => i % 2 === 0 ? bbox.reduce((a, b) => a > b[i / 2] ? b[i / 2] : a, d) : bbox.reduce((a, b) => a < b[(i - 1) / 2] ? b[(i - 1) / 2] : a, d));
-      model.boundsMTime.modified();
-    }
-    return model.bounds;
-  };
-  publicAPI.getMTime = () => {
-    let mt = model.mtime;
-    if (model.property !== null) {
-      const time = model.property.getMTime();
-      mt = time > mt ? time : mt;
-    }
-    return mt;
-  };
-  publicAPI.getRedrawMTime = () => {
-    let mt = model.mtime;
-    if (model.mapper !== null) {
-      let time = model.mapper.getMTime();
-      mt = time > mt ? time : mt;
-      if (model.mapper.getInput() !== null) {
-        // FIXME !!! getInputAlgorithm / getInput
-        model.mapper.getInputAlgorithm().update();
-        time = model.mapper.getInput().getMTime();
-        mt = time > mt ? time : mt;
-      }
-    }
-    return mt;
-  };
-}
-
-// ----------------------------------------------------------------------------
-// Object factory
-// ----------------------------------------------------------------------------
-
-const DEFAULT_VALUES = {
-  mapper: null,
-  property: null,
-  bounds: [1, -1, 1, -1, 1, -1]
-};
-
-// ----------------------------------------------------------------------------
-
-function extend(publicAPI, model) {
-  let initialValues = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-  Object.assign(model, DEFAULT_VALUES, initialValues);
-
-  // Inheritance
-  _Prop3D_js__WEBPACK_IMPORTED_MODULE_2__["default"].extend(publicAPI, model, initialValues);
-
-  // vtkTimeStamp
-  model.boundsMTime = {};
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.obj(model.boundsMTime);
-
-  // Build VTK API
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.set(publicAPI, model, ['property']);
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.setGet(publicAPI, model, ['mapper']);
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.getArray(publicAPI, model, ['bounds'], 6);
-
-  // Object methods
-  vtkVolume(publicAPI, model);
-}
-
-// ----------------------------------------------------------------------------
-
-const newInstance = _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.newInstance(extend, 'vtkVolume');
-
-// ----------------------------------------------------------------------------
-
-var vtkVolume$1 = {
-  newInstance,
-  extend
-};
-
-
-
-
-/***/ }),
-
-/***/ "./node_modules/@kitware/vtk.js/Rendering/Core/VolumeMapper.js":
-/*!*********************************************************************!*\
-  !*** ./node_modules/@kitware/vtk.js/Rendering/Core/VolumeMapper.js ***!
-  \*********************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   STATIC: () => (/* binding */ STATIC),
-/* harmony export */   "default": () => (/* binding */ vtkVolumeMapper$1),
-/* harmony export */   extend: () => (/* binding */ extend),
-/* harmony export */   newInstance: () => (/* binding */ newInstance)
-/* harmony export */ });
-/* harmony import */ var _macros2_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../macros2.js */ "./node_modules/@kitware/vtk.js/macros2.js");
-/* harmony import */ var _Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../Common/Core/Math/index.js */ "./node_modules/@kitware/vtk.js/Common/Core/Math/index.js");
-/* harmony import */ var _VolumeMapper_Constants_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./VolumeMapper/Constants.js */ "./node_modules/@kitware/vtk.js/Rendering/Core/VolumeMapper/Constants.js");
-/* harmony import */ var _AbstractMapper3D_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./AbstractMapper3D.js */ "./node_modules/@kitware/vtk.js/Rendering/Core/AbstractMapper3D.js");
-/* harmony import */ var _Common_DataModel_PiecewiseFunction_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../Common/DataModel/PiecewiseFunction.js */ "./node_modules/@kitware/vtk.js/Common/DataModel/PiecewiseFunction.js");
-
-
-
-
-
-
-const {
-  BlendMode,
-  FilterMode
-} = _VolumeMapper_Constants_js__WEBPACK_IMPORTED_MODULE_2__["default"];
-function createRadonTransferFunction(firstAbsorbentMaterialHounsfieldValue, firstAbsorbentMaterialAbsorption, maxAbsorbentMaterialHounsfieldValue, maxAbsorbentMaterialAbsorption, outputTransferFunction) {
-  let ofun = null;
-  if (outputTransferFunction) {
-    ofun = outputTransferFunction;
-    ofun.removeAllPoints();
-  } else {
-    ofun = _Common_DataModel_PiecewiseFunction_js__WEBPACK_IMPORTED_MODULE_4__["default"].newInstance();
-  }
-  ofun.addPointLong(-1024, 0, 1, 1); // air (i.e. material with no absorption)
-  ofun.addPoint(firstAbsorbentMaterialHounsfieldValue, firstAbsorbentMaterialAbsorption);
-  ofun.addPoint(maxAbsorbentMaterialHounsfieldValue, maxAbsorbentMaterialAbsorption);
-  return ofun;
-}
-
-// ----------------------------------------------------------------------------
-// Static API
-// ----------------------------------------------------------------------------
-
-const STATIC = {
-  createRadonTransferFunction
-};
-
-// ----------------------------------------------------------------------------
-// vtkVolumeMapper methods
-// ----------------------------------------------------------------------------
-
-function vtkVolumeMapper(publicAPI, model) {
-  // Set our className
-  model.classHierarchy.push('vtkVolumeMapper');
-  const superClass = {
-    ...publicAPI
-  };
-  publicAPI.getBounds = () => {
-    const input = publicAPI.getInputData();
-    if (!input) {
-      model.bounds = (0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__.H)();
-    } else {
-      if (!model.static) {
-        publicAPI.update();
-      }
-      model.bounds = input.getBounds();
-    }
-    return model.bounds;
-  };
-  publicAPI.update = () => {
-    publicAPI.getInputData();
-  };
-  publicAPI.setBlendModeToComposite = () => {
-    publicAPI.setBlendMode(BlendMode.COMPOSITE_BLEND);
-  };
-  publicAPI.setBlendModeToMaximumIntensity = () => {
-    publicAPI.setBlendMode(BlendMode.MAXIMUM_INTENSITY_BLEND);
-  };
-  publicAPI.setBlendModeToMinimumIntensity = () => {
-    publicAPI.setBlendMode(BlendMode.MINIMUM_INTENSITY_BLEND);
-  };
-  publicAPI.setBlendModeToAverageIntensity = () => {
-    publicAPI.setBlendMode(BlendMode.AVERAGE_INTENSITY_BLEND);
-  };
-  publicAPI.setBlendModeToAdditiveIntensity = () => {
-    publicAPI.setBlendMode(BlendMode.ADDITIVE_INTENSITY_BLEND);
-  };
-  publicAPI.setBlendModeToRadonTransform = () => {
-    publicAPI.setBlendMode(BlendMode.RADON_TRANSFORM_BLEND);
-  };
-  publicAPI.getBlendModeAsString = () => _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.enumToString(BlendMode, model.blendMode);
-  publicAPI.setAverageIPScalarRange = (min, max) => {
-    console.warn('setAverageIPScalarRange is deprecated use setIpScalarRange');
-    publicAPI.setIpScalarRange(min, max);
-  };
-  publicAPI.getFilterModeAsString = () => _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.enumToString(FilterMode, model.filterMode);
-  publicAPI.setFilterModeToOff = () => {
-    publicAPI.setFilterMode(FilterMode.OFF);
-  };
-  publicAPI.setFilterModeToNormalized = () => {
-    publicAPI.setFilterMode(FilterMode.NORMALIZED);
-  };
-  publicAPI.setFilterModeToRaw = () => {
-    publicAPI.setFilterMode(FilterMode.RAW);
-  };
-  publicAPI.setGlobalIlluminationReach = gl => superClass.setGlobalIlluminationReach((0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__.E)(gl, 0.0, 1.0));
-  publicAPI.setVolumetricScatteringBlending = vsb => superClass.setVolumetricScatteringBlending((0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__.E)(vsb, 0.0, 1.0));
-  publicAPI.setVolumeShadowSamplingDistFactor = vsdf => superClass.setVolumeShadowSamplingDistFactor(vsdf >= 1.0 ? vsdf : 1.0);
-  publicAPI.setAnisotropy = at => superClass.setAnisotropy((0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__.E)(at, -0.99, 0.99));
-  publicAPI.setLAOKernelSize = ks => superClass.setLAOKernelSize((0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__.K)((0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_1__.E)(ks, 1, 32)));
-  publicAPI.setLAOKernelRadius = kr => superClass.setLAOKernelRadius(kr >= 1 ? kr : 1);
-}
-
-// ----------------------------------------------------------------------------
-// Object factory
-// ----------------------------------------------------------------------------
-
-// TODO: what values to use for averageIPScalarRange to get GLSL to use max / min values like [-Math.inf, Math.inf]?
-const DEFAULT_VALUES = {
-  bounds: [1, -1, 1, -1, 1, -1],
-  sampleDistance: 1.0,
-  imageSampleDistance: 1.0,
-  maximumSamplesPerRay: 1000,
-  autoAdjustSampleDistances: true,
-  initialInteractionScale: 1.0,
-  interactionSampleDistanceFactor: 1.0,
-  blendMode: BlendMode.COMPOSITE_BLEND,
-  ipScalarRange: [-1000000.0, 1000000.0],
-  filterMode: FilterMode.OFF,
-  // ignored by WebGL so no behavior change
-  preferSizeOverAccuracy: false,
-  // Whether to use halfFloat representation of float, when it is inaccurate
-  computeNormalFromOpacity: false,
-  // volume shadow parameters
-  volumetricScatteringBlending: 0.0,
-  globalIlluminationReach: 0.0,
-  volumeShadowSamplingDistFactor: 5.0,
-  anisotropy: 0.0,
-  // local ambient occlusion
-  localAmbientOcclusion: false,
-  LAOKernelSize: 15,
-  LAOKernelRadius: 7
-};
-
-// ----------------------------------------------------------------------------
-
-function extend(publicAPI, model) {
-  let initialValues = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-  Object.assign(model, DEFAULT_VALUES, initialValues);
-  _AbstractMapper3D_js__WEBPACK_IMPORTED_MODULE_3__["default"].extend(publicAPI, model, initialValues);
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.setGet(publicAPI, model, ['sampleDistance', 'imageSampleDistance', 'maximumSamplesPerRay', 'autoAdjustSampleDistances', 'initialInteractionScale', 'interactionSampleDistanceFactor', 'blendMode', 'filterMode', 'preferSizeOverAccuracy', 'computeNormalFromOpacity', 'volumetricScatteringBlending', 'globalIlluminationReach', 'volumeShadowSamplingDistFactor', 'anisotropy', 'localAmbientOcclusion', 'LAOKernelSize', 'LAOKernelRadius']);
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.setGetArray(publicAPI, model, ['ipScalarRange'], 2);
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.event(publicAPI, model, 'lightingActivated');
-
-  // Object methods
-  vtkVolumeMapper(publicAPI, model);
-}
-
-// ----------------------------------------------------------------------------
-
-const newInstance = _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.newInstance(extend, 'vtkVolumeMapper');
-
-// ----------------------------------------------------------------------------
-
-var vtkVolumeMapper$1 = {
-  newInstance,
-  extend,
-  ...STATIC
-};
-
-
-
-
-/***/ }),
-
 /***/ "./node_modules/@kitware/vtk.js/Rendering/Core/VolumeMapper/Constants.js":
 /*!*******************************************************************************!*\
   !*** ./node_modules/@kitware/vtk.js/Rendering/Core/VolumeMapper/Constants.js ***!
@@ -27825,294 +24542,6 @@ const FilterMode = {
 var Constants = {
   BlendMode,
   FilterMode
-};
-
-
-
-
-/***/ }),
-
-/***/ "./node_modules/@kitware/vtk.js/Rendering/Core/VolumeProperty.js":
-/*!***********************************************************************!*\
-  !*** ./node_modules/@kitware/vtk.js/Rendering/Core/VolumeProperty.js ***!
-  \***********************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ vtkVolumeProperty$1),
-/* harmony export */   extend: () => (/* binding */ extend),
-/* harmony export */   newInstance: () => (/* binding */ newInstance)
-/* harmony export */ });
-/* harmony import */ var _macros2_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../macros2.js */ "./node_modules/@kitware/vtk.js/macros2.js");
-/* harmony import */ var _ColorTransferFunction_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ColorTransferFunction.js */ "./node_modules/@kitware/vtk.js/Rendering/Core/ColorTransferFunction.js");
-/* harmony import */ var _Common_DataModel_PiecewiseFunction_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../Common/DataModel/PiecewiseFunction.js */ "./node_modules/@kitware/vtk.js/Common/DataModel/PiecewiseFunction.js");
-/* harmony import */ var _VolumeProperty_Constants_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./VolumeProperty/Constants.js */ "./node_modules/@kitware/vtk.js/Rendering/Core/VolumeProperty/Constants.js");
-
-
-
-
-
-const {
-  InterpolationType,
-  OpacityMode
-} = _VolumeProperty_Constants_js__WEBPACK_IMPORTED_MODULE_3__["default"];
-const {
-  vtkErrorMacro
-} = _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m;
-const VTK_MAX_VRCOMP = 4;
-
-// ----------------------------------------------------------------------------
-// vtkVolumeProperty methods
-// ----------------------------------------------------------------------------
-
-function vtkVolumeProperty(publicAPI, model) {
-  // Set our className
-  model.classHierarchy.push('vtkVolumeProperty');
-  publicAPI.getMTime = () => {
-    let mTime = model.mtime;
-    let time;
-    for (let index = 0; index < VTK_MAX_VRCOMP; index++) {
-      // Color MTimes
-      if (model.componentData[index].colorChannels === 1) {
-        if (model.componentData[index].grayTransferFunction) {
-          // time that Gray transfer function was last modified
-          time = model.componentData[index].grayTransferFunction.getMTime();
-          mTime = mTime > time ? mTime : time;
-        }
-      } else if (model.componentData[index].colorChannels === 3) {
-        if (model.componentData[index].rGBTransferFunction) {
-          // time that RGB transfer function was last modified
-          time = model.componentData[index].rGBTransferFunction.getMTime();
-          mTime = mTime > time ? mTime : time;
-        }
-      }
-
-      // Opacity MTimes
-      if (model.componentData[index].scalarOpacity) {
-        // time that Scalar opacity transfer function was last modified
-        time = model.componentData[index].scalarOpacity.getMTime();
-        mTime = mTime > time ? mTime : time;
-      }
-      if (model.componentData[index].gradientOpacity) {
-        if (!model.componentData[index].disableGradientOpacity) {
-          // time that Gradient opacity transfer function was last modified
-          time = model.componentData[index].gradientOpacity.getMTime();
-          mTime = mTime > time ? mTime : time;
-        }
-      }
-    }
-    return mTime;
-  };
-  publicAPI.getColorChannels = index => {
-    if (index < 0 || index > 3) {
-      vtkErrorMacro('Bad index - must be between 0 and 3');
-      return 0;
-    }
-    return model.componentData[index].colorChannels;
-  };
-
-  // Set the color of a volume to a gray transfer function
-  publicAPI.setGrayTransferFunction = function () {
-    let index = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-    let func = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-    let modified = false;
-    if (model.componentData[index].grayTransferFunction !== func) {
-      model.componentData[index].grayTransferFunction = func;
-      modified = true;
-    }
-    if (model.componentData[index].colorChannels !== 1) {
-      model.componentData[index].colorChannels = 1;
-      modified = true;
-    }
-    if (modified) {
-      publicAPI.modified();
-    }
-    return modified;
-  };
-
-  // Get the currently set gray transfer function. Create one if none set.
-  publicAPI.getGrayTransferFunction = function () {
-    let index = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-    if (model.componentData[index].grayTransferFunction === null) {
-      model.componentData[index].grayTransferFunction = _Common_DataModel_PiecewiseFunction_js__WEBPACK_IMPORTED_MODULE_2__["default"].newInstance();
-      model.componentData[index].grayTransferFunction.addPoint(0, 0.0);
-      model.componentData[index].grayTransferFunction.addPoint(1024, 1.0);
-      if (model.componentData[index].colorChannels !== 1) {
-        model.componentData[index].colorChannels = 1;
-      }
-      publicAPI.modified();
-    }
-    return model.componentData[index].grayTransferFunction;
-  };
-
-  // Set the color of a volume to an RGB transfer function
-  publicAPI.setRGBTransferFunction = function () {
-    let index = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-    let func = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-    let modified = false;
-    if (model.componentData[index].rGBTransferFunction !== func) {
-      model.componentData[index].rGBTransferFunction = func;
-      modified = true;
-    }
-    if (model.componentData[index].colorChannels !== 3) {
-      model.componentData[index].colorChannels = 3;
-      modified = true;
-    }
-    if (modified) {
-      publicAPI.modified();
-    }
-    return modified;
-  };
-
-  // Get the currently set RGB transfer function. Create one if none set.
-  publicAPI.getRGBTransferFunction = function () {
-    let index = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-    if (model.componentData[index].rGBTransferFunction === null) {
-      model.componentData[index].rGBTransferFunction = _ColorTransferFunction_js__WEBPACK_IMPORTED_MODULE_1__["default"].newInstance();
-      model.componentData[index].rGBTransferFunction.addRGBPoint(0, 0.0, 0.0, 0.0);
-      model.componentData[index].rGBTransferFunction.addRGBPoint(1024, 1.0, 1.0, 1.0);
-      if (model.componentData[index].colorChannels !== 3) {
-        model.componentData[index].colorChannels = 3;
-      }
-      publicAPI.modified();
-    }
-    return model.componentData[index].rGBTransferFunction;
-  };
-
-  // Set the scalar opacity of a volume to a transfer function
-  publicAPI.setScalarOpacity = function () {
-    let index = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-    let func = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-    if (model.componentData[index].scalarOpacity !== func) {
-      model.componentData[index].scalarOpacity = func;
-      publicAPI.modified();
-      return true;
-    }
-    return false;
-  };
-
-  // Get the scalar opacity transfer function. Create one if none set.
-  publicAPI.getScalarOpacity = function () {
-    let index = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-    if (model.componentData[index].scalarOpacity === null) {
-      model.componentData[index].scalarOpacity = _Common_DataModel_PiecewiseFunction_js__WEBPACK_IMPORTED_MODULE_2__["default"].newInstance();
-      model.componentData[index].scalarOpacity.addPoint(0, 1.0);
-      model.componentData[index].scalarOpacity.addPoint(1024, 1.0);
-      publicAPI.modified();
-    }
-    return model.componentData[index].scalarOpacity;
-  };
-  publicAPI.setComponentWeight = function () {
-    let index = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-    let value = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
-    if (index < 0 || index >= VTK_MAX_VRCOMP) {
-      vtkErrorMacro('Invalid index');
-      return false;
-    }
-    const val = Math.min(1, Math.max(0, value));
-    if (model.componentData[index].componentWeight !== val) {
-      model.componentData[index].componentWeight = val;
-      publicAPI.modified();
-      return true;
-    }
-    return false;
-  };
-  publicAPI.getComponentWeight = function () {
-    let index = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-    if (index < 0 || index >= VTK_MAX_VRCOMP) {
-      vtkErrorMacro('Invalid index');
-      return 0.0;
-    }
-    return model.componentData[index].componentWeight;
-  };
-  publicAPI.setInterpolationTypeToNearest = () => publicAPI.setInterpolationType(InterpolationType.NEAREST);
-  publicAPI.setInterpolationTypeToLinear = () => publicAPI.setInterpolationType(InterpolationType.LINEAR);
-  publicAPI.setInterpolationTypeToFastLinear = () => publicAPI.setInterpolationType(InterpolationType.FAST_LINEAR);
-  publicAPI.getInterpolationTypeAsString = () => _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.enumToString(InterpolationType, model.interpolationType);
-  const sets = ['useGradientOpacity', 'scalarOpacityUnitDistance', 'gradientOpacityMinimumValue', 'gradientOpacityMinimumOpacity', 'gradientOpacityMaximumValue', 'gradientOpacityMaximumOpacity', 'opacityMode', 'forceNearestInterpolation'];
-  sets.forEach(val => {
-    const cap = _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.capitalize(val);
-    publicAPI[`set${cap}`] = (index, value) => {
-      if (model.componentData[index][`${val}`] !== value) {
-        model.componentData[index][`${val}`] = value;
-        publicAPI.modified();
-        return true;
-      }
-      return false;
-    };
-  });
-  const gets = ['useGradientOpacity', 'scalarOpacityUnitDistance', 'gradientOpacityMinimumValue', 'gradientOpacityMinimumOpacity', 'gradientOpacityMaximumValue', 'gradientOpacityMaximumOpacity', 'opacityMode', 'forceNearestInterpolation'];
-  gets.forEach(val => {
-    const cap = _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.capitalize(val);
-    publicAPI[`get${cap}`] = index => model.componentData[index][`${val}`];
-  });
-}
-
-// ----------------------------------------------------------------------------
-// Object factory
-// ----------------------------------------------------------------------------
-
-const DEFAULT_VALUES = {
-  colorMixPreset: null,
-  independentComponents: true,
-  interpolationType: InterpolationType.FAST_LINEAR,
-  shade: false,
-  ambient: 0.1,
-  diffuse: 0.7,
-  specular: 0.2,
-  specularPower: 10.0,
-  useLabelOutline: false,
-  labelOutlineThickness: [1],
-  labelOutlineOpacity: 1.0
-};
-
-// ----------------------------------------------------------------------------
-
-function extend(publicAPI, model) {
-  let initialValues = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-  Object.assign(model, DEFAULT_VALUES, initialValues);
-
-  // Build VTK API
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.obj(publicAPI, model);
-  if (!model.componentData) {
-    model.componentData = [];
-    for (let i = 0; i < VTK_MAX_VRCOMP; ++i) {
-      model.componentData.push({
-        colorChannels: 1,
-        grayTransferFunction: null,
-        rGBTransferFunction: null,
-        scalarOpacity: null,
-        scalarOpacityUnitDistance: 1.0,
-        opacityMode: OpacityMode.FRACTIONAL,
-        gradientOpacityMinimumValue: 0,
-        gradientOpacityMinimumOpacity: 0.0,
-        gradientOpacityMaximumValue: 1.0,
-        gradientOpacityMaximumOpacity: 1.0,
-        useGradientOpacity: false,
-        componentWeight: 1.0,
-        forceNearestInterpolation: false
-      });
-    }
-  }
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.setGet(publicAPI, model, ['colorMixPreset', 'independentComponents', 'interpolationType', 'shade', 'ambient', 'diffuse', 'specular', 'specularPower', 'useLabelOutline', 'labelOutlineOpacity']);
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.setGetArray(publicAPI, model, ['labelOutlineThickness']);
-
-  // Object methods
-  vtkVolumeProperty(publicAPI, model);
-}
-
-// ----------------------------------------------------------------------------
-
-const newInstance = _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.newInstance(extend, 'vtkVolumeProperty');
-
-// ----------------------------------------------------------------------------
-
-var vtkVolumeProperty$1 = {
-  newInstance,
-  extend,
-  ..._VolumeProperty_Constants_js__WEBPACK_IMPORTED_MODULE_3__["default"]
 };
 
 
@@ -63560,27 +59989,6 @@ function generateState() {
 
 /***/ }),
 
-/***/ "./node_modules/@kitware/vtk.js/favicon.js":
-/*!*************************************************!*\
-  !*** ./node_modules/@kitware/vtk.js/favicon.js ***!
-  \*************************************************/
-/***/ (() => {
-
-const head = document.querySelector('head');
-if (head) {
-  [16, 32, 96, 160, 196].forEach(resolution => {
-    const link = document.createElement('link');
-    link.setAttribute('rel', 'icon');
-    link.setAttribute('href', `https://kitware.github.io/vtk-js/icon/favicon-${resolution}x${resolution}.png`);
-    link.setAttribute('sizes', `${resolution}x${resolution}`);
-    link.setAttribute('type', 'image/png');
-    head.appendChild(link);
-  });
-}
-
-
-/***/ }),
-
 /***/ "./node_modules/@kitware/vtk.js/macros2.js":
 /*!*************************************************!*\
   !*** ./node_modules/@kitware/vtk.js/macros2.js ***!
@@ -68652,6 +65060,485 @@ class LoadImage {
 
 /***/ }),
 
+/***/ "./webvtkjs/src/rendingmpr.js":
+/*!************************************!*\
+  !*** ./webvtkjs/src/rendingmpr.js ***!
+  \************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _kitware_vtk_js_Rendering_Profiles_All__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Profiles/All */ "./node_modules/@kitware/vtk.js/Rendering/Profiles/All.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_AnnotatedCubeActor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/AnnotatedCubeActor */ "./node_modules/@kitware/vtk.js/Rendering/Core/AnnotatedCubeActor.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Misc_GenericRenderWindow__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Misc/GenericRenderWindow */ "./node_modules/@kitware/vtk.js/Rendering/Misc/GenericRenderWindow.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_ImageMapper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ImageMapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/ImageMapper.js");
+/* harmony import */ var _kitware_vtk_js_Imaging_Core_ImageReslice__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @kitware/vtk.js/Imaging/Core/ImageReslice */ "./node_modules/@kitware/vtk.js/Imaging/Core/ImageReslice.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_ImageSlice__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ImageSlice */ "./node_modules/@kitware/vtk.js/Rendering/Core/ImageSlice.js");
+/* harmony import */ var _kitware_vtk_js_Interaction_Style_InteractorStyleImage__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Style/InteractorStyleImage */ "./node_modules/@kitware/vtk.js/Interaction/Style/InteractorStyleImage.js");
+/* harmony import */ var _kitware_vtk_js_Interaction_Style_InteractorStyleTrackballCamera__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Style/InteractorStyleTrackballCamera */ "./node_modules/@kitware/vtk.js/Interaction/Style/InteractorStyleTrackballCamera.js");
+/* harmony import */ var _kitware_vtk_js_Common_Core_Math__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @kitware/vtk.js/Common/Core/Math */ "./node_modules/@kitware/vtk.js/Common/Core/Math.js");
+/* harmony import */ var _kitware_vtk_js_Interaction_Widgets_OrientationMarkerWidget__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Widgets/OrientationMarkerWidget */ "./node_modules/@kitware/vtk.js/Interaction/Widgets/OrientationMarkerWidget.js");
+/* harmony import */ var _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget */ "./node_modules/@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget.js");
+/* harmony import */ var _kitware_vtk_js_Widgets_Core_WidgetManager__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Core/WidgetManager */ "./node_modules/@kitware/vtk.js/Widgets/Core/WidgetManager.js");
+/* harmony import */ var _kitware_vtk_js_Filters_Sources_SphereSource__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @kitware/vtk.js/Filters/Sources/SphereSource */ "./node_modules/@kitware/vtk.js/Filters/Sources/SphereSource.js");
+/* harmony import */ var _kitware_vtk_js_Widgets_Core_WidgetManager_Constants__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Core/WidgetManager/Constants */ "./node_modules/@kitware/vtk.js/Widgets/Core/WidgetManager/Constants.js");
+/* harmony import */ var _kitware_vtk_js_Imaging_Core_ImageReslice_Constants__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @kitware/vtk.js/Imaging/Core/ImageReslice/Constants */ "./node_modules/@kitware/vtk.js/Imaging/Core/ImageReslice/Constants.js");
+/* harmony import */ var _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants */ "./node_modules/@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_Actor__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Actor */ "./node_modules/@kitware/vtk.js/Rendering/Core/Actor.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_Mapper__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Mapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/Mapper.js");
+/* harmony import */ var _load3d__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./load3d */ "./webvtkjs/src/load3d.js");
+// import "@kitware/vtk.js/favicon";
+
+// Load the rendering pieces we want to use (for both WebGL and WebGPU)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class MPRRendering {
+  // 创建MPR渲染页面
+  createRenderingPage() {
+    // 定义视图颜色（X轴、Y轴、Z轴以及其他方向的灰色）
+    const viewColors = [[1, 0, 0],
+    // 红色，表示X轴
+    [0, 1, 0],
+    // 绿色，表示Y轴
+    [0, 0, 1],
+    // 蓝色，表示Z轴
+    [0.5, 0.5, 0.5] // 灰色，表示其他
+    ];
+    // 是否显示调试Actor（用于开发阶段查看Actor）
+    const debugActors = true;
+
+    // 定义光标样式，用于控制不同操作时的光标表现
+    const cursorStyles = {
+      translateCenter: "move",
+      // 中心平移时的光标样式
+      rotateLine: "alias",
+      // 旋转线条时的光标样式
+      translateAxis: "pointer",
+      // 平移轴时的光标样式
+      default: "default" // 默认光标样式
+    };
+
+    // 调用布局设置函数，传入必要的参数，并返回视图属性和3D视图对象
+    const {
+      viewAttributes,
+      view3D,
+      widget,
+      widgetState
+    } = this.setupLayoutForMPR(viewColors, debugActors, cursorStyles);
+
+    // 返回渲染页面所需的视图属性和3D视图对象
+    return {
+      viewAttributes,
+      view3D,
+      widget,
+      widgetState
+    };
+  }
+
+  // 设置MPR布局的函数
+  setupLayoutForMPR(viewColors, showDebugActors, appCursorStyles) {
+    const viewAttributes = [];
+    let view3D = null;
+    const display3d = new _load3d__WEBPACK_IMPORTED_MODULE_18__["default"]();
+    // 创建vtk的ResliceCursor Widget实例
+    const widget = _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget__WEBPACK_IMPORTED_MODULE_10__["default"].newInstance();
+    window.va = viewAttributes;
+    window.widget = widget;
+    const widgetState = widget.getWidgetState();
+    widgetState.getStatesWithLabel("sphere").forEach(handle => handle.setScale1(20));
+    const checkboxOrthogonality = document.getElementById("checkboxOrthogonality");
+    // 获取容器元素并设置样式
+    const container = document.getElementById("container");
+    container.innerHTML = "";
+    const {
+      createdElements,
+      createdSliderElements
+    } = this.createViewWithButtons(container, 4);
+    // 通过访问 createdViews 数组来操作这些视图元素
+    createdElements.forEach((element, i) => {
+      // 例如，修改第一个视图的背景颜色
+      if (i === 0) {
+        element.style.backgroundColor = "lightblue";
+      }
+      //-------------------------------------------------------------------------------------------------------------------------------
+      //-------------------------------------------------------------------------------------------------------------------------------
+      // 创建一个 vtkGenericRenderWindow 实例，负责管理 VTK 渲染窗口
+      const grw = _kitware_vtk_js_Rendering_Misc_GenericRenderWindow__WEBPACK_IMPORTED_MODULE_2__["default"].newInstance();
+      // 将刚才创建的视图容器赋给渲染窗口容器
+      grw.setContainer(element);
+      // 调用 resize 方法确保渲染窗口的尺寸与视图容器一致
+      grw.resize();
+      // 使用 ResizeObserver 监听容器大小变化
+      const resizeObserver = new ResizeObserver(() => {
+        grw.resize();
+      });
+
+      // 开始监听容器
+      resizeObserver.observe(container);
+      //-------------------------------------------------------------------------------------------------------------------------------
+      //-------------------------------------------------------------------------------------------------------------------------------
+      // 创建一个对象，用于存储渲染窗口、渲染器、GL 渲染窗口等属性
+      const obj = {
+        renderWindow: grw.getRenderWindow(),
+        // 获取渲染窗口对象
+        renderer: grw.getRenderer(),
+        // 获取渲染器对象
+        GLWindow: grw.getApiSpecificRenderWindow(),
+        // 获取与 API 相关的渲染窗口对象
+        interactor: grw.getInteractor(),
+        // 获取交互器对象，用于处理用户输入（例如鼠标操作）
+        widgetManager: _kitware_vtk_js_Widgets_Core_WidgetManager__WEBPACK_IMPORTED_MODULE_11__["default"].newInstance(),
+        // 创建一个新的小部件管理器实例，管理各种交互小部件
+        orientationWidget: null // 当前没有设置方向小部件（通常用于显示视图方向等信息）
+      };
+      // 设置当前活跃相机为平行投影（不使用透视效果）
+      obj.renderer.getActiveCamera().setParallelProjection(true);
+
+      // 设置渲染器的背景颜色，viewColors[i] 是一个 RGB 颜色数组
+      obj.renderer.setBackground(...viewColors[i]);
+
+      // 将渲染器添加到渲染窗口中，这样渲染器才能在窗口中显示
+      obj.renderWindow.addRenderer(obj.renderer);
+      // 将 OpenGL 窗口添加到渲染窗口，确保渲染窗口能够显示 3D 图形
+      obj.renderWindow.addView(obj.GLWindow);
+
+      // 设置交互器与渲染窗口关联，确保用户能够与窗口进行交互
+      obj.renderWindow.setInteractor(obj.interactor);
+
+      // 设置交互器与 OpenGL 窗口关联，确保用户与窗口的交互正确显示
+      obj.interactor.setView(obj.GLWindow);
+
+      // 初始化交互器，准备开始与用户的交互
+      obj.interactor.initialize();
+
+      // 绑定事件到 HTML 元素，使得用户可以通过鼠标和键盘与视图进行交互
+      obj.interactor.bindEvents(element);
+
+      // 设置小部件管理器的渲染器，这样小部件可以在正确的渲染器上渲染
+      obj.widgetManager.setRenderer(obj.renderer);
+      //----------------------------线-------------------------------------------------------------------------------------------------
+      //-------------------------------------------------------------------------------------------------------------------------------
+      if (i < 3) {
+        // 设置交互器的样式为 vtk.js 提供的 `vtkInteractorStyleImage` 实例
+        obj.interactor.setInteractorStyle(_kitware_vtk_js_Interaction_Style_InteractorStyleImage__WEBPACK_IMPORTED_MODULE_6__["default"].newInstance());
+        // 添加一个小部件（widget）到 widgetManager，并根据 xyzToViewType[i] 设置其类型
+        obj.widgetInstance = obj.widgetManager.addWidget(widget, _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_15__.xyzToViewType[i]);
+        // 将小部件的缩放方式设置为基于像素
+        obj.widgetInstance.setScaleInPixels(true);
+        // 调整小部件的孔宽度为 2
+        obj.widgetInstance.setHoleWidth(0);
+        // 设置小部件为非无限线（即长度有限）
+        obj.widgetInstance.setInfiniteLine(false);
+        // 调整标签为 'line' 的所有状态的缩放比例
+        // x 和 y 轴方向的缩放因子为 2（变宽和变高）
+        // z 轴方向的缩放因子为 300（在深度方向拉长）
+        widgetState.getStatesWithLabel("line").forEach(state => state.setScale3(2, 2, 1000));
+        // 调整标签为 'center' 的所有状态的不透明度为 128
+        widgetState.getStatesWithLabel("center").forEach(state => state.setOpacity(0));
+        // 设置小部件是否保持正交性（即垂直关系），值取决于 checkboxOrthogonality 的选中状态
+        obj.widgetInstance.setKeepOrthogonality(checkboxOrthogonality.checked);
+        // 设置小部件的鼠标指针样式，`appCursorStyles` 是自定义的样式对象
+        obj.widgetInstance.setCursorStyles(appCursorStyles);
+        // 启用小部件的拾取功能（即可以通过鼠标交互选择小部件）
+        obj.widgetManager.enablePicking();
+        // 设置小部件管理器在鼠标移动时捕获渲染器缓冲区的行为
+        obj.widgetManager.setCaptureOn(_kitware_vtk_js_Widgets_Core_WidgetManager_Constants__WEBPACK_IMPORTED_MODULE_13__.CaptureOn.MOUSE_MOVE);
+      } else {
+        obj.interactor.setInteractorStyle(_kitware_vtk_js_Interaction_Style_InteractorStyleTrackballCamera__WEBPACK_IMPORTED_MODULE_7__["default"].newInstance());
+      }
+      //--------------------------------图像-----------------------------------------------------------------------------------------------
+      //-------------------------------------------------------------------------------------------------------------------------------
+      // 创建一个 vtkImageReslice 实例，用于图像重切割操作
+      obj.reslice = _kitware_vtk_js_Imaging_Core_ImageReslice__WEBPACK_IMPORTED_MODULE_4__["default"].newInstance();
+
+      // 设置重切割模式为 SlabMode.MEAN，表示在切割方向上对多个切片取平均
+      obj.reslice.setSlabMode(_kitware_vtk_js_Imaging_Core_ImageReslice_Constants__WEBPACK_IMPORTED_MODULE_14__.SlabMode.MEAN);
+
+      // 设置重切割操作的切片数量为 1，表示只取一个切片
+      obj.reslice.setSlabNumberOfSlices(1);
+
+      // 设置是否使用变换来输入采样，false 表示不使用变换
+      obj.reslice.setTransformInputSampling(false);
+
+      // 设置输出图像是否自动裁剪，true 表示输出图像会根据内容自动裁剪
+      obj.reslice.setAutoCropOutput(true);
+
+      // 设置输出图像的维度为 2，表示输出为 2D 图像（通常用于切片视图）
+      obj.reslice.setOutputDimensionality(2);
+      // 创建一个 vtkImageMapper 实例，用于映射图像数据
+      obj.resliceMapper = _kitware_vtk_js_Rendering_Core_ImageMapper__WEBPACK_IMPORTED_MODULE_3__["default"].newInstance();
+
+      // 将 vtkImageReslice 的输出连接到映射器，确保映射器能渲染重切割后的图像
+      obj.resliceMapper.setInputConnection(obj.reslice.getOutputPort());
+      // 创建一个 vtkImageSlice 实例，用于显示图像切片
+      obj.resliceActor = _kitware_vtk_js_Rendering_Core_ImageSlice__WEBPACK_IMPORTED_MODULE_5__["default"].newInstance();
+      // obj.resliceActor.setPosition(-200, -200, 0);  // 调整 X 和 Y 的位置
+      // obj.resliceActor.setScale(2.0, 2.0, 1.0);
+      // 将映射器应用到 vtkImageSlice 上，以便它能够渲染图像
+      obj.resliceActor.setMapper(obj.resliceMapper);
+
+      // 初始化一个空数组，用于存储球体演员对象
+      obj.sphereActors = [];
+
+      // 初始化一个空数组，用于存储球体源对象
+      obj.sphereSources = [];
+      //-------------------------------------------------------------------------------------------------------------------------------
+      //-------------------------------------------------------------------------------------------------------------------------------
+      // Create sphere for each 2D views which will be displayed in 3D
+      // Define origin, point1 and point2 of the plane used to reslice the volume
+      for (let j = 0; j < 3; j++) {
+        // 创建一个新的 vtkSphereSource 实例，用于生成球体
+        const sphere = _kitware_vtk_js_Filters_Sources_SphereSource__WEBPACK_IMPORTED_MODULE_12__["default"].newInstance();
+        // 设置球体的半径为 10
+        sphere.setRadius(1);
+
+        // 创建一个新的 vtkMapper 实例，负责将数据映射到渲染中
+        const mapper = _kitware_vtk_js_Rendering_Core_Mapper__WEBPACK_IMPORTED_MODULE_17__["default"].newInstance();
+        // 将球体的输出连接到映射器，以便映射器可以渲染球体
+        mapper.setInputConnection(sphere.getOutputPort());
+
+        // 创建一个新的 vtkActor 实例，负责在渲染中显示数据
+        const actor = _kitware_vtk_js_Rendering_Core_Actor__WEBPACK_IMPORTED_MODULE_16__["default"].newInstance();
+        // 将映射器应用到演员上，使其渲染球体
+        actor.setMapper(mapper);
+
+        // 设置球体演员的颜色，viewColors[i] 应该是一个 RGB 颜色数组
+        actor.getProperty().setColor(...viewColors[i]);
+
+        // 设置球体演员的可见性，showDebugActors 为布尔值，决定是否显示球体
+        actor.setVisibility(showDebugActors);
+
+        // 将演员添加到 obj.sphereActors 数组中，便于管理和后续操作
+        obj.sphereActors.push(actor);
+
+        // 将球体源添加到 obj.sphereSources 数组中，便于管理和后续操作
+        obj.sphereSources.push(sphere);
+      }
+      if (i < 3) {
+        viewAttributes.push(obj);
+      } else {
+        view3D = obj;
+        // 调用封装函数，创建一个 vtkCursor3D 边框
+        display3d.setupCursor3D(view3D);
+      }
+      // create axes
+      const axes = _kitware_vtk_js_Rendering_Core_AnnotatedCubeActor__WEBPACK_IMPORTED_MODULE_1__["default"].newInstance();
+      axes.setDefaultStyle({
+        text: "+X",
+        fontStyle: "bold",
+        fontFamily: "Arial",
+        fontColor: "black",
+        fontSizeScale: res => res / 2,
+        faceColor: this.createRGBStringFromRGBValues(viewColors[0]),
+        faceRotation: 0,
+        edgeThickness: 0.1,
+        edgeColor: "black",
+        resolution: 400
+      });
+      // axes.setXPlusFaceProperty({ text: '+X' });
+      axes.setXMinusFaceProperty({
+        text: "-X",
+        faceColor: this.createRGBStringFromRGBValues(viewColors[0]),
+        faceRotation: 90,
+        fontStyle: "italic"
+      });
+      axes.setYPlusFaceProperty({
+        text: "+Y",
+        faceColor: this.createRGBStringFromRGBValues(viewColors[1]),
+        fontSizeScale: res => res / 4
+      });
+      axes.setYMinusFaceProperty({
+        text: "-Y",
+        faceColor: this.createRGBStringFromRGBValues(viewColors[1]),
+        fontColor: "white"
+      });
+      axes.setZPlusFaceProperty({
+        text: "+Z",
+        faceColor: this.createRGBStringFromRGBValues(viewColors[2])
+      });
+      axes.setZMinusFaceProperty({
+        text: "-Z",
+        faceColor: this.createRGBStringFromRGBValues(viewColors[2]),
+        faceRotation: 45
+      });
+
+      // create orientation widget
+      obj.orientationWidget = _kitware_vtk_js_Interaction_Widgets_OrientationMarkerWidget__WEBPACK_IMPORTED_MODULE_9__["default"].newInstance({
+        actor: axes,
+        interactor: obj.renderWindow.getInteractor()
+      });
+      obj.orientationWidget.setEnabled(true);
+      obj.orientationWidget.setViewportCorner(_kitware_vtk_js_Interaction_Widgets_OrientationMarkerWidget__WEBPACK_IMPORTED_MODULE_9__["default"].Corners.BOTTOM_RIGHT);
+      obj.orientationWidget.setViewportSize(0.15);
+      obj.orientationWidget.setMinPixelSize(100);
+      obj.orientationWidget.setMaxPixelSize(300);
+      if (i < 3) {
+        obj.slider = createdSliderElements[i];
+        // 为滑块添加事件监听器，当滑块值发生改变时触发
+        createdSliderElements[i].addEventListener("input", ev => {
+          // 检查是否存在有效的图像
+          const image = widget.getWidgetState().getImage();
+          if (image) {
+            // 获取滑块的新值（用户拖动后的数值）
+            const newDistanceToP1 = ev.target.value;
+
+            // 获取当前平面的法向量（用于表示平面的方向）
+            const dirProj = widget.getWidgetState().getPlanes()[_kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_15__.xyzToViewType[i]].normal;
+
+            // // 获取当前平面的边界点（通常是平面的两个端点）
+            const planeExtremities = widget.getPlaneExtremities(_kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_15__.xyzToViewType[i]);
+
+            // 计算新的平面中心点：
+            // 从平面起始点 planeExtremities[0] 出发，
+            // 沿法向量 dirProj 移动 newDistanceToP1 的距离
+            const newCenter = _kitware_vtk_js_Common_Core_Math__WEBPACK_IMPORTED_MODULE_8__["default"].multiplyAccumulate(planeExtremities[0],
+            // 起始点
+            dirProj,
+            // 法向量
+            Number(newDistanceToP1),
+            // 滑块值转换为数字
+            [] // 结果存储在一个新数组中
+            );
+            // 设置平面的新中心点
+            widget.setCenter(newCenter);
+
+            // 模拟用户交互，触发小部件的交互事件，确保状态更新
+            obj.widgetInstance.invokeInteractionEvent(obj.widgetInstance.getActiveInteraction());
+
+            // 遍历所有视图属性，逐一渲染每个视图以更新显示
+            viewAttributes.forEach(obj2 => {
+              obj2.interactor.render(); // 重新渲染视图
+            });
+          } else {
+            // 弹出提示信息，提示用户未加载有效的图像
+            alert("当前未加载有效图像，无法执行操作。");
+          }
+        });
+      }
+    });
+    // 返回视图属性和3D视图对象
+    return {
+      viewAttributes,
+      view3D,
+      widget,
+      widgetState
+    };
+  }
+  // 封装函数，创建视图容器并添加按钮，返回创建的元素
+  createViewWithButtons(controlContainer, numElements = 4) {
+    const createdElements = []; // 用于存储创建的元素
+    const createdSliderElements = [];
+    const element = document.createElement("div");
+    element.style.width = "100%";
+    element.style.height = "100%";
+    element.style.display = 'grid';
+    element.style.gridTemplateRows = '50% 50%'; // 两行等高
+    element.style.gridTemplateColumns = '50% 50%'; // 两列等宽
+    // element.style.border = "1px solid black"; // 可选，便于调试
+    controlContainer.appendChild(element);
+    for (let i = 0; i < numElements; i++) {
+      // 创建父级容器，放置视图和按钮
+      const elementParent = document.createElement("div");
+      elementParent.style.width = "100%";
+      elementParent.style.height = "100%";
+      // elementParent.style.border = "1px solid black"; // 可选，便于调试
+      element.appendChild(elementParent);
+      // 创建按钮容器
+      const elementbutton = document.createElement("div");
+      elementbutton.style.width = "100%";
+      elementbutton.style.height = "10%";
+      // elementbutton.style.border = "1px solid black"; // 可选，便于调试
+      elementParent.appendChild(elementbutton);
+      const button = document.createElement("div");
+      button.style.width = "100%";
+      button.style.height = "100%";
+      button.style.display = "flex";
+      // button.style.border = "1px solid black"; // 可选，便于调试
+      elementbutton.appendChild(button);
+      if (i < 3) {
+        const slider = document.createElement("input");
+        slider.type = "range";
+        slider.min = 0;
+        slider.max = 300;
+        slider.style.bottom = "0px";
+        slider.style.width = "100%";
+        slider.style.height = "100%";
+        slider.style.margin = "0px";
+        button.appendChild(slider);
+        createdSliderElements.push(slider);
+      }
+
+      // 创建图像容器
+      const elementImage = document.createElement("div");
+      elementImage.style.width = "100%";
+      elementImage.style.height = "90%";
+      // elementImage.style.display = "flex";
+      // elementImage.innerText = "这是底部显示文本"; // 你可以修改这里的文本内容
+      // elementImage.style.border = "1px solid red"; // 可选，便于调试
+      elementParent.appendChild(elementImage);
+      // 创建按钮并添加到左侧部分
+      // const axialButton = this.createColorButton("Axial", "axial_" + i); // 每个按钮的 id 保持唯一
+      // elementleft.appendChild(axialButton);
+      // axialButton.addEventListener("click", function () {
+      //   alert("达到最高点击次数！");
+      // });
+
+      // 将创建的 elementParent 存储在数组中
+      createdElements.push(elementImage);
+    }
+
+    // 返回包含所有创建元素的数组
+    return {
+      createdElements,
+      createdSliderElements
+    };
+  }
+  // 创建一个按钮的辅助函数
+  createColorButton(labelText, buttonId) {
+    const button = document.createElement("button");
+    button.id = buttonId;
+    button.textContent = labelText;
+    button.style.width = "100%";
+    button.style.height = "100%";
+    button.style.backgroundColor = "lightgray"; // 初始颜色
+    button.style.cursor = "pointer"; // 设置鼠标指针样式为“手形”，表示可以点击
+    button.style.pointerEvents = "auto"; // 确保可以响应点击事件
+    return button;
+  }
+  createRGBStringFromRGBValues(rgb) {
+    if (rgb.length !== 3) {
+      return "rgb(0, 0, 0)";
+    }
+    return `rgb(${(rgb[0] * 255).toString()}, ${(rgb[1] * 255).toString()}, ${(rgb[2] * 255).toString()})`;
+  }
+}
+//   elementParent.innerText = "这是底部显示文本"; // 你可以修改这里的文本内容
+//   elementParent.style.border = "1px solid black"; // 2px 宽的黑色实线边框
+// 导出类
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (MPRRendering);
+
+/***/ }),
+
 /***/ "./webvtkjs/src/syntheticimage.js":
 /*!****************************************!*\
   !*** ./webvtkjs/src/syntheticimage.js ***!
@@ -68715,6 +65602,109 @@ class SyntheticImageData {
       windowCenter: window_center
     };
   }
+  SyntheticImage(dicomData) {
+    // 创建一个新的 vtkImageData 实例，用于存储体数据
+    const imageData = _kitware_vtk_js_Common_DataModel_ImageData__WEBPACK_IMPORTED_MODULE_0__["default"].newInstance();
+    try {
+      this.validateDicomData(dicomData); // 如果数据有效
+      let length = Object.keys(dicomData.hitbit).length;
+      // 设置图像的维度信息：列数、行数以及切片数
+      const dimensions = [dicomData.hitbit.property0.numCols, dicomData.hitbit.property0.numRows, length];
+
+      //   // 设置图像的间距信息，包括像素间距和切片厚度
+      const spacing = [dicomData.pixelSpacing[0], dicomData.pixelSpacing[1], dicomData.sliceThickness[0]];
+
+      // 设置 vtkImageData 的间距、原点和维度
+      imageData.setSpacing(spacing);
+      imageData.setOrigin([0, 0, 0]);
+      imageData.setDimensions(...dimensions);
+      // 将像素数据绑定到 vtkImageData 的点数据（PointData）中
+      imageData.getPointData().setScalars(scalarArray);
+    } catch (error) {
+      console.error("数据验证失败:", error); // 如果抛出异常，则捕获并打印错误信息
+    }
+
+    // 返回处理后的 vtkImageData 对象，以及窗宽和窗位信息
+    return {
+      imageData: imageData,
+      windowWidth: dicomData.windowWidth,
+      windowCenter: dicomData.windowCenter
+    };
+  }
+  validateDicomData(dicomData) {
+    // 验证 pixelSpacing 是否为数组且包含两个数字
+    if (!Array.isArray(dicomData.pixelSpacing) || dicomData.pixelSpacing.length !== 2) {
+      throw new Error("像素间距(pixelSpacing)无效，请检查数据。");
+    }
+
+    // 验证 sliceThickness 是否为数字
+    if (!Array.isArray(dicomData.sliceThickness) || dicomData.pixelSpacing.length == 0) {
+      throw new Error("切片厚度(SliceThickness)无效，请检查数据。");
+    }
+
+    // 验证 windowCenter 和 windowWidth 是否为数组，并且数组中的每个元素都是数字
+    if (!Array.isArray(dicomData.windowCenter) || !dicomData.windowCenter.every(item => typeof item === "number")) {
+      throw new Error("窗位(WindowCenter)数组无效，请检查数据。");
+    }
+    if (!Array.isArray(dicomData.windowWidth) || !dicomData.windowWidth.every(item => typeof item === "number")) {
+      throw new Error("窗宽(WindowWidth)数组无效，请检查数据。");
+    }
+
+    // 验证 HitBit 数据（property0）是否存在
+    if (!dicomData.hitbit || !dicomData.hitbit.property0) {
+      throw new Error("HitBit 数据无效，请检查数据。");
+    }
+
+    // 所有验证通过，返回 true
+    return true;
+  }
+  GetTagsData(arrayBuffer) {
+    // 解析第一个 DICOM 文件的数据，获取基础元信息
+    const dicom_data = parseDicomData(arrayBuffer[0]);
+
+    // 获取 DICOM 文件中的像素间距 (Pixel Spacing)
+    const pixel_spacing = dicom_data.tags["00280030"].value;
+
+    // 获取 DICOM 文件中的切片厚度 (Slice Thickness)
+    const slice_thickness = dicom_data.tags["00180050"].value;
+
+    // 获取窗宽 (Window Width) 和窗位 (Window Center) 信息
+    const window_center = dicom_data.tags["00281050"].value;
+    const window_width = dicom_data.tags["00281051"].value;
+    // 获取 DICOM 文件中的像素数据，并解析出其位深 (bit depth)
+    const hit_bit = this.GetHitBitData(arrayBuffer);
+    return {
+      pixelSpacing: pixel_spacing,
+      SliceThickness: slice_thickness,
+      WindowCenter: window_center,
+      WindowWidth: window_width,
+      HitBit: hit_bit
+    };
+  }
+  GetHitBitData(arrayBuffer) {
+    let Hit = [];
+    arrayBuffer.forEach((buffer, index) => {
+      let Hitbit = {};
+      const dicomdata = parseDicomData(buffer);
+      const hitbit = dicomdata.getInterpretedData(false, true);
+      // 获取 DICOM 文件中的像素间距 (Pixel Spacing)
+      const pixel_spacing = dicomdata.tags["00280030"].value;
+
+      // 获取 DICOM 文件中的切片厚度 (Slice Thickness)
+      const slice_thickness = dicomdata.tags["00180050"].value;
+
+      // 获取窗宽 (Window Width) 和窗位 (Window Center) 信息
+      const window_center = dicomdata.tags["00281050"].value;
+      const window_width = dicomdata.tags["00281051"].value;
+      Hitbit[`h_img`] = hitbit;
+      Hitbit[`pixSpacing`] = pixel_spacing;
+      Hitbit[`slice_Thickness`] = slice_thickness;
+      Hitbit[`window_l`] = window_center;
+      Hitbit[`window_w`] = window_width;
+      Hit.push(Hitbit);
+    });
+    return Hit;
+  }
 }
 /*
  * 将多个 DICOM 文件解析并转换为 vtkDataArray 对象
@@ -68729,12 +65719,73 @@ function createScalarArrayFromDICOM(arrayBuffer, dimensions, data_type) {
   const typedPixelArray = createTypedArray(data_type, dimensions, arrayBuffer.length);
 
   // 遍历每个 DICOM 文件，提取其像素数据并写入 typedPixelArray
+  // arrayBuffer.forEach((buffer, index) => {
+  //     const dicomdata = parseDicomData(buffer); // 解析当前切片数据
+  //     const hitbit = dicomdata.getInterpretedData(false, true); // 获取当前切片的像素数据
+  //     const sliceOffset = dimensions[0] * dimensions[1] * index; // 计算切片在总体数据中的偏移量
+  //     typedPixelArray.set(hitbit.data, sliceOffset); // 将当前切片数据填充到对应位置
+  // });
+  let totalStartTime = performance.now(); // 记录循环开始的时间
+
+  // 初始化每个步骤的总时间
+  let totalParseTime = 0;
+  let totalGetInterpretedTime = 0;
+  let totalCalculateOffsetTime = 0;
+  let totalSetPixelDataTime = 0;
   arrayBuffer.forEach((buffer, index) => {
-    const dicomdata = parseDicomData(buffer); // 解析当前切片数据
-    const hitbit = dicomdata.getInterpretedData(false, true); // 获取当前切片的像素数据
-    const sliceOffset = dimensions[0] * dimensions[1] * index; // 计算切片在总体数据中的偏移量
-    typedPixelArray.set(hitbit.data, sliceOffset); // 将当前切片数据填充到对应位置
+    let start, end;
+    console.log(`----------------创建数据----------------------------`);
+    // 1. 记录 parseDicomData 的执行时间
+    start = performance.now();
+    const dicomdata = parseDicomData(buffer);
+    end = performance.now();
+    const parseTime = end - start;
+    totalParseTime += parseTime;
+    console.log(`parseDicomData-${index}: ${parseTime.toFixed(2)} ms`);
+
+    // 2. 记录 getInterpretedData 的执行时间
+    start = performance.now();
+    const hitbit = dicomdata.getInterpretedData(false, true);
+    end = performance.now();
+    const getInterpretedTime = end - start;
+    totalGetInterpretedTime += getInterpretedTime;
+    console.log(`getInterpretedData-${index}: ${getInterpretedTime.toFixed(2)} ms`);
+
+    // 3. 计算当前切片数据的偏移量
+    start = performance.now();
+    const sliceOffset = dimensions[0] * dimensions[1] * index;
+    end = performance.now();
+    const calculateOffsetTime = end - start;
+    totalCalculateOffsetTime += calculateOffsetTime;
+    console.log(`calculateOffset-${index}: ${calculateOffsetTime.toFixed(2)} ms`);
+
+    // 4. 将当前切片的像素数据填充到 typedPixelArray 中
+    start = performance.now();
+    typedPixelArray.set(hitbit.data, sliceOffset);
+    end = performance.now();
+    const setPixelDataTime = end - start;
+    totalSetPixelDataTime += setPixelDataTime;
+    console.log(`setPixelData-${index}: ${setPixelDataTime.toFixed(2)} ms`);
   });
+  let totalEndTime = performance.now(); // 记录循环结束的时间
+  let totalExecutionTime = totalEndTime - totalStartTime; // 总执行时间
+
+  // 打印每个步骤的总时间
+  console.log(`Total parseDicomData time: ${totalParseTime.toFixed(2)} ms`);
+  console.log(`Total getInterpretedData time: ${totalGetInterpretedTime.toFixed(2)} ms`);
+  console.log(`Total calculateOffset time: ${totalCalculateOffsetTime.toFixed(2)} ms`);
+  console.log(`Total setPixelData time: ${totalSetPixelDataTime.toFixed(2)} ms`);
+
+  // 计算并打印每个步骤的平均执行时间
+  let averageParseTime = totalParseTime / arrayBuffer.length;
+  let averageGetInterpretedTime = totalGetInterpretedTime / arrayBuffer.length;
+  let averageCalculateOffsetTime = totalCalculateOffsetTime / arrayBuffer.length;
+  let averageSetPixelDataTime = totalSetPixelDataTime / arrayBuffer.length;
+  console.log(`Average parseDicomData time: ${averageParseTime.toFixed(2)} ms`);
+  console.log(`Average getInterpretedData time: ${averageGetInterpretedTime.toFixed(2)} ms`);
+  console.log(`Average calculateOffset time: ${averageCalculateOffsetTime.toFixed(2)} ms`);
+  console.log(`Average setPixelData time: ${averageSetPixelDataTime.toFixed(2)} ms`);
+  console.log(`Total execution time: ${totalExecutionTime.toFixed(2)} ms`);
 
   // 创建 vtkDataArray 对象，用于将像素数据与 vtkImageData 关联
   return _kitware_vtk_js_Common_Core_DataArray__WEBPACK_IMPORTED_MODULE_1__["default"].newInstance({
@@ -68747,9 +65798,28 @@ function createScalarArrayFromDICOM(arrayBuffer, dimensions, data_type) {
     values: typedPixelArray // 像素数据
   });
 }
+function parseDicomData(arrayBuffer) {
+  console.log(`parseDicomData buffer`);
+  const startTotal = performance.now();
+  const startDataView = performance.now();
+  const dataView = new DataView(arrayBuffer);
+  const endDataView = performance.now();
+  console.log(`-------------DataView creation time: ${(endDataView - startDataView).toFixed(2)} ms`);
+  const startVerbose = performance.now();
+  (_halo_200804__WEBPACK_IMPORTED_MODULE_2___default().Parser).verbose = false;
+  const endVerbose = performance.now();
+  console.log(`------------Disable verbose logging time: ${(endVerbose - startVerbose).toFixed(2)} ms`);
+  const startParse = performance.now();
+  const dicomData = _halo_200804__WEBPACK_IMPORTED_MODULE_2___default().Series.parseImage(dataView);
+  const endParse = performance.now();
+  console.log(`------------DICOM parsing time: ${(endParse - startParse).toFixed(2)} ms`);
+  const endTotal = performance.now();
+  console.log(`------Total parseDicomData execution time: ${(endTotal - startTotal).toFixed(2)} ms`);
+  return dicomData;
+}
 
 // 封装读取和解析 DICOM 数据的函数
-function parseDicomData(arrayBuffer) {
+function parseDicomData1(arrayBuffer) {
   // 创建一个 DataView 来读取 ArrayBuffer 数据
   const dataView = new DataView(arrayBuffer);
 
@@ -78643,17 +75713,6 @@ function tickFormat(start, stop, count, specifier) {
 }
 
 
-/***/ }),
-
-/***/ "./webvtkjs/src/config.json":
-/*!**********************************!*\
-  !*** ./webvtkjs/src/config.json ***!
-  \**********************************/
-/***/ ((module) => {
-
-"use strict";
-module.exports = /*#__PURE__*/JSON.parse('{"viewColors":[[1,0,0],[0,1,0],[0,0,1],[0.5,0.5,0.5]]}');
-
 /***/ })
 
 /******/ 	});
@@ -78771,41 +75830,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   f_load_directory: () => (/* binding */ f_load_directory),
 /* harmony export */   load: () => (/* binding */ load),
+/* harmony export */   loadDicom: () => (/* binding */ loadDicom),
 /* harmony export */   loadMPR: () => (/* binding */ loadMPR)
 /* harmony export */ });
-/* harmony import */ var _kitware_vtk_js_favicon__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @kitware/vtk.js/favicon */ "./node_modules/@kitware/vtk.js/favicon.js");
-/* harmony import */ var _kitware_vtk_js_favicon__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_kitware_vtk_js_favicon__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _kitware_vtk_js_Rendering_Profiles_All__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Profiles/All */ "./node_modules/@kitware/vtk.js/Rendering/Profiles/All.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_AnnotatedCubeActor__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/AnnotatedCubeActor */ "./node_modules/@kitware/vtk.js/Rendering/Core/AnnotatedCubeActor.js");
-/* harmony import */ var _kitware_vtk_js_Common_Core_DataArray__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @kitware/vtk.js/Common/Core/DataArray */ "./node_modules/@kitware/vtk.js/Common/Core/DataArray.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Misc_GenericRenderWindow__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Misc/GenericRenderWindow */ "./node_modules/@kitware/vtk.js/Rendering/Misc/GenericRenderWindow.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_ImageMapper__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ImageMapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/ImageMapper.js");
-/* harmony import */ var _kitware_vtk_js_Imaging_Core_ImageReslice__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @kitware/vtk.js/Imaging/Core/ImageReslice */ "./node_modules/@kitware/vtk.js/Imaging/Core/ImageReslice.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_ImageSlice__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ImageSlice */ "./node_modules/@kitware/vtk.js/Rendering/Core/ImageSlice.js");
-/* harmony import */ var _kitware_vtk_js_Interaction_Style_InteractorStyleImage__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Style/InteractorStyleImage */ "./node_modules/@kitware/vtk.js/Interaction/Style/InteractorStyleImage.js");
-/* harmony import */ var _kitware_vtk_js_Interaction_Style_InteractorStyleTrackballCamera__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Style/InteractorStyleTrackballCamera */ "./node_modules/@kitware/vtk.js/Interaction/Style/InteractorStyleTrackballCamera.js");
-/* harmony import */ var _kitware_vtk_js_Common_Core_Math__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @kitware/vtk.js/Common/Core/Math */ "./node_modules/@kitware/vtk.js/Common/Core/Math.js");
-/* harmony import */ var _kitware_vtk_js_Filters_General_OutlineFilter__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @kitware/vtk.js/Filters/General/OutlineFilter */ "./node_modules/@kitware/vtk.js/Filters/General/OutlineFilter.js");
-/* harmony import */ var _kitware_vtk_js_Interaction_Widgets_OrientationMarkerWidget__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Widgets/OrientationMarkerWidget */ "./node_modules/@kitware/vtk.js/Interaction/Widgets/OrientationMarkerWidget.js");
-/* harmony import */ var _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget */ "./node_modules/@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget.js");
-/* harmony import */ var _kitware_vtk_js_Widgets_Core_WidgetManager__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Core/WidgetManager */ "./node_modules/@kitware/vtk.js/Widgets/Core/WidgetManager.js");
-/* harmony import */ var _kitware_vtk_js_Filters_Sources_SphereSource__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @kitware/vtk.js/Filters/Sources/SphereSource */ "./node_modules/@kitware/vtk.js/Filters/Sources/SphereSource.js");
-/* harmony import */ var _kitware_vtk_js_Widgets_Core_WidgetManager_Constants__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Core/WidgetManager/Constants */ "./node_modules/@kitware/vtk.js/Widgets/Core/WidgetManager/Constants.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_ImageCPRMapper__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ImageCPRMapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/ImageCPRMapper.js");
-/* harmony import */ var gl_matrix__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! gl-matrix */ "./node_modules/gl-matrix/esm/vec3.js");
-/* harmony import */ var _kitware_vtk_js_Imaging_Core_ImageReslice_Constants__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @kitware/vtk.js/Imaging/Core/ImageReslice/Constants */ "./node_modules/@kitware/vtk.js/Imaging/Core/ImageReslice/Constants.js");
-/* harmony import */ var _kitware_vtk_js_Common_DataModel_ImageData__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @kitware/vtk.js/Common/DataModel/ImageData */ "./node_modules/@kitware/vtk.js/Common/DataModel/ImageData.js");
-/* harmony import */ var _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants */ "./node_modules/@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_Volume__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Volume */ "./node_modules/@kitware/vtk.js/Rendering/Core/Volume.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_Actor__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Actor */ "./node_modules/@kitware/vtk.js/Rendering/Core/Actor.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_VolumeMapper__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/VolumeMapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/VolumeMapper.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_Mapper__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Mapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/Mapper.js");
-/* harmony import */ var _kitware_vtk_js_Filters_General_ImageMarchingCubes__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! @kitware/vtk.js/Filters/General/ImageMarchingCubes */ "./node_modules/@kitware/vtk.js/Filters/General/ImageMarchingCubes.js");
-/* harmony import */ var _syntheticimage__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! ./syntheticimage */ "./webvtkjs/src/syntheticimage.js");
-/* harmony import */ var _load3d__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! ./load3d */ "./webvtkjs/src/load3d.js");
-/* harmony import */ var _loadimage__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! ./loadimage */ "./webvtkjs/src/loadimage.js");
-/* harmony import */ var _config_json__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! ./config.json */ "./webvtkjs/src/config.json");
-
+/* harmony import */ var _kitware_vtk_js_Rendering_Profiles_All__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Profiles/All */ "./node_modules/@kitware/vtk.js/Rendering/Profiles/All.js");
+/* harmony import */ var _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants */ "./node_modules/@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants.js");
+/* harmony import */ var _syntheticimage__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./syntheticimage */ "./webvtkjs/src/syntheticimage.js");
+/* harmony import */ var _load3d__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./load3d */ "./webvtkjs/src/load3d.js");
+/* harmony import */ var _loadimage__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./loadimage */ "./webvtkjs/src/loadimage.js");
+/* harmony import */ var _rendingmpr__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./rendingmpr */ "./webvtkjs/src/rendingmpr.js");
+// import "@kitware/vtk.js/favicon";
 
 // Load the rendering pieces we want to use (for both WebGL and WebGPU)
 
@@ -78814,529 +75848,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ----------------------------------------------------------------------------
-// 定义主要属性
-// ----------------------------------------------------------------------------
-const viewAttributes = [];
-let view3D = null;
-let imageData = null;
-window.va = viewAttributes;
-const widget = _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget__WEBPACK_IMPORTED_MODULE_13__["default"].newInstance();
-window.widget = widget;
-const widgetState = widget.getWidgetState();
-widgetState.getStatesWithLabel("sphere").forEach(handle => handle.setScale1(20));
-const showDebugActors = true;
-const windowWidthCenter = [];
-const appCursorStyles = {
-  translateCenter: "move",
-  rotateLine: "alias",
-  translateAxis: "pointer",
-  default: "default"
-};
-// ----------------------------------------------------------------------------
-// 配置文件参数
-// ----------------------------------------------------------------------------
-const viewColors = _config_json__WEBPACK_IMPORTED_MODULE_29__.viewColors && _config_json__WEBPACK_IMPORTED_MODULE_29__.viewColors.length > 0 ? _config_json__WEBPACK_IMPORTED_MODULE_29__.viewColors : [[1, 0, 0],
-// axial
-[0, 1, 0],
-// coronal
-[0, 0, 1],
-// sagittal
-[0.5, 0.5, 0.5] // 3D
-];
-const syntheticImageData = new _syntheticimage__WEBPACK_IMPORTED_MODULE_26__["default"]();
-const display3d = new _load3d__WEBPACK_IMPORTED_MODULE_27__["default"]();
-const loadimage = new _loadimage__WEBPACK_IMPORTED_MODULE_28__["default"]();
-// ----------------------------------------------------------------------------
-// 定义 html 结构
-// ----------------------------------------------------------------------------
-const container = document.getElementById("container");
-container.style.display = "flex";
-container.style.flexFlow = "wrap-reverse";
-container.style.justifyContent = "space-between";
-const controlContainer = document.createElement("div");
-container.appendChild(controlContainer);
-const checkboxTranslation = document.getElementById("checkboxTranslation");
-const checkboxShowRotation = document.getElementById("checkboxShowRotation");
-const checkboxRotation = document.getElementById("checkboxRotation");
-const checkboxOrthogonality = document.getElementById("checkboxOrthogonality");
-for (let i = 0; i < 4; i++) {
-  // 创建一个新的 div 元素作为容器，父级容器，用来放置视图
-  const elementParent = document.createElement("div");
-  // 为父容器设置 CSS 类名
-  // elementParent.setAttribute("class", "view");
-  // 设置父容器的宽度为页面宽度的 50%
-  elementParent.style.width = "50%";
-  // 设置父容器的高度为 300px
-  elementParent.style.height = "400px";
-  // 设置父容器的显示方式为 inline-block，确保它会与其他元素并排显示
-  elementParent.style.display = "inline-block"; // 保留上下外边距/内边距
-  // 创建一个新的 div 元素作为实际的视图容器
-  const element = document.createElement("div");
-  // 为视图容器设置 CSS 类名
-  // element.setAttribute("class", "view");
-  // 设置视图容器的宽度为父容器的 100%
-  element.style.width = "100%";
-  // 设置视图容器的高度为父容器的 100%
-  element.style.height = "90%";
-  element.style.display = "inline-block"; // 保留上下外边距/内边距
-  // 将实际的视图容器添加到父容器中
-  elementParent.appendChild(element);
-  // 将父容器添加到页面的指定容器（container）中
-  container.appendChild(elementParent);
-  //-------------------------------------------------------------------------------------------------------------------------------
-  //-------------------------------------------------------------------------------------------------------------------------------
-  // 创建一个 vtkGenericRenderWindow 实例，负责管理 VTK 渲染窗口
-  const grw = _kitware_vtk_js_Rendering_Misc_GenericRenderWindow__WEBPACK_IMPORTED_MODULE_4__["default"].newInstance();
-  // 将刚才创建的视图容器赋给渲染窗口容器
-  grw.setContainer(element);
-  // 调用 resize 方法确保渲染窗口的尺寸与视图容器一致
-  grw.resize();
-  //-------------------------------------------------------------------------------------------------------------------------------
-  //-------------------------------------------------------------------------------------------------------------------------------
-  // 创建一个对象，用于存储渲染窗口、渲染器、GL 渲染窗口等属性
-  const obj = {
-    renderWindow: grw.getRenderWindow(),
-    // 获取渲染窗口对象
-    renderer: grw.getRenderer(),
-    // 获取渲染器对象
-    GLWindow: grw.getApiSpecificRenderWindow(),
-    // 获取与 API 相关的渲染窗口对象
-    interactor: grw.getInteractor(),
-    // 获取交互器对象，用于处理用户输入（例如鼠标操作）
-    widgetManager: _kitware_vtk_js_Widgets_Core_WidgetManager__WEBPACK_IMPORTED_MODULE_14__["default"].newInstance(),
-    // 创建一个新的小部件管理器实例，管理各种交互小部件
-    orientationWidget: null // 当前没有设置方向小部件（通常用于显示视图方向等信息）
-  };
-  // 设置当前活跃相机为平行投影（不使用透视效果）
-  obj.renderer.getActiveCamera().setParallelProjection(true);
-
-  // 设置渲染器的背景颜色，viewColors[i] 是一个 RGB 颜色数组
-  obj.renderer.setBackground(...viewColors[i]);
-
-  // 将渲染器添加到渲染窗口中，这样渲染器才能在窗口中显示
-  obj.renderWindow.addRenderer(obj.renderer);
-  // 将 OpenGL 窗口添加到渲染窗口，确保渲染窗口能够显示 3D 图形
-  obj.renderWindow.addView(obj.GLWindow);
-
-  // 设置交互器与渲染窗口关联，确保用户能够与窗口进行交互
-  obj.renderWindow.setInteractor(obj.interactor);
-
-  // 设置交互器与 OpenGL 窗口关联，确保用户与窗口的交互正确显示
-  obj.interactor.setView(obj.GLWindow);
-
-  // 初始化交互器，准备开始与用户的交互
-  obj.interactor.initialize();
-
-  // 绑定事件到 HTML 元素，使得用户可以通过鼠标和键盘与视图进行交互
-  obj.interactor.bindEvents(element);
-
-  // 设置小部件管理器的渲染器，这样小部件可以在正确的渲染器上渲染
-  obj.widgetManager.setRenderer(obj.renderer);
-  //----------------------------线-------------------------------------------------------------------------------------------------
-  //-------------------------------------------------------------------------------------------------------------------------------
-  if (i < 3) {
-    // 设置交互器的样式为 vtk.js 提供的 `vtkInteractorStyleImage` 实例
-    obj.interactor.setInteractorStyle(_kitware_vtk_js_Interaction_Style_InteractorStyleImage__WEBPACK_IMPORTED_MODULE_8__["default"].newInstance());
-    // 添加一个小部件（widget）到 widgetManager，并根据 xyzToViewType[i] 设置其类型
-    obj.widgetInstance = obj.widgetManager.addWidget(widget, _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_20__.xyzToViewType[i]);
-    // 将小部件的缩放方式设置为基于像素
-    obj.widgetInstance.setScaleInPixels(true);
-    // 调整小部件的孔宽度为 2
-    obj.widgetInstance.setHoleWidth(0);
-    // 设置小部件为非无限线（即长度有限）
-    obj.widgetInstance.setInfiniteLine(false);
-    // 调整标签为 'line' 的所有状态的缩放比例
-    // x 和 y 轴方向的缩放因子为 2（变宽和变高）
-    // z 轴方向的缩放因子为 300（在深度方向拉长）
-    widgetState.getStatesWithLabel("line").forEach(state => state.setScale3(2, 2, 1000));
-    // 调整标签为 'center' 的所有状态的不透明度为 128
-    widgetState.getStatesWithLabel("center").forEach(state => state.setOpacity(0));
-    // 设置小部件是否保持正交性（即垂直关系），值取决于 checkboxOrthogonality 的选中状态
-    obj.widgetInstance.setKeepOrthogonality(checkboxOrthogonality.checked);
-    // 设置小部件的鼠标指针样式，`appCursorStyles` 是自定义的样式对象
-    obj.widgetInstance.setCursorStyles(appCursorStyles);
-    // 启用小部件的拾取功能（即可以通过鼠标交互选择小部件）
-    obj.widgetManager.enablePicking();
-    // 设置小部件管理器在鼠标移动时捕获渲染器缓冲区的行为
-    obj.widgetManager.setCaptureOn(_kitware_vtk_js_Widgets_Core_WidgetManager_Constants__WEBPACK_IMPORTED_MODULE_16__.CaptureOn.MOUSE_MOVE);
-  } else {
-    obj.interactor.setInteractorStyle(_kitware_vtk_js_Interaction_Style_InteractorStyleTrackballCamera__WEBPACK_IMPORTED_MODULE_9__["default"].newInstance());
-  }
-  //--------------------------------图像-----------------------------------------------------------------------------------------------
-  //-------------------------------------------------------------------------------------------------------------------------------
-  // 创建一个 vtkImageReslice 实例，用于图像重切割操作
-  obj.reslice = _kitware_vtk_js_Imaging_Core_ImageReslice__WEBPACK_IMPORTED_MODULE_6__["default"].newInstance();
-
-  // 设置重切割模式为 SlabMode.MEAN，表示在切割方向上对多个切片取平均
-  obj.reslice.setSlabMode(_kitware_vtk_js_Imaging_Core_ImageReslice_Constants__WEBPACK_IMPORTED_MODULE_18__.SlabMode.MEAN);
-
-  // 设置重切割操作的切片数量为 1，表示只取一个切片
-  obj.reslice.setSlabNumberOfSlices(1);
-
-  // 设置是否使用变换来输入采样，false 表示不使用变换
-  obj.reslice.setTransformInputSampling(false);
-
-  // 设置输出图像是否自动裁剪，true 表示输出图像会根据内容自动裁剪
-  obj.reslice.setAutoCropOutput(true);
-
-  // 设置输出图像的维度为 2，表示输出为 2D 图像（通常用于切片视图）
-  obj.reslice.setOutputDimensionality(2);
-  // 创建一个 vtkImageMapper 实例，用于映射图像数据
-  obj.resliceMapper = _kitware_vtk_js_Rendering_Core_ImageMapper__WEBPACK_IMPORTED_MODULE_5__["default"].newInstance();
-
-  // 将 vtkImageReslice 的输出连接到映射器，确保映射器能渲染重切割后的图像
-  obj.resliceMapper.setInputConnection(obj.reslice.getOutputPort());
-  // 创建一个 vtkImageSlice 实例，用于显示图像切片
-  obj.resliceActor = _kitware_vtk_js_Rendering_Core_ImageSlice__WEBPACK_IMPORTED_MODULE_7__["default"].newInstance();
-  // obj.resliceActor.setPosition(-200, -200, 0);  // 调整 X 和 Y 的位置
-  // obj.resliceActor.setScale(2.0, 2.0, 1.0);
-  // 将映射器应用到 vtkImageSlice 上，以便它能够渲染图像
-  obj.resliceActor.setMapper(obj.resliceMapper);
-
-  // 初始化一个空数组，用于存储球体演员对象
-  obj.sphereActors = [];
-
-  // 初始化一个空数组，用于存储球体源对象
-  obj.sphereSources = [];
-  //-------------------------------------------------------------------------------------------------------------------------------
-  //-------------------------------------------------------------------------------------------------------------------------------
-  // Create sphere for each 2D views which will be displayed in 3D
-  // Define origin, point1 and point2 of the plane used to reslice the volume
-  for (let j = 0; j < 3; j++) {
-    // 创建一个新的 vtkSphereSource 实例，用于生成球体
-    const sphere = _kitware_vtk_js_Filters_Sources_SphereSource__WEBPACK_IMPORTED_MODULE_15__["default"].newInstance();
-    // 设置球体的半径为 10
-    sphere.setRadius(1);
-
-    // 创建一个新的 vtkMapper 实例，负责将数据映射到渲染中
-    const mapper = _kitware_vtk_js_Rendering_Core_Mapper__WEBPACK_IMPORTED_MODULE_24__["default"].newInstance();
-    // 将球体的输出连接到映射器，以便映射器可以渲染球体
-    mapper.setInputConnection(sphere.getOutputPort());
-
-    // 创建一个新的 vtkActor 实例，负责在渲染中显示数据
-    const actor = _kitware_vtk_js_Rendering_Core_Actor__WEBPACK_IMPORTED_MODULE_22__["default"].newInstance();
-    // 将映射器应用到演员上，使其渲染球体
-    actor.setMapper(mapper);
-
-    // 设置球体演员的颜色，viewColors[i] 应该是一个 RGB 颜色数组
-    actor.getProperty().setColor(...viewColors[i]);
-
-    // 设置球体演员的可见性，showDebugActors 为布尔值，决定是否显示球体
-    actor.setVisibility(showDebugActors);
-
-    // 将演员添加到 obj.sphereActors 数组中，便于管理和后续操作
-    obj.sphereActors.push(actor);
-
-    // 将球体源添加到 obj.sphereSources 数组中，便于管理和后续操作
-    obj.sphereSources.push(sphere);
-  }
-  if (i < 3) {
-    viewAttributes.push(obj);
-  } else {
-    view3D = obj;
-    // 调用封装函数，创建一个 vtkCursor3D 边框
-    display3d.setupCursor3D(view3D);
-  }
-  // create axes
-  const axes = _kitware_vtk_js_Rendering_Core_AnnotatedCubeActor__WEBPACK_IMPORTED_MODULE_2__["default"].newInstance();
-  axes.setDefaultStyle({
-    text: "+X",
-    fontStyle: "bold",
-    fontFamily: "Arial",
-    fontColor: "black",
-    fontSizeScale: res => res / 2,
-    faceColor: createRGBStringFromRGBValues(viewColors[0]),
-    faceRotation: 0,
-    edgeThickness: 0.1,
-    edgeColor: "black",
-    resolution: 400
-  });
-  // axes.setXPlusFaceProperty({ text: '+X' });
-  axes.setXMinusFaceProperty({
-    text: "-X",
-    faceColor: createRGBStringFromRGBValues(viewColors[0]),
-    faceRotation: 90,
-    fontStyle: "italic"
-  });
-  axes.setYPlusFaceProperty({
-    text: "+Y",
-    faceColor: createRGBStringFromRGBValues(viewColors[1]),
-    fontSizeScale: res => res / 4
-  });
-  axes.setYMinusFaceProperty({
-    text: "-Y",
-    faceColor: createRGBStringFromRGBValues(viewColors[1]),
-    fontColor: "white"
-  });
-  axes.setZPlusFaceProperty({
-    text: "+Z",
-    faceColor: createRGBStringFromRGBValues(viewColors[2])
-  });
-  axes.setZMinusFaceProperty({
-    text: "-Z",
-    faceColor: createRGBStringFromRGBValues(viewColors[2]),
-    faceRotation: 45
-  });
-
-  // create orientation widget
-  obj.orientationWidget = _kitware_vtk_js_Interaction_Widgets_OrientationMarkerWidget__WEBPACK_IMPORTED_MODULE_12__["default"].newInstance({
-    actor: axes,
-    interactor: obj.renderWindow.getInteractor()
-  });
-  obj.orientationWidget.setEnabled(true);
-  obj.orientationWidget.setViewportCorner(_kitware_vtk_js_Interaction_Widgets_OrientationMarkerWidget__WEBPACK_IMPORTED_MODULE_12__["default"].Corners.BOTTOM_RIGHT);
-  obj.orientationWidget.setViewportSize(0.15);
-  obj.orientationWidget.setMinPixelSize(100);
-  obj.orientationWidget.setMaxPixelSize(300);
-  const bottomDisplay = document.createElement("div");
-  // bottomDisplay.setAttribute("class", "view");
-  bottomDisplay.style.top = "0px";
-  bottomDisplay.style.width = "100%";
-  bottomDisplay.style.height = "10%";
-  element.appendChild(bottomDisplay);
-  if (i < 3) {
-    const bottomDiv = document.createElement("div");
-    // bottomDiv.setAttribute("class", "view");
-    bottomDiv.style.width = "100%";
-    bottomDiv.style.height = "100%";
-    bottomDiv.style.display = "flex";
-    // bottomDiv0.innerText = "这是底部显示文本";  // 你可以修改这里的文本内容
-    // const buttonContainer = document.createElement("div");
-    // // buttonContainer.setAttribute("class", "view");
-    // buttonContainer.style.width = "30%";
-    // buttonContainer.style.height = "100%";
-    // buttonContainer.style.display = "flex";
-    // buttonContainer.style.border = "2px solid black"; // 2px 宽的黑色实线边框
-
-    const slide = document.createElement("div");
-    // slide.setAttribute("class", "view");
-    slide.style.width = "100%";
-    slide.style.height = "100%";
-    slide.style.display = "flex";
-    // slide.style.border = "2px solid black"; // 2px 宽的黑色实线边框
-    const slider = document.createElement("input");
-    slider.type = "range";
-    slider.min = 0;
-    slider.max = 300;
-    slider.style.bottom = "0px";
-    slider.style.width = "100%";
-    slide.appendChild(slider);
-
-    // const axialButton = createColorCheckbox("轴向截面(Axial)", "axial");
-    // slide.appendChild(axialButton);
-    // axialButton.addEventListener("input",(ev) => {
-    //   alert("达到最高点击次数！",ev);
-    // });
-    // if (i==0){
-    //   const axialButton = createColorButton("轴向截面(Axial)", "axial");
-    //   buttonContainer.appendChild(axialButton);
-    //   axialButton.addEventListener("click", function() {
-
-    //     alert("达到最高点击次数！");
-
-    // });
-    // }
-
-    // if (i==1){
-    //   const coronalButton = createColorButton("冠状面(Coronal)", "coronal");
-    //   buttonContainer.appendChild(coronalButton);
-    // }
-    // if (i==2){
-    //   const sagittalButton = createColorButton("矢状面(Sagittal)", "sagittal");
-    //   buttonContainer.appendChild(sagittalButton);
-    // }
-
-    // bottomDiv.appendChild(buttonContainer);
-    bottomDiv.appendChild(slide);
-    bottomDisplay.appendChild(bottomDiv);
-    obj.slider = slider;
-    // 为滑块添加事件监听器，当滑块值发生改变时触发
-    slider.addEventListener("input", ev => {
-      // 检查是否存在有效的图像
-      const image = widget.getWidgetState().getImage();
-      if (image) {
-        // 获取滑块的新值（用户拖动后的数值）
-        const newDistanceToP1 = ev.target.value;
-
-        // 获取当前平面的法向量（用于表示平面的方向）
-        const dirProj = widget.getWidgetState().getPlanes()[_kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_20__.xyzToViewType[i]].normal;
-
-        // // 获取当前平面的边界点（通常是平面的两个端点）
-        const planeExtremities = widget.getPlaneExtremities(_kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_20__.xyzToViewType[i]);
-
-        // 计算新的平面中心点：
-        // 从平面起始点 planeExtremities[0] 出发，
-        // 沿法向量 dirProj 移动 newDistanceToP1 的距离
-        const newCenter = _kitware_vtk_js_Common_Core_Math__WEBPACK_IMPORTED_MODULE_10__["default"].multiplyAccumulate(planeExtremities[0],
-        // 起始点
-        dirProj,
-        // 法向量
-        Number(newDistanceToP1),
-        // 滑块值转换为数字
-        [] // 结果存储在一个新数组中
-        );
-        // 设置平面的新中心点
-        widget.setCenter(newCenter);
-
-        // 模拟用户交互，触发小部件的交互事件，确保状态更新
-        obj.widgetInstance.invokeInteractionEvent(obj.widgetInstance.getActiveInteraction());
-
-        // 遍历所有视图属性，逐一渲染每个视图以更新显示
-        viewAttributes.forEach(obj2 => {
-          obj2.interactor.render(); // 重新渲染视图
-        });
-      } else {
-        // 弹出提示信息，提示用户未加载有效的图像
-        alert("当前未加载有效图像，无法执行操作。");
-      }
-    });
-  }
-  // if (i==3){
-  //   const bottomDiv3 = document.createElement("div")
-  //   bottomDiv3.setAttribute("class", "view");
-  //   bottomDiv3.style.width = "100%";
-  //   bottomDiv3.style.height = "100%";
-  //   bottomDiv3.innerText = "这是底部显示文本";  // 你可以修改这里的文本内容
-  //   bottomDisplay.appendChild(bottomDiv3);
-  // }
-
-  // create sliders
-  // if (i < 3) {
-  //   const slider = document.createElement("input");
-  //   slider.type = "range";
-  //   slider.min = 0;
-  //   slider.max = 300;
-  //   slider.style.bottom = "0px";
-  //   slider.style.width = "100%";
-  //   elementParent.appendChild(slider);
-  //   obj.slider = slider;
-
-  //   // 为滑块添加事件监听器，当滑块值发生改变时触发
-  //   slider.addEventListener("input", (ev) => {
-  //     // 检查是否存在有效的图像
-  //     const image = widget.getWidgetState().getImage();
-  //     if (image) {
-  //       // 获取滑块的新值（用户拖动后的数值）
-  //       const newDistanceToP1 = ev.target.value;
-
-  //       // 获取当前平面的法向量（用于表示平面的方向）
-  //       const dirProj = widget.getWidgetState().getPlanes()[xyzToViewType[i]].normal;
-
-  //       // // 获取当前平面的边界点（通常是平面的两个端点）
-  //       const planeExtremities = widget.getPlaneExtremities(xyzToViewType[i]);
-
-  //       // 计算新的平面中心点：
-  //       // 从平面起始点 planeExtremities[0] 出发，
-  //       // 沿法向量 dirProj 移动 newDistanceToP1 的距离
-  //       const newCenter = vtkMath.multiplyAccumulate(
-  //         planeExtremities[0], // 起始点
-  //         dirProj, // 法向量
-  //         Number(newDistanceToP1), // 滑块值转换为数字
-  //         [] // 结果存储在一个新数组中
-  //       );
-  //       // 设置平面的新中心点
-  //       widget.setCenter(newCenter);
-
-  //       // 模拟用户交互，触发小部件的交互事件，确保状态更新
-  //       obj.widgetInstance.invokeInteractionEvent(obj.widgetInstance.getActiveInteraction());
-
-  //       // 遍历所有视图属性，逐一渲染每个视图以更新显示
-  //       viewAttributes.forEach((obj2) => {
-  //         obj2.interactor.render(); // 重新渲染视图
-  //       });
-  //     } else {
-  //       // 弹出提示信息，提示用户未加载有效的图像
-  //       alert("当前未加载有效图像，无法执行操作。");
-  //     }
-  //   });
-  // }
-}
-// ----------------------------------------------------------------------------
-// UI 控件处理
-// ----------------------------------------------------------------------------
-// 创建一个按钮的辅助函数
-function createColorButton(labelText, buttonId) {
-  const button = document.createElement("button");
-  button.id = buttonId;
-  button.textContent = labelText;
-  button.style.width = "100%";
-  button.style.height = "100%";
-  button.style.backgroundColor = "lightgray"; // 初始颜色
-  button.style.cursor = "pointer"; // 设置鼠标指针样式为“手形”，表示可以点击
-  button.style.pointerEvents = "auto"; // 确保可以响应点击事件
-  return button;
-}
-function createColorCheckbox(labelText, checkboxId) {
-  const checkboxContainer = document.createElement("div");
-
-  // Create the checkbox element
-  const checkbox = document.createElement("input");
-  checkbox.type = "checkbox";
-  checkbox.id = checkboxId;
-
-  // Create the label element
-  const label = document.createElement("label");
-  label.textContent = labelText;
-  label.setAttribute("for", checkboxId);
-
-  // Style the checkbox
-  checkbox.style.cursor = "pointer"; // Ensure cursor shows as "pointer" on hover
-
-  // Optional: Style the container for layout
-  checkboxContainer.style.width = "100%";
-  checkboxContainer.style.height = "100%";
-  checkboxContainer.style.display = "flex";
-  checkboxContainer.style.alignItems = "center";
-  checkboxContainer.style.justifyContent = "center";
-  checkboxContainer.style.bottom = "0px";
-  // Append the checkbox and label to the container
-  checkboxContainer.appendChild(checkbox);
-  checkboxContainer.appendChild(label);
-  return checkboxContainer;
-}
-
-//-----------------------------------------矢状面--------------------------------------------------------------
-
-// 创建切换按钮颜色的函数
-function toggleButtonColor(button) {
-  alert(button.style.backgroundColor);
-  if (button.style.backgroundColor === "lightgray") {
-    // 如果当前颜色是灰色，切换为选中颜色
-    button.style.backgroundColor = "red"; // 选中颜色
-  } else {
-    // 如果当前颜色是选中颜色，切换为未选中颜色
-    button.style.backgroundColor = "lightgray"; // 未选中颜色
-  }
-}
-// ----------------------------------------------------------------------------
-// 逻辑代码
-// ----------------------------------------------------------------------------
+// const mprrendering = new MPRRendering();
+// mprrendering.createRenderingPage();
 async function load(ArrayBuffer) {
   let arrayBuffer = [];
   for (var i = 0; i < Object.keys(ArrayBuffer).length; i++) {
@@ -79347,6 +75860,19 @@ async function load(ArrayBuffer) {
   }
   return arrayBuffer;
 }
+function loadDicom(arrayBuffer) {
+  const syntheticImageData = new _syntheticimage__WEBPACK_IMPORTED_MODULE_2__["default"]();
+  // const {pixelSpacing,SliceThickness,WindowCenter,WindowWidth,HitBit} = syntheticImageData.GetTagsData(arrayBuffer)
+  // return {
+  //   pixelSpacing:pixelSpacing,
+  //   SliceThickness:SliceThickness,
+  //   WindowCenter:WindowCenter,
+  //   WindowWidth:WindowWidth,
+  //   HitBit:HitBit
+  //   }
+  const hit = syntheticImageData.GetHitBitData(arrayBuffer);
+  return hit;
+}
 /**
  * 加载 MPR 数据并渲染多切片图像。
  * @param {ArrayBuffer} arrayBuffer - 输入的二进制数据缓冲区。
@@ -79356,24 +75882,57 @@ function loadMPR(arrayBuffer) {
     // 检查输入是否有效
     throw new Error("arrayBuffer 不能为空！");
   }
-  // 解析输入数据以生成图像数据和窗口设置
-  let {
-    imageData,
-    windowWidth,
-    windowCenter
-  } = syntheticImageData.ImageData(arrayBuffer);
-  if (!imageData) {
-    // 确保解析结果有效
-    throw new Error("图像数据生成失败，请检查输入的 arrayBuffer 格式是否正确。");
-  }
+  // let totalStartTime = performance.now(); // 记录循环开始的时间
+  // const syntheticImageData = new SyntheticImageData();
+  // // 解析输入数据以生成图像数据和窗口设置
+  // const { imageData, windowWidth, windowCenter } = syntheticImageData.ImageData(arrayBuffer);
+  const start = performance.now();
+  const syntheticImageData = new _syntheticimage__WEBPACK_IMPORTED_MODULE_2__["default"]();
+  const {
+    pixelSpacing,
+    SliceThickness,
+    WindowCenter,
+    WindowWidth,
+    HitBit
+  } = syntheticImageData.GetTagsData(arrayBuffer);
+  const dicomData = {
+    pixelSpacing: pixelSpacing,
+    sliceThickness: SliceThickness,
+    windowCenter: WindowCenter,
+    windowWidth: WindowWidth,
+    hitbit: HitBit
+  };
+  console.log(dicomData);
+  syntheticImageData.SyntheticImage(dicomData);
+  const end = performance.now();
+  const parseTime = end - start;
+  console.log(`parseDicomData: ${parseTime.toFixed(2)} ms`);
+  // if (!imageData) {
+  //   // 确保解析结果有效
+  //   throw new Error("图像数据生成失败，请检查输入的 arrayBuffer 格式是否正确。");
+  // }
 
   // 使用生成的图像数据渲染多切片图像
-  MultiSliceImageMapper(imageData, windowWidth, windowCenter);
-
-  // 可选：日志输出调试信息
-  console.log(`MPR 加载完成，窗口宽度: ${windowWidth}, 窗口中心: ${windowCenter}`);
+  // MultiSliceImageMapper(imageData, windowWidth, windowCenter);
+  // let totalEndTime = performance.now(); // 记录循环结束的时间
+  // let totalExecutionTime = totalEndTime - totalStartTime; // 总执行时间
+  // console.log(`Total time: ${totalExecutionTime.toFixed(2)} ms`);
+  // // 可选：日志输出调试信息
+  // console.log(`MPR 加载完成，窗口宽度: ${windowWidth}, 窗口中心: ${windowCenter}`);
 }
 function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
+  const display3d = new _load3d__WEBPACK_IMPORTED_MODULE_3__["default"]();
+  const loadimage = new _loadimage__WEBPACK_IMPORTED_MODULE_4__["default"]();
+  const mprrendering = new _rendingmpr__WEBPACK_IMPORTED_MODULE_5__["default"]();
+  const {
+    viewAttributes,
+    view3D,
+    widget,
+    widgetState
+  } = mprrendering.createRenderingPage();
+  const initialPlanesState = {
+    ...widgetState.getPlanes()
+  };
   // 将加载的图像数据设置到一个假设的控件 `widget` 中进行显示
   widget.setImage(imageData);
   // 调用封装函数，创建一个 vtkCursor3D 边框
@@ -79383,9 +75942,7 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
   viewAttributes.forEach((obj, i) => {
     // 设置该视图的重采样输入数据为加载的图像数据
     obj.reslice.setInputData(imageData);
-    const property = obj.resliceActor.getProperty();
-    property.setColorWindow(windowWidth); // 设置窗口宽度
-    property.setColorLevel(windowCenter); // 设置窗口中心
+    setColorProperties(obj, windowWidth, windowCenter);
     // 将该视图的重采样演员添加到渲染器中
     obj.renderer.addActor(obj.resliceActor);
     // 遍历并将该视图中的球体演员添加到渲染器中
@@ -79394,7 +75951,7 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
       // view3D.renderer.addActor(actor);
     });
     const reslice = obj.reslice;
-    const viewType = _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_20__.xyzToViewType[i];
+    const viewType = _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_1__.xyzToViewType[i];
     // 对所有视图进行操作，确保在当前视图进行交互时能够正确更新切片
     viewAttributes.forEach(v => {
       // 在交互开始时，更新重采样器的状态
@@ -79417,7 +75974,7 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
       v.widgetInstance.onInteractionEvent(
       // 可以根据当前交互方法判断是否允许更新焦点
       interactionMethodName => {
-        const canUpdateFocalPoint = interactionMethodName === _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_20__.InteractionMethodsName.RotateLine;
+        const canUpdateFocalPoint = interactionMethodName === _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_1__.InteractionMethodsName.RotateLine;
         const activeViewType = widget.getWidgetState().getActiveViewType();
         // 如果当前视图是活动视图或不能更新焦点，则允许计算焦点偏移
         const computeFocalPointOffset = activeViewType === viewType || !canUpdateFocalPoint;
@@ -79457,8 +76014,98 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
   view3D.renderer.resetCameraClippingRange();
   view3D.renderWindow.render();
   // 设置最大切片数量到滑块的最大值
-  const maxNumberOfSlices = gl_matrix__WEBPACK_IMPORTED_MODULE_30__.length(imageData.getDimensions());
-  document.getElementById("slabNumber").max = maxNumberOfSlices;
+  // const maxNumberOfSlices = vec3.length(imageData.getDimensions());
+  // document.getElementById("slabNumber").max = maxNumberOfSlices;
+  const checkboxShowRotation = document.getElementById("checkboxShowRotation");
+  const checkboxRotation = document.getElementById("checkboxRotation");
+  // 假设 `widget` 和 `widgetState` 已经被正确初始化
+  handleCheckboxShowRotationChange(checkboxShowRotation, checkboxRotation, widget, widgetState, viewAttributes);
+  const checkboxTranslation = document.getElementById("checkboxTranslation");
+  // 假设 `widget` 和 `viewAttributes` 已经被正确初始化
+  handleCheckboxTranslationChange(checkboxTranslation, widget, viewAttributes);
+  const buttonReset = document.getElementById("buttonReset");
+  // 假设 `widget`、`widgetState`、`initialPlanesState`、`view3D`、`viewAttributes` 已经被正确初始化
+  handleButtonResetClick(buttonReset, widget, widgetState, initialPlanesState, view3D, viewAttributes);
+}
+// 封装函数，检查数组有效性并设置颜色窗口和颜色中心
+function setColorProperties(obj, windowWidth, windowCenter) {
+  const property = obj.resliceActor.getProperty();
+
+  // 验证并设置窗口宽度
+  if (Array.isArray(windowWidth) && windowWidth.length > 0) {
+    property.setColorWindow(windowWidth[0]); // 假设使用第一个值，或者根据具体需求使用
+  } else {
+    console.warn("windowWidth 不是有效的数组或数组为空");
+  }
+
+  // 验证并设置窗口中心
+  if (Array.isArray(windowCenter) && windowCenter.length > 0) {
+    property.setColorLevel(windowCenter[0]); // 假设使用第一个值，或者根据具体需求使用
+  } else {
+    console.warn("windowCenter 不是有效的数组或数组为空");
+  }
+}
+function handleButtonResetClick(buttonReset, widget, widgetState, initialPlanesState, view3D, viewAttributes) {
+  buttonReset.addEventListener("click", () => {
+    // 检查是否存在有效的图像
+    const image = widget.getWidgetState().getImage();
+    if (image) {
+      widgetState.setPlanes({
+        ...initialPlanesState
+      });
+      // 设置中心点为图像中心
+      widget.setCenter(image.getCenter());
+      updateViews(view3D, viewAttributes, widget, widgetState);
+    } else {
+      alert("当前未加载有效图像，无法执行重置操作。");
+    }
+  });
+}
+function updateViews(view3D, viewAttributes, widget, widgetState) {
+  const loadimage = new _loadimage__WEBPACK_IMPORTED_MODULE_4__["default"]();
+  viewAttributes.forEach((obj, i) => {
+    loadimage.updateReslice(view3D, widget, widgetState, {
+      viewType: _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_1__.xyzToViewType[i],
+      reslice: obj.reslice,
+      actor: obj.resliceActor,
+      renderer: obj.renderer,
+      resetFocalPoint: true,
+      computeFocalPointOffset: true,
+      sphereSources: obj.sphereSources,
+      resetViewUp: true
+    });
+    obj.renderWindow.render();
+  });
+  view3D.renderer.resetCamera();
+  view3D.renderer.resetCameraClippingRange();
+}
+function handleCheckboxTranslationChange(checkboxTranslation, widget, viewAttributes) {
+  checkboxTranslation.addEventListener("change", ev => {
+    // 检查是否存在有效的图像
+    const image = widget.getWidgetState().getImage();
+    if (image) {
+      viewAttributes.forEach(obj => obj.widgetInstance.setEnableTranslation(checkboxTranslation.checked));
+    } else {
+      alert("当前未加载有效图像，无法执行平移操作。");
+    }
+  });
+}
+function handleCheckboxShowRotationChange(checkboxShowRotation, checkboxRotation, widget, widgetState, viewAttributes) {
+  checkboxShowRotation.addEventListener("change", ev => {
+    // 检查是否存在有效的图像
+    const image = widget.getWidgetState().getImage();
+    if (image) {
+      widgetState.getStatesWithLabel("rotation").forEach(handle => handle.setVisible(checkboxShowRotation.checked));
+      viewAttributes.forEach(obj => {
+        obj.interactor.render();
+      });
+      checkboxRotation.checked = checkboxShowRotation.checked;
+      checkboxRotation.disabled = !checkboxShowRotation.checked;
+      checkboxRotation.dispatchEvent(new Event("change"));
+    } else {
+      alert("当前未加载有效图像，无法执行旋转操作。");
+    }
+  });
 }
 function f_load_directory(selectFiles) {
   let dicom_arraybuffer = [];
@@ -79471,15 +76118,6 @@ function f_load_directory(selectFiles) {
     dicom_arraybuffer.push(readFileAsync(file));
   }
   return dicom_arraybuffer;
-}
-// ----------------------------------------------------------------------------
-// 设置渲染代码
-// ----------------------------------------------------------------------------
-function createRGBStringFromRGBValues(rgb) {
-  if (rgb.length !== 3) {
-    return "rgb(0, 0, 0)";
-  }
-  return `rgb(${(rgb[0] * 255).toString()}, ${(rgb[1] * 255).toString()}, ${(rgb[2] * 255).toString()})`;
 }
 })();
 

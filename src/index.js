@@ -22,29 +22,68 @@ export async function load(ArrayBuffer) {
   }
   return arrayBuffer;
 }
+export function loadDicom(arrayBuffer){
+  const syntheticImageData = new SyntheticImageData();
+ // const {pixelSpacing,SliceThickness,WindowCenter,WindowWidth,HitBit} = syntheticImageData.GetTagsData(arrayBuffer)
+  // return {
+  //   pixelSpacing:pixelSpacing,
+  //   SliceThickness:SliceThickness,
+  //   WindowCenter:WindowCenter,
+  //   WindowWidth:WindowWidth,
+  //   HitBit:HitBit
+  //   }
+  const hit =  syntheticImageData.GetHitBitData(arrayBuffer)
+  return hit
+}
 /**
  * 加载 MPR 数据并渲染多切片图像。
  * @param {ArrayBuffer} arrayBuffer - 输入的二进制数据缓冲区。
  */
+export function loadMPR1(arrayBuffer) {
+  if (!arrayBuffer) {
+    // 检查输入是否有效
+    throw new Error("arrayBuffer 不能为空！");
+  }
+  // let totalStartTime = performance.now(); // 记录循环开始的时间
+  // const syntheticImageData = new SyntheticImageData();
+  // // 解析输入数据以生成图像数据和窗口设置
+  // const { imageData, windowWidth, windowCenter } = syntheticImageData.ImageData(arrayBuffer);
+  const start = performance.now();
+  const syntheticImageData = new SyntheticImageData();
+  const {pixelSpacing,SliceThickness,WindowCenter,WindowWidth,HitBit} = syntheticImageData.GetTagsData(arrayBuffer)
+  const dicomData = {
+      pixelSpacing: pixelSpacing,
+      sliceThickness: SliceThickness,
+      windowCenter: WindowCenter,
+      windowWidth: WindowWidth,
+      hitbit: HitBit
+    };
+  console.log(dicomData);
+  syntheticImageData.SyntheticImage(dicomData)
+  const end = performance.now();
+  const parseTime = end - start;
+  console.log(`parseDicomData: ${parseTime.toFixed(2)} ms`);
+  // if (!imageData) {
+  //   // 确保解析结果有效
+  //   throw new Error("图像数据生成失败，请检查输入的 arrayBuffer 格式是否正确。");
+  // }
+
+  // 使用生成的图像数据渲染多切片图像
+  // MultiSliceImageMapper(imageData, windowWidth, windowCenter);
+  // let totalEndTime = performance.now(); // 记录循环结束的时间
+  // let totalExecutionTime = totalEndTime - totalStartTime; // 总执行时间
+  // console.log(`Total time: ${totalExecutionTime.toFixed(2)} ms`);
+  // // 可选：日志输出调试信息
+  // console.log(`MPR 加载完成，窗口宽度: ${windowWidth}, 窗口中心: ${windowCenter}`);
+}
 export function loadMPR(arrayBuffer) {
   if (!arrayBuffer) {
     // 检查输入是否有效
     throw new Error("arrayBuffer 不能为空！");
   }
   const syntheticImageData = new SyntheticImageData();
-  // 解析输入数据以生成图像数据和窗口设置
-  const { imageData, windowWidth, windowCenter } = syntheticImageData.ImageData(arrayBuffer);
-
-  if (!imageData) {
-    // 确保解析结果有效
-    throw new Error("图像数据生成失败，请检查输入的 arrayBuffer 格式是否正确。");
-  }
-
-  // 使用生成的图像数据渲染多切片图像
-  MultiSliceImageMapper(imageData, windowWidth, windowCenter);
-
-  // 可选：日志输出调试信息
-  console.log(`MPR 加载完成，窗口宽度: ${windowWidth}, 窗口中心: ${windowCenter}`);
+  const {imageData, windowWidth, windowCenter} = syntheticImageData.ImageData(arrayBuffer)
+  MultiSliceImageMapper(imageData, windowWidth, windowCenter)
 }
 function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
   const display3d = new Display3D();
@@ -160,21 +199,22 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
 // 封装函数，检查数组有效性并设置颜色窗口和颜色中心
 function setColorProperties(obj, windowWidth, windowCenter) {
   const property = obj.resliceActor.getProperty();
-  
-  // 验证并设置窗口宽度
-  if (Array.isArray(windowWidth) && windowWidth.length > 0) {
-      property.setColorWindow(windowWidth[0]); // 假设使用第一个值，或者根据具体需求使用
+
+  // 验证并设置窗口宽度，确保是整数类型
+  if (Number.isInteger(windowWidth)) {
+      property.setColorWindow(windowWidth); 
   } else {
-      console.warn("windowWidth 不是有效的数组或数组为空");
+      console.warn("windowWidth 不是有效的整数");
   }
 
-  // 验证并设置窗口中心
-  if (Array.isArray(windowCenter) && windowCenter.length > 0) {
-      property.setColorLevel(windowCenter[0]); // 假设使用第一个值，或者根据具体需求使用
+  // 验证并设置窗口中心，确保是整数类型
+  if (Number.isInteger(windowCenter)) {
+      property.setColorLevel(windowCenter); 
   } else {
-      console.warn("windowCenter 不是有效的数组或数组为空");
+      console.warn("windowCenter 不是有效的整数");
   }
 }
+
 
 function handleButtonResetClick(
   buttonReset,
