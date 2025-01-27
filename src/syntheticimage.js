@@ -61,6 +61,7 @@ class SyntheticImageData {
     imageData.setSpacing(spacing);
     imageData.setOrigin([0, 0, 0]);
     imageData.setDimensions(...dimensions);
+    //imageData.setExtent(0, 127, 0, 127, 0, 127);
     const typedPixelArray = createTypedArray(data_type, dimensions, hitbit.length);
     hitbit.forEach((buffer, index) => {
       const sliceOffset = dimensions[0] * dimensions[1] * index;
@@ -177,6 +178,68 @@ class SyntheticImageData {
     };
   }
   GetHitBitData(arrayBuffer) {
+    let Hit = [];
+
+    arrayBuffer.forEach((buffer, index) => {
+      let Hitbit = {};
+
+      const dicomdata = parseDicomData(buffer);
+      // var hitbit = dicomdata.getInterpretedData(false, true);
+      // let data_b = new Uint16Array(hitbit.data.length)
+      // for(var pix_num = 0;pix_num<hitbit.data.length;pix_num--){
+      //   data_b[pix_num] = hitbit.data[pix_num]-hitbit.min
+      // }
+     // hitbit.data = data_b
+      // 获取 DICOM 文件中的像素间距 (Pixel Spacing)
+      var hitbit = this.h_b_obj_return_h_img(dicomdata)
+      const pixel_spacing = dicomdata.tags["00280030"].value;
+
+      // 获取 DICOM 文件中的切片厚度 (Slice Thickness)
+      const slice_thickness = dicomdata.tags["00180050"].value;
+
+      // 获取窗宽 (Window Width) 和窗位 (Window Center) 信息
+      const window_center = dicomdata.tags["00281050"].value;
+      const window_width = dicomdata.tags["00281051"].value;
+      Hitbit[`h_img`] = hitbit;
+      Hitbit[`pixSpacing`] = pixel_spacing[0];
+      Hitbit[`slice_Thickness`] = slice_thickness[0];
+      Hitbit[`window_l`] = window_center[0]-hitbit.dx;
+      Hitbit[`window_w`] = window_width[0]
+      Hit.push(Hitbit);
+    });
+
+    return Hit;
+  }
+  
+h_b_obj_return_h_img(h_b_obj) {
+    
+
+    var h_img = h_b_obj.getInterpretedData(false, true);
+
+    // h_img.pixtype = h_b_obj.getPhotometricInterpretation();
+    // h_img.imageData_max = Math.pow(2, h_b_obj.getBitsStored());
+   // h_img.pixtype = ("00280004" in tags) ? tags["00280004"].value[0] : "MONOCHROME2";
+    h_img.Is_fanzhuan = false;
+    h_img.dx = 0;
+    if (h_img.min < 0) {
+
+        let data_b = new Uint16Array(h_img.data.length);
+      // let data_b = new  Uint8Array(h_img.data.length);
+      //let data_b = new  Float32Array(h_img.data.length);
+        for (var pix_num = 0; pix_num < h_img.data.length; pix_num++) {
+            data_b[pix_num] = h_img.data[pix_num] - h_img.min;
+        }
+        h_img.data = data_b;
+        h_img.dx = h_img.min;
+        h_img.max = h_img.max - h_img.dx;
+        h_img.min = h_img.min - h_img.dx;
+    }
+    if (h_img.pixtype == "MONOCHROME1") {
+        h_img.Is_fanzhuan = true;
+    }
+    return h_img;
+} 
+  GetHitBitData1(arrayBuffer) {
     let Hit = [];
 
     arrayBuffer.forEach((buffer, index) => {
