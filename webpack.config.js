@@ -2,22 +2,22 @@ var path = require('path');
 
 var entry = path.join(__dirname, './src/index.js');
 const sourcePath = path.join(__dirname, './src');
-const outputPath = path.join(__dirname, './webvtkjs/dist');
+const outputPath = path.join(__dirname, './dist');
 
 module.exports = {
  
  
   mode: 'development', // 设置为开发模式
-  entry: './webvtkjs/src/index.js', // 入口文件
+  entry: './src/index.js', // 入口文件
   output: {
     filename: 'webvtk.js', // 输出文件名
-    path: path.resolve(__dirname, './webvtkjs/dist'), // 输出路径
+    path: path.resolve(__dirname, './dist'), // 输出路径
     library: "pian",
     path: outputPath,
   },
     devServer: {
-    port: 8080,
-    static: './webvtkjs/dist', // 指定静态资源路径
+    port: 8888,
+    static: './dist', // 指定静态资源路径
     open: true,       // 自动打开浏览器
   },
   devtool: 'source-map', // 开启调试模式，生成 source map

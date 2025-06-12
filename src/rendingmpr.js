@@ -63,8 +63,8 @@ class MPRRendering {
     window.va = viewAttributes;
     window.widget = widget;
     const widgetState = widget.getWidgetState();
-
-    widgetState.getStatesWithLabel("sphere").forEach((handle) => handle.setScale1(20));
+    console.log(widgetState)
+    widgetState.getStatesWithLabel("sphere").forEach((handle) => handle.setScale1(10));
     const checkboxOrthogonality = document.getElementById("checkboxOrthogonality");
     // 获取容器元素并设置样式
     const container = document.getElementById("container");
@@ -74,8 +74,8 @@ class MPRRendering {
     // 通过访问 createdViews 数组来操作这些视图元素
     createdElements.forEach((element, i) => {
       // 例如，修改第一个视图的背景颜色
-      if (i === 0) {
-        element.style.backgroundColor = "lightblue";
+      if (i === 4) {
+        element.id = "3dView";
       }
       //-------------------------------------------------------------------------------------------------------------------------------
       //-------------------------------------------------------------------------------------------------------------------------------
@@ -107,7 +107,7 @@ class MPRRendering {
       obj.renderer.getActiveCamera().setParallelProjection(true);
 
       // 设置渲染器的背景颜色，viewColors[i] 是一个 RGB 颜色数组
-      obj.renderer.setBackground(...viewColors[i]);
+      // obj.renderer.setBackground(...viewColors[i]);
 
       // 将渲染器添加到渲染窗口中，这样渲染器才能在窗口中显示
       obj.renderWindow.addRenderer(obj.renderer);
@@ -137,14 +137,16 @@ class MPRRendering {
         obj.widgetInstance = obj.widgetManager.addWidget(widget, xyzToViewType[i]);
         // 将小部件的缩放方式设置为基于像素
         obj.widgetInstance.setScaleInPixels(true);
-        // 调整小部件的孔宽度为 2
-        obj.widgetInstance.setHoleWidth(0);
+        // 调整交线的空距
+        obj.widgetInstance.setHoleWidth(20);
         // 设置小部件为非无限线（即长度有限）
         obj.widgetInstance.setInfiniteLine(false);
         // 调整标签为 'line' 的所有状态的缩放比例
         // x 和 y 轴方向的缩放因子为 2（变宽和变高）
         // z 轴方向的缩放因子为 300（在深度方向拉长）
-        widgetState.getStatesWithLabel("line").forEach((state) => state.setScale3(2, 2, 1000));
+        widgetState.getStatesWithLabel("line").forEach((state) => state.setScale3(1, 1, 1000));
+        // 添加鼠标悬停效果
+        // console.log(widgetState.getStatesWithLabel("line"), obj.widgetInstance)
         // 调整标签为 'center' 的所有状态的不透明度为 128
         widgetState.getStatesWithLabel("center").forEach((state) => state.setOpacity(0));
         // 设置小部件是否保持正交性（即垂直关系），值取决于 checkboxOrthogonality 的选中状态
@@ -155,6 +157,7 @@ class MPRRendering {
         obj.widgetManager.enablePicking();
         // 设置小部件管理器在鼠标移动时捕获渲染器缓冲区的行为
         obj.widgetManager.setCaptureOn(CaptureOn.MOUSE_MOVE);
+
       } else {
         obj.interactor.setInteractorStyle(vtkInteractorStyleTrackballCamera.newInstance());
       }
@@ -179,13 +182,13 @@ class MPRRendering {
       obj.reslice.setOutputDimensionality(2);
       // 创建一个 vtkImageMapper 实例，用于映射图像数据
       obj.resliceMapper = vtkImageMapper.newInstance();
-
+      obj.resliceMapper.setSliceAtFocalPoint(true); // 确保切片在焦点处
       // 将 vtkImageReslice 的输出连接到映射器，确保映射器能渲染重切割后的图像
       obj.resliceMapper.setInputConnection(obj.reslice.getOutputPort());
       // 创建一个 vtkImageSlice 实例，用于显示图像切片
       obj.resliceActor = vtkImageSlice.newInstance();
       // obj.resliceActor.setPosition(-200, -200, 0);  // 调整 X 和 Y 的位置
-      // obj.resliceActor.setScale(2.0, 2.0, 1.0);
+      obj.resliceActor.setScale(1.0, 1.0, 1.0);
       // 将映射器应用到 vtkImageSlice 上，以便它能够渲染图像
       obj.resliceActor.setMapper(obj.resliceMapper);
 
@@ -230,9 +233,9 @@ class MPRRendering {
       if (i < 3) {
         viewAttributes.push(obj);
       } else {
-        view3D = obj;
-        // 调用封装函数，创建一个 vtkCursor3D 边框
-        display3d.setupCursor3D(view3D);
+        // view3D = obj;
+        // // 调用封装函数，创建一个 vtkCursor3D 边框
+        // display3d.setupCursor3D(view3D);
       }
       // create axes
       const axes = vtkAnnotatedCubeActor.newInstance();
@@ -310,6 +313,8 @@ class MPRRendering {
               Number(newDistanceToP1), // 滑块值转换为数字
               [] // 结果存储在一个新数组中
             );
+            console.log(newCenter);
+            console.log(obj.widgetInstance.getActiveInteraction())
             // 设置平面的新中心点
             widget.setCenter(newCenter);
 
@@ -330,72 +335,72 @@ class MPRRendering {
     // 返回视图属性和3D视图对象
     return { viewAttributes, view3D, widget, widgetState };
   }
-    // 封装函数，创建视图容器并添加按钮，返回创建的元素
-    createViewWithButtons(controlContainer, numElements = 4) {
-      const createdElements = []; // 用于存储创建的元素
-      const createdSliderElements = [];
-      const element = document.createElement("div");
-      element.style.width = "100%";
-      element.style.height = "100%";
-      element.style.display = 'grid';
-      element.style.gridTemplateRows = '50% 50%';  // 两行等高
-      element.style.gridTemplateColumns = '50% 50%';  // 两列等宽
-      // element.style.border = "1px solid black"; // 可选，便于调试
-      controlContainer.appendChild(element);
-      for (let i = 0; i < numElements; i++) {
-        // 创建父级容器，放置视图和按钮
-        const elementParent = document.createElement("div");
-        elementParent.style.width = "100%";
-        elementParent.style.height = "100%";
-        // elementParent.style.border = "1px solid black"; // 可选，便于调试
-        element.appendChild(elementParent);
-        // 创建按钮容器
-        const elementbutton = document.createElement("div");
-        elementbutton.style.width = "100%";
-        elementbutton.style.height = "10%";
-        // elementbutton.style.border = "1px solid black"; // 可选，便于调试
-        elementParent.appendChild(elementbutton);
-        const button = document.createElement("div");
-        button.style.width = "100%";
-        button.style.height = "100%";
-        button.style.display = "flex";
-        // button.style.border = "1px solid black"; // 可选，便于调试
-        elementbutton.appendChild(button);
-        if (i < 3) {
-          const slider = document.createElement("input");
-          slider.type = "range";
-          slider.min = 0;
-          slider.max = 300;
-          slider.style.bottom = "0px";
-          slider.style.width = "100%";
-          slider.style.height = "100%";
-          slider.style.margin = "0px";
-          button.appendChild(slider);
-          createdSliderElements.push(slider);
-        }
-
-        // 创建图像容器
-        const elementImage = document.createElement("div");
-        elementImage.style.width = "100%";
-        elementImage.style.height = "90%";
-        // elementImage.style.display = "flex";
-        // elementImage.innerText = "这是底部显示文本"; // 你可以修改这里的文本内容
-        // elementImage.style.border = "1px solid red"; // 可选，便于调试
-        elementParent.appendChild(elementImage);
-        // 创建按钮并添加到左侧部分
-        // const axialButton = this.createColorButton("Axial", "axial_" + i); // 每个按钮的 id 保持唯一
-        // elementleft.appendChild(axialButton);
-        // axialButton.addEventListener("click", function () {
-        //   alert("达到最高点击次数！");
-        // });
-  
-        // 将创建的 elementParent 存储在数组中
-        createdElements.push(elementImage);
+  // 封装函数，创建视图容器并添加按钮，返回创建的元素
+  createViewWithButtons(controlContainer, numElements = 4) {
+    const createdElements = []; // 用于存储创建的元素
+    const createdSliderElements = [];
+    const element = document.createElement("div");
+    element.style.width = "100%";
+    element.style.height = "100%";
+    element.style.display = 'grid';
+    element.style.gridTemplateRows = '50% 50%';  // 两行等高
+    element.style.gridTemplateColumns = '50% 50%';  // 两列等宽
+    // element.style.border = "1px solid black"; // 可选，便于调试
+    controlContainer.appendChild(element);
+    for (let i = 0; i < numElements; i++) {
+      // 创建父级容器，放置视图和按钮
+      const elementParent = document.createElement("div");
+      elementParent.style.width = "100%";
+      elementParent.style.height = "100%";
+      elementParent.style.border = "1px solid black"; // 可选，便于调试
+      element.appendChild(elementParent);
+      // 创建按钮容器
+      const elementbutton = document.createElement("div");
+      elementbutton.style.width = "100%";
+      elementbutton.style.height = "10%";
+      // elementbutton.style.border = "1px solid black"; // 可选，便于调试
+      elementParent.appendChild(elementbutton);
+      const button = document.createElement("div");
+      button.style.width = "100%";
+      button.style.height = "100%";
+      button.style.display = "flex";
+      // button.style.border = "1px solid black"; // 可选，便于调试
+      elementbutton.appendChild(button);
+      if (i < 3) {
+        const slider = document.createElement("input");
+        slider.type = "range";
+        slider.min = 0;
+        slider.max = 300;
+        slider.style.bottom = "0px";
+        slider.style.width = "100%";
+        slider.style.height = "100%";
+        slider.style.margin = "0px";
+        button.appendChild(slider);
+        createdSliderElements.push(slider);
       }
-  
-      // 返回包含所有创建元素的数组
-      return { createdElements, createdSliderElements };
+
+      // 创建图像容器
+      const elementImage = document.createElement("div");
+      elementImage.style.width = "100%";
+      elementImage.style.height = "90%";
+      // elementImage.style.display = "flex";
+      // elementImage.innerText = "这是底部显示文本"; // 你可以修改这里的文本内容
+      // elementImage.style.border = "1px solid red"; // 可选，便于调试
+      elementParent.appendChild(elementImage);
+      // 创建按钮并添加到左侧部分
+      // const axialButton = this.createColorButton("Axial", "axial_" + i); // 每个按钮的 id 保持唯一
+      // elementleft.appendChild(axialButton);
+      // axialButton.addEventListener("click", function () {
+      //   alert("达到最高点击次数！");
+      // });
+
+      // 将创建的 elementParent 存储在数组中
+      createdElements.push(elementImage);
     }
+
+    // 返回包含所有创建元素的数组
+    return { createdElements, createdSliderElements };
+  }
   // 创建一个按钮的辅助函数
   createColorButton(labelText, buttonId) {
     const button = document.createElement("button");

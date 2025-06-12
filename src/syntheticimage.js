@@ -1,9 +1,9 @@
 import vtkImageData from "@kitware/vtk.js/Common/DataModel/ImageData";
 import vtkDataArray from "@kitware/vtk.js/Common/Core/DataArray";
 import daikon from "./halo_200804";
-import pako from 'pako';
-import JSZip from 'jszip';
-import { saveAs } from 'file-saver';
+// import pako from 'pako';
+// import JSZip from 'jszip';
+// import { saveAs } from 'file-saver';
 
 class SyntheticImageData {
   ImageData1(arrayBuffer) {
@@ -53,7 +53,7 @@ class SyntheticImageData {
   ImageData(hitbit) {
     // 创建一个新的 vtkImageData 实例，用于存储体数据
     const imageData = vtkImageData.newInstance();
-    console.log(hitbit[0]);
+    console.log(hitbit,hitbit[0]);
     const zeroHit = hitbit[0];
     const origin = [1.0, 1.0, 1.0];
     // 根据像素数据确定数据类型（如 Int16、Uint8 等）
@@ -68,16 +68,20 @@ class SyntheticImageData {
     imageData.setDimensions(...dimensions);
     //imageData.setExtent(0, 127, 0, 127, 0, 127);
     const typedPixelArray = createTypedArray(data_type, dimensions, hitbit.length);
+    console.log(typedPixelArray);
     hitbit.forEach((buffer, index) => {
       const sliceOffset = dimensions[0] * dimensions[1] * index;
+      console.log(sliceOffset)
       typedPixelArray.set(buffer.h_img.data, sliceOffset);
     });
+    console.log(typedPixelArray);
     const scalarArray = vtkDataArray.newInstance({
       name: "Pixels", // 数据的名称
       dataType: data_type, // 数据类型（如 Int16、Uint8 等）
       numberOfComponents: 1, // 每个像素的分量数（单通道图像为 1）
       values: typedPixelArray, // 像素数据
     });
+
     // 将像素数据绑定到 vtkImageData 的点数据（PointData）中
     imageData.getPointData().setScalars(scalarArray);
     // const vtiObject = this.createVTIObject(spacing, data_type, origin);

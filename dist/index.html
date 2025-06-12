@@ -1,144 +1,142 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-  </head>
-  <body>
-    <input type="file" id="dicomFileInput" webkitdirectory multiple="multiple" />
-    <div>
-      <table>
-        <tbody>
-          
 
-          <tr>
-            <td>Scale in pixels:</td>
-            <td><input type="checkbox" id="checkboxScaleInPixels" checked="checked" /></td>
-          </tr>
-          <tr>
-            <td>Opacity :</td>
-            <td>
-              <input
-                id="opacity"
-                type="range"
-                min="0"
-                max="255"
-                step="1"
-                value="255"
-                style="width: 100px"
-              />
-            </td>
-            <td id="opacityValue">255</td>
-          </tr>
-          <tr>
-            <td>Slab Mode :</td>
-            <td>
-              <select id="slabMode">
-                <option id="slabModeMin" value="0">MIN</option>
-                <option id="slabModeMax" value="1">MAX</option>
-                <option id="slabModeMean" selected="selected" value="2">MEAN</option>
-                <option id="slabModeSum" value="3">SUM</option>
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <td>Slab Number of Slices :</td>
-            <td>
-              <input
-                id="slabNumber"
-                type="range"
-                min="1"
-                max="385.69547573182655"
-                step="1"
-                value="1"
-                style="width: 100px"
-              />
-            </td>
-            <td id="slabNumberValue">1</td>
-          </tr>
-          <tr>
-            <td>Interpolation mode :</td>
-            <td>
-              <select id="selectInterpolation">
-                <option id="nearest" selected="selected">Nearest</option>
-                <option id="linear">Linear</option>
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <td>Window Level:</td>
-            <td><input type="checkbox" id="checkboxWindowLevel" checked="checked" /></td>
-          </tr>
-          <span>允许平移:</span>
-          <span><input type="checkbox" id="checkboxTranslation" checked="checked" /></span>
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+    .canvas-container { display: flex; }
+    canvas { border: 1px solid #6e6e6e; }
+  </style>
+</head>
 
-          <span>显示旋转:</span>
-          <span><input type="checkbox" id="checkboxShowRotation" checked="checked" /></span>
+<body>
+  <div>
+    <table>
+      <tbody>
 
-          <span>允许旋转:</span>
-          <span><input type="checkbox" id="checkboxRotation" checked="checked" /></span>
 
-          <span>保持垂直:</span>
-          <span><input type="checkbox" id="checkboxOrthogonality" checked="checked" /></span>
-          <span><button id="buttonReset">重置视图</button></span>
+        <tr>
+          <td>Scale in pixels:</td>
+          <td><input type="checkbox" id="checkboxScaleInPixels" checked="checked" /></td>
+        </tr>
+        <tr>
+          <td>Opacity :</td>
+          <td>
+            <input id="opacity" type="range" min="0" max="255" step="1" value="255" style="width: 100px" />
+          </td>
+          <td id="opacityValue">255</td>
+        </tr>
+        <tr>
+          <td>Slab Mode :</td>
+          <td>
+            <select id="slabMode">
+              <option id="slabModeMin" value="0">MIN</option>
+              <option id="slabModeMax" value="1">MAX</option>
+              <option id="slabModeMean" selected="selected" value="2">MEAN</option>
+              <option id="slabModeSum" value="3">SUM</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>Slab Number of Slices :</td>
+          <td>
+            <input id="slabNumber" type="range" min="1" max="385.69547573182655" step="1" value="1"
+              style="width: 100px" />
+          </td>
+          <td id="slabNumberValue">1</td>
+        </tr>
+        <tr>
+          <td>Interpolation mode :</td>
+          <td>
+            <select id="selectInterpolation">
+              <option id="nearest" selected="selected">Nearest</option>
+              <option id="linear">Linear</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>Window Level:</td>
+          <td><input type="checkbox" id="checkboxWindowLevel" checked="checked" /></td>
+        </tr>
+        <span>允许平移:</span>
+        <span><input type="checkbox" id="checkboxTranslation" checked="checked" /></span>
 
-          <tr>
-            <td><button id="buttonClearAll">清除3D显示</button></td>
-          </tr>
-          <tr>
-            <td>轴向截面(Axial):</td>
-            <td><input type="checkbox" id="checkboxAxial" /></td>
-          </tr>
-          <tr>
-            <td>冠状面(Coronal)</td>
-            <td><input type="checkbox" id="checkboxCoronal" /></td>
-          </tr>
-          <tr>
-            <td>矢状面(Sagittal)</td>
-            <td><input type="checkbox" id="checkboxSagittal" /></td>
-          </tr>
-          <label for="blendModeSelect">选择渲染模式：</label>
-          <select id="blendModeSelect">
-            <option value="Composite">Composite(默认)</option>
-            <option value="MaximumIntensity">MIP</option>
-          </select>
-     
-        </tbody>
-      </table>
-    </div>
-    <div id="container" style="width: 100%;height: 300px; border: 1px solid red"></div>
-    <script src="./webvtk.js"></script>
-    <script>
-      // 文件选择框的变化事件
-      dicomFileInput.addEventListener("change", function (event) {
-        const files = event.target.files;
-        if (files.length > 0) {
-          const ArrayBuffer = pian.f_load_directory(files);
-          loadAndLogBuffer(ArrayBuffer);
-        }
-      });
-      /**
-       * 加载和日志输出 ArrayBuffer
-       * @param {ArrayBuffer} arrayBuffer - 输入的二进制缓冲区
-       */
-      async function loadAndLogBuffer(arrayBuffer) {
-        try {
-          // 调用 pian.load，返回一个 Promise
-          const bufferPromise = pian.load(arrayBuffer);
+        <span>显示旋转:</span>
+        <span><input type="checkbox" id="checkboxShowRotation" checked="checked" /></span>
 
-          // 使用 await 获取 Promise 的结果
-          const buffer = await bufferPromise;
-          const arg1 = pian.loadDicom(buffer)
-          console.log(arg1);
-          // 输出结果
-          // console.log(buffer);
-          pian.loadMPR(arg1);
-          
-        } catch (error) {
-          // 捕获并处理 pian.load 中的错误
-          console.error("加载 buffer 时发生错误:", error);
-        }
+        <span>允许旋转:</span>
+        <span><input type="checkbox" id="checkboxRotation" checked="checked" /></span>
+
+        <span>保持垂直:</span>
+        <span><input type="checkbox" id="checkboxOrthogonality" checked="checked" /></span>
+        <span><button id="buttonReset">重置视图</button></span>
+
+        <tr>
+          <td><button id="buttonClearAll">清除3D显示</button></td>
+        </tr>
+        <tr>
+          <td>轴向截面(Axial):</td>
+          <td><input type="checkbox" id="checkboxAxial" /></td>
+        </tr>
+        <tr>
+          <td>冠状面(Coronal)</td>
+          <td><input type="checkbox" id="checkboxCoronal" /></td>
+        </tr>
+        <tr>
+          <td>矢状面(Sagittal)</td>
+          <td><input type="checkbox" id="checkboxSagittal" /></td>
+        </tr>
+        <label for="blendModeSelect">选择渲染模式：</label>
+        <select id="blendModeSelect">
+          <option value="Composite">Composite(默认)</option>
+          <option value="MaximumIntensity">MIP</option>
+        </select>
+
+      </tbody>
+    </table>
+  </div>
+  <input type="file" id="dicomFileInput" webkitdirectory multiple="multiple" />
+  <div class="canvas-container">
+    <canvas id="axial" width="512" height="512"></canvas>
+    <canvas id="coronal" width="512" height="512"></canvas>
+    <canvas id="sagittal" width="512" height="512"></canvas>
+  </div>
+  <div id="container" style="width: 996px;height: 627px; border: 1px solid red"></div>
+
+  <script src="./webvtk.js"></script>
+  <script>
+    // 文件选择框的变化事件
+    dicomFileInput.addEventListener("change", function (event) {
+      const files = event.target.files;
+      if (files.length > 0) {
+        const ArrayBuffer = pian.f_load_directory(files);
+        loadAndLogBuffer(ArrayBuffer);
       }
-    </script>
-  </body>
+    });
+    /**
+     * 加载和日志输出 ArrayBuffer
+     * @param {ArrayBuffer} arrayBuffer - 输入的二进制缓冲区
+     */
+    async function loadAndLogBuffer(arrayBuffer) {
+      try {
+        // 调用 pian.load，返回一个 Promise
+        const bufferPromise = pian.load(arrayBuffer);
+
+        // 使用 await 获取 Promise 的结果
+        const buffer = await bufferPromise;
+        const arg1 = pian.loadDicom(buffer)
+        console.log(arg1);
+        // 输出结果
+        // console.log(buffer);
+        pian.loadMPR(arg1);
+
+      } catch (error) {
+        // 捕获并处理 pian.load 中的错误
+        console.error("加载 buffer 时发生错误:", error);
+      }
+    }
+  </script>
+</body>
+
 </html>
