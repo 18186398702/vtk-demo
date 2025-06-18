@@ -53,7 +53,7 @@ class SyntheticImageData {
   ImageData(hitbit) {
     // 创建一个新的 vtkImageData 实例，用于存储体数据
     const imageData = vtkImageData.newInstance();
-    console.log(hitbit,hitbit[0]);
+    // console.log(hitbit,hitbit[0]);
     const zeroHit = hitbit[0];
     const origin = [1.0, 1.0, 1.0];
     // 根据像素数据确定数据类型（如 Int16、Uint8 等）
@@ -68,13 +68,13 @@ class SyntheticImageData {
     imageData.setDimensions(...dimensions);
     //imageData.setExtent(0, 127, 0, 127, 0, 127);
     const typedPixelArray = createTypedArray(data_type, dimensions, hitbit.length);
-    console.log(typedPixelArray);
+    // console.log(typedPixelArray);
     hitbit.forEach((buffer, index) => {
       const sliceOffset = dimensions[0] * dimensions[1] * index;
-      console.log(sliceOffset)
+      // console.log(sliceOffset)
       typedPixelArray.set(buffer.h_img.data, sliceOffset);
     });
-    console.log(typedPixelArray);
+    // console.log(typedPixelArray);
     const scalarArray = vtkDataArray.newInstance({
       name: "Pixels", // 数据的名称
       dataType: data_type, // 数据类型（如 Int16、Uint8 等）
@@ -400,14 +400,14 @@ function createScalarArrayFromDICOM(arrayBuffer, dimensions, data_type) {
 
   arrayBuffer.forEach((buffer, index) => {
     let start, end;
-    console.log(`----------------创建数据----------------------------`);
+    // console.log(`----------------创建数据----------------------------`);
     // 1. 记录 parseDicomData 的执行时间
     start = performance.now();
     const dicomdata = parseDicomData(buffer);
     end = performance.now();
     const parseTime = end - start;
     totalParseTime += parseTime;
-    console.log(`parseDicomData-${index}: ${parseTime.toFixed(2)} ms`);
+    // console.log(`parseDicomData-${index}: ${parseTime.toFixed(2)} ms`);
 
     // 2. 记录 getInterpretedData 的执行时间
     start = performance.now();
@@ -415,7 +415,7 @@ function createScalarArrayFromDICOM(arrayBuffer, dimensions, data_type) {
     end = performance.now();
     const getInterpretedTime = end - start;
     totalGetInterpretedTime += getInterpretedTime;
-    console.log(`getInterpretedData-${index}: ${getInterpretedTime.toFixed(2)} ms`);
+    // console.log(`getInterpretedData-${index}: ${getInterpretedTime.toFixed(2)} ms`);
 
     // 3. 计算当前切片数据的偏移量
     start = performance.now();
@@ -423,7 +423,7 @@ function createScalarArrayFromDICOM(arrayBuffer, dimensions, data_type) {
     end = performance.now();
     const calculateOffsetTime = end - start;
     totalCalculateOffsetTime += calculateOffsetTime;
-    console.log(`calculateOffset-${index}: ${calculateOffsetTime.toFixed(2)} ms`);
+    // console.log(`calculateOffset-${index}: ${calculateOffsetTime.toFixed(2)} ms`);
 
     // 4. 将当前切片的像素数据填充到 typedPixelArray 中
     start = performance.now();
@@ -431,17 +431,17 @@ function createScalarArrayFromDICOM(arrayBuffer, dimensions, data_type) {
     end = performance.now();
     const setPixelDataTime = end - start;
     totalSetPixelDataTime += setPixelDataTime;
-    console.log(`setPixelData-${index}: ${setPixelDataTime.toFixed(2)} ms`);
+    // console.log(`setPixelData-${index}: ${setPixelDataTime.toFixed(2)} ms`);
   });
 
   let totalEndTime = performance.now(); // 记录循环结束的时间
   let totalExecutionTime = totalEndTime - totalStartTime; // 总执行时间
 
   // 打印每个步骤的总时间
-  console.log(`Total parseDicomData time: ${totalParseTime.toFixed(2)} ms`);
-  console.log(`Total getInterpretedData time: ${totalGetInterpretedTime.toFixed(2)} ms`);
-  console.log(`Total calculateOffset time: ${totalCalculateOffsetTime.toFixed(2)} ms`);
-  console.log(`Total setPixelData time: ${totalSetPixelDataTime.toFixed(2)} ms`);
+  // console.log(`Total parseDicomData time: ${totalParseTime.toFixed(2)} ms`);
+  // console.log(`Total getInterpretedData time: ${totalGetInterpretedTime.toFixed(2)} ms`);
+  // console.log(`Total calculateOffset time: ${totalCalculateOffsetTime.toFixed(2)} ms`);
+  // console.log(`Total setPixelData time: ${totalSetPixelDataTime.toFixed(2)} ms`);
 
   // 计算并打印每个步骤的平均执行时间
   let averageParseTime = totalParseTime / arrayBuffer.length;
@@ -449,12 +449,12 @@ function createScalarArrayFromDICOM(arrayBuffer, dimensions, data_type) {
   let averageCalculateOffsetTime = totalCalculateOffsetTime / arrayBuffer.length;
   let averageSetPixelDataTime = totalSetPixelDataTime / arrayBuffer.length;
 
-  console.log(`Average parseDicomData time: ${averageParseTime.toFixed(2)} ms`);
-  console.log(`Average getInterpretedData time: ${averageGetInterpretedTime.toFixed(2)} ms`);
-  console.log(`Average calculateOffset time: ${averageCalculateOffsetTime.toFixed(2)} ms`);
-  console.log(`Average setPixelData time: ${averageSetPixelDataTime.toFixed(2)} ms`);
+  // console.log(`Average parseDicomData time: ${averageParseTime.toFixed(2)} ms`);
+  // console.log(`Average getInterpretedData time: ${averageGetInterpretedTime.toFixed(2)} ms`);
+  // console.log(`Average calculateOffset time: ${averageCalculateOffsetTime.toFixed(2)} ms`);
+  // console.log(`Average setPixelData time: ${averageSetPixelDataTime.toFixed(2)} ms`);
 
-  console.log(`Total execution time: ${totalExecutionTime.toFixed(2)} ms`);
+  // console.log(`Total execution time: ${totalExecutionTime.toFixed(2)} ms`);
 
   // 创建 vtkDataArray 对象，用于将像素数据与 vtkImageData 关联
   return vtkDataArray.newInstance({
@@ -465,32 +465,32 @@ function createScalarArrayFromDICOM(arrayBuffer, dimensions, data_type) {
   });
 }
 function parseDicomData(arrayBuffer) {
-  console.log(`parseDicomData buffer`);
+  // console.log(`parseDicomData buffer`);
   const startTotal = performance.now();
 
   const startDataView = performance.now();
   const dataView = new DataView(arrayBuffer);
   const endDataView = performance.now();
-  console.log(
-    `-------------DataView creation time: ${(endDataView - startDataView).toFixed(2)} ms`
-  );
+  // console.log(
+  //   `-------------DataView creation time: ${(endDataView - startDataView).toFixed(2)} ms`
+  // );
 
   const startVerbose = performance.now();
   daikon.Parser.verbose = false;
   const endVerbose = performance.now();
-  console.log(
-    `------------Disable verbose logging time: ${(endVerbose - startVerbose).toFixed(2)} ms`
-  );
+  // console.log(
+  //   `------------Disable verbose logging time: ${(endVerbose - startVerbose).toFixed(2)} ms`
+  // );
 
   const startParse = performance.now();
   const dicomData = daikon.Series.parseImage(dataView);
   const endParse = performance.now();
-  console.log(`------------DICOM parsing time: ${(endParse - startParse).toFixed(2)} ms`);
+  // console.log(`------------DICOM parsing time: ${(endParse - startParse).toFixed(2)} ms`);
 
   const endTotal = performance.now();
-  console.log(
-    `------Total parseDicomData execution time: ${(endTotal - startTotal).toFixed(2)} ms`
-  );
+  // console.log(
+  //   `------Total parseDicomData execution time: ${(endTotal - startTotal).toFixed(2)} ms`
+  // );
 
   return dicomData;
 }

@@ -388,11 +388,11 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
   // 将加载的图像数据设置到一个假设的控件 `widget` 中进行显示
   // console.log(imageData)
   widget.setImage(imageData);
+
   // 调用封装函数，创建一个 vtkCursor3D 边框
   // display3d.setupCursor3D(view3D);
   // renderVolume(imageData, view3D);
   // 对每个视图的属性进行操作，`viewAttributes` 是包含多个视图属性的数组
-  console.log(viewAttributes)
   viewAttributes.forEach((obj, i) => {
     // 设置该视图的重采样输入数据为加载的图像数据
     obj.reslice.setInputData(imageData);
@@ -408,7 +408,8 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
       console.log(e)
     })
     obj.interactor.onLeftButtonPress((e) => {
-      console.log(obj.interactor)
+      console.log(widgetState.getStatesWithLabel("line")[0].get())
+      console.log(obj.resliceActor.get())
       let center = widgetState.getCenter();
       console.log("center", center)
       let otherLineHandle = obj.widgetInstance.getOtherLineHandle("XinY")
@@ -463,7 +464,7 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
       widgetState.getStatesWithLabel("line").forEach((state) => {
         // 判断是激活状态
         if (state.getActive()) {
-          // console.log('HoverEvent', e);
+          console.log('HoverEvent', e);
           state.setScale3(2.5, 2.5, 1000);
         } else {
           state.setScale3(1, 1, 1000)
@@ -534,6 +535,7 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
     });
     // 渲染当前视图
     obj.interactor.render();
+    console.log(obj.widgetManager.getState())
   });
 
 }

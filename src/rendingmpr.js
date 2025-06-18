@@ -25,49 +25,80 @@ import { xyzToViewType } from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWi
 import vtkActor from "@kitware/vtk.js/Rendering/Core/Actor";
 import vtkMapper from "@kitware/vtk.js/Rendering/Core/Mapper";
 import Display3D from "./load3d";
-// class CustomInteractorStyle extends vtkInteractorStyleTrackballCamera {
+
+// import vtkInteractorStyleManipulator from '@kitware/vtk.js/Sources/Rendering/Core/InteractorStyle';
+
+// import vtkLineSource from '@kitware/vtk.js/Filters/Sources/LineSource';
+
+// // 自定义交互器样式
+// class CustomInteractorStyle extends vtkInteractorStyle {
 //   constructor() {
 //     super();
-//     this.leftButtonDown = false;
+//     this.drawing = false;
+//     this.startPosition = [0, 0];
+//     this.endPosition = [0, 0];
+//     this.lineActor = null;
+//     this.renderer = null;
 //   }
 
 //   onLeftButtonDown() {
-//     this.leftButtonDown = true;
-//     // 调用父类的 OnLeftButtonDown 方法以处理其他逻辑
-//     super.onLeftButtonDown();
+//     if (!this.drawing) {
+//       this.drawing = true;
+//       const interactor = this.getInteractor();
+//       const renderer = interactor.getRenderer();
+//       if (renderer) {
+//         this.renderer = renderer;
+//         const position = interactor.getEventPosition();
+//         this.startPosition = [position[0], position[1]];
+//         this.endPosition = [position[0], position[1]];
+
+//         // 创建线源、映射器和演员
+//         const lineSource = vtkLineSource.newInstance();
+//         lineSource.setPoint1(this.startPosition[0], this.startPosition[1], 0);
+//         lineSource.setPoint2(this.endPosition[0], this.endPosition[1], 0);
+
+//         const mapper = vtkPolyDataMapper.newInstance();
+//         mapper.setInputConnection(lineSource.getOutputPort());
+
+//         this.lineActor = vtkActor.newInstance();
+//         this.lineActor.setMapper(mapper);
+//         this.lineActor.GetProperty().SetColor(1, 0, 0); // 设置线条为红色
+
+//         renderer.addActor(this.lineActor);
+//         interactor.render();
+//       }
+//     }
+//     return super.onLeftButtonDown();
 //   }
 
 //   onMouseMove() {
-//     if (this.leftButtonDown) {
-//       // 获取当前鼠标位置
+//     if (this.drawing && this.renderer) {
 //       const interactor = this.getInteractor();
-//       const renderer = interactor.getRenderer();
-//       const lastPos = interactor.getEventPosition();
-//       const currPos = interactor.getEventPosition();
+//       const position = interactor.getEventPosition();
+//       this.endPosition = [position[0], position[1]];
 
-//       // 计算鼠标移动的增量
-//       const dy = lastPos[1] - currPos[1];
+//       // 更新线条终点
+//       const lineSource = this.lineActor.getMapper().getInputConnection(0).getSource();
+//       lineSource.setPoint2(this.endPosition[0], this.endPosition[1], 0);
+//       lineSource.modified();
 
-//       // 根据鼠标移动量平移相机
-//       const camera = renderer.getActiveCamera();
-//       const viewUp = camera.getViewUp();
-//       const distance = camera.getDistance();
-//       const factor = distance * 0.01; // 调整平移的灵敏度
-//       const translateFactor = dy * factor;
-
-//       // 应用平移
-//       camera.translate(0, 0, translateFactor, viewUp);
-//       renderer.resetCameraClippingRange();
 //       interactor.render();
 //     }
-//     super.onMouseMove();
+//     return super.onMouseMove();
 //   }
 
 //   onLeftButtonUp() {
-//     this.leftButtonDown = false;
-//     super.onLeftButtonUp();
+//     if (this.drawing) {
+//       this.drawing = false;
+//       if (this.lineActor) {
+//         this.renderer.addActor(this.lineActor);
+//       }
+//     }
+//     return super.onLeftButtonUp();
 //   }
 // }
+
+
 class MPRRendering {
   // 创建MPR渲染页面
   createRenderingPage() {
@@ -129,6 +160,7 @@ class MPRRendering {
       // 创建一个 vtkGenericRenderWindow 实例，负责管理 VTK 渲染窗口
       const grw = vtkGenericRenderWindow.newInstance();
       // 将刚才创建的视图容器赋给渲染窗口容器
+      console.log(element);
       grw.setContainer(element);
       // 调用 resize 方法确保渲染窗口的尺寸与视图容器一致
       grw.resize();
@@ -185,10 +217,10 @@ class MPRRendering {
       //-------------------------------------------------------------------------------------------------------------------------------
       if (i < 3) {
         // 设置交互器的样式为 vtk.js 提供的 `vtkInteractorStyleImage` 实例
-        // const CustomInteractorStyle = vtkInteractorStyleTrackballCamera.newInstance();
-        // console.log(CustomInteractorStyle)
-        // obj.interactor.setInteractorStyle(vtkInteractorStyleImage.newInstance());
-        obj.interactor.setInteractorStyle(vtkInteractorStyleTrackballCamera.newInstance());
+        // const ccc = CustomInteractorStyle.newInstance();
+        // console.log(ccc)
+        obj.interactor.setInteractorStyle(vtkInteractorStyleImage.newInstance());
+        // obj.interactor.setInteractorStyle(ccc.newInstance());
         
         // 添加一个小部件（widget）到 widgetManager，并根据 xyzToViewType[i] 设置其类型
         obj.widgetInstance = obj.widgetManager.addWidget(widget, xyzToViewType[i]);
@@ -204,7 +236,7 @@ class MPRRendering {
         // z 轴方向的缩放因子为 300（在深度方向拉长）
         widgetState.getStatesWithLabel("line").forEach((state) => state.setScale3(1, 1, 1000));
         // 添加鼠标悬停效果
-        // console.log(widgetState.getStatesWithLabel("line"), obj.widgetInstance)
+        console.log(widgetState.getStatesWithLabel("line")[0])
         // 调整标签为 'center' 的所有状态的不透明度为 128
         widgetState.getStatesWithLabel("center").forEach((state) => state.setOpacity(10));
         // 设置小部件是否保持正交性（即垂直关系），值取决于 checkboxOrthogonality 的选中状态
