@@ -1,6 +1,8 @@
 // import "@kitware/vtk.js/favicon";
 import vtkCoordinate from '@kitware/vtk.js/Rendering/Core/Coordinate';
 
+import vtkGenericRenderWindow from "@kitware/vtk.js/Rendering/Misc/GenericRenderWindow";
+import vtkWidgetManager from "@kitware/vtk.js/Widgets/Core/WidgetManager";
 // Load the rendering pieces we want to use (for both WebGL and WebGPU)
 import "@kitware/vtk.js/Rendering/Profiles/All";
 import {
@@ -155,7 +157,7 @@ export function loadMPR(arrayBuffer) {
   }
   const syntheticImageData = new SyntheticImageData();
   const { imageData, windowWidth, windowCenter } = syntheticImageData.ImageData(arrayBuffer)
-  console.log("imageData", imageData)
+  console.log("imageData", imageData, windowWidth, windowCenter)
   const axialCanvas = document.getElementById('axial');
   const coronalCanvas = document.getElementById('coronal');
   const sagittalCanvas = document.getElementById('sagittal');
@@ -184,6 +186,13 @@ export function loadMPR(arrayBuffer) {
     // 将映射器应用到 vtkImageSlice 上，以便它能够渲染图像
     obj.resliceActor.setMapper(obj.resliceMapper);
     obj.reslice.setInputData(imageData);
+    const grw = vtkGenericRenderWindow.newInstance();
+    const render = grw.getRenderer()
+
+    obj.widgetManager = vtkWidgetManager.newInstance()
+    obj.widgetManager.setRenderer(render);
+    obj.widgetInstance = obj.widgetManager.addWidget(widget, viewtype);
+    obj.widgetInstance.setKeepOrthogonality(true);
     const ctx = canvas.getContext('2d');
     //canvas加监听点击事件
     canvas.addEventListener('click', function (e) {
@@ -198,7 +207,7 @@ export function loadMPR(arrayBuffer) {
       console.log(viewtype, xCanvas, yCanvas);
       let center = widget.get().widgetState.getCenter();
       console.log("center", widget, widget.get().widgetState.getRotationHandleXinY0(), widget.get().widgetState.getCenter());
-
+      console.log("widgetInstance", obj.widgetInstance)
       if (obj.viewtype == 4) {
         center[1] = xCanvas;
         center[2] = yCanvas;
@@ -209,8 +218,12 @@ export function loadMPR(arrayBuffer) {
         center[0] = xCanvas;
         center[1] = yCanvas;
       }
-      widget.setCenter(center);
-      updateMPR(widget, objArr, center);
+      // widget.setCenter(center);
+      obj.widgetInstance.rotateLineInView("YinX", -Math.PI / 4)
+      obj.widgetInstance.rotateLineInView("YinZ", -Math.PI / 4)
+      // obj.widgetInstance.rotateLineInView("YinX", 90)
+      //  obj.widgetInstance.invokeInteractionEvent("rotateLine")
+      updateMPR(widget, objArr, center, windowWidth, windowCenter);
     })
     obj.ctx = ctx;
     objArr.push(obj)
@@ -218,16 +231,78 @@ export function loadMPR(arrayBuffer) {
   createVTIObject(axialCanvas, imageData, widget, 4)
   createVTIObject(coronalCanvas, imageData, widget, 5)
   createVTIObject(sagittalCanvas, imageData, widget, 6)
+  console.log(widgetState.getCenter())
   let center = [200.801, 200.801, 22]
   widget.setCenter(center);
+  let otherLineHandle = objArr[0].widgetInstance.getOtherLineHandle("XinY")
+  let otherLineVector = otherLineHandle.getDirection()
+  console.log("XinY", otherLineVector)
+  otherLineHandle = objArr[0].widgetInstance.getOtherLineHandle("ZinY")
+  otherLineVector = otherLineHandle.getDirection()
+  console.log("ZinY", otherLineVector)
+  otherLineHandle = objArr[0].widgetInstance.getOtherLineHandle("ZinX")
+  otherLineVector = otherLineHandle.getDirection()
+  console.log("ZinX", otherLineVector)
+  otherLineHandle = objArr[0].widgetInstance.getOtherLineHandle("YinX")
+  otherLineVector = otherLineHandle.getDirection()
+  console.log("YinX", otherLineVector)
+  otherLineHandle = objArr[0].widgetInstance.getOtherLineHandle("XinZ")
+  otherLineVector = otherLineHandle.getDirection()
+  console.log("XinZ", otherLineVector)
+  otherLineHandle = objArr[0].widgetInstance.getOtherLineHandle("YinZ")
+  otherLineVector = otherLineHandle.getDirection()
+  console.log("YinZ", otherLineVector)
   // widget.get().widgetState.setRotationHandleXinY0(45)
-  console.log("objArr",  widget.get().widgetState.getAxisXinY().get())
-  updateMPR(widget, objArr, center)
+  console.log("widget", widget.get())
+  console.log("objArr", widget.get().behavior, widget.get().widgetState.getStatesWithLabel('rotation'))
+  console.log(widget.get().widgetState.getStatesWithLabel("sphere")[1].getState())
+  //  widget.get().widgetState.getStatesWithLabel('rotation')[0].setOffset()
+  updateMPR(widget, objArr, center, windowWidth, windowCenter)
   console.log("widgetState", widgetState, widgetState.getCenter(), widgetState.getAxisXinY().get());
   MultiSliceImageMapper(imageData, windowWidth, windowCenter)
 }
+function dicom_to_8byte_from_hight_byte_at_ww_wl(pixdate, wl_y, ww) {
+  //计算最小值
+  var min = Math.min(pixdate);
+  //拨正
+  var wl = wl_y;
+  if (min < 0) {
+    for (var pix_num = 0; pix_num < pixdate.length; pix_num++) {
+      pixdate[pix_num] = pixdate[pix_num] - min;
+    }
+    var wl = wl_y - min;
+  }
 
-function updateMPR(widget, objArr, center) {
+  const window_min = (wl - ww / 2);
+  const window_max = (wl + ww / 2);
+  const ww_wl_a = (255 / ww);
+  const ww_wl_b = ((window_min * 255) / ww);
+  var lut = new Uint8ClampedArray(65536);
+  var lueLenght = lut.length
+  for (var i = 0; i < lueLenght; i++) {
+    if (i < window_min) {
+      lut[i] = 0;
+    } else if (i > window_max) {
+      lut[i] = 255;
+    } else {
+      lut[i] = parseInt(i * ww_wl_a - ww_wl_b);
+    }
+  }
+
+  const pixdataLenght = pixdate.length
+  var pixUint8ArrTC = new Uint8Array(pixdataLenght * 4)
+  for (var a = 0, b = 0; a < pixdataLenght; a++) {
+    let lut_val = lut[pixdate[a]];
+    if (lut_val == undefined) {
+      lut_val = lut[Math.round(pixdate[a])];
+    }
+    pixUint8ArrTC[b] = pixUint8ArrTC[b + 1] = pixUint8ArrTC[b + 2] = lut_val;
+    pixUint8ArrTC[b + 3] = 255;
+    b += 4;
+  }
+  return pixUint8ArrTC
+}
+function updateMPR(widget, objArr, center, windowWidth, windowCenter) {
   for (let obj of objArr) {
     const modified = widget.updateReslicePlane(
       obj.reslice,
@@ -240,6 +315,8 @@ function updateMPR(widget, objArr, center) {
     const width = imageData2.getDimensions()[0];
     const height = imageData2.getDimensions()[1];
     const bounds = obj.resliceActor.getBounds();
+    const spacing = imageData2.getSpacing()
+    console.log(obj.viewtype, imageData2.getDimensions(), imageData2.getSpacing(), obj.resliceActor.getBounds())
     //计算切片像素
     const displayX = bounds[1] - bounds[0];  // X轴方向显示宽度
     const displayY = bounds[3] - bounds[2]; // Y轴方向显示高度
@@ -248,31 +325,42 @@ function updateMPR(widget, objArr, center) {
     let imgheight = 0
     let linesX = 0
     let linesY = 0
+
+    imgwidth = width * spacing[0];
+    imgheight = height * spacing[1];
     if (obj.viewtype == 4) {
-      imgwidth = displayY;
-      imgheight = displayZ;
+      // imgwidth = displayY;
+      // imgheight = displayZ;
       linesX = center[1]
       linesY = center[2]
     } else if (obj.viewtype == 5) {
-      imgwidth = displayX;
-      imgheight = displayZ;
+      // imgwidth = displayX;
+      // imgheight = displayZ;
       linesX = center[0]
       linesY = center[2]
     } else {
-      imgwidth = displayX;
-      imgheight = displayY;
+      // imgwidth = displayX;
+      // imgheight = displayY;
       linesX = center[0]
       linesY = center[1]
     }
-    let buffer = new Uint8ClampedArray(image)
-    const rgbaBuffer = new Uint8ClampedArray(width * height * 4);
-    for (let i = 0; i < buffer.length; i++) {
-      rgbaBuffer[i * 4] = buffer[i];   // R
-      rgbaBuffer[i * 4 + 1] = buffer[i]; // G
-      rgbaBuffer[i * 4 + 2] = buffer[i]; // B
-      rgbaBuffer[i * 4 + 3] = 255;     // A
-    }
-    const imageDataObj = new ImageData(rgbaBuffer, width, height);
+    console.log(image)
+    const rgbaBuffer = dicom_to_8byte_from_hight_byte_at_ww_wl(image, windowCenter, windowWidth)
+
+    // let buffer = new Uint8ClampedArray(image)
+    // console.log(buffer)
+    // const normalizedData = new Uint8ClampedArray(image);
+
+    // console.log(normalizedData)
+    // const rgbaBuffer = new Uint8ClampedArray(width * height * 4);
+    // for (let i = 0; i < normalizedData.length; i++) {
+    //   rgbaBuffer[i * 4] = normalizedData[i]
+    //   rgbaBuffer[i * 4 + 1] = normalizedData[i]; // G
+    //   rgbaBuffer[i * 4 + 2] = normalizedData[i]; // B
+    //   rgbaBuffer[i * 4 + 3] = 255;     // A
+    // }
+    console.log(rgbaBuffer)
+    const imageDataObj = new ImageData(new Uint8ClampedArray(rgbaBuffer), width, height);
 
     // 创建临时Canvas存放ImageData
     const tempCanvas = document.createElement('canvas');
@@ -316,21 +404,53 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
       // obj.renderer.addActor(actor);
       // view3D.renderer.addActor(actor);
     });
-
+    obj.interactor.handleMouseMove((e) => {
+      console.log(e)
+    })
     obj.interactor.onLeftButtonPress((e) => {
-      const bounds = obj.resliceActor.getBounds();  // 返回 [xMin, xMax, yMin, yMax, zMin, zMax]
-      console.log(obj.resliceActor, bounds);
-      const displayWidth = bounds[1] - bounds[0];  // X轴方向显示宽度
-      const displayHeight = bounds[3] - bounds[2]; // Y轴方向显示高度
+      console.log(obj.interactor)
+      let center = widgetState.getCenter();
+      console.log("center", center)
+      let otherLineHandle = obj.widgetInstance.getOtherLineHandle("XinY")
+      let otherLineVector = otherLineHandle.getDirection()
+      console.log("XinY", otherLineVector)
+      otherLineHandle = obj.widgetInstance.getOtherLineHandle("ZinY")
+      otherLineVector = otherLineHandle.getDirection()
+      console.log("ZinY", otherLineVector)
+      otherLineHandle = obj.widgetInstance.getOtherLineHandle("ZinX")
+      otherLineVector = otherLineHandle.getDirection()
+      console.log("ZinX", otherLineVector)
+      otherLineHandle = obj.widgetInstance.getOtherLineHandle("YinX")
+      otherLineVector = otherLineHandle.getDirection()
+      console.log("YinX", otherLineVector)
+      otherLineHandle = obj.widgetInstance.getOtherLineHandle("XinZ")
+      otherLineVector = otherLineHandle.getDirection()
+      console.log("XinZ", otherLineVector)
+      otherLineHandle = obj.widgetInstance.getOtherLineHandle("YinZ")
+      otherLineVector = otherLineHandle.getDirection()
+      console.log("YinZ", otherLineVector)
+      const imageData2 = obj.reslice.getOutputData()
+      console.log(imageData2)
+      const image = imageData2.getPointData().getScalars().getData();
+      console.log(image)
+      // obj.widgetInstance.rotateLineInView("YinX", 90)
+      // loadimage.updateReslice(view3D, widget, widgetState, {
+      //   viewType,
+      //   reslice,
+      //   actor: obj.resliceActor,
+      //   renderer: obj.renderer,
+      //   resetFocalPoint: false,
+      //   computeFocalPointOffset: false,
+      //   sphereSources: obj.sphereSources,
+      //   slider: obj.slider,
+      // });
+      // const bounds = obj.resliceActor.getBounds();  // 返回 [xMin, xMax, yMin, yMax, zMin, zMax]
 
-      console.log("displayWidth", displayWidth, displayHeight)
-      console.log("widgetState", widgetState, widgetState.getCenter())
-      const inputImage = obj.reslice.getInputData();
-      console.log('Input Image Dimensions:', inputImage.getDimensions());
-      const imageData2 = obj.reslice.getOutputData();
-      const position = e.position; // 获取鼠标点击位置
-      const x = position.x;
-      const y = position.y;
+      console.log(obj.resliceActor);
+
+      let img = obj.reslice.getOutputData()
+      console.log(img, img.getDimensions())
+
     })
     obj.widgetInstance.onWidgetChange((e) => {
       // console.log(obj.widgetInstance)

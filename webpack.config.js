@@ -5,8 +5,8 @@ const sourcePath = path.join(__dirname, './src');
 const outputPath = path.join(__dirname, './dist');
 
 module.exports = {
- 
- 
+  cache: false,
+
   mode: 'development', // 设置为开发模式
   entry: './src/index.js', // 入口文件
   output: {
@@ -15,7 +15,7 @@ module.exports = {
     library: "pian",
     path: outputPath,
   },
-    devServer: {
+  devServer: {
     port: 8888,
     static: './dist', // 指定静态资源路径
     open: true,       // 自动打开浏览器
@@ -26,7 +26,7 @@ module.exports = {
       {
         test: /\.(png|jpe?g|gif|svg|css|html|glsl)$/, // Matches image files
         type: 'asset/resource', // Built-in in Webpack 5
-        use: ['html-loader','style-loader', 'css-loader','webpack-glsl-loader','@babel/preset-env'], // Loaders to process CSS
+        use: ['html-loader', 'style-loader', 'css-loader', 'webpack-glsl-loader', '@babel/preset-env'], // Loaders to process CSS
       },
       {
         test: /\.js$/, // 处理项目中的 JS 文件

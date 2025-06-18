@@ -2,6 +2,7 @@
 
 // Load the rendering pieces we want to use (for both WebGL and WebGPU)
 import "@kitware/vtk.js/Rendering/Profiles/All";
+import vtkInteractorStyleMPRSlice from "@kitware/vtk.js/Interaction/Style/InteractorStyleMPRSlice";
 import vtkAnnotatedCubeActor from "@kitware/vtk.js/Rendering/Core/AnnotatedCubeActor";
 import vtkGenericRenderWindow from "@kitware/vtk.js/Rendering/Misc/GenericRenderWindow";
 import vtkImageMapper from "@kitware/vtk.js/Rendering/Core/ImageMapper";
@@ -9,6 +10,9 @@ import vtkImageReslice from "@kitware/vtk.js/Imaging/Core/ImageReslice";
 import vtkImageSlice from "@kitware/vtk.js/Rendering/Core/ImageSlice";
 import vtkInteractorStyleImage from "@kitware/vtk.js/Interaction/Style/InteractorStyleImage";
 import vtkInteractorStyleTrackballCamera from "@kitware/vtk.js/Interaction/Style/InteractorStyleTrackballCamera";
+import vtkInteractorStyleUnicam from "@kitware/vtk.js/Interaction/Style/InteractorStyleUnicam";
+import InteractorStyleHMDXR from "@kitware/vtk.js/Interaction/Style/InteractorStyleHMDXR";
+
 import vtkMath from "@kitware/vtk.js/Common/Core/Math";
 import vtkOrientationMarkerWidget from "@kitware/vtk.js/Interaction/Widgets/OrientationMarkerWidget";
 import vtkResliceCursorWidget from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget";
@@ -21,6 +25,49 @@ import { xyzToViewType } from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWi
 import vtkActor from "@kitware/vtk.js/Rendering/Core/Actor";
 import vtkMapper from "@kitware/vtk.js/Rendering/Core/Mapper";
 import Display3D from "./load3d";
+// class CustomInteractorStyle extends vtkInteractorStyleTrackballCamera {
+//   constructor() {
+//     super();
+//     this.leftButtonDown = false;
+//   }
+
+//   onLeftButtonDown() {
+//     this.leftButtonDown = true;
+//     // 调用父类的 OnLeftButtonDown 方法以处理其他逻辑
+//     super.onLeftButtonDown();
+//   }
+
+//   onMouseMove() {
+//     if (this.leftButtonDown) {
+//       // 获取当前鼠标位置
+//       const interactor = this.getInteractor();
+//       const renderer = interactor.getRenderer();
+//       const lastPos = interactor.getEventPosition();
+//       const currPos = interactor.getEventPosition();
+
+//       // 计算鼠标移动的增量
+//       const dy = lastPos[1] - currPos[1];
+
+//       // 根据鼠标移动量平移相机
+//       const camera = renderer.getActiveCamera();
+//       const viewUp = camera.getViewUp();
+//       const distance = camera.getDistance();
+//       const factor = distance * 0.01; // 调整平移的灵敏度
+//       const translateFactor = dy * factor;
+
+//       // 应用平移
+//       camera.translate(0, 0, translateFactor, viewUp);
+//       renderer.resetCameraClippingRange();
+//       interactor.render();
+//     }
+//     super.onMouseMove();
+//   }
+
+//   onLeftButtonUp() {
+//     this.leftButtonDown = false;
+//     super.onLeftButtonUp();
+//   }
+// }
 class MPRRendering {
   // 创建MPR渲染页面
   createRenderingPage() {
@@ -105,7 +152,13 @@ class MPRRendering {
       };
       // 设置当前活跃相机为平行投影（不使用透视效果）
       obj.renderer.getActiveCamera().setParallelProjection(true);
+      // const customStyle = vtkInteractorStyleMPRSlice.newInstance();
 
+      // obj.interactor.setInteractorStyle(customStyle);
+      // console.log(customStyle)
+      // customStyle.onStartWindowLevelEvent((callData) => {
+      //   console.log(callData)
+      // });
       // 设置渲染器的背景颜色，viewColors[i] 是一个 RGB 颜色数组
       // obj.renderer.setBackground(...viewColors[i]);
 
@@ -132,9 +185,14 @@ class MPRRendering {
       //-------------------------------------------------------------------------------------------------------------------------------
       if (i < 3) {
         // 设置交互器的样式为 vtk.js 提供的 `vtkInteractorStyleImage` 实例
-        obj.interactor.setInteractorStyle(vtkInteractorStyleImage.newInstance());
+        // const CustomInteractorStyle = vtkInteractorStyleTrackballCamera.newInstance();
+        // console.log(CustomInteractorStyle)
+        // obj.interactor.setInteractorStyle(vtkInteractorStyleImage.newInstance());
+        obj.interactor.setInteractorStyle(vtkInteractorStyleTrackballCamera.newInstance());
+        
         // 添加一个小部件（widget）到 widgetManager，并根据 xyzToViewType[i] 设置其类型
         obj.widgetInstance = obj.widgetManager.addWidget(widget, xyzToViewType[i]);
+        console.log(obj.widgetInstance)
         // 将小部件的缩放方式设置为基于像素
         obj.widgetInstance.setScaleInPixels(true);
         // 调整交线的空距
@@ -148,7 +206,7 @@ class MPRRendering {
         // 添加鼠标悬停效果
         // console.log(widgetState.getStatesWithLabel("line"), obj.widgetInstance)
         // 调整标签为 'center' 的所有状态的不透明度为 128
-        widgetState.getStatesWithLabel("center").forEach((state) => state.setOpacity(0));
+        widgetState.getStatesWithLabel("center").forEach((state) => state.setOpacity(10));
         // 设置小部件是否保持正交性（即垂直关系），值取决于 checkboxOrthogonality 的选中状态
         obj.widgetInstance.setKeepOrthogonality(checkboxOrthogonality.checked);
         // 设置小部件的鼠标指针样式，`appCursorStyles` 是自定义的样式对象

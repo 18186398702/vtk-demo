@@ -18,16 +18,17 @@ class LoadImage {
       interactionContext.viewType
     );
     if (modified) {
+     
       const resliceAxes = interactionContext.reslice.getResliceAxes();
       // Get returned modified from setter to know if we have to render
       interactionContext.actor.setUserMatrix(resliceAxes);
+       console.log(resliceAxes)
       // const planeSource = widget.getPlaneSource(interactionContext.viewType);
       // interactionContext.sphereSources[0].setCenter(planeSource.getOrigin());
       // interactionContext.sphereSources[1].setCenter(planeSource.getPoint1());
       // interactionContext.sphereSources[2].setCenter(planeSource.getPoint2());
 
       if (interactionContext.slider) {
-        console.log("interactionContext.viewType", interactionContext.viewType)
         const planeExtremities = widget.getPlaneExtremities(interactionContext.viewType);
         const length = Math.sqrt(
           vtkMath.distance2BetweenPoints(planeExtremities[0], planeExtremities[1])
@@ -47,7 +48,7 @@ class LoadImage {
       interactionContext.computeFocalPointOffset
     );
     interactionContext.renderer.resetCamera()
-    // interactionContext.renderer.getActiveCamera().setParallelScale(150); // 例如，将当前值减半
+    interactionContext.renderer.getActiveCamera().setParallelScale(200); // 例如，将当前值减半
 
     // view3D.renderWindow.render();
     return modified;

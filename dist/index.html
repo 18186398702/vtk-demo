@@ -4,9 +4,14 @@
 <head>
   <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
-    .canvas-container { display: flex; }
-    canvas { border: 1px solid #6e6e6e; }
+  <style>
+    .canvas-container {
+      display: flex;
+    }
+
+    canvas {
+      border: 1px solid #6e6e6e;
+    }
   </style>
 </head>
 
@@ -97,12 +102,12 @@
     </table>
   </div>
   <input type="file" id="dicomFileInput" webkitdirectory multiple="multiple" />
-  <div class="canvas-container">
+  <div style="zoom:0.5" class="canvas-container">
     <canvas id="axial" width="512" height="512"></canvas>
     <canvas id="coronal" width="512" height="512"></canvas>
     <canvas id="sagittal" width="512" height="512"></canvas>
   </div>
-  <div id="container" style="width: 996px;height: 627px; border: 1px solid red"></div>
+  <div id="container" style="width: 400px;height: 300px; border: 1px solid red"></div>
 
   <script src="./webvtk.js"></script>
   <script>
