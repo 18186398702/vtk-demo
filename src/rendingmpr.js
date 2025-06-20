@@ -25,78 +25,11 @@ import { xyzToViewType } from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWi
 import vtkActor from "@kitware/vtk.js/Rendering/Core/Actor";
 import vtkMapper from "@kitware/vtk.js/Rendering/Core/Mapper";
 import Display3D from "./load3d";
+import vtkInteractorStyle from '@kitware/vtk.js/Rendering/Core/InteractorStyle';
+import a from './a.js';
 
-// import vtkInteractorStyleManipulator from '@kitware/vtk.js/Sources/Rendering/Core/InteractorStyle';
+// 自定义交互器样式
 
-// import vtkLineSource from '@kitware/vtk.js/Filters/Sources/LineSource';
-
-// // 自定义交互器样式
-// class CustomInteractorStyle extends vtkInteractorStyle {
-//   constructor() {
-//     super();
-//     this.drawing = false;
-//     this.startPosition = [0, 0];
-//     this.endPosition = [0, 0];
-//     this.lineActor = null;
-//     this.renderer = null;
-//   }
-
-//   onLeftButtonDown() {
-//     if (!this.drawing) {
-//       this.drawing = true;
-//       const interactor = this.getInteractor();
-//       const renderer = interactor.getRenderer();
-//       if (renderer) {
-//         this.renderer = renderer;
-//         const position = interactor.getEventPosition();
-//         this.startPosition = [position[0], position[1]];
-//         this.endPosition = [position[0], position[1]];
-
-//         // 创建线源、映射器和演员
-//         const lineSource = vtkLineSource.newInstance();
-//         lineSource.setPoint1(this.startPosition[0], this.startPosition[1], 0);
-//         lineSource.setPoint2(this.endPosition[0], this.endPosition[1], 0);
-
-//         const mapper = vtkPolyDataMapper.newInstance();
-//         mapper.setInputConnection(lineSource.getOutputPort());
-
-//         this.lineActor = vtkActor.newInstance();
-//         this.lineActor.setMapper(mapper);
-//         this.lineActor.GetProperty().SetColor(1, 0, 0); // 设置线条为红色
-
-//         renderer.addActor(this.lineActor);
-//         interactor.render();
-//       }
-//     }
-//     return super.onLeftButtonDown();
-//   }
-
-//   onMouseMove() {
-//     if (this.drawing && this.renderer) {
-//       const interactor = this.getInteractor();
-//       const position = interactor.getEventPosition();
-//       this.endPosition = [position[0], position[1]];
-
-//       // 更新线条终点
-//       const lineSource = this.lineActor.getMapper().getInputConnection(0).getSource();
-//       lineSource.setPoint2(this.endPosition[0], this.endPosition[1], 0);
-//       lineSource.modified();
-
-//       interactor.render();
-//     }
-//     return super.onMouseMove();
-//   }
-
-//   onLeftButtonUp() {
-//     if (this.drawing) {
-//       this.drawing = false;
-//       if (this.lineActor) {
-//         this.renderer.addActor(this.lineActor);
-//       }
-//     }
-//     return super.onLeftButtonUp();
-//   }
-// }
 
 
 class MPRRendering {
@@ -175,6 +108,7 @@ class MPRRendering {
       //-------------------------------------------------------------------------------------------------------------------------------
       // 创建一个对象，用于存储渲染窗口、渲染器、GL 渲染窗口等属性
       const obj = {
+        grw: grw,
         renderWindow: grw.getRenderWindow(), // 获取渲染窗口对象
         renderer: grw.getRenderer(), // 获取渲染器对象
         GLWindow: grw.getApiSpecificRenderWindow(), // 获取与 API 相关的渲染窗口对象
@@ -217,11 +151,11 @@ class MPRRendering {
       //-------------------------------------------------------------------------------------------------------------------------------
       if (i < 3) {
         // 设置交互器的样式为 vtk.js 提供的 `vtkInteractorStyleImage` 实例
-        // const ccc = CustomInteractorStyle.newInstance();
+        // const ccc = a.newInstance();
         // console.log(ccc)
-        obj.interactor.setInteractorStyle(vtkInteractorStyleImage.newInstance());
-        // obj.interactor.setInteractorStyle(ccc.newInstance());
-        
+        // obj.interactor.setInteractorStyle(ccc);
+        obj.interactor.setInteractorStyle(vtkInteractorStyle.newInstance());
+
         // 添加一个小部件（widget）到 widgetManager，并根据 xyzToViewType[i] 设置其类型
         obj.widgetInstance = obj.widgetManager.addWidget(widget, xyzToViewType[i]);
         console.log(obj.widgetInstance)
@@ -473,6 +407,11 @@ class MPRRendering {
       const elementImage = document.createElement("div");
       elementImage.style.width = "100%";
       elementImage.style.height = "90%";
+      elementImage.style.position = "relative";
+      // 添加一个
+      elementImage.innerHTML = `<svg id="lineSVG" style="position: absolute;
+    top: 0;
+    left: 0;width:100%;height:100%" xmlns="http://www.w3.org/2000/svg"></svg>`
       // elementImage.style.display = "flex";
       // elementImage.innerText = "这是底部显示文本"; // 你可以修改这里的文本内容
       // elementImage.style.border = "1px solid red"; // 可选，便于调试

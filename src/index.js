@@ -193,6 +193,7 @@ export function loadMPR(arrayBuffer) {
     obj.widgetManager.setRenderer(render);
     obj.widgetInstance = obj.widgetManager.addWidget(widget, viewtype);
     obj.widgetInstance.setKeepOrthogonality(true);
+    console.log(canvas)
     const ctx = canvas.getContext('2d');
     //canvas加监听点击事件
     canvas.addEventListener('click', function (e) {
@@ -359,7 +360,7 @@ function updateMPR(widget, objArr, center, windowWidth, windowCenter) {
     //   rgbaBuffer[i * 4 + 2] = normalizedData[i]; // B
     //   rgbaBuffer[i * 4 + 3] = 255;     // A
     // }
-    console.log(rgbaBuffer)
+    // console.log(rgbaBuffer)
     const imageDataObj = new ImageData(new Uint8ClampedArray(rgbaBuffer), width, height);
 
     // 创建临时Canvas存放ImageData
@@ -404,10 +405,44 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
       // obj.renderer.addActor(actor);
       // view3D.renderer.addActor(actor);
     });
-    obj.interactor.handleMouseMove((e) => {
+    console.log(obj.interactor)
+    let isDrawing = false;
+    let startX, startY;
+    let currentLine = null;
+    const container = obj.grw.getContainer();
+    const svg = container.querySelector('svg');
+    // 获得svg实际高度
+    const svgHeight = svg.height.baseVal.value;
+    obj.interactor.onMouseEnter((e) => {
       console.log(e)
     })
+    obj.interactor.onMouseMove((e) => {
+      if (!isDrawing) return;
+      console.log(e)
+      currentLine.setAttribute('x2', e.position.x / 1.8);
+      currentLine.setAttribute('y2', svgHeight - e.position.y / 1.8);
+    })
+    obj.interactor.onLeftButtonRelease((e) => {
+      console.log(e)
+      isDrawing = false;
+      currentLine = null;
+    })
     obj.interactor.onLeftButtonPress((e) => {
+      console.log(e)
+      console.log(obj.grw)
+      isDrawing = true;
+      startX = e.position.x / 1.8;
+      startY = svgHeight - e.position.y / 1.8;
+
+      // 创建SVG线条元素
+      currentLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      currentLine.setAttribute('stroke', '#ff0000');
+      currentLine.setAttribute('stroke-width', '2');
+      currentLine.setAttribute('x1', startX);
+      currentLine.setAttribute('y1', startY);
+      currentLine.setAttribute('x2', startX);
+      currentLine.setAttribute('y2', startY);
+      svg.appendChild(currentLine);
       console.log(widgetState.getStatesWithLabel("line")[0].get())
       console.log(obj.resliceActor.get())
       let center = widgetState.getCenter();
@@ -464,7 +499,7 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
       widgetState.getStatesWithLabel("line").forEach((state) => {
         // 判断是激活状态
         if (state.getActive()) {
-          console.log('HoverEvent', e);
+          // console.log('HoverEvent', e);
           state.setScale3(2.5, 2.5, 1000);
         } else {
           state.setScale3(1, 1, 1000)
