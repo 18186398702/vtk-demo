@@ -68451,7 +68451,7 @@ __webpack_require__.r(__webpack_exports__);
 
 class MPRRendering {
   // 创建MPR渲染页面
-  createRenderingPage() {
+  createRenderingPage(divElement) {
     // 定义视图颜色（X轴、Y轴、Z轴以及其他方向的灰色）
     const viewColors = [[1, 0, 0],
     // 红色，表示X轴
@@ -68481,7 +68481,7 @@ class MPRRendering {
       view3D,
       widget,
       widgetState
-    } = this.setupLayoutForMPR(viewColors, debugActors, cursorStyles);
+    } = this.setupLayoutForMPR(viewColors, debugActors, cursorStyles, divElement);
 
     // 返回渲染页面所需的视图属性和3D视图对象
     return {
@@ -68493,7 +68493,7 @@ class MPRRendering {
   }
 
   // 设置MPR布局的函数
-  setupLayoutForMPR(viewColors, showDebugActors, appCursorStyles) {
+  setupLayoutForMPR(viewColors, showDebugActors, appCursorStyles, divElement) {
     const viewAttributes = [];
     let view3D = null;
     // 创建vtk的ResliceCursor Widget实例
@@ -68513,7 +68513,7 @@ class MPRRendering {
     console.log(widgetState.getStatesWithLabel("line"));
     // 调整标签为 'center' 的所有状态的不透明度为 128
     widgetState.getStatesWithLabel("center").forEach(state => state.setOpacity(128));
-    const container = document.getElementById("container");
+    const container = divElement;
     container.innerHTML = "";
     const {
       createdElements,
@@ -79628,7 +79628,7 @@ function Demo3d(source) {
  * @param {} arrayBuffer 
  */
 
-function loadMPR(arrayBuffer) {
+function loadMPR(arrayBuffer, divElement) {
   if (!arrayBuffer) {
     // 检查输入是否有效
     throw new Error("arrayBuffer 不能为空！");
@@ -79742,7 +79742,7 @@ function loadMPR(arrayBuffer) {
   // //  widget.get().widgetState.getStatesWithLabel('rotation')[0].setOffset()
   // updateMPR(widget, objArr, center, windowWidth, windowCenter)
   // console.log("widgetState", widgetState, widgetState.getCenter(), widgetState.getAxisXinY().get());
-  MultiSliceImageMapper(imageData, windowWidth, windowCenter);
+  MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement);
 }
 function dicom_to_8byte_from_hight_byte_at_ww_wl(pixdate, wl_y, ww) {
   //计算最小值
@@ -79847,7 +79847,7 @@ function updateMPR(widget, objArr, center, windowWidth, windowCenter) {
 function calculateB2(a) {
   return 15.8 * Math.pow(a, -0.68);
 }
-function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
+function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement) {
   const loadimage = new _loadimage__WEBPACK_IMPORTED_MODULE_10__["default"]();
   const mprrendering = new _rendingmpr__WEBPACK_IMPORTED_MODULE_11__["default"]();
   const {
@@ -79855,7 +79855,7 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
     view3D,
     widget,
     widgetState
-  } = mprrendering.createRenderingPage();
+  } = mprrendering.createRenderingPage(divElement);
   viewObj = viewAttributes;
   // 将加载的图像数据设置到一个假设的控件 `widget` 中进行显示
   // console.log(imageData)
@@ -79890,7 +79890,7 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
     // 获得svg实际高度
     const svgHeight = svg.height.baseVal.value;
     obj.interactor.onMouseEnter(e => {
-      console.log(e);
+      console.log("鼠标进入");
     });
     obj.interactor.onMouseMove(e => {
       if (!mouseDrawing) return;
@@ -79945,7 +79945,8 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
       }
     });
     obj.interactor.onLeftButtonRelease(e => {
-      console.log(e);
+      const imageData = obj.reslice.getOutputData();
+      console.log(imageData.getDimensions(), imageData.getSpacing(), imageData.getBounds());
       mouseDrawing = false;
       currentLine = null;
     });
@@ -80062,7 +80063,7 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
           actor: obj.resliceActor,
           renderer: obj.renderer,
           resetFocalPoint: false,
-          computeFocalPointOffset,
+          computeFocalPointOffset: true,
           sphereSources: obj.sphereSources,
           slider: obj.slider
         });

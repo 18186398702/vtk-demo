@@ -205,7 +205,7 @@ function Demo3d(source) {
  * @param {} arrayBuffer 
  */
 
-export function loadMPR(arrayBuffer) {
+export function loadMPR(arrayBuffer, divElement) {
   if (!arrayBuffer) {
     // 检查输入是否有效
     throw new Error("arrayBuffer 不能为空！");
@@ -315,7 +315,7 @@ export function loadMPR(arrayBuffer) {
   // //  widget.get().widgetState.getStatesWithLabel('rotation')[0].setOffset()
   // updateMPR(widget, objArr, center, windowWidth, windowCenter)
   // console.log("widgetState", widgetState, widgetState.getCenter(), widgetState.getAxisXinY().get());
-  MultiSliceImageMapper(imageData, windowWidth, windowCenter)
+  MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
 }
 function dicom_to_8byte_from_hight_byte_at_ww_wl(pixdate, wl_y, ww) {
   //计算最小值
@@ -426,10 +426,10 @@ function updateMPR(widget, objArr, center, windowWidth, windowCenter) {
 function calculateB2(a) {
   return 15.8 * Math.pow(a, -0.68);
 }
-function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
+function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement) {
   const loadimage = new LoadImage();
   const mprrendering = new MPRRendering();
-  const { viewAttributes, view3D, widget, widgetState } = mprrendering.createRenderingPage();
+  const { viewAttributes, view3D, widget, widgetState } = mprrendering.createRenderingPage(divElement);
   viewObj = viewAttributes
   // 将加载的图像数据设置到一个假设的控件 `widget` 中进行显示
   // console.log(imageData)
@@ -664,7 +664,7 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
       slider: obj.slider,
     });
     // 渲染当前视图
-    obj.renderer.getActiveCamera().setParallelScale(2lo00);
+    obj.renderer.getActiveCamera().setParallelScale(200);
     obj.interactor.render();
 
   });

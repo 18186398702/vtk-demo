@@ -17,7 +17,7 @@ import { xyzToViewType } from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWi
 
 class MPRRendering {
   // 创建MPR渲染页面
-  createRenderingPage() {
+  createRenderingPage(divElement) {
     // 定义视图颜色（X轴、Y轴、Z轴以及其他方向的灰色）
     const viewColors = [
       [1, 0, 0], // 红色，表示X轴
@@ -40,7 +40,8 @@ class MPRRendering {
     const { viewAttributes, view3D, widget, widgetState } = this.setupLayoutForMPR(
       viewColors,
       debugActors,
-      cursorStyles
+      cursorStyles,
+      divElement
     );
 
     // 返回渲染页面所需的视图属性和3D视图对象
@@ -48,7 +49,7 @@ class MPRRendering {
   }
 
   // 设置MPR布局的函数
-  setupLayoutForMPR(viewColors, showDebugActors, appCursorStyles) {
+  setupLayoutForMPR(viewColors, showDebugActors, appCursorStyles, divElement) {
     const viewAttributes = [];
     let view3D = null;
     // 创建vtk的ResliceCursor Widget实例
@@ -69,7 +70,7 @@ class MPRRendering {
     console.log(widgetState.getStatesWithLabel("line"))
     // 调整标签为 'center' 的所有状态的不透明度为 128
     widgetState.getStatesWithLabel("center").forEach((state) => state.setOpacity(128));
-    const container = document.getElementById("container");
+    const container = divElement;
     container.innerHTML = "";
 
     const { createdElements, createdSliderElements, resetElements } = this.createViewWithButtons(container, 4);
