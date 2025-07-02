@@ -27,7 +27,6 @@ class LoadImage {
       // interactionContext.sphereSources[0].setCenter(planeSource.getOrigin());
       // interactionContext.sphereSources[1].setCenter(planeSource.getPoint1());
       // interactionContext.sphereSources[2].setCenter(planeSource.getPoint2());
-
       if (interactionContext.slider) {
         const planeExtremities = widget.getPlaneExtremities(interactionContext.viewType);
         const length = Math.sqrt(
@@ -47,10 +46,10 @@ class LoadImage {
       interactionContext.resetFocalPoint,
       interactionContext.computeFocalPointOffset
     );
-    interactionContext.renderer.resetCamera()
-    interactionContext.renderer.getActiveCamera().setParallelScale(200); // 例如，将当前值减半
+    // interactionContext.renderer.resetCamera()
+    // interactionContext.renderer.getActiveCamera().setParallelScale(200); // 例如，将当前值减半
 
-    // view3D.renderWindow.render();
+    view3D.renderWindow.render();
     return modified;
   }
 }

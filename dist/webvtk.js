@@ -931,6 +931,7 @@ function canvasToImageData(canvas) {
  * Converts an Image object to a vtkImageData.
  */
 function imageToImageData(image) {
+  console.log("imageToImageData");
   let transform = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
     flipX: false,
     flipY: false,
@@ -11011,6 +11012,113 @@ var vtkImageDataOutlineFilter$1 = {
 
 /***/ }),
 
+/***/ "./node_modules/@kitware/vtk.js/Filters/General/OutlineFilter.js":
+/*!***********************************************************************!*\
+  !*** ./node_modules/@kitware/vtk.js/Filters/General/OutlineFilter.js ***!
+  \***********************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   BOUNDS_MAP: () => (/* binding */ BOUNDS_MAP),
+/* harmony export */   LINE_ARRAY: () => (/* binding */ LINE_ARRAY),
+/* harmony export */   "default": () => (/* binding */ vtkOutlineFilter$1),
+/* harmony export */   extend: () => (/* binding */ extend),
+/* harmony export */   newInstance: () => (/* binding */ newInstance)
+/* harmony export */ });
+/* harmony import */ var _macros2_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../macros2.js */ "./node_modules/@kitware/vtk.js/macros2.js");
+/* harmony import */ var _Common_DataModel_PolyData_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../Common/DataModel/PolyData.js */ "./node_modules/@kitware/vtk.js/Common/DataModel/PolyData.js");
+
+
+
+const {
+  vtkErrorMacro
+} = _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m;
+
+// prettier-ignore
+const BOUNDS_MAP = [0, 2, 4,
+// pt 0
+1, 2, 4,
+// pt 1
+0, 3, 4,
+// pt 2
+1, 3, 4,
+// pt 3
+0, 2, 5,
+// pt 4
+1, 2, 5,
+// pt 5
+0, 3, 5,
+// pt 6
+1, 3, 5 // pt 7
+];
+
+// prettier-ignore
+const LINE_ARRAY = [2, 0, 1, 2, 2, 3, 2, 4, 5, 2, 6, 7, 2, 0, 2, 2, 1, 3, 2, 4, 6, 2, 5, 7, 2, 0, 4, 2, 1, 5, 2, 2, 6, 2, 3, 7];
+
+// ----------------------------------------------------------------------------
+// vtkOutlineFilter methods
+// ----------------------------------------------------------------------------
+
+function vtkOutlineFilter(publicAPI, model) {
+  // Set our className
+  model.classHierarchy.push('vtkOutlineFilter');
+  publicAPI.requestData = (inData, outData) => {
+    // implement requestData
+    const input = inData[0];
+    if (!input) {
+      vtkErrorMacro('Invalid or missing input');
+      return;
+    }
+    const bounds = input.getBounds();
+    const output = _Common_DataModel_PolyData_js__WEBPACK_IMPORTED_MODULE_1__["default"].newInstance();
+    output.getPoints().setData(Float32Array.from(BOUNDS_MAP.map(idx => bounds[idx])), 3);
+    output.getLines().setData(Uint16Array.from(LINE_ARRAY));
+    outData[0] = output;
+  };
+}
+
+// ----------------------------------------------------------------------------
+// Object factory
+// ----------------------------------------------------------------------------
+
+const DEFAULT_VALUES = {};
+
+// ----------------------------------------------------------------------------
+
+function extend(publicAPI, model) {
+  let initialValues = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+  Object.assign(model, DEFAULT_VALUES, initialValues);
+
+  // Make this a VTK object
+  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.obj(publicAPI, model);
+
+  // Also make it an algorithm with one input and one output
+  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.algo(publicAPI, model, 1, 1);
+
+  // Object specific methods
+  vtkOutlineFilter(publicAPI, model);
+}
+
+// ----------------------------------------------------------------------------
+
+const newInstance = _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.newInstance(extend, 'vtkOutlineFilter');
+
+// ----------------------------------------------------------------------------
+
+var vtkOutlineFilter$1 = {
+  newInstance,
+  extend,
+  BOUNDS_MAP,
+  LINE_ARRAY
+};
+
+
+
+
+/***/ }),
+
 /***/ "./node_modules/@kitware/vtk.js/Filters/Sources/CubeSource.js":
 /*!********************************************************************!*\
   !*** ./node_modules/@kitware/vtk.js/Filters/Sources/CubeSource.js ***!
@@ -14631,6 +14739,7 @@ __webpack_require__.r(__webpack_exports__);
 
 function vtkInteractorStyleImage(publicAPI, model) {
   // Set our className
+  console.log('vtkInteractorStyleImage');
   model.classHierarchy.push('vtkInteractorStyleImage');
 
   // Public API methods
@@ -28436,6 +28545,7 @@ function vtkOpenGLBufferObject(publicAPI, model) {
     return convertType(internalType) === objectTypeGL;
   };
   publicAPI.upload = (data, type) => {
+    //console.log('upload', data);
     // buffer, size, type
     const alreadyGenerated = publicAPI.generateBuffer(type);
     if (!alreadyGenerated) {
@@ -29676,6 +29786,7 @@ function vtkOpenGLGlyph3DMapper(publicAPI, model) {
     ...publicAPI
   };
   publicAPI.renderPiece = (ren, actor) => {
+    //console.log('renderPiece', actor.getActors());
     publicAPI.invokeEvent(StartEvent);
     if (!model.renderable.getStatic()) {
       model.renderable.update();
@@ -29717,6 +29828,7 @@ function vtkOpenGLGlyph3DMapper(publicAPI, model) {
       gl.cullFace(gl.BACK);
     }
     publicAPI.renderPieceStart(ren, actor);
+   // console.log("actor", actor.get());
     publicAPI.renderPieceDraw(ren, actor);
     publicAPI.renderPieceFinish(ren, actor);
   };
@@ -29916,6 +30028,7 @@ function vtkOpenGLGlyph3DMapper(publicAPI, model) {
     }
   };
   publicAPI.renderPieceDraw = (ren, actor) => {
+    // console.log('renderPieceDraw', actor.get().bounds);
     const representation = actor.getProperty().getRepresentation();
     const gl = model.context;
     const drawSurfaceWithEdges = actor.getProperty().getEdgeVisibility() && representation === Representation.SURFACE;
@@ -30026,6 +30139,7 @@ function vtkOpenGLGlyph3DMapper(publicAPI, model) {
     return false;
   };
   publicAPI.buildBufferObjects = (ren, actor) => {
+    // console.log("buildBufferObjects", actor.get());
     if (model.hardwareSupport) {
       // update the buffer objects if needed
       const garray = model.renderable.getMatrixArray();
@@ -30942,6 +31056,7 @@ function vtkOpenGLHelper(publicAPI, model) {
     model.CABO.setElementCount(0);
   };
   publicAPI.drawArrays = (ren, actor, rep, oglMapper) => {
+    // console.log('drawArrays', ren, actor.get(), rep, oglMapper)
     // Are there any entries
     if (model.CABO.getElementCount()) {
       // are we drawing edges
@@ -31264,6 +31379,7 @@ function vtkOpenGLImageCPRMapper(publicAPI, model) {
     publicAPI.updateBufferObjects(ren, actor);
   };
   publicAPI.renderPieceDraw = (ren, actor) => {
+    //console.log("renderPieceDraw", actor.get().bounds)
     const gl = model.context;
 
     // activate the texture
@@ -31282,7 +31398,7 @@ function vtkOpenGLImageCPRMapper(publicAPI, model) {
     model.colorTexture.deactivate();
     model.pwfTexture.deactivate();
   };
-  publicAPI.renderPieceFinish = (ren, actor) => {};
+  publicAPI.renderPieceFinish = (ren, actor) => { };
   publicAPI.updateBufferObjects = (ren, actor) => {
     // Rebuild buffers if needed
     if (publicAPI.getNeedToRebuildBufferObjects(ren, actor)) {
@@ -31538,12 +31654,12 @@ function vtkOpenGLImageCPRMapper(publicAPI, model) {
       const quadIndexArray = new Float32Array(nPts);
       for (let lineIdx = 0, offset = 0; lineIdx < nLines; ++lineIdx) {
         quadIndexArray.set([0,
-        // Top left
-        1,
-        // Top right
-        3,
-        // Bottom right
-        2 // Bottom left
+          // Top left
+          1,
+          // Top right
+          3,
+          // Bottom right
+          2 // Bottom left
         ], offset);
         offset += 4;
       }
@@ -31644,9 +31760,9 @@ function vtkOpenGLImageCPRMapper(publicAPI, model) {
     }
     VSSource = _ShaderProgram_js__WEBPACK_IMPORTED_MODULE_10__["default"].substitute(VSSource, '//VTK::Color::Dec', vsColorDec).result;
     const vsColorImpl = [
-    // quadOffsetVSOutput.x: left = -0.5* width; right = 0.5 * width
-    // quadOffsetVSOutput.y: bottom = 0.0; top = 1.0;
-    'quadOffsetVSOutput = vec2(width * (mod(quadIndex, 2.0) == 0.0 ? -0.5 : 0.5), quadIndex > 1.0 ? 0.0 : 1.0);', 'centerlinePosVSOutput = centerlinePosition;'];
+      // quadOffsetVSOutput.x: left = -0.5* width; right = 0.5 * width
+      // quadOffsetVSOutput.y: bottom = 0.0; top = 1.0;
+      'quadOffsetVSOutput = vec2(width * (mod(quadIndex, 2.0) == 0.0 ? -0.5 : 0.5), quadIndex > 1.0 ? 0.0 : 1.0);', 'centerlinePosVSOutput = centerlinePosition;'];
     if (isDirectionUniform) {
       vsColorImpl.push('samplingDirVSOutput = applyQuaternionToVec(centerlineOrientation, tangentDirection);');
       if (useProjection) {
@@ -31661,20 +31777,20 @@ function vtkOpenGLImageCPRMapper(publicAPI, model) {
     const tNumComp = model.volumeTexture.getComponents();
     const iComps = actor.getProperty().getIndependentComponents();
     let tcoordFSDec = [
-    // used to compute texture coordinates of the sample
-    'uniform mat4 MCTCMatrix; // Model coordinates to texture coordinates', 'in vec2 quadOffsetVSOutput;', 'in vec3 centerlinePosVSOutput;',
-    // volume texture
-    'uniform highp sampler3D volumeTexture;',
-    // color and pwf textures
-    'uniform sampler2D colorTexture1;', 'uniform sampler2D pwfTexture1;',
-    // opacity
-    'uniform float opacity;',
-    // background color (out of volume samples)
-    'uniform vec4 backgroundColor;',
-    // color shift and scale
-    `uniform float cshift0;`, `uniform float cscale0;`,
-    // weighting shift and scale
-    `uniform float pwfshift0;`, `uniform float pwfscale0;`];
+      // used to compute texture coordinates of the sample
+      'uniform mat4 MCTCMatrix; // Model coordinates to texture coordinates', 'in vec2 quadOffsetVSOutput;', 'in vec3 centerlinePosVSOutput;',
+      // volume texture
+      'uniform highp sampler3D volumeTexture;',
+      // color and pwf textures
+      'uniform sampler2D colorTexture1;', 'uniform sampler2D pwfTexture1;',
+      // opacity
+      'uniform float opacity;',
+      // background color (out of volume samples)
+      'uniform vec4 backgroundColor;',
+      // color shift and scale
+      `uniform float cshift0;`, `uniform float cscale0;`,
+      // weighting shift and scale
+      `uniform float pwfshift0;`, `uniform float pwfscale0;`];
     if (useProjection) {
       tcoordFSDec.push('uniform vec3 volumeSizeMC;', 'uniform int projectionSlabNumberOfSamples;', 'uniform float projectionConstantOffset;', 'uniform float projectionStepLength;');
     }
@@ -31696,10 +31812,10 @@ function vtkOpenGLImageCPRMapper(publicAPI, model) {
     if (iComps) {
       for (let comp = 1; comp < tNumComp; comp++) {
         tcoordFSDec = tcoordFSDec.concat([
-        // color shift and scale
-        `uniform float cshift${comp};`, `uniform float cscale${comp};`,
-        // weighting shift and scale
-        `uniform float pwfshift${comp};`, `uniform float pwfscale${comp};`]);
+          // color shift and scale
+          `uniform float cshift${comp};`, `uniform float cscale${comp};`,
+          // weighting shift and scale
+          `uniform float pwfshift${comp};`, `uniform float pwfscale${comp};`]);
       }
       // the heights defined below are the locations
       // for the up to four components of the tfuns
@@ -31734,8 +31850,8 @@ function vtkOpenGLImageCPRMapper(publicAPI, model) {
       // Slerp or lerp between centerlineTopDirVSOutput and centerlineBotDirVSOutput
       // We use quadOffsetVSOutput.y: bottom = 0.0; top = 1.0;
       tcoordFSImpl.push(
-      // Slerp / Lerp
-      'vec4 q0 = centerlineBotOrientationVSOutput;', 'vec4 q1 = centerlineTopOrientationVSOutput;', 'float qCosAngle = dot(q0, q1);', 'vec4 interpolatedOrientation;', 'if (qCosAngle > 0.999 || qCosAngle < -0.999) {', '  // Use LERP instead of SLERP when the two quaternions are close or opposite', '  interpolatedOrientation = normalize(mix(q0, q1, quadOffsetVSOutput.y));', '} else {', '  float omega = acos(qCosAngle);', '  interpolatedOrientation = normalize(sin((1.0 - quadOffsetVSOutput.y) * omega) * q0 + sin(quadOffsetVSOutput.y * omega) * q1);', '}', 'vec3 samplingDirection = applyQuaternionToVec(interpolatedOrientation, tangentDirection);');
+        // Slerp / Lerp
+        'vec4 q0 = centerlineBotOrientationVSOutput;', 'vec4 q1 = centerlineTopOrientationVSOutput;', 'float qCosAngle = dot(q0, q1);', 'vec4 interpolatedOrientation;', 'if (qCosAngle > 0.999 || qCosAngle < -0.999) {', '  // Use LERP instead of SLERP when the two quaternions are close or opposite', '  interpolatedOrientation = normalize(mix(q0, q1, quadOffsetVSOutput.y));', '} else {', '  float omega = acos(qCosAngle);', '  interpolatedOrientation = normalize(sin((1.0 - quadOffsetVSOutput.y) * omega) * q0 + sin(quadOffsetVSOutput.y * omega) * q1);', '}', 'vec3 samplingDirection = applyQuaternionToVec(interpolatedOrientation, tangentDirection);');
       if (useProjection) {
         tcoordFSImpl.push('vec3 projectionDirection = applyQuaternionToVec(interpolatedOrientation, bitangentDirection);');
       }
@@ -32272,9 +32388,9 @@ function vtkOpenGLImageMapper(publicAPI, model) {
   };
   publicAPI.getCoincidentParameters = (ren, actor) => {
     if (
-    // backwards compat with code that (errorneously) set this to boolean
-    // eslint-disable-next-line eqeqeq
-    model.renderable.getResolveCoincidentTopology() == _Core_Mapper_Static_js__WEBPACK_IMPORTED_MODULE_18__.Resolve.PolygonOffset) {
+      // backwards compat with code that (errorneously) set this to boolean
+      // eslint-disable-next-line eqeqeq
+      model.renderable.getResolveCoincidentTopology() == _Core_Mapper_Static_js__WEBPACK_IMPORTED_MODULE_18__.Resolve.PolygonOffset) {
       return model.renderable.getCoincidentTopologyPolygonOffsetParameters();
     }
     return null;
@@ -32301,17 +32417,17 @@ function vtkOpenGLImageMapper(publicAPI, model) {
     const tNumComp = model.openGLTexture.getComponents();
     const iComps = actor.getProperty().getIndependentComponents();
     let tcoordDec = ['varying vec2 tcoordVCVSOutput;',
-    // color shift and scale
-    'uniform float cshift0;', 'uniform float cscale0;',
-    // pwf shift and scale
-    'uniform float pwfshift0;', 'uniform float pwfscale0;', 'uniform sampler2D texture1;', 'uniform sampler2D colorTexture1;', 'uniform sampler2D pwfTexture1;', 'uniform sampler2D labelOutlineTexture1;', 'uniform float opacity;', 'uniform float outlineOpacity;'];
+      // color shift and scale
+      'uniform float cshift0;', 'uniform float cscale0;',
+      // pwf shift and scale
+      'uniform float pwfshift0;', 'uniform float pwfscale0;', 'uniform sampler2D texture1;', 'uniform sampler2D colorTexture1;', 'uniform sampler2D pwfTexture1;', 'uniform sampler2D labelOutlineTexture1;', 'uniform float opacity;', 'uniform float outlineOpacity;'];
     if (iComps) {
       for (let comp = 1; comp < tNumComp; comp++) {
         tcoordDec = tcoordDec.concat([
-        // color shift and scale
-        `uniform float cshift${comp};`, `uniform float cscale${comp};`,
-        // weighting shift and scale
-        `uniform float pwfshift${comp};`, `uniform float pwfscale${comp};`]);
+          // color shift and scale
+          `uniform float cshift${comp};`, `uniform float cscale${comp};`,
+          // weighting shift and scale
+          `uniform float pwfshift${comp};`, `uniform float pwfscale${comp};`]);
       }
       // the heights defined below are the locations
       // for the up to four components of the tfuns
@@ -32684,6 +32800,7 @@ function vtkOpenGLImageMapper(publicAPI, model) {
     model.lastBoundBO = null;
   };
   publicAPI.renderPieceDraw = (ren, actor) => {
+  //  console.log("renderPieceDraw", actor.get().bounds)
     const gl = model.context;
 
     // activate the texture
@@ -32696,6 +32813,7 @@ function vtkOpenGLImageMapper(publicAPI, model) {
     if (model.tris.getCABO().getElementCount()) {
       // First we do the triangles, update the shader, set uniforms, etc.
       publicAPI.updateShaders(model.tris, ren, actor);
+      //console.log(gl.TRIANGLES, 0, model.tris.getCABO().getElementCount())
       gl.drawArrays(gl.TRIANGLES, 0, model.tris.getCABO().getElementCount());
       model.tris.getVAO().release();
     }
@@ -32704,7 +32822,7 @@ function vtkOpenGLImageMapper(publicAPI, model) {
     model.labelOutlineThicknessTexture.deactivate();
     model.pwfTexture.deactivate();
   };
-  publicAPI.renderPieceFinish = (ren, actor) => {};
+  publicAPI.renderPieceFinish = (ren, actor) => { };
   publicAPI.renderPiece = (ren, actor) => {
     // Make sure that we have been properly initialized.
     // if (ren.getRenderWindow().checkAbortStatus()) {
@@ -32724,6 +32842,7 @@ function vtkOpenGLImageMapper(publicAPI, model) {
       return;
     }
     publicAPI.renderPieceStart(ren, actor);
+   // console.log("actor", actor.get());
     publicAPI.renderPieceDraw(ren, actor);
     publicAPI.renderPieceFinish(ren, actor);
   };
@@ -32901,7 +33020,7 @@ function vtkOpenGLImageMapper(publicAPI, model) {
     // Use sub-Slice number/offset if mapper being used is vtkImageArrayMapper,
     // since this mapper uses a collection of vtkImageData (and not just a single vtkImageData).
     const nSlice = model.renderable.isA('vtkImageArrayMapper') ? model.renderable.getSubSlice() // get subSlice of the current (possibly multi-frame) image
-    : Math.round(slice);
+      : Math.round(slice);
 
     // Find sliceOffset
     const ext = image.getExtent();
@@ -36821,6 +36940,7 @@ function vtkOpenGLRenderWindow(publicAPI, model) {
     return pixels;
   };
   publicAPI.get3DContext = function () {
+    // console.log('get3DContext');
     let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {
       preserveDrawingBuffer: false,
       depth: true,
@@ -36997,6 +37117,7 @@ function vtkOpenGLRenderWindow(publicAPI, model) {
     }
   };
   function getCanvasDataURL() {
+    console.log("getCanvasDataURL")
     let format = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : model.imageFormat;
     // Copy current canvas to not modify the original
     const temporaryCanvas = document.createElement('canvas');
@@ -42527,6 +42648,7 @@ function vtkOpenGLTexture(publicAPI, model) {
 
   //----------------------------------------------------------------------------
   publicAPI.create2DFromImage = image => {
+    console.log("create2DFromImage")
     // Now determine the texture parameters using the arguments.
     publicAPI.getOpenGLDataType(VtkDataTypes.UNSIGNED_CHAR);
     publicAPI.getInternalFormat(VtkDataTypes.UNSIGNED_CHAR, 4);
@@ -44802,6 +44924,7 @@ function vtkOpenGLVolumeMapper(publicAPI, model) {
     // for (let i = 0; i < 11; ++i) {
     //   gl.drawArrays(gl.TRIANGLES, 66 * i, 66);
     // }
+   // console.log("renderPieceDraw", actor.get())
     gl.drawArrays(gl.TRIANGLES, 0, model.tris.getCABO().getElementCount());
     model.tris.getVAO().release();
     model.scalarTexture.deactivate();
@@ -52134,6 +52257,7 @@ function vtkWebGPURenderWindow(publicAPI, model) {
     }
   };
   async function getCanvasDataURL() {
+    console.log("getCanvasDataURL")
     let format = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : model.imageFormat;
     // Copy current canvas to not modify the original
     const temporaryCanvas = document.createElement('canvas');
@@ -55080,6 +55204,7 @@ function vtkWebGPUTexture(publicAPI, model) {
   };
 
   publicAPI.writeImageData = req => {
+    console.log("writeImageData");
     let nativeArray = [];
     if (req.canvas) {
       model.device.getHandle().queue.copyExternalImageToTexture({
@@ -61314,6 +61439,7 @@ function vtkLineHandleRepresentation(publicAPI, model) {
    */
   const superScale3 = publicAPI.getScale3();
   publicAPI.setScale3((polyData, states) => {
+    // console.log("setScale3", states[0].get(), states[1].get());
     superScale3(polyData, states);
     if (model.infiniteLine) {
       const scales = (0,_WidgetRepresentation_js__WEBPACK_IMPORTED_MODULE_5__.allocateArray)(polyData, 'scale', states.length, 'Float32Array', 3).getData();
@@ -62668,6 +62794,7 @@ function widgetBehavior(publicAPI, model) {
     (0,_helpers_js__WEBPACK_IMPORTED_MODULE_4__.updateState)(model.widgetState, model._factory.getScaleInPixels(), model._factory.getRotationHandlePosition());
   };
   publicAPI[_Constants_js__WEBPACK_IMPORTED_MODULE_5__.InteractionMethodsName.TranslateAxis] = calldata => {
+    console.log('TranslateAxis',calldata)
     const lineHandle = publicAPI.getActiveLineHandle();
     const lineName = publicAPI.getActiveLineName();
     const pointOnLine = (0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_3__.k)(lineHandle.getOrigin(), lineHandle.getDirection(), []);
@@ -62726,6 +62853,8 @@ function widgetBehavior(publicAPI, model) {
     (0,_helpers_js__WEBPACK_IMPORTED_MODULE_4__.updateState)(model.widgetState, model._factory.getScaleInPixels(), model._factory.getRotationHandlePosition());
   };
   publicAPI[_Constants_js__WEBPACK_IMPORTED_MODULE_5__.InteractionMethodsName.RotateLine] = calldata => {
+    // publicAPI.rotateLineInView(publicAPI.getActiveLineName(), 0.1);
+    // return
     const activeLineHandle = publicAPI.getActiveLineHandle();
     const manipulator = model.activeState?.getManipulator?.() ?? model.manipulator;
     const planeNormal = manipulator.getWidgetNormal();
@@ -62746,6 +62875,8 @@ function widgetBehavior(publicAPI, model) {
       (0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_3__.w)(previousLineDirection, -1);
     }
     const radianAngle = (0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_3__.X)(previousLineDirection, currentVectorToOrigin, planeNormal);
+    console.log("radianAngle",publicAPI.getActiveLineName(), radianAngle);
+    
     publicAPI.rotateLineInView(publicAPI.getActiveLineName(), radianAngle);
   };
 
@@ -63130,6 +63261,7 @@ const viewsColor3 = {
 };
 
 function generateState() {
+  console.log('generateState');
   let planes = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _Constants_js__WEBPACK_IMPORTED_MODULE_1__.planeNames;
   const state = _Core_StateBuilder_js__WEBPACK_IMPORTED_MODULE_0__["default"].createBuilder().addField({
     name: 'center',
@@ -63820,6 +63952,7 @@ function getArray(publicAPI, model, fieldNames) {
 // ----------------------------------------------------------------------------
 
 function setArray(publicAPI, model, fieldNames, size) {
+  // console.log("setArray",publicAPI, model, fieldNames, size);
   let defaultVal = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : undefined;
   fieldNames.forEach(field => {
     if (model[field] && size && model[field].length !== size) {
@@ -68249,13 +68382,12 @@ class LoadImage {
       const resliceAxes = interactionContext.reslice.getResliceAxes();
       // Get returned modified from setter to know if we have to render
       interactionContext.actor.setUserMatrix(resliceAxes);
+      console.log(resliceAxes);
       // const planeSource = widget.getPlaneSource(interactionContext.viewType);
       // interactionContext.sphereSources[0].setCenter(planeSource.getOrigin());
       // interactionContext.sphereSources[1].setCenter(planeSource.getPoint1());
       // interactionContext.sphereSources[2].setCenter(planeSource.getPoint2());
-
       if (interactionContext.slider) {
-        console.log("interactionContext.viewType", interactionContext.viewType);
         const planeExtremities = widget.getPlaneExtremities(interactionContext.viewType);
         const length = Math.sqrt(_kitware_vtk_js_Common_Core_Math__WEBPACK_IMPORTED_MODULE_0__["default"].distance2BetweenPoints(planeExtremities[0], planeExtremities[1]));
         const dist = Math.sqrt(_kitware_vtk_js_Common_Core_Math__WEBPACK_IMPORTED_MODULE_0__["default"].distance2BetweenPoints(planeExtremities[0], widgetState.getCenter()));
@@ -68265,10 +68397,10 @@ class LoadImage {
       }
     }
     widget.updateCameraPoints(interactionContext.renderer, interactionContext.viewType, interactionContext.resetFocalPoint, interactionContext.computeFocalPointOffset);
-    interactionContext.renderer.resetCamera();
-    // interactionContext.renderer.getActiveCamera().setParallelScale(150); // 例如，将当前值减半
+    // interactionContext.renderer.resetCamera()
+    // interactionContext.renderer.getActiveCamera().setParallelScale(200); // 例如，将当前值减半
 
-    // view3D.renderWindow.render();
+    view3D.renderWindow.render();
     return modified;
   }
 }
@@ -68293,26 +68425,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _kitware_vtk_js_Rendering_Core_ImageMapper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ImageMapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/ImageMapper.js");
 /* harmony import */ var _kitware_vtk_js_Imaging_Core_ImageReslice__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @kitware/vtk.js/Imaging/Core/ImageReslice */ "./node_modules/@kitware/vtk.js/Imaging/Core/ImageReslice.js");
 /* harmony import */ var _kitware_vtk_js_Rendering_Core_ImageSlice__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ImageSlice */ "./node_modules/@kitware/vtk.js/Rendering/Core/ImageSlice.js");
-/* harmony import */ var _kitware_vtk_js_Interaction_Style_InteractorStyleImage__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Style/InteractorStyleImage */ "./node_modules/@kitware/vtk.js/Interaction/Style/InteractorStyleImage.js");
-/* harmony import */ var _kitware_vtk_js_Interaction_Style_InteractorStyleTrackballCamera__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Style/InteractorStyleTrackballCamera */ "./node_modules/@kitware/vtk.js/Interaction/Style/InteractorStyleTrackballCamera.js");
+/* harmony import */ var _kitware_vtk_js_Interaction_Style_InteractorStyleTrackballCamera__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Style/InteractorStyleTrackballCamera */ "./node_modules/@kitware/vtk.js/Interaction/Style/InteractorStyleTrackballCamera.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_InteractorStyle__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/InteractorStyle */ "./node_modules/@kitware/vtk.js/Rendering/Core/InteractorStyle.js");
 /* harmony import */ var _kitware_vtk_js_Common_Core_Math__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @kitware/vtk.js/Common/Core/Math */ "./node_modules/@kitware/vtk.js/Common/Core/Math.js");
 /* harmony import */ var _kitware_vtk_js_Interaction_Widgets_OrientationMarkerWidget__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Widgets/OrientationMarkerWidget */ "./node_modules/@kitware/vtk.js/Interaction/Widgets/OrientationMarkerWidget.js");
 /* harmony import */ var _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget */ "./node_modules/@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget.js");
 /* harmony import */ var _kitware_vtk_js_Widgets_Core_WidgetManager__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Core/WidgetManager */ "./node_modules/@kitware/vtk.js/Widgets/Core/WidgetManager.js");
-/* harmony import */ var _kitware_vtk_js_Filters_Sources_SphereSource__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @kitware/vtk.js/Filters/Sources/SphereSource */ "./node_modules/@kitware/vtk.js/Filters/Sources/SphereSource.js");
-/* harmony import */ var _kitware_vtk_js_Widgets_Core_WidgetManager_Constants__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Core/WidgetManager/Constants */ "./node_modules/@kitware/vtk.js/Widgets/Core/WidgetManager/Constants.js");
-/* harmony import */ var _kitware_vtk_js_Imaging_Core_ImageReslice_Constants__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @kitware/vtk.js/Imaging/Core/ImageReslice/Constants */ "./node_modules/@kitware/vtk.js/Imaging/Core/ImageReslice/Constants.js");
-/* harmony import */ var _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants */ "./node_modules/@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_Actor__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Actor */ "./node_modules/@kitware/vtk.js/Rendering/Core/Actor.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_Mapper__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Mapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/Mapper.js");
-/* harmony import */ var _load3d__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./load3d */ "./src/load3d.js");
-// import "@kitware/vtk.js/favicon";
-
-// Load the rendering pieces we want to use (for both WebGL and WebGPU)
-
-
-
-
+/* harmony import */ var _kitware_vtk_js_Widgets_Core_WidgetManager_Constants__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Core/WidgetManager/Constants */ "./node_modules/@kitware/vtk.js/Widgets/Core/WidgetManager/Constants.js");
+/* harmony import */ var _kitware_vtk_js_Imaging_Core_ImageReslice_Constants__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @kitware/vtk.js/Imaging/Core/ImageReslice/Constants */ "./node_modules/@kitware/vtk.js/Imaging/Core/ImageReslice/Constants.js");
+/* harmony import */ var _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants */ "./node_modules/@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants.js");
 
 
 
@@ -68375,21 +68496,29 @@ class MPRRendering {
   setupLayoutForMPR(viewColors, showDebugActors, appCursorStyles) {
     const viewAttributes = [];
     let view3D = null;
-    const display3d = new _load3d__WEBPACK_IMPORTED_MODULE_18__["default"]();
     // 创建vtk的ResliceCursor Widget实例
     const widget = _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget__WEBPACK_IMPORTED_MODULE_10__["default"].newInstance();
     window.va = viewAttributes;
     window.widget = widget;
     const widgetState = widget.getWidgetState();
     console.log(widgetState);
-    widgetState.getStatesWithLabel("sphere").forEach(handle => handle.setScale1(10));
-    const checkboxOrthogonality = document.getElementById("checkboxOrthogonality");
-    // 获取容器元素并设置样式
+    widgetState.getStatesWithLabel("sphere").forEach(handle => handle.setScale1(7));
+    widgetState.getStatesWithLabel("line").forEach(state => state.setScale3(1.5, 1.5, 1));
+    widgetState.getStatesWithLabel("line")[0].setColor3(46, 213, 115);
+    widgetState.getStatesWithLabel("line")[1].setColor3(9, 132, 227);
+    widgetState.getStatesWithLabel("line")[2].setColor3(255, 71, 87);
+    widgetState.getStatesWithLabel("line")[3].setColor3(9, 132, 227);
+    widgetState.getStatesWithLabel("line")[4].setColor3(255, 71, 87);
+    widgetState.getStatesWithLabel("line")[5].setColor3(46, 213, 115);
+    console.log(widgetState.getStatesWithLabel("line"));
+    // 调整标签为 'center' 的所有状态的不透明度为 128
+    widgetState.getStatesWithLabel("center").forEach(state => state.setOpacity(128));
     const container = document.getElementById("container");
     container.innerHTML = "";
     const {
       createdElements,
-      createdSliderElements
+      createdSliderElements,
+      resetElements
     } = this.createViewWithButtons(container, 4);
     // 通过访问 createdViews 数组来操作这些视图元素
     createdElements.forEach((element, i) => {
@@ -68402,6 +68531,7 @@ class MPRRendering {
       // 创建一个 vtkGenericRenderWindow 实例，负责管理 VTK 渲染窗口
       const grw = _kitware_vtk_js_Rendering_Misc_GenericRenderWindow__WEBPACK_IMPORTED_MODULE_2__["default"].newInstance();
       // 将刚才创建的视图容器赋给渲染窗口容器
+      console.log(element);
       grw.setContainer(element);
       // 调用 resize 方法确保渲染窗口的尺寸与视图容器一致
       grw.resize();
@@ -68416,6 +68546,7 @@ class MPRRendering {
       //-------------------------------------------------------------------------------------------------------------------------------
       // 创建一个对象，用于存储渲染窗口、渲染器、GL 渲染窗口等属性
       const obj = {
+        grw: grw,
         renderWindow: grw.getRenderWindow(),
         // 获取渲染窗口对象
         renderer: grw.getRenderer(),
@@ -68430,7 +68561,13 @@ class MPRRendering {
       };
       // 设置当前活跃相机为平行投影（不使用透视效果）
       obj.renderer.getActiveCamera().setParallelProjection(true);
+      // const customStyle = vtkInteractorStyleMPRSlice.newInstance();
 
+      // obj.interactor.setInteractorStyle(customStyle);
+      // console.log(customStyle)
+      // customStyle.onStartWindowLevelEvent((callData) => {
+      //   console.log(callData)
+      // });
       // 设置渲染器的背景颜色，viewColors[i] 是一个 RGB 颜色数组
       // obj.renderer.setBackground(...viewColors[i]);
 
@@ -68457,34 +68594,34 @@ class MPRRendering {
       //-------------------------------------------------------------------------------------------------------------------------------
       if (i < 3) {
         // 设置交互器的样式为 vtk.js 提供的 `vtkInteractorStyleImage` 实例
-        obj.interactor.setInteractorStyle(_kitware_vtk_js_Interaction_Style_InteractorStyleImage__WEBPACK_IMPORTED_MODULE_6__["default"].newInstance());
+        // const ccc = a.newInstance();
+        // console.log(ccc)
+        // obj.interactor.setInteractorStyle(ccc);
+        obj.interactor.setInteractorStyle(_kitware_vtk_js_Rendering_Core_InteractorStyle__WEBPACK_IMPORTED_MODULE_7__["default"].newInstance());
+
         // 添加一个小部件（widget）到 widgetManager，并根据 xyzToViewType[i] 设置其类型
-        obj.widgetInstance = obj.widgetManager.addWidget(widget, _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_15__.xyzToViewType[i]);
+        obj.widgetInstance = obj.widgetManager.addWidget(widget, _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_14__.xyzToViewType[i]);
         console.log(obj.widgetInstance);
         // 将小部件的缩放方式设置为基于像素
         obj.widgetInstance.setScaleInPixels(true);
         // 调整交线的空距
-        obj.widgetInstance.setHoleWidth(20);
+        obj.widgetInstance.setHoleWidth(30);
         // 设置小部件为非无限线（即长度有限）
-        obj.widgetInstance.setInfiniteLine(false);
+        obj.widgetInstance.setInfiniteLine(true);
         // 调整标签为 'line' 的所有状态的缩放比例
         // x 和 y 轴方向的缩放因子为 2（变宽和变高）
         // z 轴方向的缩放因子为 300（在深度方向拉长）
-        widgetState.getStatesWithLabel("line").forEach(state => state.setScale3(1, 1, 1000));
-        // 添加鼠标悬停效果
-        // console.log(widgetState.getStatesWithLabel("line"), obj.widgetInstance)
-        // 调整标签为 'center' 的所有状态的不透明度为 128
-        widgetState.getStatesWithLabel("center").forEach(state => state.setOpacity(0));
+
         // 设置小部件是否保持正交性（即垂直关系），值取决于 checkboxOrthogonality 的选中状态
-        obj.widgetInstance.setKeepOrthogonality(checkboxOrthogonality.checked);
+        obj.widgetInstance.setKeepOrthogonality(true);
         // 设置小部件的鼠标指针样式，`appCursorStyles` 是自定义的样式对象
         obj.widgetInstance.setCursorStyles(appCursorStyles);
         // 启用小部件的拾取功能（即可以通过鼠标交互选择小部件）
         obj.widgetManager.enablePicking();
         // 设置小部件管理器在鼠标移动时捕获渲染器缓冲区的行为
-        obj.widgetManager.setCaptureOn(_kitware_vtk_js_Widgets_Core_WidgetManager_Constants__WEBPACK_IMPORTED_MODULE_13__.CaptureOn.MOUSE_MOVE);
+        obj.widgetManager.setCaptureOn(_kitware_vtk_js_Widgets_Core_WidgetManager_Constants__WEBPACK_IMPORTED_MODULE_12__.CaptureOn.MOUSE_MOVE);
       } else {
-        obj.interactor.setInteractorStyle(_kitware_vtk_js_Interaction_Style_InteractorStyleTrackballCamera__WEBPACK_IMPORTED_MODULE_7__["default"].newInstance());
+        obj.interactor.setInteractorStyle(_kitware_vtk_js_Interaction_Style_InteractorStyleTrackballCamera__WEBPACK_IMPORTED_MODULE_6__["default"].newInstance());
       }
       //--------------------------------图像-----------------------------------------------------------------------------------------------
       //-------------------------------------------------------------------------------------------------------------------------------
@@ -68492,7 +68629,7 @@ class MPRRendering {
       obj.reslice = _kitware_vtk_js_Imaging_Core_ImageReslice__WEBPACK_IMPORTED_MODULE_4__["default"].newInstance();
 
       // 设置重切割模式为 SlabMode.MEAN，表示在切割方向上对多个切片取平均
-      obj.reslice.setSlabMode(_kitware_vtk_js_Imaging_Core_ImageReslice_Constants__WEBPACK_IMPORTED_MODULE_14__.SlabMode.MEAN);
+      obj.reslice.setSlabMode(_kitware_vtk_js_Imaging_Core_ImageReslice_Constants__WEBPACK_IMPORTED_MODULE_13__.SlabMode.MEAN);
 
       // 设置重切割操作的切片数量为 1，表示只取一个切片
       obj.reslice.setSlabNumberOfSlices(1);
@@ -68526,95 +68663,102 @@ class MPRRendering {
       //-------------------------------------------------------------------------------------------------------------------------------
       // Create sphere for each 2D views which will be displayed in 3D
       // Define origin, point1 and point2 of the plane used to reslice the volume
-      for (let j = 0; j < 3; j++) {
-        // 创建一个新的 vtkSphereSource 实例，用于生成球体
-        const sphere = _kitware_vtk_js_Filters_Sources_SphereSource__WEBPACK_IMPORTED_MODULE_12__["default"].newInstance();
-        // 设置球体的半径为 10
-        sphere.setRadius(1);
+      // for (let j = 0; j < 3; j++) {
+      //   // 创建一个新的 vtkSphereSource 实例，用于生成球体
+      //   const sphere = vtkSphereSource.newInstance();
+      //   // 设置球体的半径为 10
+      //   sphere.setRadius(10);
 
-        // 创建一个新的 vtkMapper 实例，负责将数据映射到渲染中
-        const mapper = _kitware_vtk_js_Rendering_Core_Mapper__WEBPACK_IMPORTED_MODULE_17__["default"].newInstance();
-        // 将球体的输出连接到映射器，以便映射器可以渲染球体
-        mapper.setInputConnection(sphere.getOutputPort());
+      //   // 创建一个新的 vtkMapper 实例，负责将数据映射到渲染中
+      //   const mapper = vtkMapper.newInstance();
+      //   // 将球体的输出连接到映射器，以便映射器可以渲染球体
+      //   mapper.setInputConnection(sphere.getOutputPort());
 
-        // 创建一个新的 vtkActor 实例，负责在渲染中显示数据
-        const actor = _kitware_vtk_js_Rendering_Core_Actor__WEBPACK_IMPORTED_MODULE_16__["default"].newInstance();
-        // 将映射器应用到演员上，使其渲染球体
-        actor.setMapper(mapper);
+      //   // 创建一个新的 vtkActor 实例，负责在渲染中显示数据
+      //   const actor = vtkActor.newInstance();
+      //   // 将映射器应用到演员上，使其渲染球体
+      //   actor.setMapper(mapper);
 
-        // 设置球体演员的颜色，viewColors[i] 应该是一个 RGB 颜色数组
-        actor.getProperty().setColor(...viewColors[i]);
+      //   // 设置球体演员的颜色，viewColors[i] 应该是一个 RGB 颜色数组
+      //   actor.getProperty().setColor(...viewColors[i]);
 
-        // 设置球体演员的可见性，showDebugActors 为布尔值，决定是否显示球体
-        actor.setVisibility(showDebugActors);
+      //   // 设置球体演员的可见性，showDebugActors 为布尔值，决定是否显示球体
+      //   actor.setVisibility(showDebugActors);
 
-        // 将演员添加到 obj.sphereActors 数组中，便于管理和后续操作
-        obj.sphereActors.push(actor);
+      //   // 将演员添加到 obj.sphereActors 数组中，便于管理和后续操作
+      //   obj.sphereActors.push(actor);
 
-        // 将球体源添加到 obj.sphereSources 数组中，便于管理和后续操作
-        obj.sphereSources.push(sphere);
-      }
+      //   // 将球体源添加到 obj.sphereSources 数组中，便于管理和后续操作
+      //   obj.sphereSources.push(sphere);
+      // }
+
       if (i < 3) {
         viewAttributes.push(obj);
       } else {
-        // view3D = obj;
-        // // 调用封装函数，创建一个 vtkCursor3D 边框
-        // display3d.setupCursor3D(view3D);
+        view3D = obj;
       }
-      // create axes
-      const axes = _kitware_vtk_js_Rendering_Core_AnnotatedCubeActor__WEBPACK_IMPORTED_MODULE_1__["default"].newInstance();
-      axes.setDefaultStyle({
-        text: "+X",
-        fontStyle: "bold",
-        fontFamily: "Arial",
-        fontColor: "black",
-        fontSizeScale: res => res / 2,
-        faceColor: this.createRGBStringFromRGBValues(viewColors[0]),
-        faceRotation: 0,
-        edgeThickness: 0.1,
-        edgeColor: "black",
-        resolution: 400
-      });
-      // axes.setXPlusFaceProperty({ text: '+X' });
-      axes.setXMinusFaceProperty({
-        text: "-X",
-        faceColor: this.createRGBStringFromRGBValues(viewColors[0]),
-        faceRotation: 90,
-        fontStyle: "italic"
-      });
-      axes.setYPlusFaceProperty({
-        text: "+Y",
-        faceColor: this.createRGBStringFromRGBValues(viewColors[1]),
-        fontSizeScale: res => res / 4
-      });
-      axes.setYMinusFaceProperty({
-        text: "-Y",
-        faceColor: this.createRGBStringFromRGBValues(viewColors[1]),
-        fontColor: "white"
-      });
-      axes.setZPlusFaceProperty({
-        text: "+Z",
-        faceColor: this.createRGBStringFromRGBValues(viewColors[2])
-      });
-      axes.setZMinusFaceProperty({
-        text: "-Z",
-        faceColor: this.createRGBStringFromRGBValues(viewColors[2]),
-        faceRotation: 45
-      });
+      // 只有3d视图才加方块
+      if (i == 3) {
+        // create axes
+        const axes = _kitware_vtk_js_Rendering_Core_AnnotatedCubeActor__WEBPACK_IMPORTED_MODULE_1__["default"].newInstance();
+        axes.setDefaultStyle({
+          text: "+X",
+          fontStyle: "bold",
+          fontFamily: "Arial",
+          fontColor: "black",
+          // fontSizeScale: (res) => res / 2,
+          faceColor: this.createRGBStringFromRGBValues(viewColors[0]),
+          faceRotation: 0,
+          edgeThickness: 0.1,
+          edgeColor: "black",
+          resolution: 400
+        });
+        // axes.setXPlusFaceProperty({ text: '+X' });
+        axes.setXMinusFaceProperty({
+          text: "-X",
+          faceColor: this.createRGBStringFromRGBValues(viewColors[0])
+          // faceRotation: 90,
+          // fontStyle: "italic",
+        });
+        axes.setYPlusFaceProperty({
+          text: "+Y",
+          faceColor: this.createRGBStringFromRGBValues(viewColors[1])
+          // fontSizeScale: (res) => res / 4,
+        });
+        axes.setYMinusFaceProperty({
+          text: "-Y",
+          faceColor: this.createRGBStringFromRGBValues(viewColors[1]),
+          fontColor: "white"
+        });
+        axes.setZPlusFaceProperty({
+          text: "+Z",
+          faceColor: this.createRGBStringFromRGBValues(viewColors[2])
+        });
+        axes.setZMinusFaceProperty({
+          text: "-Z",
+          faceColor: this.createRGBStringFromRGBValues(viewColors[2])
+          // faceRotation: 45,
+        });
 
-      // create orientation widget
-      obj.orientationWidget = _kitware_vtk_js_Interaction_Widgets_OrientationMarkerWidget__WEBPACK_IMPORTED_MODULE_9__["default"].newInstance({
-        actor: axes,
-        interactor: obj.renderWindow.getInteractor()
-      });
-      obj.orientationWidget.setEnabled(true);
-      obj.orientationWidget.setViewportCorner(_kitware_vtk_js_Interaction_Widgets_OrientationMarkerWidget__WEBPACK_IMPORTED_MODULE_9__["default"].Corners.BOTTOM_RIGHT);
-      obj.orientationWidget.setViewportSize(0.15);
-      obj.orientationWidget.setMinPixelSize(100);
-      obj.orientationWidget.setMaxPixelSize(300);
+        // create orientation widget
+        obj.orientationWidget = _kitware_vtk_js_Interaction_Widgets_OrientationMarkerWidget__WEBPACK_IMPORTED_MODULE_9__["default"].newInstance({
+          actor: axes,
+          interactor: obj.renderWindow.getInteractor()
+        });
+        obj.orientationWidget.setEnabled(true);
+        obj.orientationWidget.setViewportCorner(_kitware_vtk_js_Interaction_Widgets_OrientationMarkerWidget__WEBPACK_IMPORTED_MODULE_9__["default"].Corners.BOTTOM_RIGHT);
+        obj.orientationWidget.setViewportSize(0.15);
+        obj.orientationWidget.setMinPixelSize(100);
+        obj.orientationWidget.setMaxPixelSize(300);
+      }
       if (i < 3) {
         obj.slider = createdSliderElements[i];
         // 为滑块添加事件监听器，当滑块值发生改变时触发
+        resetElements[i].addEventListener("click", () => {
+          obj.renderer.resetCamera();
+          obj.renderer.getActiveCamera().setParallelScale(200); // 例如，将当前值减半
+          obj.interactor.render();
+        });
         createdSliderElements[i].addEventListener("input", ev => {
           // 检查是否存在有效的图像
           const image = widget.getWidgetState().getImage();
@@ -68623,10 +68767,10 @@ class MPRRendering {
             const newDistanceToP1 = ev.target.value;
 
             // 获取当前平面的法向量（用于表示平面的方向）
-            const dirProj = widget.getWidgetState().getPlanes()[_kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_15__.xyzToViewType[i]].normal;
+            const dirProj = widget.getWidgetState().getPlanes()[_kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_14__.xyzToViewType[i]].normal;
 
             // // 获取当前平面的边界点（通常是平面的两个端点）
-            const planeExtremities = widget.getPlaneExtremities(_kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_15__.xyzToViewType[i]);
+            const planeExtremities = widget.getPlaneExtremities(_kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_14__.xyzToViewType[i]);
 
             // 计算新的平面中心点：
             // 从平面起始点 planeExtremities[0] 出发，
@@ -68670,6 +68814,7 @@ class MPRRendering {
   createViewWithButtons(controlContainer, numElements = 4) {
     const createdElements = []; // 用于存储创建的元素
     const createdSliderElements = [];
+    const resetElements = [];
     const element = document.createElement("div");
     element.style.width = "100%";
     element.style.height = "100%";
@@ -68683,56 +68828,48 @@ class MPRRendering {
       const elementParent = document.createElement("div");
       elementParent.style.width = "100%";
       elementParent.style.height = "100%";
-      elementParent.style.border = "1px solid black"; // 可选，便于调试
+      elementParent.style.position = "relative";
+      // elementParent.style.border = "1px solid black"; // 可选，便于调试
       element.appendChild(elementParent);
-      // 创建按钮容器
-      const elementbutton = document.createElement("div");
-      elementbutton.style.width = "100%";
-      elementbutton.style.height = "10%";
-      // elementbutton.style.border = "1px solid black"; // 可选，便于调试
-      elementParent.appendChild(elementbutton);
-      const button = document.createElement("div");
-      button.style.width = "100%";
-      button.style.height = "100%";
-      button.style.display = "flex";
-      // button.style.border = "1px solid black"; // 可选，便于调试
-      elementbutton.appendChild(button);
+      const siderDiv = document.createElement("div");
+      siderDiv.style.width = "20px";
+      siderDiv.style.height = "100%";
+      siderDiv.style.position = "absolute";
+      siderDiv.style.zIndex = "9";
+      elementParent.appendChild(siderDiv);
+      let h = siderDiv.offsetHeight - 25;
       if (i < 3) {
+        const reset = this.createResetButton();
+        resetElements.push(reset);
+        elementParent.appendChild(reset);
         const slider = document.createElement("input");
         slider.type = "range";
         slider.min = 0;
         slider.max = 300;
-        slider.style.bottom = "0px";
-        slider.style.width = "100%";
-        slider.style.height = "100%";
-        slider.style.margin = "0px";
-        button.appendChild(slider);
+        slider.className = "vertical-slider";
+        slider.style.width = h + "px";
+        siderDiv.appendChild(slider);
         createdSliderElements.push(slider);
       }
 
       // 创建图像容器
       const elementImage = document.createElement("div");
       elementImage.style.width = "100%";
-      elementImage.style.height = "90%";
-      // elementImage.style.display = "flex";
-      // elementImage.innerText = "这是底部显示文本"; // 你可以修改这里的文本内容
-      // elementImage.style.border = "1px solid red"; // 可选，便于调试
+      elementImage.style.height = "100%";
+      elementImage.style.position = "relative";
+      // 添加一个
+      elementImage.innerHTML = `<svg id="lineSVG" style="position: absolute;
+    top: 0;
+    left: 0;width:100%;height:100%" xmlns="http://www.w3.org/2000/svg"></svg>`;
       elementParent.appendChild(elementImage);
-      // 创建按钮并添加到左侧部分
-      // const axialButton = this.createColorButton("Axial", "axial_" + i); // 每个按钮的 id 保持唯一
-      // elementleft.appendChild(axialButton);
-      // axialButton.addEventListener("click", function () {
-      //   alert("达到最高点击次数！");
-      // });
-
-      // 将创建的 elementParent 存储在数组中
       createdElements.push(elementImage);
     }
 
     // 返回包含所有创建元素的数组
     return {
       createdElements,
-      createdSliderElements
+      createdSliderElements,
+      resetElements
     };
   }
   // 创建一个按钮的辅助函数
@@ -68746,6 +68883,18 @@ class MPRRendering {
     button.style.cursor = "pointer"; // 设置鼠标指针样式为“手形”，表示可以点击
     button.style.pointerEvents = "auto"; // 确保可以响应点击事件
     return button;
+  }
+  createResetButton() {
+    let svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" t="1751254493988" class="icon" viewBox="0 0 1024 1024" version="1.1" p-id="7351" width="20" height="20"><path d="M867.89 574.16a30.73 30.73 0 0 0-37.52 21.92c-38 144.83-169.31 246-319.25 246a330.71 330.71 0 0 1-306.27-206.82h60.29l-92.78-123.5-91.82 123.5h58.88q1.23 3.72 2.53 7.4A391.65 391.65 0 0 0 511.12 903.5c177.86 0 333.58-120 378.69-291.82a30.73 30.73 0 0 0-21.92-37.52zM153.88 452.57a30.69 30.69 0 0 0 37.35-22.2A329.68 329.68 0 0 1 511.12 182c136.8 0 256.58 82 306.4 207h-60.66l92.78 123.5L941.46 389h-58.58a391.63 391.63 0 0 0-751.2 26.24 30.73 30.73 0 0 0 22.2 37.33z" fill="#ffffff" p-id="7352"/></svg>`;
+    const reset = document.createElement("div");
+    reset.innerHTML = svg;
+    reset.style.width = "20px";
+    reset.style.height = "20px";
+    reset.style.position = "absolute";
+    reset.style.cursor = "pointer";
+    reset.style.left = "-5px";
+    reset.style.zIndex = "10";
+    return reset;
   }
   createRGBStringFromRGBValues(rgb) {
     if (rgb.length !== 3) {
@@ -68831,7 +68980,7 @@ class SyntheticImageData {
   ImageData(hitbit) {
     // 创建一个新的 vtkImageData 实例，用于存储体数据
     const imageData = _kitware_vtk_js_Common_DataModel_ImageData__WEBPACK_IMPORTED_MODULE_0__["default"].newInstance();
-    console.log(hitbit, hitbit[0]);
+    // console.log(hitbit,hitbit[0]);
     const zeroHit = hitbit[0];
     const origin = [1.0, 1.0, 1.0];
     // 根据像素数据确定数据类型（如 Int16、Uint8 等）
@@ -68846,13 +68995,13 @@ class SyntheticImageData {
     imageData.setDimensions(...dimensions);
     //imageData.setExtent(0, 127, 0, 127, 0, 127);
     const typedPixelArray = createTypedArray(data_type, dimensions, hitbit.length);
-    console.log(typedPixelArray);
+    // console.log(typedPixelArray);
     hitbit.forEach((buffer, index) => {
       const sliceOffset = dimensions[0] * dimensions[1] * index;
-      console.log(sliceOffset);
+      // console.log(sliceOffset)
       typedPixelArray.set(buffer.h_img.data, sliceOffset);
     });
-    console.log(typedPixelArray);
+    // console.log(typedPixelArray);
     const scalarArray = _kitware_vtk_js_Common_Core_DataArray__WEBPACK_IMPORTED_MODULE_1__["default"].newInstance({
       name: "Pixels",
       // 数据的名称
@@ -69149,14 +69298,14 @@ function createScalarArrayFromDICOM(arrayBuffer, dimensions, data_type) {
   let totalSetPixelDataTime = 0;
   arrayBuffer.forEach((buffer, index) => {
     let start, end;
-    console.log(`----------------创建数据----------------------------`);
+    // console.log(`----------------创建数据----------------------------`);
     // 1. 记录 parseDicomData 的执行时间
     start = performance.now();
     const dicomdata = parseDicomData(buffer);
     end = performance.now();
     const parseTime = end - start;
     totalParseTime += parseTime;
-    console.log(`parseDicomData-${index}: ${parseTime.toFixed(2)} ms`);
+    // console.log(`parseDicomData-${index}: ${parseTime.toFixed(2)} ms`);
 
     // 2. 记录 getInterpretedData 的执行时间
     start = performance.now();
@@ -69164,7 +69313,7 @@ function createScalarArrayFromDICOM(arrayBuffer, dimensions, data_type) {
     end = performance.now();
     const getInterpretedTime = end - start;
     totalGetInterpretedTime += getInterpretedTime;
-    console.log(`getInterpretedData-${index}: ${getInterpretedTime.toFixed(2)} ms`);
+    // console.log(`getInterpretedData-${index}: ${getInterpretedTime.toFixed(2)} ms`);
 
     // 3. 计算当前切片数据的偏移量
     start = performance.now();
@@ -69172,7 +69321,7 @@ function createScalarArrayFromDICOM(arrayBuffer, dimensions, data_type) {
     end = performance.now();
     const calculateOffsetTime = end - start;
     totalCalculateOffsetTime += calculateOffsetTime;
-    console.log(`calculateOffset-${index}: ${calculateOffsetTime.toFixed(2)} ms`);
+    // console.log(`calculateOffset-${index}: ${calculateOffsetTime.toFixed(2)} ms`);
 
     // 4. 将当前切片的像素数据填充到 typedPixelArray 中
     start = performance.now();
@@ -69180,27 +69329,29 @@ function createScalarArrayFromDICOM(arrayBuffer, dimensions, data_type) {
     end = performance.now();
     const setPixelDataTime = end - start;
     totalSetPixelDataTime += setPixelDataTime;
-    console.log(`setPixelData-${index}: ${setPixelDataTime.toFixed(2)} ms`);
+    // console.log(`setPixelData-${index}: ${setPixelDataTime.toFixed(2)} ms`);
   });
   let totalEndTime = performance.now(); // 记录循环结束的时间
   let totalExecutionTime = totalEndTime - totalStartTime; // 总执行时间
 
   // 打印每个步骤的总时间
-  console.log(`Total parseDicomData time: ${totalParseTime.toFixed(2)} ms`);
-  console.log(`Total getInterpretedData time: ${totalGetInterpretedTime.toFixed(2)} ms`);
-  console.log(`Total calculateOffset time: ${totalCalculateOffsetTime.toFixed(2)} ms`);
-  console.log(`Total setPixelData time: ${totalSetPixelDataTime.toFixed(2)} ms`);
+  // console.log(`Total parseDicomData time: ${totalParseTime.toFixed(2)} ms`);
+  // console.log(`Total getInterpretedData time: ${totalGetInterpretedTime.toFixed(2)} ms`);
+  // console.log(`Total calculateOffset time: ${totalCalculateOffsetTime.toFixed(2)} ms`);
+  // console.log(`Total setPixelData time: ${totalSetPixelDataTime.toFixed(2)} ms`);
 
   // 计算并打印每个步骤的平均执行时间
   let averageParseTime = totalParseTime / arrayBuffer.length;
   let averageGetInterpretedTime = totalGetInterpretedTime / arrayBuffer.length;
   let averageCalculateOffsetTime = totalCalculateOffsetTime / arrayBuffer.length;
   let averageSetPixelDataTime = totalSetPixelDataTime / arrayBuffer.length;
-  console.log(`Average parseDicomData time: ${averageParseTime.toFixed(2)} ms`);
-  console.log(`Average getInterpretedData time: ${averageGetInterpretedTime.toFixed(2)} ms`);
-  console.log(`Average calculateOffset time: ${averageCalculateOffsetTime.toFixed(2)} ms`);
-  console.log(`Average setPixelData time: ${averageSetPixelDataTime.toFixed(2)} ms`);
-  console.log(`Total execution time: ${totalExecutionTime.toFixed(2)} ms`);
+
+  // console.log(`Average parseDicomData time: ${averageParseTime.toFixed(2)} ms`);
+  // console.log(`Average getInterpretedData time: ${averageGetInterpretedTime.toFixed(2)} ms`);
+  // console.log(`Average calculateOffset time: ${averageCalculateOffsetTime.toFixed(2)} ms`);
+  // console.log(`Average setPixelData time: ${averageSetPixelDataTime.toFixed(2)} ms`);
+
+  // console.log(`Total execution time: ${totalExecutionTime.toFixed(2)} ms`);
 
   // 创建 vtkDataArray 对象，用于将像素数据与 vtkImageData 关联
   return _kitware_vtk_js_Common_Core_DataArray__WEBPACK_IMPORTED_MODULE_1__["default"].newInstance({
@@ -69214,22 +69365,32 @@ function createScalarArrayFromDICOM(arrayBuffer, dimensions, data_type) {
   });
 }
 function parseDicomData(arrayBuffer) {
-  console.log(`parseDicomData buffer`);
+  // console.log(`parseDicomData buffer`);
   const startTotal = performance.now();
   const startDataView = performance.now();
   const dataView = new DataView(arrayBuffer);
   const endDataView = performance.now();
-  console.log(`-------------DataView creation time: ${(endDataView - startDataView).toFixed(2)} ms`);
+  // console.log(
+  //   `-------------DataView creation time: ${(endDataView - startDataView).toFixed(2)} ms`
+  // );
+
   const startVerbose = performance.now();
   (_halo_200804__WEBPACK_IMPORTED_MODULE_2___default().Parser).verbose = false;
   const endVerbose = performance.now();
-  console.log(`------------Disable verbose logging time: ${(endVerbose - startVerbose).toFixed(2)} ms`);
+  // console.log(
+  //   `------------Disable verbose logging time: ${(endVerbose - startVerbose).toFixed(2)} ms`
+  // );
+
   const startParse = performance.now();
   const dicomData = _halo_200804__WEBPACK_IMPORTED_MODULE_2___default().Series.parseImage(dataView);
   const endParse = performance.now();
-  console.log(`------------DICOM parsing time: ${(endParse - startParse).toFixed(2)} ms`);
+  // console.log(`------------DICOM parsing time: ${(endParse - startParse).toFixed(2)} ms`);
+
   const endTotal = performance.now();
-  console.log(`------Total parseDicomData execution time: ${(endTotal - startTotal).toFixed(2)} ms`);
+  // console.log(
+  //   `------Total parseDicomData execution time: ${(endTotal - startTotal).toFixed(2)} ms`
+  // );
+
   return dicomData;
 }
 
@@ -79254,6 +79415,7 @@ var __webpack_exports__ = {};
   \**********************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   changeEvent: () => (/* binding */ changeEvent),
 /* harmony export */   f_load_directory: () => (/* binding */ f_load_directory),
 /* harmony export */   load: () => (/* binding */ load),
 /* harmony export */   load3D: () => (/* binding */ load3D),
@@ -79261,27 +79423,35 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   loadMPR: () => (/* binding */ loadMPR)
 /* harmony export */ });
 /* harmony import */ var _kitware_vtk_js_Rendering_Core_Coordinate__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Coordinate */ "./node_modules/@kitware/vtk.js/Rendering/Core/Coordinate.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Misc_GenericRenderWindow__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Misc/GenericRenderWindow */ "./node_modules/@kitware/vtk.js/Rendering/Misc/GenericRenderWindow.js");
-/* harmony import */ var _kitware_vtk_js_Widgets_Core_WidgetManager__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Core/WidgetManager */ "./node_modules/@kitware/vtk.js/Widgets/Core/WidgetManager.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Profiles_All__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Profiles/All */ "./node_modules/@kitware/vtk.js/Rendering/Profiles/All.js");
-/* harmony import */ var _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants */ "./node_modules/@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants.js");
-/* harmony import */ var _syntheticimage__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./syntheticimage */ "./src/syntheticimage.js");
-/* harmony import */ var _load3d__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./load3d */ "./src/load3d.js");
-/* harmony import */ var _loadimage__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./loadimage */ "./src/loadimage.js");
-/* harmony import */ var _rendingmpr__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./rendingmpr */ "./src/rendingmpr.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_Volume__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Volume */ "./node_modules/@kitware/vtk.js/Rendering/Core/Volume.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_VolumeMapper__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/VolumeMapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/VolumeMapper.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Misc_FullScreenRenderWindow__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Misc/FullScreenRenderWindow */ "./node_modules/@kitware/vtk.js/Rendering/Misc/FullScreenRenderWindow.js");
-/* harmony import */ var _kitware_vtk_js_Common_DataModel_BoundingBox__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @kitware/vtk.js/Common/DataModel/BoundingBox */ "./node_modules/@kitware/vtk.js/Common/DataModel/BoundingBox.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_ColorTransferFunction__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ColorTransferFunction */ "./node_modules/@kitware/vtk.js/Rendering/Core/ColorTransferFunction.js");
-/* harmony import */ var _kitware_vtk_js_Common_DataModel_PiecewiseFunction__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @kitware/vtk.js/Common/DataModel/PiecewiseFunction */ "./node_modules/@kitware/vtk.js/Common/DataModel/PiecewiseFunction.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_VolumeProperty__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/VolumeProperty */ "./node_modules/@kitware/vtk.js/Rendering/Core/VolumeProperty.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_ImageMapper__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ImageMapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/ImageMapper.js");
-/* harmony import */ var _kitware_vtk_js_Imaging_Core_ImageReslice__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @kitware/vtk.js/Imaging/Core/ImageReslice */ "./node_modules/@kitware/vtk.js/Imaging/Core/ImageReslice.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_ImageSlice__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ImageSlice */ "./node_modules/@kitware/vtk.js/Rendering/Core/ImageSlice.js");
-/* harmony import */ var _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget */ "./node_modules/@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget.js");
-/* harmony import */ var _kitware_vtk_js_macros2__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! @kitware/vtk.js/macros2 */ "./node_modules/@kitware/vtk.js/macros2.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_Actor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Actor */ "./node_modules/@kitware/vtk.js/Rendering/Core/Actor.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_Mapper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Mapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/Mapper.js");
+/* harmony import */ var _kitware_vtk_js_Filters_General_OutlineFilter__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @kitware/vtk.js/Filters/General/OutlineFilter */ "./node_modules/@kitware/vtk.js/Filters/General/OutlineFilter.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Misc_GenericRenderWindow__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Misc/GenericRenderWindow */ "./node_modules/@kitware/vtk.js/Rendering/Misc/GenericRenderWindow.js");
+/* harmony import */ var _kitware_vtk_js_Widgets_Core_WidgetManager__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Core/WidgetManager */ "./node_modules/@kitware/vtk.js/Widgets/Core/WidgetManager.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Profiles_All__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Profiles/All */ "./node_modules/@kitware/vtk.js/Rendering/Profiles/All.js");
+/* harmony import */ var _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants */ "./node_modules/@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants.js");
+/* harmony import */ var _syntheticimage__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./syntheticimage */ "./src/syntheticimage.js");
+/* harmony import */ var _load3d__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./load3d */ "./src/load3d.js");
+/* harmony import */ var _loadimage__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./loadimage */ "./src/loadimage.js");
+/* harmony import */ var _rendingmpr__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./rendingmpr */ "./src/rendingmpr.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_Volume__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Volume */ "./node_modules/@kitware/vtk.js/Rendering/Core/Volume.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_VolumeMapper__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/VolumeMapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/VolumeMapper.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Misc_FullScreenRenderWindow__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Misc/FullScreenRenderWindow */ "./node_modules/@kitware/vtk.js/Rendering/Misc/FullScreenRenderWindow.js");
+/* harmony import */ var _kitware_vtk_js_Common_DataModel_BoundingBox__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @kitware/vtk.js/Common/DataModel/BoundingBox */ "./node_modules/@kitware/vtk.js/Common/DataModel/BoundingBox.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_ColorTransferFunction__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ColorTransferFunction */ "./node_modules/@kitware/vtk.js/Rendering/Core/ColorTransferFunction.js");
+/* harmony import */ var _kitware_vtk_js_Common_DataModel_PiecewiseFunction__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @kitware/vtk.js/Common/DataModel/PiecewiseFunction */ "./node_modules/@kitware/vtk.js/Common/DataModel/PiecewiseFunction.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_VolumeProperty__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/VolumeProperty */ "./node_modules/@kitware/vtk.js/Rendering/Core/VolumeProperty.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_ImageMapper__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ImageMapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/ImageMapper.js");
+/* harmony import */ var _kitware_vtk_js_Imaging_Core_ImageReslice__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! @kitware/vtk.js/Imaging/Core/ImageReslice */ "./node_modules/@kitware/vtk.js/Imaging/Core/ImageReslice.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_ImageSlice__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ImageSlice */ "./node_modules/@kitware/vtk.js/Rendering/Core/ImageSlice.js");
+/* harmony import */ var _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget */ "./node_modules/@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_InteractorStyle__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/InteractorStyle */ "./node_modules/@kitware/vtk.js/Rendering/Core/InteractorStyle.js");
+/* harmony import */ var _kitware_vtk_js_Interaction_Style_InteractorStyleImage__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Style/InteractorStyleImage */ "./node_modules/@kitware/vtk.js/Interaction/Style/InteractorStyleImage.js");
+/* harmony import */ var _kitware_vtk_js_macros2__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! @kitware/vtk.js/macros2 */ "./node_modules/@kitware/vtk.js/macros2.js");
 // import "@kitware/vtk.js/favicon";
+
+
+
 
 
 
@@ -79304,8 +79474,50 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
 // const mprrendering = new MPRRendering();
 // mprrendering.createRenderingPage();
+function calculateB(a) {
+  // 根据给定的数据点，使用分段线性回归进行近似
+  // 我们将数据点分为几个区间，每个区间使用不同的线性方程
+
+  // 数据点排序
+  const dataPoints = [{
+    a: 450,
+    b: 0.45
+  }, {
+    a: 270,
+    b: 0.68
+  }, {
+    a: 225,
+    b: 0.9
+  }, {
+    a: 135,
+    b: 1.48
+  }];
+
+  // 对数据点进行排序
+  dataPoints.sort((a, b) => a.a - b.a);
+
+  // 找到输入值 a 所在的区间
+  for (let i = 0; i < dataPoints.length - 1; i++) {
+    const point1 = dataPoints[i];
+    const point2 = dataPoints[i + 1];
+    if (a >= point1.a && a <= point2.a) {
+      // 计算斜率和截距
+      const slope = (point2.b - point1.b) / (point2.a - point1.a);
+      const intercept = point1.b - slope * point1.a;
+
+      // 使用线性插值计算b值
+      return slope * a + intercept;
+    }
+  }
+
+  // 如果a超出所有数据点的范围，返回最近的数据点
+  if (a < dataPoints[0].a) return dataPoints[0].b;
+  if (a > dataPoints[dataPoints.length - 1].a) return dataPoints[dataPoints.length - 1].b;
+}
 async function load(ArrayBuffer) {
   let arrayBuffer = [];
   for (var i = 0; i < Object.keys(ArrayBuffer).length; i++) {
@@ -79317,7 +79529,7 @@ async function load(ArrayBuffer) {
   return arrayBuffer;
 }
 function loadDicom(arrayBuffer) {
-  const syntheticImageData = new _syntheticimage__WEBPACK_IMPORTED_MODULE_5__["default"]();
+  const syntheticImageData = new _syntheticimage__WEBPACK_IMPORTED_MODULE_8__["default"]();
   // const {pixelSpacing,SliceThickness,WindowCenter,WindowWidth,HitBit} = syntheticImageData.GetTagsData(arrayBuffer)
   // return {
   //   pixelSpacing:pixelSpacing,
@@ -79329,12 +79541,26 @@ function loadDicom(arrayBuffer) {
   const hit = syntheticImageData.GetHitBitData(arrayBuffer);
   return hit;
 }
+let eventType = 1;
+let viewObj = null;
+function changeEvent(type) {
+  eventType = type;
+  if (eventType === 1) {
+    viewObj.forEach(obj => {
+      obj.interactor.setInteractorStyle(_kitware_vtk_js_Interaction_Style_InteractorStyleImage__WEBPACK_IMPORTED_MODULE_24__["default"].newInstance());
+    });
+  } else {
+    viewObj.forEach(obj => {
+      obj.interactor.setInteractorStyle(_kitware_vtk_js_Rendering_Core_InteractorStyle__WEBPACK_IMPORTED_MODULE_23__["default"].newInstance());
+    });
+  }
+}
 function load3D(arrayBuffer) {
   if (!arrayBuffer) {
     // 检查输入是否有效
     throw new Error("arrayBuffer 不能为空！");
   }
-  const syntheticImageData = new _syntheticimage__WEBPACK_IMPORTED_MODULE_5__["default"]();
+  const syntheticImageData = new _syntheticimage__WEBPACK_IMPORTED_MODULE_8__["default"]();
   const {
     imageData,
     windowWidth,
@@ -79344,14 +79570,14 @@ function load3D(arrayBuffer) {
 }
 function Demo3d(source) {
   const renderMainBox = document.getElementById("test1");
-  const fullScreenRenderer = _kitware_vtk_js_Rendering_Misc_FullScreenRenderWindow__WEBPACK_IMPORTED_MODULE_11__["default"].newInstance({
+  const fullScreenRenderer = _kitware_vtk_js_Rendering_Misc_FullScreenRenderWindow__WEBPACK_IMPORTED_MODULE_14__["default"].newInstance({
     container: renderMainBox,
     background: [0, 0, 0]
   });
   const renderer = fullScreenRenderer.getRenderer();
   const renderWindow = fullScreenRenderer.getRenderWindow();
-  const volume = _kitware_vtk_js_Rendering_Core_Volume__WEBPACK_IMPORTED_MODULE_9__["default"].newInstance();
-  const mapper = _kitware_vtk_js_Rendering_Core_VolumeMapper__WEBPACK_IMPORTED_MODULE_10__["default"].newInstance();
+  const volume = _kitware_vtk_js_Rendering_Core_Volume__WEBPACK_IMPORTED_MODULE_12__["default"].newInstance();
+  const mapper = _kitware_vtk_js_Rendering_Core_VolumeMapper__WEBPACK_IMPORTED_MODULE_13__["default"].newInstance();
   mapper.setInputData(source);
   volume.setMapper(mapper);
   const sampleDistance = 0.7 * Math.sqrt(source.getSpacing().map(v => v * v).reduce((a, b) => a + b, 0));
@@ -79360,9 +79586,9 @@ function Demo3d(source) {
   mapper.setGlobalIlluminationReach(0.0);
   mapper.setVolumetricScatteringBlending(0.5);
   mapper.setVolumeShadowSamplingDistFactor(5.0);
-  const volProp = _kitware_vtk_js_Rendering_Core_VolumeProperty__WEBPACK_IMPORTED_MODULE_15__["default"].newInstance();
+  const volProp = _kitware_vtk_js_Rendering_Core_VolumeProperty__WEBPACK_IMPORTED_MODULE_18__["default"].newInstance();
   volProp.setInterpolationTypeToLinear();
-  volume.getProperty().setScalarOpacityUnitDistance(0, _kitware_vtk_js_Common_DataModel_BoundingBox__WEBPACK_IMPORTED_MODULE_12__["default"].getDiagonalLength(source.getBounds()) / Math.max(...source.getDimensions()));
+  volume.getProperty().setScalarOpacityUnitDistance(0, _kitware_vtk_js_Common_DataModel_BoundingBox__WEBPACK_IMPORTED_MODULE_15__["default"].getDiagonalLength(source.getBounds()) / Math.max(...source.getDimensions()));
   volProp.setGradientOpacityMinimumValue(0, 0);
   const dataArray = source.getPointData().getScalars() || source.getPointData().getArrays()[0];
   const dataRange = dataArray.getRange();
@@ -79383,12 +79609,12 @@ function Demo3d(source) {
   cam.setFocalPoint(-1, -1, 0);
   cam.setViewUp(0, 0, -1);
   renderer.addVolume(volume);
-  const pf = _kitware_vtk_js_Common_DataModel_PiecewiseFunction__WEBPACK_IMPORTED_MODULE_14__["default"].newInstance();
+  const pf = _kitware_vtk_js_Common_DataModel_PiecewiseFunction__WEBPACK_IMPORTED_MODULE_17__["default"].newInstance();
   pf.addPoint(0, 0.0);
   pf.addPoint(100, 0.0);
   pf.addPoint(3120, 1.0);
   volume.getProperty().setScalarOpacity(0, pf);
-  const ctf = _kitware_vtk_js_Rendering_Core_ColorTransferFunction__WEBPACK_IMPORTED_MODULE_13__["default"].newInstance();
+  const ctf = _kitware_vtk_js_Rendering_Core_ColorTransferFunction__WEBPACK_IMPORTED_MODULE_16__["default"].newInstance();
   ctf.addRGBPoint(200.0, 1.0, 1.0, 1.0);
   ctf.addRGBPoint(2000.0, 1.0, 1.0, 1.0);
   volume.getProperty().setRGBTransferFunction(0, ctf);
@@ -79407,94 +79633,157 @@ function loadMPR(arrayBuffer) {
     // 检查输入是否有效
     throw new Error("arrayBuffer 不能为空！");
   }
-  const syntheticImageData = new _syntheticimage__WEBPACK_IMPORTED_MODULE_5__["default"]();
+  const syntheticImageData = new _syntheticimage__WEBPACK_IMPORTED_MODULE_8__["default"]();
   const {
     imageData,
     windowWidth,
     windowCenter
   } = syntheticImageData.ImageData(arrayBuffer);
-  console.log("imageData", imageData);
-  const axialCanvas = document.getElementById('axial');
-  const coronalCanvas = document.getElementById('coronal');
-  const sagittalCanvas = document.getElementById('sagittal');
-  const widget = _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget__WEBPACK_IMPORTED_MODULE_19__["default"].newInstance();
-  const widgetState = widget.getWidgetState();
-  widget.setImage(imageData);
-  let objArr = [];
-  const createVTIObject = (canvas, imageData, widget, viewtype) => {
-    let obj = {
-      viewtype: viewtype
-    };
-    obj.reslice = _kitware_vtk_js_Imaging_Core_ImageReslice__WEBPACK_IMPORTED_MODULE_17__["default"].newInstance();
-    // 设置重切割操作的切片数量为 1，表示只取一个切片
-    obj.reslice.setSlabNumberOfSlices(1);
-    // 设置是否使用变换来输入采样，false 表示不使用变换
-    obj.reslice.setTransformInputSampling(false);
-    // 设置输出图像是否自动裁剪，true 表示输出图像会根据内容自动裁剪
-    obj.reslice.setAutoCropOutput(true);
-    // 设置输出图像的维度为 2，表示输出为 2D 图像（通常用于切片视图）
-    obj.reslice.setOutputDimensionality(2);
-    // 创建一个 vtkImageMapper 实例，用于映射图像数据
-    obj.resliceMapper = _kitware_vtk_js_Rendering_Core_ImageMapper__WEBPACK_IMPORTED_MODULE_16__["default"].newInstance();
-    obj.resliceMapper.setSliceAtFocalPoint(true); // 确保切片在焦点处
-    // 将 vtkImageReslice 的输出连接到映射器，确保映射器能渲染重切割后的图像
-    obj.resliceMapper.setInputConnection(obj.reslice.getOutputPort());
-    // 创建一个 vtkImageSlice 实例，用于显示图像切片
-    obj.resliceActor = _kitware_vtk_js_Rendering_Core_ImageSlice__WEBPACK_IMPORTED_MODULE_18__["default"].newInstance();
-    // 将映射器应用到 vtkImageSlice 上，以便它能够渲染图像
-    obj.resliceActor.setMapper(obj.resliceMapper);
-    obj.reslice.setInputData(imageData);
-    const grw = _kitware_vtk_js_Rendering_Misc_GenericRenderWindow__WEBPACK_IMPORTED_MODULE_1__["default"].newInstance();
-    const render = grw.getRenderer();
-    obj.widgetManager = _kitware_vtk_js_Widgets_Core_WidgetManager__WEBPACK_IMPORTED_MODULE_2__["default"].newInstance();
-    obj.widgetManager.setRenderer(render);
-    obj.widgetInstance = obj.widgetManager.addWidget(widget, viewtype);
-    const ctx = canvas.getContext('2d');
-    //canvas加监听点击事件
-    canvas.addEventListener('click', function (e) {
-      // 获取点击位置的坐标
-      const x = e.clientX;
-      const y = e.clientY;
-      // 获取 canvas 元素的边界信息
-      const rect = canvas.getBoundingClientRect();
-      // 计算点击位置的 X 和 Y 坐标（相对于 canvas）
-      const xCanvas = x - rect.left;
-      const yCanvas = y - rect.top;
-      console.log(viewtype, xCanvas, yCanvas);
-      let center = widget.get().widgetState.getCenter();
-      console.log("center", widget, widget.get().widgetState.getRotationHandleXinY0(), widget.get().widgetState.getCenter());
-      console.log("widgetInstance", obj.widgetInstance);
-      if (obj.viewtype == 4) {
-        center[1] = xCanvas;
-        center[2] = yCanvas;
-      } else if (obj.viewtype == 5) {
-        center[0] = xCanvas;
-        center[2] = yCanvas;
-      } else {
-        center[0] = xCanvas;
-        center[1] = yCanvas;
-      }
-      widget.setCenter(center);
-      obj.widgetInstance.rotateLineInView("YinX", 45);
-      updateMPR(widget, objArr, center);
-    });
-    obj.ctx = ctx;
-    objArr.push(obj);
-  };
-  createVTIObject(axialCanvas, imageData, widget, 4);
-  createVTIObject(coronalCanvas, imageData, widget, 5);
-  createVTIObject(sagittalCanvas, imageData, widget, 6);
-  let center = [200.801, 200.801, 22];
-  widget.setCenter(center);
-  // widget.get().widgetState.setRotationHandleXinY0(45)
-  console.log("widget", widget.get());
-  console.log("objArr", widget.get().behavior, widget.get().widgetState.getStatesWithLabel("sphere"));
-  console.log(widget.get().widgetState.getStatesWithLabel("sphere")[1].getState());
-  updateMPR(widget, objArr, center);
-  console.log("widgetState", widgetState, widgetState.getCenter(), widgetState.getAxisXinY().get());
+  // console.log("imageData", imageData, windowWidth, windowCenter)
+  // const axialCanvas = document.getElementById('axial');
+  // const coronalCanvas = document.getElementById('coronal');
+  // const sagittalCanvas = document.getElementById('sagittal');
+  // const widget = vtkResliceCursorWidget.newInstance();
+  // const widgetState = widget.getWidgetState();
+  // widget.setImage(imageData);
+  // let objArr = []
+  // const createVTIObject = (canvas, imageData, widget, viewtype) => {
+  //   let obj = { viewtype: viewtype }
+  //   obj.reslice = vtkImageReslice.newInstance();
+  //   // 设置重切割操作的切片数量为 1，表示只取一个切片
+  //   obj.reslice.setSlabNumberOfSlices(1);
+  //   // 设置是否使用变换来输入采样，false 表示不使用变换
+  //   obj.reslice.setTransformInputSampling(false);
+  //   // 设置输出图像是否自动裁剪，true 表示输出图像会根据内容自动裁剪
+  //   obj.reslice.setAutoCropOutput(true);
+  //   // 设置输出图像的维度为 2，表示输出为 2D 图像（通常用于切片视图）
+  //   obj.reslice.setOutputDimensionality(2);
+  //   // 创建一个 vtkImageMapper 实例，用于映射图像数据
+  //   obj.resliceMapper = vtkImageMapper.newInstance();
+  //   obj.resliceMapper.setSliceAtFocalPoint(true); // 确保切片在焦点处
+  //   // 将 vtkImageReslice 的输出连接到映射器，确保映射器能渲染重切割后的图像
+  //   obj.resliceMapper.setInputConnection(obj.reslice.getOutputPort());
+  //   // 创建一个 vtkImageSlice 实例，用于显示图像切片
+  //   obj.resliceActor = vtkImageSlice.newInstance();
+  //   // 将映射器应用到 vtkImageSlice 上，以便它能够渲染图像
+  //   obj.resliceActor.setMapper(obj.resliceMapper);
+  //   obj.reslice.setInputData(imageData);
+  //   const grw = vtkGenericRenderWindow.newInstance();
+  //   const render = grw.getRenderer()
+  //   obj.widgetManager = vtkWidgetManager.newInstance()
+  //   obj.widgetManager.setRenderer(render);
+
+  //   obj.widgetInstance = obj.widgetManager.addWidget(widget, viewtype);
+  //   obj.widgetInstance.setKeepOrthogonality(true);
+  //   console.log(canvas)
+  //   const ctx = canvas.getContext('2d');
+  //   //canvas加监听点击事件
+  //   canvas.addEventListener('click', function (e) {
+  //     // 获取点击位置的坐标
+  //     const x = e.clientX;
+  //     const y = e.clientY;
+  //     // 获取 canvas 元素的边界信息
+  //     const rect = canvas.getBoundingClientRect();
+  //     // 计算点击位置的 X 和 Y 坐标（相对于 canvas）
+  //     const xCanvas = x - rect.left;
+  //     const yCanvas = y - rect.top;
+  //     console.log(viewtype, xCanvas, yCanvas);
+  //     let center = widget.get().widgetState.getCenter();
+  //     console.log("center", widget, widget.get().widgetState.getRotationHandleXinY0(), widget.get().widgetState.getCenter());
+  //     console.log("widgetInstance", obj.widgetInstance)
+  //     if (obj.viewtype == 4) {
+  //       center[1] = xCanvas;
+  //       center[2] = yCanvas;
+  //     } else if (obj.viewtype == 5) {
+  //       center[0] = xCanvas;
+  //       center[2] = yCanvas;
+  //     } else {
+  //       center[0] = xCanvas;
+  //       center[1] = yCanvas;
+  //     }
+  //     // widget.setCenter(center);
+  //     obj.widgetInstance.rotateLineInView("YinX", -Math.PI / 4)
+  //     obj.widgetInstance.rotateLineInView("YinZ", -Math.PI / 4)
+  //     // obj.widgetInstance.rotateLineInView("YinX", 90)
+  //     //  obj.widgetInstance.invokeInteractionEvent("rotateLine")
+  //     updateMPR(widget, objArr, center, windowWidth, windowCenter);
+  //   })
+  //   obj.ctx = ctx;
+  //   objArr.push(obj)
+  // }
+  // createVTIObject(axialCanvas, imageData, widget, 4)
+  // createVTIObject(coronalCanvas, imageData, widget, 5)
+  // createVTIObject(sagittalCanvas, imageData, widget, 6)
+  // console.log(widgetState.getCenter())
+  // let center = [200.801, 200.801, 22]
+  // widget.setCenter(center);
+  // let otherLineHandle = objArr[0].widgetInstance.getOtherLineHandle("XinY")
+  // let otherLineVector = otherLineHandle.getDirection()
+  // console.log("XinY", otherLineVector)
+  // otherLineHandle = objArr[0].widgetInstance.getOtherLineHandle("ZinY")
+  // otherLineVector = otherLineHandle.getDirection()
+  // console.log("ZinY", otherLineVector)
+  // otherLineHandle = objArr[0].widgetInstance.getOtherLineHandle("ZinX")
+  // otherLineVector = otherLineHandle.getDirection()
+  // console.log("ZinX", otherLineVector)
+  // otherLineHandle = objArr[0].widgetInstance.getOtherLineHandle("YinX")
+  // otherLineVector = otherLineHandle.getDirection()
+  // console.log("YinX", otherLineVector)
+  // otherLineHandle = objArr[0].widgetInstance.getOtherLineHandle("XinZ")
+  // otherLineVector = otherLineHandle.getDirection()
+  // console.log("XinZ", otherLineVector)
+  // otherLineHandle = objArr[0].widgetInstance.getOtherLineHandle("YinZ")
+  // otherLineVector = otherLineHandle.getDirection()
+  // console.log("YinZ", otherLineVector)
+  // // widget.get().widgetState.setRotationHandleXinY0(45)
+  // console.log("widget", widget.get())
+  // console.log("objArr", widget.get().behavior, widget.get().widgetState.getStatesWithLabel('rotation'))
+  // console.log(widget.get().widgetState.getStatesWithLabel("sphere")[1].getState())
+  // //  widget.get().widgetState.getStatesWithLabel('rotation')[0].setOffset()
+  // updateMPR(widget, objArr, center, windowWidth, windowCenter)
+  // console.log("widgetState", widgetState, widgetState.getCenter(), widgetState.getAxisXinY().get());
   MultiSliceImageMapper(imageData, windowWidth, windowCenter);
 }
-function updateMPR(widget, objArr, center) {
+function dicom_to_8byte_from_hight_byte_at_ww_wl(pixdate, wl_y, ww) {
+  //计算最小值
+  var min = Math.min(pixdate);
+  //拨正
+  var wl = wl_y;
+  if (min < 0) {
+    for (var pix_num = 0; pix_num < pixdate.length; pix_num++) {
+      pixdate[pix_num] = pixdate[pix_num] - min;
+    }
+    var wl = wl_y - min;
+  }
+  const window_min = wl - ww / 2;
+  const window_max = wl + ww / 2;
+  const ww_wl_a = 255 / ww;
+  const ww_wl_b = window_min * 255 / ww;
+  var lut = new Uint8ClampedArray(65536);
+  var lueLenght = lut.length;
+  for (var i = 0; i < lueLenght; i++) {
+    if (i < window_min) {
+      lut[i] = 0;
+    } else if (i > window_max) {
+      lut[i] = 255;
+    } else {
+      lut[i] = parseInt(i * ww_wl_a - ww_wl_b);
+    }
+  }
+  const pixdataLenght = pixdate.length;
+  var pixUint8ArrTC = new Uint8Array(pixdataLenght * 4);
+  for (var a = 0, b = 0; a < pixdataLenght; a++) {
+    let lut_val = lut[pixdate[a]];
+    if (lut_val == undefined) {
+      lut_val = lut[Math.round(pixdate[a])];
+    }
+    pixUint8ArrTC[b] = pixUint8ArrTC[b + 1] = pixUint8ArrTC[b + 2] = lut_val;
+    pixUint8ArrTC[b + 3] = 255;
+    b += 4;
+  }
+  return pixUint8ArrTC;
+}
+function updateMPR(widget, objArr, center, windowWidth, windowCenter) {
   for (let obj of objArr) {
     const modified = widget.updateReslicePlane(obj.reslice, obj.viewtype);
     let resliceAxes = obj.reslice.getResliceAxes();
@@ -79504,6 +79793,8 @@ function updateMPR(widget, objArr, center) {
     const width = imageData2.getDimensions()[0];
     const height = imageData2.getDimensions()[1];
     const bounds = obj.resliceActor.getBounds();
+    const spacing = imageData2.getSpacing();
+    console.log(obj.viewtype, imageData2.getDimensions(), imageData2.getSpacing(), obj.resliceActor.getBounds());
     //计算切片像素
     const displayX = bounds[1] - bounds[0]; // X轴方向显示宽度
     const displayY = bounds[3] - bounds[2]; // Y轴方向显示高度
@@ -79512,31 +79803,27 @@ function updateMPR(widget, objArr, center) {
     let imgheight = 0;
     let linesX = 0;
     let linesY = 0;
+    imgwidth = width * spacing[0];
+    imgheight = height * spacing[1];
     if (obj.viewtype == 4) {
-      imgwidth = displayY;
-      imgheight = displayZ;
+      // imgwidth = displayY;
+      // imgheight = displayZ;
       linesX = center[1];
       linesY = center[2];
     } else if (obj.viewtype == 5) {
-      imgwidth = displayX;
-      imgheight = displayZ;
+      // imgwidth = displayX;
+      // imgheight = displayZ;
       linesX = center[0];
       linesY = center[2];
     } else {
-      imgwidth = displayX;
-      imgheight = displayY;
+      // imgwidth = displayX;
+      // imgheight = displayY;
       linesX = center[0];
       linesY = center[1];
     }
-    let buffer = new Uint8ClampedArray(image);
-    const rgbaBuffer = new Uint8ClampedArray(width * height * 4);
-    for (let i = 0; i < buffer.length; i++) {
-      rgbaBuffer[i * 4] = buffer[i]; // R
-      rgbaBuffer[i * 4 + 1] = buffer[i]; // G
-      rgbaBuffer[i * 4 + 2] = buffer[i]; // B
-      rgbaBuffer[i * 4 + 3] = 255; // A
-    }
-    const imageDataObj = new ImageData(rgbaBuffer, width, height);
+    console.log(image);
+    const rgbaBuffer = dicom_to_8byte_from_hight_byte_at_ww_wl(image, windowCenter, windowWidth);
+    const imageDataObj = new ImageData(new Uint8ClampedArray(rgbaBuffer), width, height);
 
     // 创建临时Canvas存放ImageData
     const tempCanvas = document.createElement('canvas');
@@ -79557,86 +79844,187 @@ function updateMPR(widget, objArr, center) {
     ctx.stroke();
   }
 }
+function calculateB2(a) {
+  return 15.8 * Math.pow(a, -0.68);
+}
 function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
-  const loadimage = new _loadimage__WEBPACK_IMPORTED_MODULE_7__["default"]();
-  const mprrendering = new _rendingmpr__WEBPACK_IMPORTED_MODULE_8__["default"]();
+  const loadimage = new _loadimage__WEBPACK_IMPORTED_MODULE_10__["default"]();
+  const mprrendering = new _rendingmpr__WEBPACK_IMPORTED_MODULE_11__["default"]();
   const {
     viewAttributes,
     view3D,
     widget,
     widgetState
   } = mprrendering.createRenderingPage();
+  viewObj = viewAttributes;
   // 将加载的图像数据设置到一个假设的控件 `widget` 中进行显示
   // console.log(imageData)
   widget.setImage(imageData);
-  // 调用封装函数，创建一个 vtkCursor3D 边框
-  // display3d.setupCursor3D(view3D);
-  // renderVolume(imageData, view3D);
+  const outline = _kitware_vtk_js_Filters_General_OutlineFilter__WEBPACK_IMPORTED_MODULE_3__["default"].newInstance();
+  outline.setInputData(imageData);
+  const outlineMapper = _kitware_vtk_js_Rendering_Core_Mapper__WEBPACK_IMPORTED_MODULE_2__["default"].newInstance();
+  outlineMapper.setInputData(outline.getOutputData());
+  const outlineActor = _kitware_vtk_js_Rendering_Core_Actor__WEBPACK_IMPORTED_MODULE_1__["default"].newInstance();
+  outlineActor.setMapper(outlineMapper);
+  view3D.renderer.addActor(outlineActor);
   // 对每个视图的属性进行操作，`viewAttributes` 是包含多个视图属性的数组
-  console.log(viewAttributes);
   viewAttributes.forEach((obj, i) => {
     // 设置该视图的重采样输入数据为加载的图像数据
     obj.reslice.setInputData(imageData);
     setColorProperties(obj, windowWidth, windowCenter);
     // 将该视图的重采样演员添加到渲染器中
     obj.renderer.addActor(obj.resliceActor);
+    view3D.renderer.addActor(obj.resliceActor);
     // 遍历并将该视图中的球体演员添加到渲染器中
     obj.sphereActors.forEach(actor => {
-      // obj.renderer.addActor(actor);
-      // view3D.renderer.addActor(actor);
+      obj.renderer.addActor(actor);
+      view3D.renderer.addActor(actor);
+    });
+    console.log(obj.interactor);
+    let mouseDrawing = false;
+    let startX, startY;
+    let currentLine = null;
+    let previousPosition = {};
+    const container = obj.grw.getContainer();
+    const svg = container.querySelector('svg');
+    // 获得svg实际高度
+    const svgHeight = svg.height.baseVal.value;
+    obj.interactor.onMouseEnter(e => {
+      console.log(e);
+    });
+    obj.interactor.onMouseMove(e => {
+      if (!mouseDrawing) return;
+      if (eventType == 2) {
+        const currentPosition = e.position;
+        const renderer = obj.renderer;
+        const camera = renderer.getActiveCamera();
+        // 计算鼠标移动的增量
+        let deltaX = currentPosition.x - previousPosition.x;
+        let deltaY = currentPosition.y - previousPosition.y;
+        previousPosition = JSON.parse(JSON.stringify(currentPosition));
+        // 根据相机缩放尺寸合理平移相机位置
+        let scale = camera.getParallelScale();
+        // let bl = 160 / scale
+        let canvasH = container.offsetHeight;
+        console.log(canvasH, calculateB(canvasH));
+        let bl = calculateB(canvasH) * scale / 200;
+        deltaX = -deltaX * bl;
+        deltaY = deltaY * bl;
+        if (i == 0) {
+          camera.translate(0, deltaX, -deltaY);
+        } else if (i == 1) {
+          camera.translate(deltaX, 0, -deltaY);
+        } else {
+          camera.translate(deltaX, deltaY, 0);
+        }
+        renderer.resetCameraClippingRange();
+        obj.interactor.render();
+      }
+      if (eventType == 3) {
+        const currentPosition = e.position;
+        const renderer = obj.renderer;
+        const camera = renderer.getActiveCamera();
+        const deltaY = currentPosition.y - previousPosition.y;
+        previousPosition = JSON.parse(JSON.stringify(currentPosition));
+        // 缩放相机
+        console.log(camera);
+        let scale = camera.getParallelScale();
+        console.log(camera.getPhysicalScale());
+        scale -= deltaY * 0.5;
+        if (scale < 1) {
+          scale = 1;
+        }
+        console.log(scale);
+        camera.setParallelScale(scale);
+        renderer.resetCameraClippingRange();
+        obj.interactor.render();
+      }
+      if (eventType == 4) {
+        currentLine.setAttribute('x2', e.position.x / 1.8);
+        currentLine.setAttribute('y2', svgHeight - e.position.y / 1.8);
+      }
+    });
+    obj.interactor.onLeftButtonRelease(e => {
+      console.log(e);
+      mouseDrawing = false;
+      currentLine = null;
     });
     obj.interactor.onLeftButtonPress(e => {
-      const bounds = obj.resliceActor.getBounds(); // 返回 [xMin, xMax, yMin, yMax, zMin, zMax]
-      console.log(obj.resliceActor, bounds);
-      const displayWidth = bounds[1] - bounds[0]; // X轴方向显示宽度
-      const displayHeight = bounds[3] - bounds[2]; // Y轴方向显示高度
+      mouseDrawing = true;
+      if (eventType == 2) {
+        previousPosition = e.position;
+      }
+      if (eventType == 3) {
+        previousPosition = e.position;
+      }
+      if (eventType == 4) {
+        startX = e.position.x / 1.8;
+        startY = svgHeight - e.position.y / 1.8;
+        currentLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        currentLine.setAttribute('stroke', '#ff0000');
+        currentLine.setAttribute('stroke-width', '2');
+        currentLine.setAttribute('x1', startX);
+        currentLine.setAttribute('y1', startY);
+        currentLine.setAttribute('x2', startX);
+        currentLine.setAttribute('y2', startY);
+        svg.appendChild(currentLine);
+      }
 
-      console.log("displayWidth", displayWidth, displayHeight);
-      console.log("widgetState", widgetState, widgetState.getCenter());
-      const inputImage = obj.reslice.getInputData();
-      console.log('Input Image Dimensions:', inputImage.getDimensions());
-      const imageData2 = obj.reslice.getOutputData();
-      const position = e.position; // 获取鼠标点击位置
-      const x = position.x;
-      const y = position.y;
-      obj.widgetInstance.rotateLineInView("YinX", 45);
-      loadimage.updateReslice(view3D, widget, widgetState, {
-        viewType,
-        reslice,
-        actor: obj.resliceActor,
-        renderer: obj.renderer,
-        resetFocalPoint: true,
-        // 重置焦点到图像中心
-        computeFocalPointOffset: true,
-        // 允许计算当前偏移
-        sphereSources: obj.sphereSources,
-        slider: obj.slider
-      });
+      // 创建SVG线条元素
+
+      // let center = widgetState.getCenter();
+      // console.log("center", center)
+      // let otherLineHandle = obj.widgetInstance.getOtherLineHandle("XinY")
+      // let otherLineVector = otherLineHandle.getDirection()
+      // console.log("XinY", otherLineVector)
+      // otherLineHandle = obj.widgetInstance.getOtherLineHandle("ZinY")
+      // otherLineVector = otherLineHandle.getDirection()
+      // console.log("ZinY", otherLineVector)
+      // otherLineHandle = obj.widgetInstance.getOtherLineHandle("ZinX")
+      // otherLineVector = otherLineHandle.getDirection()
+      // console.log("ZinX", otherLineVector)
+      // otherLineHandle = obj.widgetInstance.getOtherLineHandle("YinX")
+      // otherLineVector = otherLineHandle.getDirection()
+      // console.log("YinX", otherLineVector)
+      // otherLineHandle = obj.widgetInstance.getOtherLineHandle("XinZ")
+      // otherLineVector = otherLineHandle.getDirection()
+      // console.log("XinZ", otherLineVector)
+      // otherLineHandle = obj.widgetInstance.getOtherLineHandle("YinZ")
+      // otherLineVector = otherLineHandle.getDirection()
+      // console.log("YinZ", otherLineVector)
+      // const imageData2 = obj.reslice.getOutputData()
+      // console.log(imageData2)
+      // const image = imageData2.getPointData().getScalars().getData();
+      // console.log(image)
+      // console.log(obj.resliceActor);
+
+      // let img = obj.reslice.getOutputData()
+      // console.log(img, img.getDimensions())
     });
-    obj.widgetInstance.onWidgetChange(e => {
-      // console.log(obj.widgetInstance)
-      // console.log('actor', obj.renderer.getActors()[0].get());
-      // const displayPos = e.position;
-      // const worldPos = screenToWorld(displayPos, obj.renderer);
-      // console.log('World Position:', worldPos);
-      // const hoveredView = e.pokedRenderer;
-      // console.log("事件视图", hoveredView)
-      widgetState.getStatesWithLabel("line").forEach(state => {
-        // 判断是激活状态
-        if (state.getActive()) {
-          // console.log('HoverEvent', e);
-          state.setScale3(2.5, 2.5, 1000);
-        } else {
-          state.setScale3(1, 1, 1000);
-        }
-      });
-    });
+    // obj.widgetInstance.onWidgetChange((e) => {
+    // console.log(obj.widgetInstance)
+    // console.log('actor', obj.renderer.getActors()[0].get());
+    // const displayPos = e.position;
+    // const worldPos = screenToWorld(displayPos, obj.renderer);
+    // console.log('World Position:', worldPos);
+    // const hoveredView = e.pokedRenderer;
+    // console.log("事件视图", hoveredView)
+    // widgetState.getStatesWithLabel("line").forEach((state) => {
+    //   // 判断是激活状态
+    //   if (state.getActive()) {
+    //     // console.log('HoverEvent', e);
+    //     state.setScale3(2.5, 2.5, 1000);
+    //   } else {
+    //     state.setScale3(1, 1, 1000)
+    //   }
+    // })
+    // })
 
     // obj.renderer.getActiveCamera().setParallelScale(currentScale * 0.5); 
     // console.log(obj.renderer.getActiveCamera().getParallelScale())
     const reslice = obj.reslice;
-    const viewType = _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_4__.xyzToViewType[i];
-    console.log(_kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_4__.xyzToViewType);
+    const viewType = _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_7__.xyzToViewType[i];
+    console.log(_kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_7__.xyzToViewType);
     // 对所有视图进行操作，确保在当前视图进行交互时能够正确更新切片
     viewAttributes.forEach(v => {
       v.widgetInstance.onWidgetChange(event => {
@@ -79662,7 +80050,7 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
       // 可以根据当前交互方法判断是否允许更新焦点
       interactionMethodName => {
         console.log("interactionMethodName", interactionMethodName);
-        const canUpdateFocalPoint = interactionMethodName === _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_4__.InteractionMethodsName.RotateLine;
+        const canUpdateFocalPoint = interactionMethodName === _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_7__.InteractionMethodsName.RotateLine;
         const activeViewType = widget.getWidgetState().getActiveViewType();
         // 如果当前视图是活动视图或不能更新焦点，则允许计算焦点偏移
         console.log("activeViewType", activeViewType, canUpdateFocalPoint);
@@ -79694,8 +80082,14 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter) {
       slider: obj.slider
     });
     // 渲染当前视图
+    obj.renderer.getActiveCamera().setParallelScale(200);
     obj.interactor.render();
   });
+  // 重置 3D 渲染器的相机，确保视图显示正确
+  view3D.renderer.resetCamera();
+  // 重置相机的裁剪范围
+  view3D.renderer.resetCameraClippingRange();
+  view3D.renderWindow.render();
 }
 // 封装函数，检查数组有效性并设置颜色窗口和颜色中心
 function setColorProperties(obj, windowWidth, windowCenter) {

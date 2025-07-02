@@ -1,35 +1,18 @@
-// import "@kitware/vtk.js/favicon";
-
-// Load the rendering pieces we want to use (for both WebGL and WebGPU)
 import "@kitware/vtk.js/Rendering/Profiles/All";
-import vtkInteractorStyleMPRSlice from "@kitware/vtk.js/Interaction/Style/InteractorStyleMPRSlice";
 import vtkAnnotatedCubeActor from "@kitware/vtk.js/Rendering/Core/AnnotatedCubeActor";
 import vtkGenericRenderWindow from "@kitware/vtk.js/Rendering/Misc/GenericRenderWindow";
 import vtkImageMapper from "@kitware/vtk.js/Rendering/Core/ImageMapper";
 import vtkImageReslice from "@kitware/vtk.js/Imaging/Core/ImageReslice";
 import vtkImageSlice from "@kitware/vtk.js/Rendering/Core/ImageSlice";
-import vtkInteractorStyleImage from "@kitware/vtk.js/Interaction/Style/InteractorStyleImage";
 import vtkInteractorStyleTrackballCamera from "@kitware/vtk.js/Interaction/Style/InteractorStyleTrackballCamera";
-import vtkInteractorStyleUnicam from "@kitware/vtk.js/Interaction/Style/InteractorStyleUnicam";
-import InteractorStyleHMDXR from "@kitware/vtk.js/Interaction/Style/InteractorStyleHMDXR";
-
+import vtkInteractorStyle from '@kitware/vtk.js/Rendering/Core/InteractorStyle';
 import vtkMath from "@kitware/vtk.js/Common/Core/Math";
 import vtkOrientationMarkerWidget from "@kitware/vtk.js/Interaction/Widgets/OrientationMarkerWidget";
 import vtkResliceCursorWidget from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget";
 import vtkWidgetManager from "@kitware/vtk.js/Widgets/Core/WidgetManager";
-
-import vtkSphereSource from "@kitware/vtk.js/Filters/Sources/SphereSource";
 import { CaptureOn } from "@kitware/vtk.js/Widgets/Core/WidgetManager/Constants";
 import { SlabMode } from "@kitware/vtk.js/Imaging/Core/ImageReslice/Constants";
 import { xyzToViewType } from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants";
-import vtkActor from "@kitware/vtk.js/Rendering/Core/Actor";
-import vtkMapper from "@kitware/vtk.js/Rendering/Core/Mapper";
-import Display3D from "./load3d";
-import vtkInteractorStyle from '@kitware/vtk.js/Rendering/Core/InteractorStyle';
-import a from './a.js';
-
-// 自定义交互器样式
-
 
 
 class MPRRendering {
@@ -68,20 +51,28 @@ class MPRRendering {
   setupLayoutForMPR(viewColors, showDebugActors, appCursorStyles) {
     const viewAttributes = [];
     let view3D = null;
-    const display3d = new Display3D();
     // 创建vtk的ResliceCursor Widget实例
     const widget = vtkResliceCursorWidget.newInstance();
     window.va = viewAttributes;
     window.widget = widget;
     const widgetState = widget.getWidgetState();
     console.log(widgetState)
-    widgetState.getStatesWithLabel("sphere").forEach((handle) => handle.setScale1(10));
-    const checkboxOrthogonality = document.getElementById("checkboxOrthogonality");
-    // 获取容器元素并设置样式
+    widgetState.getStatesWithLabel("sphere").forEach((handle) => handle.setScale1(7));
+    widgetState.getStatesWithLabel("line").forEach((state) => state.setScale3(1.5, 1.5, 1));
+
+    widgetState.getStatesWithLabel("line")[0].setColor3(46, 213, 115);
+    widgetState.getStatesWithLabel("line")[1].setColor3(9, 132, 227);
+    widgetState.getStatesWithLabel("line")[2].setColor3(255, 71, 87);
+    widgetState.getStatesWithLabel("line")[3].setColor3(9, 132, 227);
+    widgetState.getStatesWithLabel("line")[4].setColor3(255, 71, 87);
+    widgetState.getStatesWithLabel("line")[5].setColor3(46, 213, 115);
+    console.log(widgetState.getStatesWithLabel("line"))
+    // 调整标签为 'center' 的所有状态的不透明度为 128
+    widgetState.getStatesWithLabel("center").forEach((state) => state.setOpacity(128));
     const container = document.getElementById("container");
     container.innerHTML = "";
 
-    const { createdElements, createdSliderElements } = this.createViewWithButtons(container, 4);
+    const { createdElements, createdSliderElements, resetElements } = this.createViewWithButtons(container, 4);
     // 通过访问 createdViews 数组来操作这些视图元素
     createdElements.forEach((element, i) => {
       // 例如，修改第一个视图的背景颜色
@@ -162,19 +153,15 @@ class MPRRendering {
         // 将小部件的缩放方式设置为基于像素
         obj.widgetInstance.setScaleInPixels(true);
         // 调整交线的空距
-        obj.widgetInstance.setHoleWidth(20);
+        obj.widgetInstance.setHoleWidth(30);
         // 设置小部件为非无限线（即长度有限）
-        obj.widgetInstance.setInfiniteLine(false);
+        obj.widgetInstance.setInfiniteLine(true);
         // 调整标签为 'line' 的所有状态的缩放比例
         // x 和 y 轴方向的缩放因子为 2（变宽和变高）
         // z 轴方向的缩放因子为 300（在深度方向拉长）
-        widgetState.getStatesWithLabel("line").forEach((state) => state.setScale3(1, 1, 1000));
-        // 添加鼠标悬停效果
-        console.log(widgetState.getStatesWithLabel("line")[0])
-        // 调整标签为 'center' 的所有状态的不透明度为 128
-        widgetState.getStatesWithLabel("center").forEach((state) => state.setOpacity(10));
+
         // 设置小部件是否保持正交性（即垂直关系），值取决于 checkboxOrthogonality 的选中状态
-        obj.widgetInstance.setKeepOrthogonality(checkboxOrthogonality.checked);
+        obj.widgetInstance.setKeepOrthogonality(true);
         // 设置小部件的鼠标指针样式，`appCursorStyles` 是自定义的样式对象
         obj.widgetInstance.setCursorStyles(appCursorStyles);
         // 启用小部件的拾取功能（即可以通过鼠标交互选择小部件）
@@ -225,96 +212,102 @@ class MPRRendering {
       //-------------------------------------------------------------------------------------------------------------------------------
       // Create sphere for each 2D views which will be displayed in 3D
       // Define origin, point1 and point2 of the plane used to reslice the volume
-      for (let j = 0; j < 3; j++) {
-        // 创建一个新的 vtkSphereSource 实例，用于生成球体
-        const sphere = vtkSphereSource.newInstance();
-        // 设置球体的半径为 10
-        sphere.setRadius(1);
+      // for (let j = 0; j < 3; j++) {
+      //   // 创建一个新的 vtkSphereSource 实例，用于生成球体
+      //   const sphere = vtkSphereSource.newInstance();
+      //   // 设置球体的半径为 10
+      //   sphere.setRadius(10);
 
-        // 创建一个新的 vtkMapper 实例，负责将数据映射到渲染中
-        const mapper = vtkMapper.newInstance();
-        // 将球体的输出连接到映射器，以便映射器可以渲染球体
-        mapper.setInputConnection(sphere.getOutputPort());
+      //   // 创建一个新的 vtkMapper 实例，负责将数据映射到渲染中
+      //   const mapper = vtkMapper.newInstance();
+      //   // 将球体的输出连接到映射器，以便映射器可以渲染球体
+      //   mapper.setInputConnection(sphere.getOutputPort());
 
-        // 创建一个新的 vtkActor 实例，负责在渲染中显示数据
-        const actor = vtkActor.newInstance();
-        // 将映射器应用到演员上，使其渲染球体
-        actor.setMapper(mapper);
+      //   // 创建一个新的 vtkActor 实例，负责在渲染中显示数据
+      //   const actor = vtkActor.newInstance();
+      //   // 将映射器应用到演员上，使其渲染球体
+      //   actor.setMapper(mapper);
 
-        // 设置球体演员的颜色，viewColors[i] 应该是一个 RGB 颜色数组
-        actor.getProperty().setColor(...viewColors[i]);
+      //   // 设置球体演员的颜色，viewColors[i] 应该是一个 RGB 颜色数组
+      //   actor.getProperty().setColor(...viewColors[i]);
 
-        // 设置球体演员的可见性，showDebugActors 为布尔值，决定是否显示球体
-        actor.setVisibility(showDebugActors);
+      //   // 设置球体演员的可见性，showDebugActors 为布尔值，决定是否显示球体
+      //   actor.setVisibility(showDebugActors);
 
-        // 将演员添加到 obj.sphereActors 数组中，便于管理和后续操作
-        obj.sphereActors.push(actor);
+      //   // 将演员添加到 obj.sphereActors 数组中，便于管理和后续操作
+      //   obj.sphereActors.push(actor);
 
-        // 将球体源添加到 obj.sphereSources 数组中，便于管理和后续操作
-        obj.sphereSources.push(sphere);
-      }
+      //   // 将球体源添加到 obj.sphereSources 数组中，便于管理和后续操作
+      //   obj.sphereSources.push(sphere);
+      // }
 
       if (i < 3) {
         viewAttributes.push(obj);
       } else {
-        // view3D = obj;
-        // // 调用封装函数，创建一个 vtkCursor3D 边框
-        // display3d.setupCursor3D(view3D);
+        view3D = obj;
       }
-      // create axes
-      const axes = vtkAnnotatedCubeActor.newInstance();
-      axes.setDefaultStyle({
-        text: "+X",
-        fontStyle: "bold",
-        fontFamily: "Arial",
-        fontColor: "black",
-        fontSizeScale: (res) => res / 2,
-        faceColor: this.createRGBStringFromRGBValues(viewColors[0]),
-        faceRotation: 0,
-        edgeThickness: 0.1,
-        edgeColor: "black",
-        resolution: 400,
-      });
-      // axes.setXPlusFaceProperty({ text: '+X' });
-      axes.setXMinusFaceProperty({
-        text: "-X",
-        faceColor: this.createRGBStringFromRGBValues(viewColors[0]),
-        faceRotation: 90,
-        fontStyle: "italic",
-      });
-      axes.setYPlusFaceProperty({
-        text: "+Y",
-        faceColor: this.createRGBStringFromRGBValues(viewColors[1]),
-        fontSizeScale: (res) => res / 4,
-      });
-      axes.setYMinusFaceProperty({
-        text: "-Y",
-        faceColor: this.createRGBStringFromRGBValues(viewColors[1]),
-        fontColor: "white",
-      });
-      axes.setZPlusFaceProperty({
-        text: "+Z",
-        faceColor: this.createRGBStringFromRGBValues(viewColors[2]),
-      });
-      axes.setZMinusFaceProperty({
-        text: "-Z",
-        faceColor: this.createRGBStringFromRGBValues(viewColors[2]),
-        faceRotation: 45,
-      });
+      // 只有3d视图才加方块
+      if (i == 3) {
+        // create axes
+        const axes = vtkAnnotatedCubeActor.newInstance();
+        axes.setDefaultStyle({
+          text: "+X",
+          fontStyle: "bold",
+          fontFamily: "Arial",
+          fontColor: "black",
+          // fontSizeScale: (res) => res / 2,
+          faceColor: this.createRGBStringFromRGBValues(viewColors[0]),
+          faceRotation: 0,
+          edgeThickness: 0.1,
+          edgeColor: "black",
+          resolution: 400,
+        });
+        // axes.setXPlusFaceProperty({ text: '+X' });
+        axes.setXMinusFaceProperty({
+          text: "-X",
+          faceColor: this.createRGBStringFromRGBValues(viewColors[0]),
+          // faceRotation: 90,
+          // fontStyle: "italic",
+        });
+        axes.setYPlusFaceProperty({
+          text: "+Y",
+          faceColor: this.createRGBStringFromRGBValues(viewColors[1]),
+          // fontSizeScale: (res) => res / 4,
+        });
+        axes.setYMinusFaceProperty({
+          text: "-Y",
+          faceColor: this.createRGBStringFromRGBValues(viewColors[1]),
+          fontColor: "white",
+        });
+        axes.setZPlusFaceProperty({
+          text: "+Z",
+          faceColor: this.createRGBStringFromRGBValues(viewColors[2]),
+        });
+        axes.setZMinusFaceProperty({
+          text: "-Z",
+          faceColor: this.createRGBStringFromRGBValues(viewColors[2]),
+          // faceRotation: 45,
+        });
 
-      // create orientation widget
-      obj.orientationWidget = vtkOrientationMarkerWidget.newInstance({
-        actor: axes,
-        interactor: obj.renderWindow.getInteractor(),
-      });
-      obj.orientationWidget.setEnabled(true);
-      obj.orientationWidget.setViewportCorner(vtkOrientationMarkerWidget.Corners.BOTTOM_RIGHT);
-      obj.orientationWidget.setViewportSize(0.15);
-      obj.orientationWidget.setMinPixelSize(100);
-      obj.orientationWidget.setMaxPixelSize(300);
+        // create orientation widget
+        obj.orientationWidget = vtkOrientationMarkerWidget.newInstance({
+          actor: axes,
+          interactor: obj.renderWindow.getInteractor(),
+        });
+        obj.orientationWidget.setEnabled(true);
+        obj.orientationWidget.setViewportCorner(vtkOrientationMarkerWidget.Corners.BOTTOM_RIGHT);
+        obj.orientationWidget.setViewportSize(0.15);
+        obj.orientationWidget.setMinPixelSize(100);
+        obj.orientationWidget.setMaxPixelSize(300);
+      }
       if (i < 3) {
         obj.slider = createdSliderElements[i];
         // 为滑块添加事件监听器，当滑块值发生改变时触发
+        resetElements[i].addEventListener("click", () => {
+          obj.renderer.resetCamera()
+          obj.renderer.getActiveCamera().setParallelScale(200); // 例如，将当前值减半
+          obj.interactor.render();
+        })
         createdSliderElements[i].addEventListener("input", (ev) => {
           // 检查是否存在有效的图像
           const image = widget.getWidgetState().getImage();
@@ -363,6 +356,7 @@ class MPRRendering {
   createViewWithButtons(controlContainer, numElements = 4) {
     const createdElements = []; // 用于存储创建的元素
     const createdSliderElements = [];
+    const resetElements = [];
     const element = document.createElement("div");
     element.style.width = "100%";
     element.style.height = "100%";
@@ -376,59 +370,46 @@ class MPRRendering {
       const elementParent = document.createElement("div");
       elementParent.style.width = "100%";
       elementParent.style.height = "100%";
-      elementParent.style.border = "1px solid black"; // 可选，便于调试
+      elementParent.style.position = "relative";
+      // elementParent.style.border = "1px solid black"; // 可选，便于调试
       element.appendChild(elementParent);
-      // 创建按钮容器
-      const elementbutton = document.createElement("div");
-      elementbutton.style.width = "100%";
-      elementbutton.style.height = "10%";
-      // elementbutton.style.border = "1px solid black"; // 可选，便于调试
-      elementParent.appendChild(elementbutton);
-      const button = document.createElement("div");
-      button.style.width = "100%";
-      button.style.height = "100%";
-      button.style.display = "flex";
-      // button.style.border = "1px solid black"; // 可选，便于调试
-      elementbutton.appendChild(button);
+
+      const siderDiv = document.createElement("div");
+      siderDiv.style.width = "20px";
+      siderDiv.style.height = "100%";
+      siderDiv.style.position = "absolute";
+      siderDiv.style.zIndex = "9";
+      elementParent.appendChild(siderDiv);
+      let h = siderDiv.offsetHeight - 25
       if (i < 3) {
+        const reset = this.createResetButton();
+        resetElements.push(reset);
+        elementParent.appendChild(reset);
         const slider = document.createElement("input");
         slider.type = "range";
         slider.min = 0;
         slider.max = 300;
-        slider.style.bottom = "0px";
-        slider.style.width = "100%";
-        slider.style.height = "100%";
-        slider.style.margin = "0px";
-        button.appendChild(slider);
+        slider.className = "vertical-slider";
+        slider.style.width = h + "px";
+        siderDiv.appendChild(slider);
         createdSliderElements.push(slider);
       }
 
       // 创建图像容器
       const elementImage = document.createElement("div");
       elementImage.style.width = "100%";
-      elementImage.style.height = "90%";
+      elementImage.style.height = "100%";
       elementImage.style.position = "relative";
       // 添加一个
       elementImage.innerHTML = `<svg id="lineSVG" style="position: absolute;
     top: 0;
     left: 0;width:100%;height:100%" xmlns="http://www.w3.org/2000/svg"></svg>`
-      // elementImage.style.display = "flex";
-      // elementImage.innerText = "这是底部显示文本"; // 你可以修改这里的文本内容
-      // elementImage.style.border = "1px solid red"; // 可选，便于调试
       elementParent.appendChild(elementImage);
-      // 创建按钮并添加到左侧部分
-      // const axialButton = this.createColorButton("Axial", "axial_" + i); // 每个按钮的 id 保持唯一
-      // elementleft.appendChild(axialButton);
-      // axialButton.addEventListener("click", function () {
-      //   alert("达到最高点击次数！");
-      // });
-
-      // 将创建的 elementParent 存储在数组中
       createdElements.push(elementImage);
     }
 
     // 返回包含所有创建元素的数组
-    return { createdElements, createdSliderElements };
+    return { createdElements, createdSliderElements, resetElements };
   }
   // 创建一个按钮的辅助函数
   createColorButton(labelText, buttonId) {
@@ -442,7 +423,18 @@ class MPRRendering {
     button.style.pointerEvents = "auto"; // 确保可以响应点击事件
     return button;
   }
-
+  createResetButton() {
+    let svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" t="1751254493988" class="icon" viewBox="0 0 1024 1024" version="1.1" p-id="7351" width="20" height="20"><path d="M867.89 574.16a30.73 30.73 0 0 0-37.52 21.92c-38 144.83-169.31 246-319.25 246a330.71 330.71 0 0 1-306.27-206.82h60.29l-92.78-123.5-91.82 123.5h58.88q1.23 3.72 2.53 7.4A391.65 391.65 0 0 0 511.12 903.5c177.86 0 333.58-120 378.69-291.82a30.73 30.73 0 0 0-21.92-37.52zM153.88 452.57a30.69 30.69 0 0 0 37.35-22.2A329.68 329.68 0 0 1 511.12 182c136.8 0 256.58 82 306.4 207h-60.66l92.78 123.5L941.46 389h-58.58a391.63 391.63 0 0 0-751.2 26.24 30.73 30.73 0 0 0 22.2 37.33z" fill="#ffffff" p-id="7352"/></svg>`
+    const reset = document.createElement("div");
+    reset.innerHTML = svg;
+    reset.style.width = "20px";
+    reset.style.height = "20px";
+    reset.style.position = "absolute";
+    reset.style.cursor = "pointer";
+    reset.style.left = "-5px";
+    reset.style.zIndex = "10";
+    return reset;
+  }
   createRGBStringFromRGBValues(rgb) {
     if (rgb.length !== 3) {
       return "rgb(0, 0, 0)";

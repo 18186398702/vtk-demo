@@ -12,105 +12,82 @@
     canvas {
       border: 1px solid #6e6e6e;
     }
+
+
+    /* 垂直滑块基础样式 */
+    .vertical-slider {
+      -webkit-appearance: none;
+      -webkit-appearance: slider-vertical;
+      appearance: none;
+      width: 200px;
+      height: 4px;
+      /* margin: 30px 0; */
+      background: transparent;
+      transform: rotate(90deg) translate(8px, -2px);
+      transform-origin: left;
+    }
+
+    /* 轨道样式 - 所有浏览器 */
+    .vertical-slider::-webkit-slider-runnable-track {
+      height: 4px;
+      background: #eee;
+      border-radius: 4px;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .vertical-slider::-moz-range-track {
+      height: 4px;
+      background: #eee;
+      border-radius: 4px;
+    }
+
+    /* 方形滑块样式 */
+    .vertical-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 10px;
+      height: 20px;
+      background: #ebebeb;
+      border: 1px solid rgb(80, 80, 80);
+      border-radius: 2px;
+      margin-top: -8px;
+      transform: rotate(90deg);
+      box-shadow: 0 2px 5px rgba(184, 184, 184, 0.2);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .vertical-slider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: #ffffff;
+      border: 2px solid #4e54c8;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+    }
+
+    /* 交互效果 */
+    .vertical-slider::-webkit-slider-thumb:hover {
+      transform: rotate(90deg) scale(1.1);
+      background: #f0f0f0;
+    }
   </style>
 </head>
 
 <body>
-  <div>
-    <table>
-      <tbody>
-
-
-        <tr>
-          <td>Scale in pixels:</td>
-          <td><input type="checkbox" id="checkboxScaleInPixels" checked="checked" /></td>
-        </tr>
-        <tr>
-          <td>Opacity :</td>
-          <td>
-            <input id="opacity" type="range" min="0" max="255" step="1" value="255" style="width: 100px" />
-          </td>
-          <td id="opacityValue">255</td>
-        </tr>
-        <tr>
-          <td>Slab Mode :</td>
-          <td>
-            <select id="slabMode">
-              <option id="slabModeMin" value="0">MIN</option>
-              <option id="slabModeMax" value="1">MAX</option>
-              <option id="slabModeMean" selected="selected" value="2">MEAN</option>
-              <option id="slabModeSum" value="3">SUM</option>
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <td>Slab Number of Slices :</td>
-          <td>
-            <input id="slabNumber" type="range" min="1" max="385.69547573182655" step="1" value="1"
-              style="width: 100px" />
-          </td>
-          <td id="slabNumberValue">1</td>
-        </tr>
-        <tr>
-          <td>Interpolation mode :</td>
-          <td>
-            <select id="selectInterpolation">
-              <option id="nearest" selected="selected">Nearest</option>
-              <option id="linear">Linear</option>
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <td>Window Level:</td>
-          <td><input type="checkbox" id="checkboxWindowLevel" checked="checked" /></td>
-        </tr>
-        <span>允许平移:</span>
-        <span><input type="checkbox" id="checkboxTranslation" checked="checked" /></span>
-
-        <span>显示旋转:</span>
-        <span><input type="checkbox" id="checkboxShowRotation" checked="checked" /></span>
-
-        <span>允许旋转:</span>
-        <span><input type="checkbox" id="checkboxRotation" checked="checked" /></span>
-
-        <span>保持垂直:</span>
-        <span><input type="checkbox" id="checkboxOrthogonality" checked="checked" /></span>
-        <span><button id="buttonReset">重置视图</button></span>
-
-        <tr>
-          <td><button id="buttonClearAll">清除3D显示</button></td>
-        </tr>
-        <tr>
-          <td>轴向截面(Axial):</td>
-          <td><input type="checkbox" id="checkboxAxial" /></td>
-        </tr>
-        <tr>
-          <td>冠状面(Coronal)</td>
-          <td><input type="checkbox" id="checkboxCoronal" /></td>
-        </tr>
-        <tr>
-          <td>矢状面(Sagittal)</td>
-          <td><input type="checkbox" id="checkboxSagittal" /></td>
-        </tr>
-        <label for="blendModeSelect">选择渲染模式：</label>
-        <select id="blendModeSelect">
-          <option value="Composite">Composite(默认)</option>
-          <option value="MaximumIntensity">MIP</option>
-        </select>
-
-      </tbody>
-    </table>
-  </div>
   <input type="file" id="dicomFileInput" webkitdirectory multiple="multiple" />
-  <div style="zoom:0.5" class="canvas-container">
+  <button onclick="ccc(1)">调窗</button>
+  <button onclick="ccc(2)">平移</button>
+  <button onclick="ccc(3)">缩放</button>
+  <!-- <div style="zoom:0.5" class="canvas-container">
     <canvas id="axial" width="512" height="512"></canvas>
     <canvas id="coronal" width="512" height="512"></canvas>
     <canvas id="sagittal" width="512" height="512"></canvas>
-  </div>
-  <div id="container" style="width: 400px;height: 300px; border: 1px solid red"></div>
+  </div> -->
+  <div id="container" style="width: 800px;height: 600px; border: 1px solid red"></div>
 
   <script src="./webvtk.js"></script>
   <script>
+
     // 文件选择框的变化事件
     dicomFileInput.addEventListener("change", function (event) {
       const files = event.target.files;
@@ -140,6 +117,9 @@
         // 捕获并处理 pian.load 中的错误
         console.error("加载 buffer 时发生错误:", error);
       }
+    }
+    function ccc(type) {
+      pian.changeEvent(type)
     }
   </script>
 </body>
