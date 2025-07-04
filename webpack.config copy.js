@@ -1,6 +1,6 @@
 var path = require('path');
 
-var entry = path.join(__dirname, './src/index.js').join(__dirname, './dist');
+var entry = path.join(__dirname, './src/index.js');
 const sourcePath = path.join(__dirname, './src');
 const outputPath = path.join(__dirname, './dist');
 

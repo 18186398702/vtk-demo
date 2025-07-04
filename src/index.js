@@ -3,34 +3,23 @@ import vtkCoordinate from '@kitware/vtk.js/Rendering/Core/Coordinate';
 import vtkActor from '@kitware/vtk.js/Rendering/Core/Actor';
 import vtkMapper from '@kitware/vtk.js/Rendering/Core/Mapper';
 import vtkOutlineFilter from '@kitware/vtk.js/Filters/General/OutlineFilter';
-import vtkGenericRenderWindow from "@kitware/vtk.js/Rendering/Misc/GenericRenderWindow";
-import vtkWidgetManager from "@kitware/vtk.js/Widgets/Core/WidgetManager";
-// Load the rendering pieces we want to use (for both WebGL and WebGPU)
 import "@kitware/vtk.js/Rendering/Profiles/All";
 import {
   xyzToViewType,
   InteractionMethodsName,
 } from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants";
 import SyntheticImageData from "./syntheticimage";
-import Display3D from "./load3d";
 import LoadImage from "./loadimage";
 import MPRRendering from "./rendingmpr";
-import vtkVolume from "@kitware/vtk.js/Rendering/Core/Volume";
-import vtkVolumeMapper from "@kitware/vtk.js/Rendering/Core/VolumeMapper";
-import vtkFullScreenRenderWindow from "@kitware/vtk.js/Rendering/Misc/FullScreenRenderWindow";
-import vtkBoundingBox from "@kitware/vtk.js/Common/DataModel/BoundingBox";
-import vtkColorTransferFunction from "@kitware/vtk.js/Rendering/Core/ColorTransferFunction";
-import vtkPiecewiseFunction from "@kitware/vtk.js/Common/DataModel/PiecewiseFunction";
-import vtkVolumeProperty from "@kitware/vtk.js/Rendering/Core/VolumeProperty";
-import vtkImageMapper from "@kitware/vtk.js/Rendering/Core/ImageMapper";
-import vtkImageReslice from "@kitware/vtk.js/Imaging/Core/ImageReslice";
-import vtkImageSlice from "@kitware/vtk.js/Rendering/Core/ImageSlice";
-import vtkResliceCursorWidget from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget";
 import vtkInteractorStyle from '@kitware/vtk.js/Rendering/Core/InteractorStyle';
 import vtkInteractorStyleImage from "@kitware/vtk.js/Interaction/Style/InteractorStyleImage";
-import { w } from '@kitware/vtk.js/macros2';
-// const mprrendering = new MPRRendering();
-// mprrendering.createRenderingPage();
+import { Demo3d, load3dColor } from "./3d";
+export function change3dColor(color) {
+  load3dColor(color)
+}
+
+
+
 function calculateB(a) {
   // 根据给定的数据点，使用分段线性回归进行近似
   // 我们将数据点分为几个区间，每个区间使用不同的线性方程
@@ -106,98 +95,17 @@ export function changeEvent(type) {
   }
 }
 
-export function load3D(arrayBuffer) {
+export function load3D(arrayBuffer, divElement) {
   if (!arrayBuffer) {
     // 检查输入是否有效
     throw new Error("arrayBuffer 不能为空！");
   }
   const syntheticImageData = new SyntheticImageData();
   const { imageData, windowWidth, windowCenter } = syntheticImageData.ImageData(arrayBuffer)
-  Demo3d(imageData)
+  Demo3d(imageData, divElement)
 }
 
-function Demo3d(source) {
-  const renderMainBox = document.getElementById("test1");
-  const fullScreenRenderer = vtkFullScreenRenderWindow.newInstance({
-    container: renderMainBox,
-    background: [0, 0, 0],
-  });
-  const renderer = fullScreenRenderer.getRenderer();
-  const renderWindow = fullScreenRenderer.getRenderWindow();
-  const volume = vtkVolume.newInstance();
-  const mapper = vtkVolumeMapper.newInstance();
 
-  mapper.setInputData(source);
-  volume.setMapper(mapper);
-
-  const sampleDistance =
-    0.7 *
-    Math.sqrt(
-      source
-        .getSpacing()
-        .map((v) => v * v)
-        .reduce((a, b) => a + b, 0)
-    );
-  mapper.setSampleDistance(sampleDistance);
-  mapper.setComputeNormalFromOpacity(false);
-  mapper.setGlobalIlluminationReach(0.0);
-  mapper.setVolumetricScatteringBlending(0.5);
-  mapper.setVolumeShadowSamplingDistFactor(5.0);
-
-  const volProp = vtkVolumeProperty.newInstance();
-  volProp.setInterpolationTypeToLinear();
-  volume
-    .getProperty()
-    .setScalarOpacityUnitDistance(
-      0,
-      vtkBoundingBox.getDiagonalLength(source.getBounds()) /
-      Math.max(...source.getDimensions())
-    );
-  volProp.setGradientOpacityMinimumValue(0, 0);
-  const dataArray =
-    source.getPointData().getScalars() ||
-    source.getPointData().getArrays()[0];
-  const dataRange = dataArray.getRange();
-  volume
-    .getProperty()
-    .setGradientOpacityMaximumValue(
-      0,
-      (dataRange[1] - dataRange[0]) * 0.05
-    );
-  volProp.setShade(true);
-  volProp.setUseGradientOpacity(0, false);
-  volProp.setGradientOpacityMinimumOpacity(0, 0.0);
-  volProp.setGradientOpacityMaximumOpacity(0, 1.0);
-  // volProp.setAmbient(0.0);
-  volProp.setDiffuse(2.0);
-  volProp.setSpecular(0.0);
-  volProp.setSpecularPower(0.0);
-  volProp.setUseLabelOutline(false);
-  // volProp.setLabelOutlineThickness(2);
-  volume.setProperty(volProp);
-
-  const cam = renderer.getActiveCamera();
-  cam.setPosition(0, 0, 0);
-  cam.setFocalPoint(-1, -1, 0);
-  cam.setViewUp(0, 0, -1);
-
-  renderer.addVolume(volume);
-  const pf = vtkPiecewiseFunction.newInstance();
-  pf.addPoint(0, 0.0);
-  pf.addPoint(100, 0.0);
-  pf.addPoint(3120, 1.0);
-  volume.getProperty().setScalarOpacity(0, pf);
-
-  const ctf = vtkColorTransferFunction.newInstance();
-  ctf.addRGBPoint(200.0, 1.0, 1.0, 1.0);
-  ctf.addRGBPoint(2000.0, 1.0, 1.0, 1.0);
-
-  volume.getProperty().setRGBTransferFunction(0, ctf);
-
-  renderer.resetCamera();
-  renderer.resetCameraClippingRange();
-  renderWindow.render();
-}
 
 
 /**

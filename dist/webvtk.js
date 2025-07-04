@@ -1,5 +1,14 @@
-var pian;
-/******/ (() => { // webpackBootstrap
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else if(typeof exports === 'object')
+		exports["pian"] = factory();
+	else
+		root["pian"] = factory();
+})(self, () => {
+return /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
 /***/ "./node_modules/@kitware/vtk.js/Common/Core/CellArray.js":
@@ -11390,438 +11399,6 @@ const newInstance = _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.newInstance(exten
 // ----------------------------------------------------------------------------
 
 var vtkCubeSource$1 = {
-  newInstance,
-  extend
-};
-
-
-
-
-/***/ }),
-
-/***/ "./node_modules/@kitware/vtk.js/Filters/Sources/Cursor3D.js":
-/*!******************************************************************!*\
-  !*** ./node_modules/@kitware/vtk.js/Filters/Sources/Cursor3D.js ***!
-  \******************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ vtkCursor3D$1),
-/* harmony export */   extend: () => (/* binding */ extend),
-/* harmony export */   newInstance: () => (/* binding */ newInstance)
-/* harmony export */ });
-/* harmony import */ var _macros2_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../macros2.js */ "./node_modules/@kitware/vtk.js/macros2.js");
-/* harmony import */ var _Common_DataModel_PolyData_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../Common/DataModel/PolyData.js */ "./node_modules/@kitware/vtk.js/Common/DataModel/PolyData.js");
-/* harmony import */ var _Common_Core_CellArray_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../Common/Core/CellArray.js */ "./node_modules/@kitware/vtk.js/Common/Core/CellArray.js");
-/* harmony import */ var _Common_Core_Points_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../Common/Core/Points.js */ "./node_modules/@kitware/vtk.js/Common/Core/Points.js");
-
-
-
-
-
-// ----------------------------------------------------------------------------
-// vtkCursor3D methods
-// ----------------------------------------------------------------------------
-
-function vtkCursor3D(publicAPI, model) {
-  // Set our className
-  model.classHierarchy.push('vtkCursor3D');
-  // Public API methods
-  publicAPI.setModelBounds = bounds => {
-    if (!Array.isArray(bounds) || bounds.length < 6) {
-      return;
-    }
-    if (model.modelBounds[0] === bounds[0] && model.modelBounds[1] === bounds[1] && model.modelBounds[2] === bounds[2] && model.modelBounds[3] === bounds[3] && model.modelBounds[4] === bounds[4] && model.modelBounds[5] === bounds[5]) {
-      return;
-    }
-    publicAPI.modified();
-    // Doing type convert, make sure it is a number array.
-    // Without correct coversion, the array may contains string which cause
-    // the wrapping and clampping works incorrectly.
-    model.modelBounds = bounds.map(v => Number(v));
-    for (let i = 0; i < 3; ++i) {
-      model.modelBounds[2 * i] = Math.min(model.modelBounds[2 * i], model.modelBounds[2 * i + 1]);
-    }
-  };
-  publicAPI.setFocalPoint = points => {
-    if (!Array.isArray(points) || points.length < 3) {
-      return;
-    }
-    if (points[0] === model.focalPoint[0] && points[1] === model.focalPoint[1] && points[2] === model.focalPoint[2]) {
-      return;
-    }
-    publicAPI.modified();
-    const v = [];
-    for (let i = 0; i < 3; i++) {
-      v[i] = points[i] - model.focalPoint[i];
-      model.focalPoint[i] = Number(points[i]);
-      if (model.translationMode) {
-        model.modelBounds[2 * i] += v[i];
-        model.modelBounds[2 * i + 1] += v[i];
-      }
-      // wrap
-      else if (model.wrap) {
-        model.focalPoint[i] = model.modelBounds[2 * i] + (model.focalPoint[i] - model.modelBounds[2 * i]) * 1.0 % ((model.modelBounds[2 * i + 1] - model.modelBounds[2 * i]) * 1.0);
-      }
-      // clamp
-      else {
-        if (points[i] < model.modelBounds[2 * i]) {
-          model.focalPoint[i] = model.modelBounds[2 * i];
-        }
-        if (points[i] > model.modelBounds[2 * i + 1]) {
-          model.focalPoint[i] = model.modelBounds[2 * i + 1];
-        }
-      }
-    }
-  };
-  publicAPI.setAll = flag => {
-    publicAPI.setOutline(flag);
-    publicAPI.setAxes(flag);
-    publicAPI.setXShadows(flag);
-    publicAPI.setYShadows(flag);
-    publicAPI.setZShadows(flag);
-  };
-  publicAPI.allOn = () => {
-    publicAPI.setAll(true);
-  };
-  publicAPI.allOff = () => {
-    publicAPI.setAll(false);
-  };
-  publicAPI.requestData = (inData, outData) => {
-    if (model.deleted) {
-      return;
-    }
-    let numPts = 0;
-    let numLines = 0;
-    // Check bounding box and origin
-    if (model.wrap) {
-      for (let i = 0; i < model.focalPoint.length; ++i) {
-        model.focalPoint[i] = model.modelBounds[2 * i] + (model.focalPoint[i] - model.modelBounds[2 * i]) * 1.0 % (model.modelBounds[2 * i + 1] - model.modelBounds[2 * i]);
-      }
-    } else {
-      for (let i = 0; i < model.focalPoint.length; ++i) {
-        model.focalPoint[i] = Math.max(model.focalPoint[i], model.modelBounds[2 * i]);
-        model.focalPoint[i] = Math.min(model.focalPoint[i], model.modelBounds[2 * i + 1]);
-      }
-    }
-    // allocate storage
-    if (model.axes) {
-      numPts += 6;
-      numLines += 3;
-    }
-    if (model.outline) {
-      numPts += 8;
-      numLines += 12;
-    }
-    if (model.xShadows) {
-      numPts += 8;
-      numLines += 4;
-    }
-    if (model.yShadows) {
-      numPts += 8;
-      numLines += 4;
-    }
-    if (model.zShadows) {
-      numPts += 8;
-      numLines += 4;
-    }
-    if (numPts === 0) {
-      return;
-    }
-    const polyData = _Common_DataModel_PolyData_js__WEBPACK_IMPORTED_MODULE_1__["default"].newInstance();
-    const newPts = _Common_Core_Points_js__WEBPACK_IMPORTED_MODULE_3__["default"].newInstance({
-      size: numPts * 3
-    });
-    //  vtkCellArray is a supporting object that explicitly represents cell
-    //  connectivity. The cell array structure is a raw integer list
-    //  of the form: (n,id1,id2,...,idn, n,id1,id2,...,idn, ...)
-    //  where n is the number of points in the cell, and id is a zero-offset index
-    //  into an associated point list.
-    const newLines = _Common_Core_CellArray_js__WEBPACK_IMPORTED_MODULE_2__["default"].newInstance({
-      size: numLines * (2 + 1)
-    });
-    let pid = 0;
-    let cid = 0;
-    // Create axes
-    if (model.axes) {
-      newPts.getData()[pid * 3 + 0] = model.modelBounds[0];
-      newPts.getData()[pid * 3 + 1] = model.focalPoint[1];
-      newPts.getData()[pid * 3 + 2] = model.focalPoint[2];
-      ++pid;
-      newPts.getData()[pid * 3 + 0] = model.modelBounds[1];
-      newPts.getData()[pid * 3 + 1] = model.focalPoint[1];
-      newPts.getData()[pid * 3 + 2] = model.focalPoint[2];
-      ++pid;
-      newLines.getData()[cid * 3 + 0] = 2;
-      newLines.getData()[cid * 3 + 1] = pid - 2;
-      newLines.getData()[cid * 3 + 2] = pid - 1;
-      ++cid;
-      newPts.getData()[pid * 3 + 0] = model.focalPoint[0];
-      newPts.getData()[pid * 3 + 1] = model.modelBounds[2];
-      newPts.getData()[pid * 3 + 2] = model.focalPoint[2];
-      ++pid;
-      newPts.getData()[pid * 3 + 0] = model.focalPoint[0];
-      newPts.getData()[pid * 3 + 1] = model.modelBounds[3];
-      newPts.getData()[pid * 3 + 2] = model.focalPoint[2];
-      ++pid;
-      newLines.getData()[cid * 3 + 0] = 2;
-      newLines.getData()[cid * 3 + 1] = pid - 2;
-      newLines.getData()[cid * 3 + 2] = pid - 1;
-      ++cid;
-      newPts.getData()[pid * 3 + 0] = model.focalPoint[0];
-      newPts.getData()[pid * 3 + 1] = model.focalPoint[1];
-      newPts.getData()[pid * 3 + 2] = model.modelBounds[4];
-      ++pid;
-      newPts.getData()[pid * 3 + 0] = model.focalPoint[0];
-      newPts.getData()[pid * 3 + 1] = model.focalPoint[1];
-      newPts.getData()[pid * 3 + 2] = model.modelBounds[5];
-      ++pid;
-      newLines.getData()[cid * 3 + 0] = 2;
-      newLines.getData()[cid * 3 + 1] = pid - 2;
-      newLines.getData()[cid * 3 + 2] = pid - 1;
-      ++cid;
-    }
-    // create outline
-    if (model.outline) {
-      // first traid
-      newPts.getData()[pid * 3 + 0] = model.modelBounds[0];
-      newPts.getData()[pid * 3 + 1] = model.modelBounds[2];
-      newPts.getData()[pid * 3 + 2] = model.modelBounds[4];
-      const corner024 = pid;
-      ++pid;
-      newPts.getData()[pid * 3 + 0] = model.modelBounds[1];
-      newPts.getData()[pid * 3 + 1] = model.modelBounds[2];
-      newPts.getData()[pid * 3 + 2] = model.modelBounds[4];
-      const corner124 = pid;
-      ++pid;
-      newPts.getData()[pid * 3 + 0] = model.modelBounds[0];
-      newPts.getData()[pid * 3 + 1] = model.modelBounds[3];
-      newPts.getData()[pid * 3 + 2] = model.modelBounds[4];
-      const corner034 = pid;
-      ++pid;
-      newPts.getData()[pid * 3 + 0] = model.modelBounds[0];
-      newPts.getData()[pid * 3 + 1] = model.modelBounds[2];
-      newPts.getData()[pid * 3 + 2] = model.modelBounds[5];
-      const corner025 = pid;
-      ++pid;
-      newLines.getData()[(cid + 0) * 3 + 0] = 2;
-      newLines.getData()[(cid + 0) * 3 + 1] = corner024;
-      newLines.getData()[(cid + 0) * 3 + 2] = corner124;
-      newLines.getData()[(cid + 1) * 3 + 0] = 2;
-      newLines.getData()[(cid + 1) * 3 + 1] = corner024;
-      newLines.getData()[(cid + 1) * 3 + 2] = corner034;
-      newLines.getData()[(cid + 2) * 3 + 0] = 2;
-      newLines.getData()[(cid + 2) * 3 + 1] = corner024;
-      newLines.getData()[(cid + 2) * 3 + 2] = corner025;
-      cid += 3;
-      // second triad
-      newPts.getData()[pid * 3 + 0] = model.modelBounds[1];
-      newPts.getData()[pid * 3 + 1] = model.modelBounds[3];
-      newPts.getData()[pid * 3 + 2] = model.modelBounds[5];
-      const corner135 = pid;
-      ++pid;
-      newPts.getData()[pid * 3 + 0] = model.modelBounds[0];
-      newPts.getData()[pid * 3 + 1] = model.modelBounds[3];
-      newPts.getData()[pid * 3 + 2] = model.modelBounds[5];
-      const corner035 = pid;
-      ++pid;
-      newPts.getData()[pid * 3 + 0] = model.modelBounds[1];
-      newPts.getData()[pid * 3 + 1] = model.modelBounds[2];
-      newPts.getData()[pid * 3 + 2] = model.modelBounds[5];
-      const corner125 = pid;
-      ++pid;
-      newPts.getData()[pid * 3 + 0] = model.modelBounds[1];
-      newPts.getData()[pid * 3 + 1] = model.modelBounds[3];
-      newPts.getData()[pid * 3 + 2] = model.modelBounds[4];
-      const corner134 = pid;
-      ++pid;
-      newLines.getData()[(cid + 0) * 3 + 0] = 2;
-      newLines.getData()[(cid + 0) * 3 + 1] = corner135;
-      newLines.getData()[(cid + 0) * 3 + 2] = corner035;
-      newLines.getData()[(cid + 1) * 3 + 0] = 2;
-      newLines.getData()[(cid + 1) * 3 + 1] = corner135;
-      newLines.getData()[(cid + 1) * 3 + 2] = corner125;
-      newLines.getData()[(cid + 2) * 3 + 0] = 2;
-      newLines.getData()[(cid + 2) * 3 + 1] = corner135;
-      newLines.getData()[(cid + 2) * 3 + 2] = corner134;
-      cid += 3;
-      // Fill in remaining lines
-      // vtk.js do not support checking repeating insertion
-      newLines.getData()[(cid + 0) * 3 + 0] = 2;
-      newLines.getData()[(cid + 0) * 3 + 1] = corner124;
-      newLines.getData()[(cid + 0) * 3 + 2] = corner134;
-      newLines.getData()[(cid + 1) * 3 + 0] = 2;
-      newLines.getData()[(cid + 1) * 3 + 1] = corner124;
-      newLines.getData()[(cid + 1) * 3 + 2] = corner125;
-      cid += 2;
-      newLines.getData()[(cid + 0) * 3 + 0] = 2;
-      newLines.getData()[(cid + 0) * 3 + 1] = corner034;
-      newLines.getData()[(cid + 0) * 3 + 2] = corner134;
-      newLines.getData()[(cid + 1) * 3 + 0] = 2;
-      newLines.getData()[(cid + 1) * 3 + 1] = corner034;
-      newLines.getData()[(cid + 1) * 3 + 2] = corner035;
-      cid += 2;
-      newLines.getData()[(cid + 0) * 3 + 0] = 2;
-      newLines.getData()[(cid + 0) * 3 + 1] = corner025;
-      newLines.getData()[(cid + 0) * 3 + 2] = corner125;
-      newLines.getData()[(cid + 1) * 3 + 0] = 2;
-      newLines.getData()[(cid + 1) * 3 + 1] = corner025;
-      newLines.getData()[(cid + 1) * 3 + 2] = corner035;
-      cid += 2;
-    }
-    // create x-shadows
-    if (model.xShadows) {
-      for (let i = 0; i < 2; ++i) {
-        newPts.getData()[pid * 3 + 0] = model.modelBounds[i];
-        newPts.getData()[pid * 3 + 1] = model.modelBounds[2];
-        newPts.getData()[pid * 3 + 2] = model.focalPoint[2];
-        ++pid;
-        newPts.getData()[pid * 3 + 0] = model.modelBounds[i];
-        newPts.getData()[pid * 3 + 1] = model.modelBounds[3];
-        newPts.getData()[pid * 3 + 2] = model.focalPoint[2];
-        ++pid;
-        newLines.getData()[cid * 3 + 0] = 2;
-        newLines.getData()[cid * 3 + 1] = pid - 2;
-        newLines.getData()[cid * 3 + 2] = pid - 1;
-        ++cid;
-        newPts.getData()[pid * 3 + 0] = model.modelBounds[i];
-        newPts.getData()[pid * 3 + 1] = model.focalPoint[1];
-        newPts.getData()[pid * 3 + 2] = model.modelBounds[4];
-        ++pid;
-        newPts.getData()[pid * 3 + 0] = model.modelBounds[i];
-        newPts.getData()[pid * 3 + 1] = model.focalPoint[1];
-        newPts.getData()[pid * 3 + 2] = model.modelBounds[5];
-        ++pid;
-        newLines.getData()[cid * 3 + 0] = 2;
-        newLines.getData()[cid * 3 + 1] = pid - 2;
-        newLines.getData()[cid * 3 + 2] = pid - 1;
-        ++cid;
-      }
-    }
-
-    // create y-shadows
-    if (model.yShadows) {
-      for (let i = 0; i < 2; ++i) {
-        newPts.getData()[pid * 3 + 0] = model.modelBounds[0];
-        newPts.getData()[pid * 3 + 1] = model.modelBounds[i + 2];
-        newPts.getData()[pid * 3 + 2] = model.focalPoint[2];
-        ++pid;
-        newPts.getData()[pid * 3 + 0] = model.modelBounds[1];
-        newPts.getData()[pid * 3 + 1] = model.modelBounds[i + 2];
-        newPts.getData()[pid * 3 + 2] = model.focalPoint[2];
-        ++pid;
-        newLines.getData()[cid * 3 + 0] = 2;
-        newLines.getData()[cid * 3 + 1] = pid - 2;
-        newLines.getData()[cid * 3 + 2] = pid - 1;
-        ++cid;
-        newPts.getData()[pid * 3 + 0] = model.focalPoint[0];
-        newPts.getData()[pid * 3 + 1] = model.modelBounds[i + 2];
-        newPts.getData()[pid * 3 + 2] = model.modelBounds[4];
-        ++pid;
-        newPts.getData()[pid * 3 + 0] = model.focalPoint[0];
-        newPts.getData()[pid * 3 + 1] = model.modelBounds[i + 2];
-        newPts.getData()[pid * 3 + 2] = model.modelBounds[5];
-        ++pid;
-        newLines.getData()[cid * 3 + 0] = 2;
-        newLines.getData()[cid * 3 + 1] = pid - 2;
-        newLines.getData()[cid * 3 + 2] = pid - 1;
-        ++cid;
-      }
-    }
-
-    // create z-shadows
-    if (model.zShadows) {
-      for (let i = 0; i < 2; ++i) {
-        newPts.getData()[pid * 3 + 0] = model.modelBounds[0];
-        newPts.getData()[pid * 3 + 1] = model.focalPoint[1];
-        newPts.getData()[pid * 3 + 2] = model.modelBounds[i + 4];
-        ++pid;
-        newPts.getData()[pid * 3 + 0] = model.modelBounds[1];
-        newPts.getData()[pid * 3 + 1] = model.focalPoint[1];
-        newPts.getData()[pid * 3 + 2] = model.modelBounds[i + 4];
-        ++pid;
-        newLines.getData()[cid * 3 + 0] = 2;
-        newLines.getData()[cid * 3 + 1] = pid - 2;
-        newLines.getData()[cid * 3 + 2] = pid - 1;
-        ++cid;
-        newPts.getData()[pid * 3 + 0] = model.focalPoint[0];
-        newPts.getData()[pid * 3 + 1] = model.modelBounds[2];
-        newPts.getData()[pid * 3 + 2] = model.modelBounds[i + 4];
-        ++pid;
-        newPts.getData()[pid * 3 + 0] = model.focalPoint[0];
-        newPts.getData()[pid * 3 + 1] = model.modelBounds[3];
-        newPts.getData()[pid * 3 + 2] = model.modelBounds[i + 4];
-        ++pid;
-        newLines.getData()[cid * 3 + 0] = 2;
-        newLines.getData()[cid * 3 + 1] = pid - 2;
-        newLines.getData()[cid * 3 + 2] = pid - 1;
-        ++cid;
-      }
-    }
-    const pts = _Common_Core_Points_js__WEBPACK_IMPORTED_MODULE_3__["default"].newInstance({
-      size: 3
-    });
-    pts.getData()[0] = model.focalPoint[0];
-    pts.getData()[1] = model.focalPoint[1];
-    pts.getData()[2] = model.focalPoint[2];
-    // update ourseleves
-    model.focus = _Common_DataModel_PolyData_js__WEBPACK_IMPORTED_MODULE_1__["default"].newInstance();
-    model.focus.setPoints(pts);
-    polyData.setPoints(newPts);
-    polyData.setLines(newLines);
-    outData[0] = polyData;
-  };
-}
-
-// ----------------------------------------------------------------------------
-// Object factory
-// ----------------------------------------------------------------------------
-
-const DEFAULT_VALUES = {
-  focus: null,
-  modelBounds: [-1.0, 1.0, -1.0, 1.0, -1.0, 1.0],
-  focalPoint: [0.0, 0.0, 0.0],
-  outline: true,
-  axes: true,
-  xShadows: true,
-  yShadows: true,
-  zShadows: true,
-  wrap: false,
-  translationMode: false
-};
-
-// ----------------------------------------------------------------------------
-
-function extend(publicAPI, model) {
-  let initialValues = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-  Object.assign(model, DEFAULT_VALUES, initialValues);
-
-  // Build VTK API
-  // Cursor3D
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.obj(publicAPI, model);
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.get(publicAPI, model, ['focus']);
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.getArray(publicAPI, model, ['modelBounds'], 6);
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.getArray(publicAPI, model, ['focalPoint'], 3);
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.setGet(publicAPI, model, ['outline']);
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.setGet(publicAPI, model, ['axes']);
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.setGet(publicAPI, model, ['xShadows']);
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.setGet(publicAPI, model, ['yShadows']);
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.setGet(publicAPI, model, ['zShadows']);
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.setGet(publicAPI, model, ['wrap']);
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.setGet(publicAPI, model, ['translationMode']);
-  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.algo(publicAPI, model, 0, 1);
-  vtkCursor3D(publicAPI, model);
-}
-
-// ----------------------------------------------------------------------------
-
-const newInstance = _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.newInstance(extend, 'vtkCursor3D');
-
-// ----------------------------------------------------------------------------
-
-var vtkCursor3D$1 = {
   newInstance,
   extend
 };
@@ -65171,6 +64748,136 @@ vtk.register = register;
 
 /***/ }),
 
+/***/ "./src/3d.js":
+/*!*******************!*\
+  !*** ./src/3d.js ***!
+  \*******************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Demo3d: () => (/* binding */ Demo3d),
+/* harmony export */   load3dColor: () => (/* binding */ load3dColor)
+/* harmony export */ });
+/* harmony import */ var _kitware_vtk_js_Rendering_Profiles_All__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Profiles/All */ "./node_modules/@kitware/vtk.js/Rendering/Profiles/All.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_Volume__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Volume */ "./node_modules/@kitware/vtk.js/Rendering/Core/Volume.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_VolumeMapper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/VolumeMapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/VolumeMapper.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Misc_FullScreenRenderWindow__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Misc/FullScreenRenderWindow */ "./node_modules/@kitware/vtk.js/Rendering/Misc/FullScreenRenderWindow.js");
+/* harmony import */ var _kitware_vtk_js_Common_DataModel_BoundingBox__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @kitware/vtk.js/Common/DataModel/BoundingBox */ "./node_modules/@kitware/vtk.js/Common/DataModel/BoundingBox.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_ColorTransferFunction__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ColorTransferFunction */ "./node_modules/@kitware/vtk.js/Rendering/Core/ColorTransferFunction.js");
+/* harmony import */ var _kitware_vtk_js_Common_DataModel_PiecewiseFunction__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @kitware/vtk.js/Common/DataModel/PiecewiseFunction */ "./node_modules/@kitware/vtk.js/Common/DataModel/PiecewiseFunction.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_VolumeProperty__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/VolumeProperty */ "./node_modules/@kitware/vtk.js/Rendering/Core/VolumeProperty.js");
+/* harmony import */ var _MedicalColorPresets_json__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./MedicalColorPresets.json */ "./src/MedicalColorPresets.json");
+
+
+
+
+
+
+
+
+
+var renderWindow_3d = null;
+var volume_3d = null;
+function Demo3d(source, divElement) {
+  const renderMainBox = divElement;
+  renderMainBox.style.position = "relative";
+
+  // 添加一个下拉list的选择元素到divElement
+  const select = document.createElement("select");
+  select.id = "color-preset-select";
+  const fullScreenRenderer = _kitware_vtk_js_Rendering_Misc_FullScreenRenderWindow__WEBPACK_IMPORTED_MODULE_3__["default"].newInstance({
+    container: renderMainBox,
+    background: [0, 0, 0]
+  });
+  const renderer = fullScreenRenderer.getRenderer();
+  renderWindow_3d = fullScreenRenderer.getRenderWindow();
+  volume_3d = _kitware_vtk_js_Rendering_Core_Volume__WEBPACK_IMPORTED_MODULE_1__["default"].newInstance();
+  const mapper = _kitware_vtk_js_Rendering_Core_VolumeMapper__WEBPACK_IMPORTED_MODULE_2__["default"].newInstance();
+  mapper.setInputData(source);
+  volume_3d.setMapper(mapper);
+  const sampleDistance = 0.7 * Math.sqrt(source.getSpacing().map(v => v * v).reduce((a, b) => a + b, 0));
+  mapper.setSampleDistance(sampleDistance);
+  mapper.setComputeNormalFromOpacity(false);
+  mapper.setGlobalIlluminationReach(0.0);
+  mapper.setVolumetricScatteringBlending(0.5);
+  mapper.setVolumeShadowSamplingDistFactor(5.0);
+  const volProp = _kitware_vtk_js_Rendering_Core_VolumeProperty__WEBPACK_IMPORTED_MODULE_7__["default"].newInstance();
+  volProp.setInterpolationTypeToLinear();
+  volume_3d.getProperty().setScalarOpacityUnitDistance(0, _kitware_vtk_js_Common_DataModel_BoundingBox__WEBPACK_IMPORTED_MODULE_4__["default"].getDiagonalLength(source.getBounds()) / Math.max(...source.getDimensions()));
+  volProp.setGradientOpacityMinimumValue(0, 0);
+  const dataArray = source.getPointData().getScalars() || source.getPointData().getArrays()[0];
+  const dataRange = dataArray.getRange();
+  console.log(dataRange);
+  volume_3d.getProperty().setGradientOpacityMaximumValue(0, (dataRange[1] - dataRange[0]) * 0.05);
+  volProp.setShade(true);
+  volProp.setUseGradientOpacity(0, false);
+  volProp.setGradientOpacityMinimumOpacity(0, 0.0);
+  volProp.setGradientOpacityMaximumOpacity(0, 1.0);
+  // volProp.setAmbient(0.0);
+  volProp.setDiffuse(2.0);
+  volProp.setSpecular(0.0);
+  volProp.setSpecularPower(0.0);
+  volProp.setUseLabelOutline(false);
+  // volProp.setLabelOutlineThickness(2);
+  volume_3d.setProperty(volProp);
+  const cam = renderer.getActiveCamera();
+  cam.setPosition(0, 0, 0);
+  cam.setFocalPoint(-1, -1, 0);
+  cam.setViewUp(0, 0, -1);
+  renderer.addVolume(volume_3d);
+  // const pf = vtkPiecewiseFunction.newInstance();
+  // pf.addPoint(0, 0.0);
+  // pf.addPoint(100, 0.0);
+  // pf.addPoint(3120, 1.0);
+  // volume.getProperty().setScalarOpacity(0, pf);
+  // const ctf = vtkColorTransferFunction.newInstance();
+  // ctf.addRGBPoint(200.0, 1.0, 1.0, 1.0);
+  // ctf.addRGBPoint(2000.0, 1.0, 1.0, 1.0);
+
+  // volume.getProperty().setRGBTransferFunction(0, ctf);
+  load3dColor('CT-AAA2');
+  renderer.resetCamera();
+  renderer.resetCameraClippingRange();
+  renderWindow_3d.render();
+}
+
+// 颜色切换函数
+function load3dColor(presetName) {
+  const preset = _MedicalColorPresets_json__WEBPACK_IMPORTED_MODULE_8__.find(p => p.Name === presetName);
+  const pf = _kitware_vtk_js_Common_DataModel_PiecewiseFunction__WEBPACK_IMPORTED_MODULE_6__["default"].newInstance();
+  // pf.addPoint(0, 0.0);
+  // pf.addPoint(100, 0.0);
+  // pf.addPoint(3120, 1.0);
+  // volume.getProperty().setScalarOpacity(0, pf);
+  const ctf = _kitware_vtk_js_Rendering_Core_ColorTransferFunction__WEBPACK_IMPORTED_MODULE_5__["default"].newInstance();
+  // 重置传输函数
+  ctf.removeAllPoints();
+  pf.removeAllPoints();
+
+  // 设置颜色点
+  // 设置颜色点（每4个一组：值, R, G, B）
+  for (let i = 0; i < preset.RGBPoints.length; i += 4) {
+    ctf.addRGBPoint(preset.RGBPoints[i], preset.RGBPoints[i + 1], preset.RGBPoints[i + 2], preset.RGBPoints[i + 3]);
+  }
+
+  // 设置透明度点（每两个一组：值, 透明度）
+  for (let i = 0; i < preset.OpacityPoints.length; i += 2) {
+    pf.addPoint(preset.OpacityPoints[i], preset.OpacityPoints[i + 1]);
+  }
+  pf.setRange(...preset.EffectiveRange);
+  // 更新体积属性
+  volume_3d.getProperty().setRGBTransferFunction(0, ctf);
+  volume_3d.getProperty().setScalarOpacity(0, pf);
+
+  // 触发重新渲染
+  renderWindow_3d.render();
+}
+;
+
+/***/ }),
+
 /***/ "./src/halo_200804.js":
 /*!****************************!*\
   !*** ./src/halo_200804.js ***!
@@ -68275,78 +67982,6 @@ daikon.Utils.isString=function(s){return typeof s==='string'||s instanceof Strin
 daikon.Utils.isValidDate=function(d){if(Object.prototype.toString.call(d)==="[object Date]"){if(isNaN(d.getTime())){return false;}else{return true;}}else{return false;}};daikon.Utils.swap32=function(val){/*jslint bitwise: true */return(val&0xFF)<<24|(val&0xFF00)<<8|val>>8&0xFF00|val>>24&0xFF;};daikon.Utils.swap16=function(val){/*jslint bitwise: true */return((val&0xFF)<<8|val>>8&0xFF)<<16>>16;// since JS uses 32-bit when bit shifting
 };// http://stackoverflow.com/questions/18638900/javascript-crc32
 daikon.Utils.makeCRCTable=function(){var c;var crcTable=[];for(var n=0;n<256;n++){c=n;for(var k=0;k<8;k++){c=c&1?0xEDB88320^c>>>1:c>>>1;}crcTable[n]=c;}return crcTable;};daikon.Utils.crc32=function(dataView){var crcTable=daikon.Utils.crcTable||(daikon.Utils.crcTable=daikon.Utils.makeCRCTable());var crc=0^-1;for(var i=0;i<dataView.byteLength;i++){crc=crc>>>8^crcTable[(crc^dataView.getUint8(i))&0xFF];}return(crc^-1)>>>0;};daikon.Utils.createBitMask=function(numBytes,bitsStored,unsigned){var mask=0xFFFFFFFF;mask>>>=(4-numBytes)*8+(numBytes*8-bitsStored);if(unsigned){if(numBytes==1){mask&=0x000000FF;}else if(numBytes==2){mask&=0x0000FFFF;}else if(numBytes==4){mask&=0xFFFFFFFF;}else if(numBytes==8){mask=0xFFFFFFFF;}}else{mask=0xFFFFFFFF;}return mask;};/*** Exports ***/var moduleType=typeof module;if(moduleType!=='undefined'&&module.exports){module.exports=daikon.Utils;}},{}]},{},[38])(38);});
-
-/***/ }),
-
-/***/ "./src/load3d.js":
-/*!***********************!*\
-  !*** ./src/load3d.js ***!
-  \***********************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony import */ var _kitware_vtk_js_Filters_Sources_Cursor3D__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @kitware/vtk.js/Filters/Sources/Cursor3D */ "./node_modules/@kitware/vtk.js/Filters/Sources/Cursor3D.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_Mapper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Mapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/Mapper.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_Actor__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Actor */ "./node_modules/@kitware/vtk.js/Rendering/Core/Actor.js");
-
-
-
-class Display3D {
-  /**
-  * 创建并显示一个 vtkCursor3D 边框
-  * @param {Object} view3D - 包含 renderer 和 renderWindow 的对象
-  * @param {Array} focalPoint - 设置焦点 [x, y, z]
-  * @param {Array} modelBounds - 设置模型边界 [xmin, xmax, ymin, ymax, zmin, zmax]
-  * @param {Object} options - 配置选项，例如是否显示边框、阴影、坐标轴等
-  */
-  setupCursor3D(view3D, focalPoint = [0, 0, 0], modelBounds = [-10, 10, -10, 10, -10, 10], options = {}) {
-    // 清除渲染器中的所有演员
-    view3D.renderer.getActors().forEach(actor => {
-      view3D.renderer.removeActor(actor);
-    });
-
-    // 创建新的 vtkCursor3D
-    const cursor3D = _kitware_vtk_js_Filters_Sources_Cursor3D__WEBPACK_IMPORTED_MODULE_0__["default"].newInstance();
-    cursor3D.setFocalPoint(focalPoint);
-    cursor3D.setModelBounds(modelBounds);
-
-    // 设置选项，默认只显示边框
-    cursor3D.set({
-      zShadows: options.zShadows ?? false,
-      xShadows: options.xShadows ?? false,
-      yShadows: options.yShadows ?? false,
-      outline: options.outline ?? true,
-      axes: options.axes ?? false,
-      center: options.center ?? false
-    });
-
-    // 创建 Mapper 和 Actor
-    const cursor3DMapper = _kitware_vtk_js_Rendering_Core_Mapper__WEBPACK_IMPORTED_MODULE_1__["default"].newInstance();
-    cursor3DMapper.setInputConnection(cursor3D.getOutputPort());
-    const cursor3DActor = _kitware_vtk_js_Rendering_Core_Actor__WEBPACK_IMPORTED_MODULE_2__["default"].newInstance();
-    cursor3DActor.setMapper(cursor3DMapper);
-    // 设置 Actor 的颜色为白色
-    cursor3DActor.getProperty().setColor(1.0, 1.0, 1.0); // RGB(1, 1, 1) 表示白色
-    // 设置线条加粗（设置线宽）
-    cursor3DActor.getProperty().setLineWidth(3.0); // 将线宽设置为 3（默认是 1）
-    // 添加到渲染器
-    view3D.renderer.addActor(cursor3DActor);
-
-    // 更新渲染器
-    view3D.renderer.resetCamera();
-    view3D.renderWindow.render();
-
-    // 更新 view3D 引用
-    view3D.cursor3D = cursor3D;
-    view3D.cursor3DMapper = cursor3DMapper;
-    view3D.cursor3DActor = cursor3DActor;
-  }
-}
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Display3D);
 
 /***/ }),
 
@@ -79300,6 +78935,17 @@ function tickFormat(start, stop, count, specifier) {
 }
 
 
+/***/ }),
+
+/***/ "./src/MedicalColorPresets.json":
+/*!**************************************!*\
+  !*** ./src/MedicalColorPresets.json ***!
+  \**************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = /*#__PURE__*/JSON.parse('[{"Name":"CT-AAA","NanColor":[1,1,0],"ColorSpace":"RGB","AbsoluteRange":true,"OpacityPoints":[-3024,0,143.556,0,166.222,0.686275,214.389,0.696078,419.736,0.833333,3071,0.803922],"RGBPoints":[-3024,0,0,0,143.556,0.615686,0.356863,0.184314,166.222,0.882353,0.603922,0.290196,214.389,1,1,1,419.736,1,0.937033,0.954531,3071,0.827451,0.658824,1],"EffectiveRange":[143.556,419.736]},{"Name":"CT-AAA2","NanColor":[1,1,0],"ColorSpace":"RGB","AbsoluteRange":true,"OpacityPoints":[-3024,0,129.542,0,145.244,0.166667,157.02,0.5,169.918,0.627451,395.575,0.8125,1578.73,0.8125,3071,0.8125],"RGBPoints":[-3024,0,0,0,129.542,0.54902,0.25098,0.14902,145.244,0.6,0.627451,0.843137,157.02,0.890196,0.47451,0.6,169.918,0.992157,0.870588,0.392157,395.575,1,0.886275,0.658824,1578.73,1,0.829256,0.957922,3071,0.827451,0.658824,1],"EffectiveRange":[0,1600]},{"Name":"CT-Bone","NanColor":[1,1,0],"ColorSpace":"RGB","AbsoluteRange":true,"OpacityPoints":[-3024,0,-16.4458,0,641.385,0.715686,3071,0.705882],"RGBPoints":[-3024,0,0,0,-16.4458,0.729412,0.254902,0.301961,641.385,0.905882,0.815686,0.552941,3071,1,1,1],"EffectiveRange":[-16.4458,641.385]},{"Name":"CT-Bones","NanColor":[1,1,0],"ColorSpace":"RGB","AbsoluteRange":true,"OpacityPoints":[-1000,0,152.19,0,278.93,0.190476,952,0.2],"RGBPoints":[-1000,0.3,0.3,1,-488,0.3,1,0.3,463.28,1,0,0,659.15,1,0.912535,0.0374849,953,1,0.3,0.3],"EffectiveRange":[152.19,952]},{"Name":"CT-Cardiac","NanColor":[1,1,0],"ColorSpace":"RGB","AbsoluteRange":true,"OpacityPoints":[-3024,0,-77.6875,0,94.9518,0.285714,179.052,0.553571,260.439,0.848214,3071,0.875],"RGBPoints":[-3024,0,0,0,-77.6875,0.54902,0.25098,0.14902,94.9518,0.882353,0.603922,0.290196,179.052,1,0.937033,0.954531,260.439,0.615686,0,0,3071,0.827451,0.658824,1],"EffectiveRange":[-77.6875,260.439]},{"Name":"CT-Cardiac2","NanColor":[1,1,0],"ColorSpace":"RGB","AbsoluteRange":true,"OpacityPoints":[-3024,0,42.8964,0,163.488,0.428571,277.642,0.776786,1587,0.754902,3071,0.754902],"RGBPoints":[-3024,0,0,0,42.8964,0.54902,0.25098,0.14902,163.488,0.917647,0.639216,0.0588235,277.642,1,0.878431,0.623529,1587,1,1,1,3071,0.827451,0.658824,1],"EffectiveRange":[42.8964,1587]},{"Name":"CT-Cardiac3","NanColor":[1,1,0],"ColorSpace":"RGB","AbsoluteRange":true,"OpacityPoints":[-3024,0,-86.9767,0,45.3791,0.169643,139.919,0.589286,347.907,0.607143,1224.16,0.607143,3071,0.616071],"RGBPoints":[-3024,0,0,0,-86.9767,0,0.25098,1,45.3791,1,0,0,139.919,1,0.894893,0.894893,347.907,1,1,0.25098,1224.16,1,1,1,3071,0.827451,0.658824,1],"EffectiveRange":[-86.9767,1224.16]},{"Name":"CT-Chest-Contrast-Enhanced","NanColor":[1,1,0],"ColorSpace":"RGB","AbsoluteRange":true,"OpacityPoints":[-3024,0,67.0106,0,251.105,0.446429,439.291,0.625,3071,0.616071],"RGBPoints":[-3024,0,0,0,67.0106,0.54902,0.25098,0.14902,251.105,0.882353,0.603922,0.290196,439.291,1,0.937033,0.954531,3071,0.827451,0.658824,1],"EffectiveRange":[67.0106,439.291]},{"Name":"CT-Chest-Vessels","NanColor":[1,1,0],"ColorSpace":"RGB","AbsoluteRange":true,"OpacityPoints":[-3024,0,-1278.35,0,22.8277,0.428571,439.291,0.625,3071,0.616071],"RGBPoints":[-3024,0,0,0,-1278.35,0.54902,0.25098,0.14902,22.8277,0.882353,0.603922,0.290196,439.291,1,0.937033,0.954531,3071,0.827451,0.658824,1],"EffectiveRange":[-1278.35,439.291]},{"Name":"CT-Coronary-Arteries","NanColor":[1,1,0],"ColorSpace":"RGB","AbsoluteRange":true,"OpacityPoints":[-2048,0,136.47,0,159.215,0.258929,318.43,0.571429,478.693,0.776786,3661,1],"RGBPoints":[-2048,0,0,0,136.47,0,0,0,159.215,0.159804,0.159804,0.159804,318.43,0.764706,0.764706,0.764706,478.693,1,1,1,3661,1,1,1],"EffectiveRange":[136.47,478.693]},{"Name":"CT-Coronary-Arteries-2","NanColor":[1,1,0],"ColorSpace":"RGB","AbsoluteRange":true,"OpacityPoints":[-2048,0,142.677,0,145.016,0.116071,192.174,0.5625,217.24,0.776786,384.347,0.830357,3661,0.830357],"RGBPoints":[-2048,0,0,0,142.677,0,0,0,145.016,0.615686,0,0.0156863,192.174,0.909804,0.454902,0,217.24,0.972549,0.807843,0.611765,384.347,0.909804,0.909804,1,3661,1,1,1],"EffectiveRange":[142.677,384.347]},{"Name":"CT-Coronary-Arteries-3","NanColor":[1,1,0],"ColorSpace":"RGB","AbsoluteRange":true,"OpacityPoints":[-2048,0,128.643,0,129.982,0.0982143,173.636,0.669643,255.884,0.857143,584.878,0.866071,3661,1],"RGBPoints":[-2048,0,0,0,128.643,0,0,0,129.982,0.615686,0,0.0156863,173.636,0.909804,0.454902,0,255.884,0.886275,0.886275,0.886275,584.878,0.968627,0.968627,0.968627,3661,1,1,1],"EffectiveRange":[128.643,584.878]},{"Name":"CT-Cropped-Volume-Bone","NanColor":[1,1,0],"ColorSpace":"RGB","AbsoluteRange":true,"OpacityPoints":[-2048,0,-451,0,-450,1,1050,1,3661,1],"RGBPoints":[-2048,0,0,0,-451,0,0,0,-450,0.0556356,0.0556356,0.0556356,1050,1,1,1,3661,1,1,1],"EffectiveRange":[-451,1050]},{"Name":"CT-Fat","NanColor":[1,1,0],"ColorSpace":"RGB","AbsoluteRange":true,"OpacityPoints":[-1000,0,-100,0,-99,0.15,-60,0.15,-59,0,101.2,0,952,0],"RGBPoints":[-1000,0.3,0.3,1,-497.5,0.3,1,0.3,-99,0,0,1,-76.946,0,1,0,-65.481,0.835431,0.888889,0.0165387,83.89,1,0,0,463.28,1,0,0,659.15,1,0.912535,0.0374849,2952,1,0.300267,0.299886],"EffectiveRange":[-100,101.2]},{"Name":"CT-Liver-Vasculature","NanColor":[1,1,0],"ColorSpace":"RGB","AbsoluteRange":true,"OpacityPoints":[-2048,0,149.113,0,157.884,0.482143,339.96,0.660714,388.526,0.830357,1197.95,0.839286,3661,0.848214],"RGBPoints":[-2048,0,0,0,149.113,0,0,0,157.884,0.501961,0.25098,0,339.96,0.695386,0.59603,0.36886,388.526,0.854902,0.85098,0.827451,1197.95,1,1,1,3661,1,1,1],"EffectiveRange":[149.113,1197.95]},{"Name":"CT-Lung","NanColor":[1,1,0],"ColorSpace":"RGB","AbsoluteRange":true,"OpacityPoints":[-1000,0,-600,0,-599,0.15,-400,0.15,-399,0,2952,0],"RGBPoints":[-1000,0.3,0.3,1,-600,0,0,1,-530,0.134704,0.781726,0.0724558,-460,0.929244,1,0.109473,-400,0.888889,0.254949,0.0240258,2952,1,0.3,0.3],"EffectiveRange":[-600,-399]},{"Name":"CT-MIP","NanColor":[1,1,0],"ColorSpace":"RGB","AbsoluteRange":true,"OpacityPoints":[-3024,0,-637.62,0,700,1,3071,1],"RGBPoints":[-3024,0,0,0,-637.62,1,1,1,700,1,1,1,3071,1,1,1],"EffectiveRange":[-637.62,700]},{"Name":"CT-Muscle","NanColor":[1,1,0],"ColorSpace":"RGB","AbsoluteRange":true,"OpacityPoints":[-3024,0,-155.407,0,217.641,0.676471,419.736,0.833333,3071,0.803922],"RGBPoints":[-3024,0,0,0,-155.407,0.54902,0.25098,0.14902,217.641,0.882353,0.603922,0.290196,419.736,1,0.937033,0.954531,3071,0.827451,0.658824,1],"EffectiveRange":[-155.407,419.736]},{"Name":"CT-Pulmonary-Arteries","NanColor":[1,1,0],"ColorSpace":"RGB","AbsoluteRange":true,"OpacityPoints":[-2048,0,-568.625,0,-364.081,0.0714286,-244.813,0.401786,18.2775,0.607143,447.798,0.830357,3592.73,0.839286],"RGBPoints":[-2048,0,0,0,-568.625,0,0,0,-364.081,0.396078,0.301961,0.180392,-244.813,0.611765,0.352941,0.0705882,18.2775,0.843137,0.0156863,0.156863,447.798,0.752941,0.752941,0.752941,3592.73,1,1,1],"EffectiveRange":[-568.625,447.798]},{"Name":"CT-Soft-Tissue","NanColor":[1,1,0],"ColorSpace":"RGB","AbsoluteRange":true,"OpacityPoints":[-2048,0,-167.01,0,-160,1,240,1,3661,1],"RGBPoints":[-2048,0,0,0,-167.01,0,0,0,-160,0.0556356,0.0556356,0.0556356,240,1,1,1,3661,1,1,1],"EffectiveRange":[-167.01,240]},{"Name":"CT-Air","NanColor":[1,1,0],"ColorSpace":"RGB","AbsoluteRange":true,"OpacityPoints":[-3024,0.705882,-900,0.715686,-500,0,3071,0],"RGBPoints":[-3024,1,1,1,-900,0.2,1,1,-500,0.3,0.3,1,3071,0,0,0],"EffectiveRange":[-1200,-200]},{"Name":"CT-X-ray","NanColor":[1,1,0],"ColorSpace":"RGB","AbsoluteRange":true,"OpacityPoints":[-3024,0,-200,0,1500,0.05,3071,0.05],"RGBPoints":[-3024,1,1,1,3071,1,1,1],"EffectiveRange":[-250,1550]},{"Name":"MR-Angio","NanColor":[1,1,0],"ColorSpace":"RGB","AbsoluteRange":true,"OpacityPoints":[-2048,0,151.354,0,158.279,0.4375,190.112,0.580357,200.873,0.732143,3661,0.741071],"RGBPoints":[-2048,0,0,0,151.354,0,0,0,158.279,0.74902,0.376471,0,190.112,1,0.866667,0.733333,200.873,0.937255,0.937255,0.937255,3661,1,1,1],"EffectiveRange":[151.354,200.873]},{"Name":"MR-Default","NanColor":[1,1,0],"ColorSpace":"RGB","AbsoluteRange":true,"OpacityPoints":[0,0,20,0,40,0.15,120,0.3,220,0.375,1024,0.5],"RGBPoints":[0,0,0,0,20,0.168627,0,0,40,0.403922,0.145098,0.0784314,120,0.780392,0.607843,0.380392,220,0.847059,0.835294,0.788235,1024,1,1,1],"EffectiveRange":[0,220]},{"Name":"MR-MIP","NanColor":[1,1,0],"ColorSpace":"RGB","AbsoluteRange":true,"OpacityPoints":[0,0,98.3725,0,416.637,1,2800,1],"RGBPoints":[0,1,1,1,98.3725,1,1,1,416.637,1,1,1,2800,1,1,1],"EffectiveRange":[0,416.637]},{"Name":"MR-T2-Brain","NanColor":[1,1,0],"ColorSpace":"RGB","AbsoluteRange":true,"OpacityPoints":[0,0,36.05,0,218.302,0.171429,412.406,1,641,1],"RGBPoints":[0,0,0,0,98.7223,0.956863,0.839216,0.192157,412.406,0,0.592157,0.807843,641,1,1,1],"EffectiveRange":[0,412.406]},{"Name":"DTI-FA-Brain","NanColor":[1,1,0],"ColorSpace":"RGB","AbsoluteRange":true,"OpacityPoints":[0,0,0,0,0.3501,0.0158,0.49379,0.7619,0.6419,1,0.992,1,0.995,0,0.995,0],"RGBPoints":[0,1,0,0,0,1,0,0,0.24974,0.4941,1,0,0.49949,0,0.9882,1,0.7492,0.51764,0,1,0.995,1,0,0,0.995,1,0,0],"EffectiveRange":[0,1]},{"Name":"US-Fetal","NanColor":[1,1,0],"ColorSpace":"RGB","AbsoluteRange":true,"OpacityPoints":[-10,0,0,0,270,0.8],"RGBPoints":[-10,0.325,0.153,0.153,74,0.474,0.392,0.302,136,0.718,0.51,0.443,270,0.76,0.44,0.53],"EffectiveRange":[-10,270]},{"ColorSpace":"Lab","Name":"2hot","RGBPoints":[-1,0.0416667,0,0,-0.873016,0.208333,0,0,-0.746032,0.375,0,0,-0.619048,0.541667,0,0,-0.492063,0.708333,0,0,-0.365079,0.854137,0,0,-0.238095,0.937488,0.039062,0,-0.111111,1,0.208333,0,0.015873,1,0.375,0,0.142857,1,0.541667,0,0.269841,1,0.708333,0,0.396825,1,0.858805,0.03125,0.52381,1,0.947392,0.15625,0.650794,1,1,0.3125,0.777778,1,1,0.5625,0.904762,1,1,0.8125,1,1,1,1]},{"ColorSpace":"HSV","Name":"Blue to Red Rainbow","NanColor":[0.498039215686,0.498039215686,0.498039215686],"RGBPoints":[0,0,0,1,1,1,0,0]}]');
+
 /***/ })
 
 /******/ 	});
@@ -79426,44 +79072,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _kitware_vtk_js_Rendering_Core_Actor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Actor */ "./node_modules/@kitware/vtk.js/Rendering/Core/Actor.js");
 /* harmony import */ var _kitware_vtk_js_Rendering_Core_Mapper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Mapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/Mapper.js");
 /* harmony import */ var _kitware_vtk_js_Filters_General_OutlineFilter__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @kitware/vtk.js/Filters/General/OutlineFilter */ "./node_modules/@kitware/vtk.js/Filters/General/OutlineFilter.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Misc_GenericRenderWindow__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Misc/GenericRenderWindow */ "./node_modules/@kitware/vtk.js/Rendering/Misc/GenericRenderWindow.js");
-/* harmony import */ var _kitware_vtk_js_Widgets_Core_WidgetManager__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Core/WidgetManager */ "./node_modules/@kitware/vtk.js/Widgets/Core/WidgetManager.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Profiles_All__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Profiles/All */ "./node_modules/@kitware/vtk.js/Rendering/Profiles/All.js");
-/* harmony import */ var _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants */ "./node_modules/@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants.js");
-/* harmony import */ var _syntheticimage__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./syntheticimage */ "./src/syntheticimage.js");
-/* harmony import */ var _load3d__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./load3d */ "./src/load3d.js");
-/* harmony import */ var _loadimage__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./loadimage */ "./src/loadimage.js");
-/* harmony import */ var _rendingmpr__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./rendingmpr */ "./src/rendingmpr.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_Volume__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Volume */ "./node_modules/@kitware/vtk.js/Rendering/Core/Volume.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_VolumeMapper__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/VolumeMapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/VolumeMapper.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Misc_FullScreenRenderWindow__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Misc/FullScreenRenderWindow */ "./node_modules/@kitware/vtk.js/Rendering/Misc/FullScreenRenderWindow.js");
-/* harmony import */ var _kitware_vtk_js_Common_DataModel_BoundingBox__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @kitware/vtk.js/Common/DataModel/BoundingBox */ "./node_modules/@kitware/vtk.js/Common/DataModel/BoundingBox.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_ColorTransferFunction__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ColorTransferFunction */ "./node_modules/@kitware/vtk.js/Rendering/Core/ColorTransferFunction.js");
-/* harmony import */ var _kitware_vtk_js_Common_DataModel_PiecewiseFunction__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @kitware/vtk.js/Common/DataModel/PiecewiseFunction */ "./node_modules/@kitware/vtk.js/Common/DataModel/PiecewiseFunction.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_VolumeProperty__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/VolumeProperty */ "./node_modules/@kitware/vtk.js/Rendering/Core/VolumeProperty.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_ImageMapper__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ImageMapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/ImageMapper.js");
-/* harmony import */ var _kitware_vtk_js_Imaging_Core_ImageReslice__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! @kitware/vtk.js/Imaging/Core/ImageReslice */ "./node_modules/@kitware/vtk.js/Imaging/Core/ImageReslice.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_ImageSlice__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ImageSlice */ "./node_modules/@kitware/vtk.js/Rendering/Core/ImageSlice.js");
-/* harmony import */ var _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget */ "./node_modules/@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_InteractorStyle__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/InteractorStyle */ "./node_modules/@kitware/vtk.js/Rendering/Core/InteractorStyle.js");
-/* harmony import */ var _kitware_vtk_js_Interaction_Style_InteractorStyleImage__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Style/InteractorStyleImage */ "./node_modules/@kitware/vtk.js/Interaction/Style/InteractorStyleImage.js");
-/* harmony import */ var _kitware_vtk_js_macros2__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! @kitware/vtk.js/macros2 */ "./node_modules/@kitware/vtk.js/macros2.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Profiles_All__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Profiles/All */ "./node_modules/@kitware/vtk.js/Rendering/Profiles/All.js");
+/* harmony import */ var _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants */ "./node_modules/@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants.js");
+/* harmony import */ var _syntheticimage__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./syntheticimage */ "./src/syntheticimage.js");
+/* harmony import */ var _loadimage__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./loadimage */ "./src/loadimage.js");
+/* harmony import */ var _rendingmpr__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./rendingmpr */ "./src/rendingmpr.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_InteractorStyle__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/InteractorStyle */ "./node_modules/@kitware/vtk.js/Rendering/Core/InteractorStyle.js");
+/* harmony import */ var _kitware_vtk_js_Interaction_Style_InteractorStyleImage__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Style/InteractorStyleImage */ "./node_modules/@kitware/vtk.js/Interaction/Style/InteractorStyleImage.js");
+/* harmony import */ var _3d__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./3d */ "./src/3d.js");
 // import "@kitware/vtk.js/favicon";
-
-
-
-
-
-
-// Load the rendering pieces we want to use (for both WebGL and WebGPU)
-
-
-
-
-
-
-
-
 
 
 
@@ -79529,7 +79146,7 @@ async function load(ArrayBuffer) {
   return arrayBuffer;
 }
 function loadDicom(arrayBuffer) {
-  const syntheticImageData = new _syntheticimage__WEBPACK_IMPORTED_MODULE_8__["default"]();
+  const syntheticImageData = new _syntheticimage__WEBPACK_IMPORTED_MODULE_6__["default"]();
   // const {pixelSpacing,SliceThickness,WindowCenter,WindowWidth,HitBit} = syntheticImageData.GetTagsData(arrayBuffer)
   // return {
   //   pixelSpacing:pixelSpacing,
@@ -79547,80 +79164,26 @@ function changeEvent(type) {
   eventType = type;
   if (eventType === 1) {
     viewObj.forEach(obj => {
-      obj.interactor.setInteractorStyle(_kitware_vtk_js_Interaction_Style_InteractorStyleImage__WEBPACK_IMPORTED_MODULE_24__["default"].newInstance());
+      obj.interactor.setInteractorStyle(_kitware_vtk_js_Interaction_Style_InteractorStyleImage__WEBPACK_IMPORTED_MODULE_10__["default"].newInstance());
     });
   } else {
     viewObj.forEach(obj => {
-      obj.interactor.setInteractorStyle(_kitware_vtk_js_Rendering_Core_InteractorStyle__WEBPACK_IMPORTED_MODULE_23__["default"].newInstance());
+      obj.interactor.setInteractorStyle(_kitware_vtk_js_Rendering_Core_InteractorStyle__WEBPACK_IMPORTED_MODULE_9__["default"].newInstance());
     });
   }
 }
-function load3D(arrayBuffer) {
+function load3D(arrayBuffer, divElement) {
   if (!arrayBuffer) {
     // 检查输入是否有效
     throw new Error("arrayBuffer 不能为空！");
   }
-  const syntheticImageData = new _syntheticimage__WEBPACK_IMPORTED_MODULE_8__["default"]();
+  const syntheticImageData = new _syntheticimage__WEBPACK_IMPORTED_MODULE_6__["default"]();
   const {
     imageData,
     windowWidth,
     windowCenter
   } = syntheticImageData.ImageData(arrayBuffer);
-  Demo3d(imageData);
-}
-function Demo3d(source) {
-  const renderMainBox = document.getElementById("test1");
-  const fullScreenRenderer = _kitware_vtk_js_Rendering_Misc_FullScreenRenderWindow__WEBPACK_IMPORTED_MODULE_14__["default"].newInstance({
-    container: renderMainBox,
-    background: [0, 0, 0]
-  });
-  const renderer = fullScreenRenderer.getRenderer();
-  const renderWindow = fullScreenRenderer.getRenderWindow();
-  const volume = _kitware_vtk_js_Rendering_Core_Volume__WEBPACK_IMPORTED_MODULE_12__["default"].newInstance();
-  const mapper = _kitware_vtk_js_Rendering_Core_VolumeMapper__WEBPACK_IMPORTED_MODULE_13__["default"].newInstance();
-  mapper.setInputData(source);
-  volume.setMapper(mapper);
-  const sampleDistance = 0.7 * Math.sqrt(source.getSpacing().map(v => v * v).reduce((a, b) => a + b, 0));
-  mapper.setSampleDistance(sampleDistance);
-  mapper.setComputeNormalFromOpacity(false);
-  mapper.setGlobalIlluminationReach(0.0);
-  mapper.setVolumetricScatteringBlending(0.5);
-  mapper.setVolumeShadowSamplingDistFactor(5.0);
-  const volProp = _kitware_vtk_js_Rendering_Core_VolumeProperty__WEBPACK_IMPORTED_MODULE_18__["default"].newInstance();
-  volProp.setInterpolationTypeToLinear();
-  volume.getProperty().setScalarOpacityUnitDistance(0, _kitware_vtk_js_Common_DataModel_BoundingBox__WEBPACK_IMPORTED_MODULE_15__["default"].getDiagonalLength(source.getBounds()) / Math.max(...source.getDimensions()));
-  volProp.setGradientOpacityMinimumValue(0, 0);
-  const dataArray = source.getPointData().getScalars() || source.getPointData().getArrays()[0];
-  const dataRange = dataArray.getRange();
-  volume.getProperty().setGradientOpacityMaximumValue(0, (dataRange[1] - dataRange[0]) * 0.05);
-  volProp.setShade(true);
-  volProp.setUseGradientOpacity(0, false);
-  volProp.setGradientOpacityMinimumOpacity(0, 0.0);
-  volProp.setGradientOpacityMaximumOpacity(0, 1.0);
-  // volProp.setAmbient(0.0);
-  volProp.setDiffuse(2.0);
-  volProp.setSpecular(0.0);
-  volProp.setSpecularPower(0.0);
-  volProp.setUseLabelOutline(false);
-  // volProp.setLabelOutlineThickness(2);
-  volume.setProperty(volProp);
-  const cam = renderer.getActiveCamera();
-  cam.setPosition(0, 0, 0);
-  cam.setFocalPoint(-1, -1, 0);
-  cam.setViewUp(0, 0, -1);
-  renderer.addVolume(volume);
-  const pf = _kitware_vtk_js_Common_DataModel_PiecewiseFunction__WEBPACK_IMPORTED_MODULE_17__["default"].newInstance();
-  pf.addPoint(0, 0.0);
-  pf.addPoint(100, 0.0);
-  pf.addPoint(3120, 1.0);
-  volume.getProperty().setScalarOpacity(0, pf);
-  const ctf = _kitware_vtk_js_Rendering_Core_ColorTransferFunction__WEBPACK_IMPORTED_MODULE_16__["default"].newInstance();
-  ctf.addRGBPoint(200.0, 1.0, 1.0, 1.0);
-  ctf.addRGBPoint(2000.0, 1.0, 1.0, 1.0);
-  volume.getProperty().setRGBTransferFunction(0, ctf);
-  renderer.resetCamera();
-  renderer.resetCameraClippingRange();
-  renderWindow.render();
+  (0,_3d__WEBPACK_IMPORTED_MODULE_11__.Demo3d)(imageData, divElement);
 }
 
 /**
@@ -79633,7 +79196,7 @@ function loadMPR(arrayBuffer, divElement) {
     // 检查输入是否有效
     throw new Error("arrayBuffer 不能为空！");
   }
-  const syntheticImageData = new _syntheticimage__WEBPACK_IMPORTED_MODULE_8__["default"]();
+  const syntheticImageData = new _syntheticimage__WEBPACK_IMPORTED_MODULE_6__["default"]();
   const {
     imageData,
     windowWidth,
@@ -79848,8 +79411,8 @@ function calculateB2(a) {
   return 15.8 * Math.pow(a, -0.68);
 }
 function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement) {
-  const loadimage = new _loadimage__WEBPACK_IMPORTED_MODULE_10__["default"]();
-  const mprrendering = new _rendingmpr__WEBPACK_IMPORTED_MODULE_11__["default"]();
+  const loadimage = new _loadimage__WEBPACK_IMPORTED_MODULE_7__["default"]();
+  const mprrendering = new _rendingmpr__WEBPACK_IMPORTED_MODULE_8__["default"]();
   const {
     viewAttributes,
     view3D,
@@ -80024,8 +79587,8 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
     // obj.renderer.getActiveCamera().setParallelScale(currentScale * 0.5); 
     // console.log(obj.renderer.getActiveCamera().getParallelScale())
     const reslice = obj.reslice;
-    const viewType = _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_7__.xyzToViewType[i];
-    console.log(_kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_7__.xyzToViewType);
+    const viewType = _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_5__.xyzToViewType[i];
+    console.log(_kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_5__.xyzToViewType);
     // 对所有视图进行操作，确保在当前视图进行交互时能够正确更新切片
     viewAttributes.forEach(v => {
       v.widgetInstance.onWidgetChange(event => {
@@ -80051,7 +79614,7 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
       // 可以根据当前交互方法判断是否允许更新焦点
       interactionMethodName => {
         console.log("interactionMethodName", interactionMethodName);
-        const canUpdateFocalPoint = interactionMethodName === _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_7__.InteractionMethodsName.RotateLine;
+        const canUpdateFocalPoint = interactionMethodName === _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_5__.InteractionMethodsName.RotateLine;
         const activeViewType = widget.getWidgetState().getActiveViewType();
         // 如果当前视图是活动视图或不能更新焦点，则允许计算焦点偏移
         console.log("activeViewType", activeViewType, canUpdateFocalPoint);
@@ -80137,7 +79700,7 @@ function screenToWorld(displayPos, renderer) {
 }
 })();
 
-pian = __webpack_exports__;
+/******/ 	return __webpack_exports__;
 /******/ })()
 ;
-//# sourceMappingURL=webvtk.js.map
+});
