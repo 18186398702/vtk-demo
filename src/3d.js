@@ -93,7 +93,7 @@ export function Demo3d(source, divElement) {
     // ctf.addRGBPoint(2000.0, 1.0, 1.0, 1.0);
 
     // volume.getProperty().setRGBTransferFunction(0, ctf);
-    load3dColor('CT-AAA2');
+    load3dColor('CT-AAA');
 
     renderer.resetCamera();
     renderer.resetCameraClippingRange();
