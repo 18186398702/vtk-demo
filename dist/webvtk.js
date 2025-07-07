@@ -64837,7 +64837,7 @@ function Demo3d(source, divElement) {
   // ctf.addRGBPoint(2000.0, 1.0, 1.0, 1.0);
 
   // volume.getProperty().setRGBTransferFunction(0, ctf);
-  load3dColor('CT-AAA2');
+  load3dColor('CT-AAA');
   renderer.resetCamera();
   renderer.resetCameraClippingRange();
   renderWindow_3d.render();
@@ -68088,13 +68088,13 @@ class MPRRendering {
   // 创建MPR渲染页面
   createRenderingPage(divElement) {
     // 定义视图颜色（X轴、Y轴、Z轴以及其他方向的灰色）
-    const viewColors = [[1, 0, 0],
+    const viewColors = [[0, 0, 0],
     // 红色，表示X轴
-    [0, 1, 0],
+    [0, 0, 0],
     // 绿色，表示Y轴
-    [0, 0, 1],
+    [0, 0, 0],
     // 蓝色，表示Z轴
-    [0.5, 0.5, 0.5] // 灰色，表示其他
+    [0.2, 0.2, 0.2] // 灰色，表示其他
     ];
     // 是否显示调试Actor（用于开发阶段查看Actor）
     const debugActors = true;
@@ -68204,7 +68204,10 @@ class MPRRendering {
       //   console.log(callData)
       // });
       // 设置渲染器的背景颜色，viewColors[i] 是一个 RGB 颜色数组
-      // obj.renderer.setBackground(...viewColors[i]);
+      if (i < 3) {
+        // 如果显示调试Actor，则将背景颜色设置为浅灰色
+        obj.renderer.setBackground(...viewColors[i]);
+      }
 
       // 将渲染器添加到渲染窗口中，这样渲染器才能在窗口中显示
       obj.renderWindow.addRenderer(obj.renderer);
@@ -68342,7 +68345,7 @@ class MPRRendering {
           fontFamily: "Arial",
           fontColor: "black",
           // fontSizeScale: (res) => res / 2,
-          faceColor: this.createRGBStringFromRGBValues(viewColors[0]),
+          faceColor: "rgb(255, 71, 87)",
           faceRotation: 0,
           edgeThickness: 0.1,
           edgeColor: "black",
@@ -68351,27 +68354,27 @@ class MPRRendering {
         // axes.setXPlusFaceProperty({ text: '+X' });
         axes.setXMinusFaceProperty({
           text: "-X",
-          faceColor: this.createRGBStringFromRGBValues(viewColors[0])
+          faceColor: "rgb(255, 71, 87)"
           // faceRotation: 90,
           // fontStyle: "italic",
         });
         axes.setYPlusFaceProperty({
           text: "+Y",
-          faceColor: this.createRGBStringFromRGBValues(viewColors[1])
+          faceColor: "rgb(46, 213, 115)"
           // fontSizeScale: (res) => res / 4,
         });
         axes.setYMinusFaceProperty({
           text: "-Y",
-          faceColor: this.createRGBStringFromRGBValues(viewColors[1]),
+          faceColor: "rgb(46, 213, 115)",
           fontColor: "white"
         });
         axes.setZPlusFaceProperty({
           text: "+Z",
-          faceColor: this.createRGBStringFromRGBValues(viewColors[2])
+          faceColor: "rgb(9, 132, 227)"
         });
         axes.setZMinusFaceProperty({
           text: "-Z",
-          faceColor: this.createRGBStringFromRGBValues(viewColors[2])
+          faceColor: "rgb(9, 132, 227)"
           // faceRotation: 45,
         });
 
@@ -79061,6 +79064,7 @@ var __webpack_exports__ = {};
   \**********************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   change3dColor: () => (/* binding */ change3dColor),
 /* harmony export */   changeEvent: () => (/* binding */ changeEvent),
 /* harmony export */   f_load_directory: () => (/* binding */ f_load_directory),
 /* harmony export */   load: () => (/* binding */ load),
@@ -79093,8 +79097,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-// const mprrendering = new MPRRendering();
-// mprrendering.createRenderingPage();
+function change3dColor(color) {
+  (0,_3d__WEBPACK_IMPORTED_MODULE_11__.load3dColor)(color);
+}
 function calculateB(a) {
   // 根据给定的数据点，使用分段线性回归进行近似
   // 我们将数据点分为几个区间，每个区间使用不同的线性方程
