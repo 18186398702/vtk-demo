@@ -14288,6 +14288,401 @@ var Constants = {
 
 /***/ }),
 
+/***/ "./node_modules/@kitware/vtk.js/Interaction/Manipulators/CompositeCameraManipulator.js":
+/*!*********************************************************************************************!*\
+  !*** ./node_modules/@kitware/vtk.js/Interaction/Manipulators/CompositeCameraManipulator.js ***!
+  \*********************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ vtkCompositeCameraManipulator$1),
+/* harmony export */   extend: () => (/* binding */ extend)
+/* harmony export */ });
+/* harmony import */ var _macros2_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../macros2.js */ "./node_modules/@kitware/vtk.js/macros2.js");
+
+
+// ----------------------------------------------------------------------------
+// vtkCompositeCameraManipulator methods
+// ----------------------------------------------------------------------------
+
+function vtkCompositeCameraManipulator(publicAPI, model) {
+  // Set our className
+  model.classHierarchy.push('vtkCompositeCameraManipulator');
+
+  //-------------------------------------------------------------------------
+  publicAPI.computeDisplayCenter = (iObserver, renderer) => {
+    const pt = iObserver.computeWorldToDisplay(renderer, model.center[0], model.center[1], model.center[2]);
+    model.displayCenter[0] = pt[0];
+    model.displayCenter[1] = pt[1];
+  };
+}
+
+// ----------------------------------------------------------------------------
+// Object factory
+// ----------------------------------------------------------------------------
+
+const DEFAULT_VALUES = {
+  center: [0, 0, 0],
+  rotationFactor: 1,
+  displayCenter: [0, 0]
+};
+
+// ----------------------------------------------------------------------------
+
+function extend(publicAPI, model) {
+  let initialValues = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+  Object.assign(model, DEFAULT_VALUES, initialValues);
+
+  // Create get-set macros
+  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.setGet(publicAPI, model, ['rotationFactor']);
+  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.setGetArray(publicAPI, model, ['displayCenter'], 2);
+  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.setGetArray(publicAPI, model, ['center'], 3);
+
+  // Object specific methods
+  vtkCompositeCameraManipulator(publicAPI, model);
+}
+
+// ----------------------------------------------------------------------------
+
+var vtkCompositeCameraManipulator$1 = {
+  extend
+};
+
+
+
+
+/***/ }),
+
+/***/ "./node_modules/@kitware/vtk.js/Interaction/Manipulators/CompositeMouseManipulator.js":
+/*!********************************************************************************************!*\
+  !*** ./node_modules/@kitware/vtk.js/Interaction/Manipulators/CompositeMouseManipulator.js ***!
+  \********************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ vtkCompositeMouseManipulator$1),
+/* harmony export */   extend: () => (/* binding */ extend)
+/* harmony export */ });
+/* harmony import */ var _macros2_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../macros2.js */ "./node_modules/@kitware/vtk.js/macros2.js");
+
+
+// ----------------------------------------------------------------------------
+// vtkCompositeMouseManipulator methods
+// ----------------------------------------------------------------------------
+
+function vtkCompositeMouseManipulator(publicAPI, model) {
+  // Set our className
+  model.classHierarchy.push('vtkCompositeMouseManipulator');
+  publicAPI.startInteraction = () => {};
+  publicAPI.endInteraction = () => {};
+  publicAPI.onButtonDown = (interactor, renderer, position) => {};
+  publicAPI.onButtonUp = interactor => {};
+  publicAPI.onMouseMove = (interactor, renderer, position) => {};
+  publicAPI.onStartScroll = (interactor, renderer, delta) => {};
+  publicAPI.onScroll = (interactor, renderer, delta) => {};
+  publicAPI.onEndScroll = interactor => {};
+  publicAPI.isDragEnabled = () => model.dragEnabled;
+  publicAPI.isScrollEnabled = () => model.scrollEnabled;
+}
+
+// ----------------------------------------------------------------------------
+// Object factory
+// ----------------------------------------------------------------------------
+
+const DEFAULT_VALUES = {
+  button: 1,
+  shift: false,
+  control: false,
+  alt: false,
+  dragEnabled: true,
+  scrollEnabled: false
+};
+
+// ----------------------------------------------------------------------------
+
+function extend(publicAPI, model) {
+  let initialValues = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+  Object.assign(model, DEFAULT_VALUES, initialValues);
+
+  // Create get-set macros
+  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.setGet(publicAPI, model, ['button', 'shift', 'control', 'alt']);
+  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.set(publicAPI, model, ['dragEnabled', 'scrollEnabled']);
+
+  // Object specific methods
+  vtkCompositeMouseManipulator(publicAPI, model);
+}
+
+// ----------------------------------------------------------------------------
+
+var vtkCompositeMouseManipulator$1 = {
+  extend
+};
+
+
+
+
+/***/ }),
+
+/***/ "./node_modules/@kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballPanManipulator.js":
+/*!*****************************************************************************************************!*\
+  !*** ./node_modules/@kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballPanManipulator.js ***!
+  \*****************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ vtkMouseCameraTrackballPanManipulator$1),
+/* harmony export */   extend: () => (/* binding */ extend),
+/* harmony export */   newInstance: () => (/* binding */ newInstance)
+/* harmony export */ });
+/* harmony import */ var _macros2_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../macros2.js */ "./node_modules/@kitware/vtk.js/macros2.js");
+/* harmony import */ var _CompositeCameraManipulator_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./CompositeCameraManipulator.js */ "./node_modules/@kitware/vtk.js/Interaction/Manipulators/CompositeCameraManipulator.js");
+/* harmony import */ var _CompositeMouseManipulator_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./CompositeMouseManipulator.js */ "./node_modules/@kitware/vtk.js/Interaction/Manipulators/CompositeMouseManipulator.js");
+/* harmony import */ var _Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../Common/Core/Math/index.js */ "./node_modules/@kitware/vtk.js/Common/Core/Math/index.js");
+
+
+
+
+
+// ----------------------------------------------------------------------------
+// vtkMouseCameraTrackballPanManipulator methods
+// ----------------------------------------------------------------------------
+
+function vtkMouseCameraTrackballPanManipulator(publicAPI, model) {
+  // Set our className
+  model.classHierarchy.push('vtkMouseCameraTrackballPanManipulator');
+  publicAPI.onButtonDown = (interactor, renderer, position) => {
+    model.previousPosition = position;
+  };
+  publicAPI.onMouseMove = (interactor, renderer, position) => {
+    if (!position) {
+      return;
+    }
+    const pos = position;
+    const lastPos = model.previousPosition;
+    model.previousPosition = position;
+    const camera = renderer.getActiveCamera();
+    const camPos = camera.getPosition();
+    const fp = camera.getFocalPoint();
+    if (camera.getParallelProjection()) {
+      camera.orthogonalizeViewUp();
+      const up = camera.getViewUp();
+      const vpn = camera.getViewPlaneNormal();
+      const right = [0, 0, 0];
+      (0,_Common_Core_Math_index_js__WEBPACK_IMPORTED_MODULE_3__.j)(vpn, up, right);
+
+      // These are different because y is flipped.
+      const height = interactor.getView().getViewportSize(renderer)[1];
+      let dx = (pos.x - lastPos.x) / height;
+      let dy = (lastPos.y - pos.y) / height;
+      const scale = camera.getParallelScale();
+      dx *= scale * 2.0;
+      dy *= scale * 2.0;
+      let tmp = right[0] * dx + up[0] * dy;
+      camPos[0] += tmp;
+      fp[0] += tmp;
+      tmp = right[1] * dx + up[1] * dy;
+      camPos[1] += tmp;
+      fp[1] += tmp;
+      tmp = right[2] * dx + up[2] * dy;
+      camPos[2] += tmp;
+      fp[2] += tmp;
+      camera.setPosition(camPos[0], camPos[1], camPos[2]);
+      camera.setFocalPoint(fp[0], fp[1], fp[2]);
+    } else {
+      const {
+        center
+      } = model;
+      const style = interactor.getInteractorStyle();
+      const focalDepth = style.computeWorldToDisplay(renderer, center[0], center[1], center[2])[2];
+      const worldPoint = style.computeDisplayToWorld(renderer, pos.x, pos.y, focalDepth);
+      const lastWorldPoint = style.computeDisplayToWorld(renderer, lastPos.x, lastPos.y, focalDepth);
+      const newCamPos = [camPos[0] + (lastWorldPoint[0] - worldPoint[0]), camPos[1] + (lastWorldPoint[1] - worldPoint[1]), camPos[2] + (lastWorldPoint[2] - worldPoint[2])];
+      const newFp = [fp[0] + (lastWorldPoint[0] - worldPoint[0]), fp[1] + (lastWorldPoint[1] - worldPoint[1]), fp[2] + (lastWorldPoint[2] - worldPoint[2])];
+      camera.setPosition(newCamPos[0], newCamPos[1], newCamPos[2]);
+      camera.setFocalPoint(newFp[0], newFp[1], newFp[2]);
+    }
+    renderer.resetCameraClippingRange();
+    if (interactor.getLightFollowCamera()) {
+      renderer.updateLightsGeometryToFollowCamera();
+    }
+  };
+}
+
+// ----------------------------------------------------------------------------
+// Object factory
+// ----------------------------------------------------------------------------
+
+const DEFAULT_VALUES = {};
+
+// ----------------------------------------------------------------------------
+
+function extend(publicAPI, model) {
+  let initialValues = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+  Object.assign(model, DEFAULT_VALUES, initialValues);
+
+  // Inheritance
+  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.obj(publicAPI, model);
+  _CompositeCameraManipulator_js__WEBPACK_IMPORTED_MODULE_1__["default"].extend(publicAPI, model, initialValues);
+  _CompositeMouseManipulator_js__WEBPACK_IMPORTED_MODULE_2__["default"].extend(publicAPI, model, initialValues);
+
+  // Object specific methods
+  vtkMouseCameraTrackballPanManipulator(publicAPI, model);
+}
+
+// ----------------------------------------------------------------------------
+
+const newInstance = _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.newInstance(extend, 'vtkMouseCameraTrackballPanManipulator');
+
+// ----------------------------------------------------------------------------
+
+var vtkMouseCameraTrackballPanManipulator$1 = {
+  newInstance,
+  extend
+};
+
+
+
+
+/***/ }),
+
+/***/ "./node_modules/@kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballZoomManipulator.js":
+/*!******************************************************************************************************!*\
+  !*** ./node_modules/@kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballZoomManipulator.js ***!
+  \******************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ vtkMouseCameraTrackballZoomManipulator$1),
+/* harmony export */   extend: () => (/* binding */ extend),
+/* harmony export */   newInstance: () => (/* binding */ newInstance)
+/* harmony export */ });
+/* harmony import */ var _macros2_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../macros2.js */ "./node_modules/@kitware/vtk.js/macros2.js");
+/* harmony import */ var _CompositeCameraManipulator_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./CompositeCameraManipulator.js */ "./node_modules/@kitware/vtk.js/Interaction/Manipulators/CompositeCameraManipulator.js");
+/* harmony import */ var _CompositeMouseManipulator_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./CompositeMouseManipulator.js */ "./node_modules/@kitware/vtk.js/Interaction/Manipulators/CompositeMouseManipulator.js");
+
+
+
+
+// ----------------------------------------------------------------------------
+// vtkMouseCameraTrackballZoomManipulator methods
+// ----------------------------------------------------------------------------
+
+function vtkMouseCameraTrackballZoomManipulator(publicAPI, model) {
+  // Set our className
+  model.classHierarchy.push('vtkMouseCameraTrackballZoomManipulator');
+  publicAPI.onButtonDown = (interactor, renderer, position) => {
+    model.previousPosition = position;
+    const size = interactor.getView().getViewportSize(renderer);
+    const camera = renderer.getActiveCamera();
+    const direction = model.flipDirection ? -1 : 1;
+    if (camera.getParallelProjection()) {
+      model.zoomScale = 1.5 / size[1] * direction;
+    } else {
+      const range = camera.getClippingRange();
+      model.zoomScale = 1.5 * (range[1] / size[1]) * direction;
+    }
+  };
+  publicAPI.onMouseMove = (interactor, renderer, position) => {
+    if (!position) {
+      return;
+    }
+    const dy = model.previousPosition.y - position.y;
+    const camera = renderer.getActiveCamera();
+    if (camera.getParallelProjection()) {
+      const k = dy * model.zoomScale;
+      camera.setParallelScale((1.0 - k) * camera.getParallelScale());
+    } else {
+      const cameraPos = camera.getPosition();
+      const cameraFp = camera.getFocalPoint();
+      const norm = camera.getDirectionOfProjection();
+      const k = dy * model.zoomScale;
+      let tmp = k * norm[0];
+      cameraPos[0] += tmp;
+      cameraFp[0] += tmp;
+      tmp = k * norm[1];
+      cameraPos[1] += tmp;
+      cameraFp[1] += tmp;
+      tmp = k * norm[2];
+      cameraPos[2] += tmp;
+      cameraFp[2] += tmp;
+      if (!camera.getFreezeFocalPoint()) {
+        camera.setFocalPoint(cameraFp[0], cameraFp[1], cameraFp[2]);
+      }
+      camera.setPosition(cameraPos[0], cameraPos[1], cameraPos[2]);
+      renderer.resetCameraClippingRange();
+    }
+    if (interactor.getLightFollowCamera()) {
+      renderer.updateLightsGeometryToFollowCamera();
+    }
+    model.previousPosition = position;
+  };
+  publicAPI.onScroll = (interactor, renderer, delta) => {
+    if (!delta) {
+      return;
+    }
+    const camera = renderer.getActiveCamera();
+    const dyf = 1 - delta / 10;
+    if (camera.getParallelProjection()) {
+      camera.setParallelScale(camera.getParallelScale() / dyf);
+    } else {
+      camera.dolly(dyf);
+      renderer.resetCameraClippingRange();
+    }
+    if (interactor.getLightFollowCamera()) {
+      renderer.updateLightsGeometryToFollowCamera();
+    }
+  };
+}
+
+// ----------------------------------------------------------------------------
+// Object factory
+// ----------------------------------------------------------------------------
+
+const DEFAULT_VALUES = {
+  zoomScale: 0.0,
+  flipDirection: false
+};
+
+// ----------------------------------------------------------------------------
+
+function extend(publicAPI, model) {
+  let initialValues = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+  Object.assign(model, DEFAULT_VALUES, initialValues);
+
+  // Inheritance
+  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.obj(publicAPI, model);
+  _CompositeMouseManipulator_js__WEBPACK_IMPORTED_MODULE_2__["default"].extend(publicAPI, model, initialValues);
+  _CompositeCameraManipulator_js__WEBPACK_IMPORTED_MODULE_1__["default"].extend(publicAPI, model, initialValues);
+  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.setGet(publicAPI, model, ['flipDirection']);
+
+  // Object specific methods
+  vtkMouseCameraTrackballZoomManipulator(publicAPI, model);
+}
+
+// ----------------------------------------------------------------------------
+
+const newInstance = _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.newInstance(extend, 'vtkMouseCameraTrackballZoomManipulator');
+
+// ----------------------------------------------------------------------------
+
+var vtkMouseCameraTrackballZoomManipulator$1 = {
+  newInstance,
+  extend
+};
+
+
+
+
+/***/ }),
+
 /***/ "./node_modules/@kitware/vtk.js/Interaction/Style/InteractorStyleImage.js":
 /*!********************************************************************************!*\
   !*** ./node_modules/@kitware/vtk.js/Interaction/Style/InteractorStyleImage.js ***!
@@ -14587,6 +14982,657 @@ const newInstance = _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.newInstance(exten
 var vtkInteractorStyleImage$1 = {
   newInstance,
   extend
+};
+
+
+
+
+/***/ }),
+
+/***/ "./node_modules/@kitware/vtk.js/Interaction/Style/InteractorStyleManipulator.js":
+/*!**************************************************************************************!*\
+  !*** ./node_modules/@kitware/vtk.js/Interaction/Style/InteractorStyleManipulator.js ***!
+  \**************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   STATIC: () => (/* binding */ STATIC),
+/* harmony export */   "default": () => (/* binding */ vtkInteractorStyleManipulator$1),
+/* harmony export */   extend: () => (/* binding */ extend),
+/* harmony export */   newInstance: () => (/* binding */ newInstance)
+/* harmony export */ });
+/* harmony import */ var _macros2_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../macros2.js */ "./node_modules/@kitware/vtk.js/macros2.js");
+/* harmony import */ var _Rendering_Core_InteractorStyle_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../Rendering/Core/InteractorStyle.js */ "./node_modules/@kitware/vtk.js/Rendering/Core/InteractorStyle.js");
+
+
+
+const {
+  vtkDebugMacro
+} = _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m;
+const {
+  States
+} = _Rendering_Core_InteractorStyle_js__WEBPACK_IMPORTED_MODULE_1__["default"];
+
+// ----------------------------------------------------------------------------
+// Event Types
+// ----------------------------------------------------------------------------
+
+const START_INTERACTION_EVENT = {
+  type: 'StartInteractionEvent'
+};
+const INTERACTION_EVENT = {
+  type: 'InteractionEvent'
+};
+const END_INTERACTION_EVENT = {
+  type: 'EndInteractionEvent'
+};
+
+// ----------------------------------------------------------------------------
+// Global methods
+// ----------------------------------------------------------------------------
+
+function translateCamera(renderer, rwi, toX, toY, fromX, fromY) {
+  const cam = renderer.getActiveCamera();
+  let viewFocus = cam.getFocalPoint();
+  viewFocus = rwi.getInteractorStyle().computeWorldToDisplay(renderer, viewFocus[0], viewFocus[1], viewFocus[2]);
+  const focalDepth = viewFocus[2];
+  const newPickPoint = rwi.getInteractorStyle().computeDisplayToWorld(renderer, toX, toY, focalDepth);
+  const oldPickPoint = rwi.getInteractorStyle().computeDisplayToWorld(renderer, fromX, fromY, focalDepth);
+
+  // camera motion is reversed
+  const motionVector = [oldPickPoint[0] - newPickPoint[0], oldPickPoint[1] - newPickPoint[1], oldPickPoint[2] - newPickPoint[2]];
+  viewFocus = cam.getFocalPoint();
+  const viewPoint = cam.getPosition();
+  cam.setFocalPoint(motionVector[0] + viewFocus[0], motionVector[1] + viewFocus[1], motionVector[2] + viewFocus[2]);
+  cam.setPosition(motionVector[0] + viewPoint[0], motionVector[1] + viewPoint[1], motionVector[2] + viewPoint[2]);
+}
+function dollyToPosition(fact, position, renderer, rwi) {
+  const cam = renderer.getActiveCamera();
+  if (cam.getParallelProjection()) {
+    // Zoom relatively to the cursor
+    const view = rwi.getView();
+    const aSize = view.getViewportSize(renderer);
+    const viewport = renderer.getViewport();
+    const viewSize = view.getSize();
+    const w = aSize[0];
+    const h = aSize[1];
+    const x0 = w / 2;
+    const y0 = h / 2;
+    const x1 = position.x - viewport[0] * viewSize[0];
+    const y1 = position.y - viewport[1] * viewSize[1];
+    translateCamera(renderer, rwi, x0, y0, x1, y1);
+    cam.setParallelScale(cam.getParallelScale() / fact);
+    translateCamera(renderer, rwi, x1, y1, x0, y0);
+  } else {
+    // Zoom relatively to the cursor position
+
+    // Move focal point to cursor position
+    let viewFocus = cam.getFocalPoint();
+    const norm = cam.getViewPlaneNormal();
+    viewFocus = rwi.getInteractorStyle().computeWorldToDisplay(renderer, viewFocus[0], viewFocus[1], viewFocus[2]);
+    const newFp = rwi.getInteractorStyle().computeDisplayToWorld(renderer, position.x, position.y, viewFocus[2]);
+    cam.setFocalPoint(newFp[0], newFp[1], newFp[2]);
+
+    // Move camera in/out along projection direction
+    cam.dolly(fact);
+    renderer.resetCameraClippingRange();
+
+    // Find new focal point
+    const newCameraPos = cam.getPosition();
+    viewFocus = cam.getFocalPoint();
+    const newPoint = [0, 0, 0];
+    let t = norm[0] * (viewFocus[0] - newCameraPos[0]) + norm[1] * (viewFocus[1] - newCameraPos[1]) + norm[2] * (viewFocus[2] - newCameraPos[2]);
+    t /= norm[0] ** 2 + norm[1] ** 2 + norm[2] ** 2;
+    newPoint[0] = newCameraPos[0] + norm[0] * t;
+    newPoint[1] = newCameraPos[1] + norm[1] * t;
+    newPoint[2] = newCameraPos[2] + norm[2] * t;
+    cam.setFocalPoint(newPoint[0], newPoint[1], newPoint[2]);
+    renderer.resetCameraClippingRange();
+  }
+}
+function dollyByFactor(interactor, renderer, factor) {
+  if (Number.isNaN(factor)) {
+    return;
+  }
+  const camera = renderer.getActiveCamera();
+  if (camera.getParallelProjection()) {
+    camera.setParallelScale(camera.getParallelScale() / factor);
+  } else {
+    camera.dolly(factor);
+    renderer.resetCameraClippingRange();
+  }
+  if (interactor.getLightFollowCamera()) {
+    renderer.updateLightsGeometryToFollowCamera();
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Static API
+// ----------------------------------------------------------------------------
+
+const STATIC = {
+  dollyToPosition,
+  translateCamera,
+  dollyByFactor
+};
+
+// ----------------------------------------------------------------------------
+// vtkInteractorStyleManipulator methods
+// ----------------------------------------------------------------------------
+
+function vtkInteractorStyleManipulator(publicAPI, model) {
+  // Set our className
+  model.classHierarchy.push('vtkInteractorStyleManipulator');
+  model.currentVRManipulators = new Map();
+  model.mouseManipulators = [];
+  model.keyboardManipulators = [];
+  model.vrManipulators = [];
+  model.gestureManipulators = [];
+  model.currentManipulator = null;
+  model.currentWheelManipulator = null;
+  model.centerOfRotation = [0, 0, 0];
+  model.rotationFactor = 1;
+
+  //-------------------------------------------------------------------------
+  publicAPI.removeAllManipulators = () => {
+    publicAPI.removeAllMouseManipulators();
+    publicAPI.removeAllKeyboardManipulators();
+    publicAPI.removeAllVRManipulators();
+    publicAPI.removeAllGestureManipulators();
+  };
+
+  //-------------------------------------------------------------------------
+  publicAPI.removeAllMouseManipulators = () => {
+    model.mouseManipulators = [];
+  };
+
+  //-------------------------------------------------------------------------
+  publicAPI.removeAllKeyboardManipulators = () => {
+    model.keyboardManipulators = [];
+  };
+
+  //-------------------------------------------------------------------------
+  publicAPI.removeAllVRManipulators = () => {
+    model.vrManipulators = [];
+  };
+
+  //-------------------------------------------------------------------------
+  publicAPI.removeAllGestureManipulators = () => {
+    model.gestureManipulators = [];
+  };
+
+  //-------------------------------------------------------------------------
+  const removeManipulator = (manipulator, list) => {
+    const index = list.indexOf(manipulator);
+    if (index === -1) {
+      return false;
+    }
+    list.splice(index, 1);
+    publicAPI.modified();
+    return true;
+  };
+
+  //-------------------------------------------------------------------------
+  publicAPI.removeMouseManipulator = manipulator => removeManipulator(manipulator, model.mouseManipulators);
+
+  //-------------------------------------------------------------------------
+  publicAPI.removeKeyboardManipulator = manipulator => removeManipulator(manipulator, model.keyboardManipulators);
+
+  //-------------------------------------------------------------------------
+  publicAPI.removeVRManipulator = manipulator => removeManipulator(manipulator, model.vrManipulators);
+
+  //-------------------------------------------------------------------------
+  publicAPI.removeGestureManipulator = manipulator => removeManipulator(manipulator, model.gestureManipulators);
+
+  //-------------------------------------------------------------------------
+  const addManipulator = (manipulator, list) => {
+    const index = list.indexOf(manipulator);
+    if (index !== -1) {
+      return false;
+    }
+    list.push(manipulator);
+    publicAPI.modified();
+    return true;
+  };
+
+  //-------------------------------------------------------------------------
+  publicAPI.addMouseManipulator = manipulator => addManipulator(manipulator, model.mouseManipulators);
+
+  //-------------------------------------------------------------------------
+  publicAPI.addKeyboardManipulator = manipulator => addManipulator(manipulator, model.keyboardManipulators);
+
+  //-------------------------------------------------------------------------
+  publicAPI.addVRManipulator = manipulator => addManipulator(manipulator, model.vrManipulators);
+
+  //-------------------------------------------------------------------------
+  publicAPI.addGestureManipulator = manipulator => addManipulator(manipulator, model.gestureManipulators);
+
+  //-------------------------------------------------------------------------
+  publicAPI.getNumberOfMouseManipulators = () => model.mouseManipulators.length;
+
+  //-------------------------------------------------------------------------
+  publicAPI.getNumberOfKeyboardManipulators = () => model.keyboardManipulators.length;
+
+  //-------------------------------------------------------------------------
+  publicAPI.getNumberOfVRManipulators = () => model.vrManipulators.length;
+
+  //-------------------------------------------------------------------------
+  publicAPI.getNumberOfGestureManipulators = () => model.gestureManipulators.length;
+
+  //-------------------------------------------------------------------------
+  publicAPI.resetCurrentManipulator = () => {
+    model.currentManipulator = null;
+    model.currentWheelManipulator = null;
+  };
+
+  //-------------------------------------------------------------------------
+  // Mouse
+  //-------------------------------------------------------------------------
+  publicAPI.handleLeftButtonPress = callData => {
+    model.previousPosition = callData.position;
+    publicAPI.onButtonDown(1, callData);
+  };
+
+  //-------------------------------------------------------------------------
+  publicAPI.handleMiddleButtonPress = callData => {
+    model.previousPosition = callData.position;
+    publicAPI.onButtonDown(2, callData);
+  };
+
+  //-------------------------------------------------------------------------
+  publicAPI.handleRightButtonPress = callData => {
+    model.previousPosition = callData.position;
+    publicAPI.onButtonDown(3, callData);
+  };
+
+  //-------------------------------------------------------------------------
+  publicAPI.handleButton3D = ed => {
+    if (!ed) {
+      return;
+    }
+
+    // Look for a matching 3D camera interactor.
+    const manipulator = publicAPI.findVRManipulator(ed.device, ed.input, ed.pressed);
+    if (manipulator) {
+      // register the manipulator for this device
+      model.currentVRManipulators.set(ed.device, manipulator);
+      manipulator.onButton3D(publicAPI, model.getRenderer(ed), model.state, ed);
+      if (ed.pressed) {
+        publicAPI.startCameraPose();
+      } else {
+        model.currentVRManipulators.delete(ed.device);
+
+        // make sure we don't end camera pose if other VR manipulators are currently interacting
+        if (model.currentVRManipulators.size === 0) {
+          publicAPI.endCameraPose();
+        }
+      }
+    } else {
+      vtkDebugMacro('No manipulator found');
+    }
+  };
+
+  //-------------------------------------------------------------------------
+  publicAPI.handleMove3D = ed => {
+    const manipulator = model.currentVRManipulators.get(ed.device);
+    if (manipulator && model.state === States.IS_CAMERA_POSE) {
+      manipulator.onMove3D(publicAPI, model.getRenderer(ed), model.state, ed);
+    }
+  };
+
+  //-------------------------------------------------------------------------
+  publicAPI.onButtonDown = (button, callData) => {
+    // Must not be processing an interaction to start another.
+    if (model.currentManipulator) {
+      return;
+    }
+
+    // Look for a matching camera interactor.
+    model.currentManipulator = publicAPI.findMouseManipulator(button, callData.shiftKey, callData.controlKey, callData.altKey);
+    if (model.currentManipulator) {
+      if (model.currentManipulator.setCenter) {
+        model.currentManipulator.setCenter(model.centerOfRotation);
+      }
+      if (model.currentManipulator.setRotationFactor) {
+        model.currentManipulator.setRotationFactor(model.rotationFactor);
+      }
+      model.currentManipulator.startInteraction();
+      model.currentManipulator.onButtonDown(model._interactor, model.getRenderer(callData), callData.position);
+      model._interactor.requestAnimation(publicAPI.onButtonDown);
+      publicAPI.invokeStartInteractionEvent(START_INTERACTION_EVENT);
+    } else {
+      vtkDebugMacro('No manipulator found');
+    }
+  };
+
+  //-------------------------------------------------------------------------
+  publicAPI.findMouseManipulator = (button, shift, control, alt) => {
+    // Look for a matching camera manipulator
+    let manipulator = null;
+    let count = model.mouseManipulators.length;
+    while (count--) {
+      const manip = model.mouseManipulators[count];
+      if (manip && manip.getButton() === button && manip.getShift() === shift && manip.getControl() === control && manip.getAlt() === alt && manip.isDragEnabled()) {
+        manipulator = manip;
+      }
+    }
+    return manipulator;
+  };
+
+  //-------------------------------------------------------------------------
+  publicAPI.findVRManipulator = (device, input) => {
+    // Look for a matching camera manipulator
+    let manipulator = null;
+    let count = model.vrManipulators.length;
+    while (count--) {
+      const manip = model.vrManipulators[count];
+      if (manip && manip.getDevice() === device && manip.getInput() === input) {
+        manipulator = manip;
+      }
+    }
+    return manipulator;
+  };
+
+  //-------------------------------------------------------------------------
+  publicAPI.handleLeftButtonRelease = () => {
+    publicAPI.onButtonUp(1);
+  };
+
+  //-------------------------------------------------------------------------
+  publicAPI.handleMiddleButtonRelease = () => {
+    publicAPI.onButtonUp(2);
+  };
+
+  //-------------------------------------------------------------------------
+  publicAPI.handleRightButtonRelease = () => {
+    publicAPI.onButtonUp(3);
+  };
+
+  //-------------------------------------------------------------------------
+  publicAPI.onButtonUp = button => {
+    if (!model.currentManipulator) {
+      return;
+    }
+    if (model.currentManipulator.getButton && model.currentManipulator.getButton() === button) {
+      model.currentManipulator.onButtonUp(model._interactor);
+      model.currentManipulator.endInteraction();
+      model.currentManipulator = null;
+      model._interactor.cancelAnimation(publicAPI.onButtonDown);
+      publicAPI.invokeEndInteractionEvent(END_INTERACTION_EVENT);
+    }
+  };
+
+  //-------------------------------------------------------------------------
+  publicAPI.handleStartMouseWheel = callData => {
+    // Must not be processing a wheel interaction to start another.
+    if (model.currentWheelManipulator) {
+      return;
+    }
+    let manipulator = null;
+    let count = model.mouseManipulators.length;
+    while (count--) {
+      const manip = model.mouseManipulators[count];
+      if (manip && manip.isScrollEnabled() && manip.getShift() === callData.shiftKey && manip.getControl() === callData.controlKey && manip.getAlt() === callData.altKey) {
+        manipulator = manip;
+      }
+    }
+    if (manipulator) {
+      model.currentWheelManipulator = manipulator;
+      model.currentWheelManipulator.onStartScroll(model._interactor, model.getRenderer(callData), callData.spinY);
+      model.currentWheelManipulator.startInteraction();
+      model._interactor.requestAnimation(publicAPI.handleStartMouseWheel);
+      publicAPI.invokeStartInteractionEvent(START_INTERACTION_EVENT);
+    } else {
+      vtkDebugMacro('No manipulator found');
+    }
+  };
+
+  //-------------------------------------------------------------------------
+  publicAPI.handleEndMouseWheel = () => {
+    if (!model.currentWheelManipulator) {
+      return;
+    }
+    if (model.currentWheelManipulator.onEndScroll) {
+      model.currentWheelManipulator.onEndScroll(model._interactor);
+      model.currentWheelManipulator.endInteraction();
+      model.currentWheelManipulator = null;
+      model._interactor.cancelAnimation(publicAPI.handleStartMouseWheel);
+      publicAPI.invokeEndInteractionEvent(END_INTERACTION_EVENT);
+    }
+  };
+
+  //-------------------------------------------------------------------------
+  publicAPI.handleMouseWheel = callData => {
+    if (model.currentWheelManipulator && model.currentWheelManipulator.onScroll) {
+      model.currentWheelManipulator.onScroll(model._interactor, model.getRenderer(callData), callData.spinY, model.cachedMousePosition);
+      publicAPI.invokeInteractionEvent(INTERACTION_EVENT);
+    }
+  };
+
+  //-------------------------------------------------------------------------
+  publicAPI.handleMouseMove = callData => {
+    model.cachedMousePosition = callData.position;
+    if (model.currentManipulator && model.currentManipulator.onMouseMove) {
+      model.currentManipulator.onMouseMove(model._interactor, model.getRenderer(callData), callData.position);
+      publicAPI.invokeInteractionEvent(INTERACTION_EVENT);
+    }
+  };
+
+  //-------------------------------------------------------------------------
+  // Keyboard
+  //-------------------------------------------------------------------------
+  publicAPI.handleKeyPress = callData => {
+    model.keyboardManipulators.filter(m => m.onKeyPress).forEach(manipulator => {
+      manipulator.onKeyPress(model._interactor, model.getRenderer(callData), callData.key);
+      publicAPI.invokeInteractionEvent(INTERACTION_EVENT);
+    });
+  };
+
+  //-------------------------------------------------------------------------
+  publicAPI.handleKeyDown = callData => {
+    model.keyboardManipulators.filter(m => m.onKeyDown).forEach(manipulator => {
+      manipulator.onKeyDown(model._interactor, model.getRenderer(callData), callData.key);
+      publicAPI.invokeInteractionEvent(INTERACTION_EVENT);
+    });
+  };
+
+  //-------------------------------------------------------------------------
+  publicAPI.handleKeyUp = callData => {
+    model.keyboardManipulators.filter(m => m.onKeyUp).forEach(manipulator => {
+      manipulator.onKeyUp(model._interactor, model.getRenderer(callData), callData.key);
+      publicAPI.invokeInteractionEvent(INTERACTION_EVENT);
+    });
+  };
+
+  //-------------------------------------------------------------------------
+  // Gesture
+  //-------------------------------------------------------------------------
+
+  publicAPI.handleStartPinch = callData => {
+    publicAPI.startDolly();
+    let count = model.gestureManipulators.length;
+    while (count--) {
+      const manipulator = model.gestureManipulators[count];
+      if (manipulator && manipulator.isPinchEnabled()) {
+        manipulator.onStartPinch(model._interactor, callData.scale);
+        manipulator.startInteraction();
+      }
+    }
+    model._interactor.requestAnimation(publicAPI.handleStartPinch);
+    publicAPI.invokeStartInteractionEvent(START_INTERACTION_EVENT);
+  };
+
+  //--------------------------------------------------------------------------
+  publicAPI.handleEndPinch = () => {
+    publicAPI.endDolly();
+    let count = model.gestureManipulators.length;
+    while (count--) {
+      const manipulator = model.gestureManipulators[count];
+      if (manipulator && manipulator.isPinchEnabled()) {
+        manipulator.onEndPinch(model._interactor);
+        manipulator.endInteraction();
+      }
+    }
+    model._interactor.cancelAnimation(publicAPI.handleStartPinch);
+    publicAPI.invokeEndInteractionEvent(END_INTERACTION_EVENT);
+  };
+
+  //----------------------------------------------------------------------------
+  publicAPI.handleStartRotate = callData => {
+    publicAPI.startRotate();
+    let count = model.gestureManipulators.length;
+    while (count--) {
+      const manipulator = model.gestureManipulators[count];
+      if (manipulator && manipulator.isRotateEnabled()) {
+        manipulator.onStartRotate(model._interactor, callData.rotation);
+        manipulator.startInteraction();
+      }
+    }
+    model._interactor.requestAnimation(publicAPI.handleStartRotate);
+    publicAPI.invokeStartInteractionEvent(START_INTERACTION_EVENT);
+  };
+
+  //--------------------------------------------------------------------------
+  publicAPI.handleEndRotate = () => {
+    publicAPI.endRotate();
+    let count = model.gestureManipulators.length;
+    while (count--) {
+      const manipulator = model.gestureManipulators[count];
+      if (manipulator && manipulator.isRotateEnabled()) {
+        manipulator.onEndRotate(model._interactor);
+        manipulator.endInteraction();
+      }
+    }
+    model._interactor.cancelAnimation(publicAPI.handleStartRotate);
+    publicAPI.invokeEndInteractionEvent(END_INTERACTION_EVENT);
+  };
+
+  //----------------------------------------------------------------------------
+  publicAPI.handleStartPan = callData => {
+    publicAPI.startPan();
+    let count = model.gestureManipulators.length;
+    while (count--) {
+      const manipulator = model.gestureManipulators[count];
+      if (manipulator && manipulator.isPanEnabled()) {
+        manipulator.onStartPan(model._interactor, callData.translation);
+        manipulator.startInteraction();
+      }
+    }
+    model._interactor.requestAnimation(publicAPI.handleStartPan);
+    publicAPI.invokeStartInteractionEvent(START_INTERACTION_EVENT);
+  };
+
+  //--------------------------------------------------------------------------
+  publicAPI.handleEndPan = () => {
+    publicAPI.endPan();
+    let count = model.gestureManipulators.length;
+    while (count--) {
+      const manipulator = model.gestureManipulators[count];
+      if (manipulator && manipulator.isPanEnabled()) {
+        manipulator.onEndPan(model._interactor);
+        manipulator.endInteraction();
+      }
+    }
+    model._interactor.cancelAnimation(publicAPI.handleStartPan);
+    publicAPI.invokeEndInteractionEvent(END_INTERACTION_EVENT);
+  };
+
+  //----------------------------------------------------------------------------
+  publicAPI.handlePinch = callData => {
+    let count = model.gestureManipulators.length;
+    let actionCount = 0;
+    while (count--) {
+      const manipulator = model.gestureManipulators[count];
+      if (manipulator && manipulator.isPinchEnabled()) {
+        manipulator.onPinch(model._interactor, model.getRenderer(callData), callData.scale);
+        actionCount++;
+      }
+    }
+    if (actionCount) {
+      publicAPI.invokeInteractionEvent(INTERACTION_EVENT);
+    }
+  };
+
+  //----------------------------------------------------------------------------
+  publicAPI.handlePan = callData => {
+    let count = model.gestureManipulators.length;
+    let actionCount = 0;
+    while (count--) {
+      const manipulator = model.gestureManipulators[count];
+      if (manipulator && manipulator.isPanEnabled()) {
+        manipulator.onPan(model._interactor, model.getRenderer(callData), callData.translation);
+        actionCount++;
+      }
+    }
+    if (actionCount) {
+      publicAPI.invokeInteractionEvent(INTERACTION_EVENT);
+    }
+  };
+
+  //----------------------------------------------------------------------------
+  publicAPI.handleRotate = callData => {
+    let count = model.gestureManipulators.length;
+    let actionCount = 0;
+    while (count--) {
+      const manipulator = model.gestureManipulators[count];
+      if (manipulator && manipulator.isRotateEnabled()) {
+        manipulator.onRotate(model._interactor, model.getRenderer(callData), callData.rotation);
+        actionCount++;
+      }
+    }
+    if (actionCount) {
+      publicAPI.invokeInteractionEvent(INTERACTION_EVENT);
+    }
+  };
+}
+
+// ----------------------------------------------------------------------------
+// Object factory
+// ----------------------------------------------------------------------------
+
+const defaultValues = initialValues => ({
+  cachedMousePosition: null,
+  currentManipulator: null,
+  currentWheelManipulator: null,
+  // mouseManipulators: null,
+  // keyboardManipulators: null,
+  // vrManipulators: null,
+  // gestureManipulators: null,
+  centerOfRotation: [0, 0, 0],
+  rotationFactor: 1,
+  ...initialValues
+});
+
+// ----------------------------------------------------------------------------
+
+function extend(publicAPI, model) {
+  let initialValues = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+  Object.assign(model, defaultValues(initialValues));
+
+  // Inheritance
+  _Rendering_Core_InteractorStyle_js__WEBPACK_IMPORTED_MODULE_1__["default"].extend(publicAPI, model, initialValues);
+
+  // Create get-set macros
+  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.setGet(publicAPI, model, ['rotationFactor']);
+  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.get(publicAPI, model, ['mouseManipulators', 'keyboardManipulators', 'vrManipulators', 'gestureManipulators']);
+  _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.setGetArray(publicAPI, model, ['centerOfRotation'], 3);
+
+  // Object specific methods
+  vtkInteractorStyleManipulator(publicAPI, model);
+}
+
+// ----------------------------------------------------------------------------
+
+const newInstance = _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.newInstance(extend, 'vtkInteractorStyleManipulator');
+
+// ----------------------------------------------------------------------------
+
+var vtkInteractorStyleManipulator$1 = {
+  newInstance,
+  extend,
+  ...STATIC
 };
 
 
@@ -64782,11 +65828,8 @@ var renderWindow_3d = null;
 var volume_3d = null;
 function Demo3d(source, divElement) {
   const renderMainBox = divElement;
+  renderMainBox.innerHTML = "";
   renderMainBox.style.position = "relative";
-
-  // 添加一个下拉list的选择元素到divElement
-  const select = document.createElement("select");
-  select.id = "color-preset-select";
   const fullScreenRenderer = _kitware_vtk_js_Rendering_Misc_FullScreenRenderWindow__WEBPACK_IMPORTED_MODULE_3__["default"].newInstance({
     container: renderMainBox,
     background: [0, 0, 0]
@@ -64824,8 +65867,8 @@ function Demo3d(source, divElement) {
   volume_3d.setProperty(volProp);
   const cam = renderer.getActiveCamera();
   cam.setPosition(0, 0, 0);
-  cam.setFocalPoint(-1, -1, 0);
-  cam.setViewUp(0, 0, -1);
+  cam.setFocalPoint(1, 1, 0);
+  cam.setViewUp(0, 0, 1);
   renderer.addVolume(volume_3d);
   // const pf = vtkPiecewiseFunction.newInstance();
   // pf.addPoint(0, 0.0);
@@ -68069,6 +69112,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _kitware_vtk_js_Widgets_Core_WidgetManager_Constants__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Core/WidgetManager/Constants */ "./node_modules/@kitware/vtk.js/Widgets/Core/WidgetManager/Constants.js");
 /* harmony import */ var _kitware_vtk_js_Imaging_Core_ImageReslice_Constants__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @kitware/vtk.js/Imaging/Core/ImageReslice/Constants */ "./node_modules/@kitware/vtk.js/Imaging/Core/ImageReslice/Constants.js");
 /* harmony import */ var _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants */ "./node_modules/@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants.js");
+/* harmony import */ var _kitware_vtk_js_Interaction_Style_InteractorStyleImage__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Style/InteractorStyleImage */ "./node_modules/@kitware/vtk.js/Interaction/Style/InteractorStyleImage.js");
+/* harmony import */ var _kitware_vtk_js_Interaction_Manipulators_MouseCameraTrackballPanManipulator__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballPanManipulator */ "./node_modules/@kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballPanManipulator.js");
+/* harmony import */ var _kitware_vtk_js_Interaction_Style_InteractorStyleManipulator__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Style/InteractorStyleManipulator */ "./node_modules/@kitware/vtk.js/Interaction/Style/InteractorStyleManipulator.js");
+
+
+
 
 
 
@@ -68196,13 +69245,6 @@ class MPRRendering {
       };
       // 设置当前活跃相机为平行投影（不使用透视效果）
       obj.renderer.getActiveCamera().setParallelProjection(true);
-      // const customStyle = vtkInteractorStyleMPRSlice.newInstance();
-
-      // obj.interactor.setInteractorStyle(customStyle);
-      // console.log(customStyle)
-      // customStyle.onStartWindowLevelEvent((callData) => {
-      //   console.log(callData)
-      // });
       // 设置渲染器的背景颜色，viewColors[i] 是一个 RGB 颜色数组
       if (i < 3) {
         // 如果显示调试Actor，则将背景颜色设置为浅灰色
@@ -68235,8 +69277,16 @@ class MPRRendering {
         // const ccc = a.newInstance();
         // console.log(ccc)
         // obj.interactor.setInteractorStyle(ccc);
-        obj.interactor.setInteractorStyle(_kitware_vtk_js_Rendering_Core_InteractorStyle__WEBPACK_IMPORTED_MODULE_7__["default"].newInstance());
-
+        obj.interactor.setInteractorStyle(_kitware_vtk_js_Interaction_Style_InteractorStyleImage__WEBPACK_IMPORTED_MODULE_15__["default"].newInstance());
+        // const stl = vtkInteractorStyleManipulator.newInstance()
+        // obj.interactor.setInteractorStyle(stl);
+        // // 2. 添加自定义平移操纵器（左键拖动）
+        // const panManipulator = vtkMouseCameraTrackballPanManipulator.newInstance({
+        //   button: 1, // 左键
+        //   shift: false,
+        //   control: false
+        // });
+        // stl.addMouseManipulator(panManipulator);
         // 添加一个小部件（widget）到 widgetManager，并根据 xyzToViewType[i] 设置其类型
         obj.widgetInstance = obj.widgetManager.addWidget(widget, _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_14__.xyzToViewType[i]);
         console.log(obj.widgetInstance);
@@ -68618,12 +69668,12 @@ class SyntheticImageData {
   ImageData(hitbit) {
     // 创建一个新的 vtkImageData 实例，用于存储体数据
     const imageData = _kitware_vtk_js_Common_DataModel_ImageData__WEBPACK_IMPORTED_MODULE_0__["default"].newInstance();
-    // console.log(hitbit,hitbit[0]);
     const zeroHit = hitbit[0];
-    const origin = [1.0, 1.0, 1.0];
+    const origin = [0, 0, 0];
     // 根据像素数据确定数据类型（如 Int16、Uint8 等）
     const data_type = getType(zeroHit.h_img.data);
     // 设置图像的维度信息：列数、行数以及切片数
+    console.log(zeroHit.h_img);
     const dimensions = [zeroHit.h_img.numCols, zeroHit.h_img.numRows, hitbit.length];
     // 设置图像的间距信息，包括像素间距和切片厚度
     const spacing = [zeroHit.pixSpacing, zeroHit.pixSpacing, zeroHit.slice_Thickness];
@@ -68631,15 +69681,12 @@ class SyntheticImageData {
     imageData.setSpacing(spacing);
     imageData.setOrigin(origin);
     imageData.setDimensions(...dimensions);
-    //imageData.setExtent(0, 127, 0, 127, 0, 127);
     const typedPixelArray = createTypedArray(data_type, dimensions, hitbit.length);
-    // console.log(typedPixelArray);
     hitbit.forEach((buffer, index) => {
       const sliceOffset = dimensions[0] * dimensions[1] * index;
       // console.log(sliceOffset)
       typedPixelArray.set(buffer.h_img.data, sliceOffset);
     });
-    // console.log(typedPixelArray);
     const scalarArray = _kitware_vtk_js_Common_Core_DataArray__WEBPACK_IMPORTED_MODULE_1__["default"].newInstance({
       name: "Pixels",
       // 数据的名称
@@ -68649,34 +69696,8 @@ class SyntheticImageData {
       // 每个像素的分量数（单通道图像为 1）
       values: typedPixelArray // 像素数据
     });
-
     // 将像素数据绑定到 vtkImageData 的点数据（PointData）中
     imageData.getPointData().setScalars(scalarArray);
-    // const vtiObject = this.createVTIObject(spacing, data_type, origin);
-    // console.log(JSON.stringify(vtiObject, null, 2));
-    // // 将 Uint16Array 转换为字节数组
-    // const byteArray = new Uint8Array(typedPixelArray.buffer);
-
-    // // 使用 pako 进行 GZIP 压缩
-    // const compressed = pako.gzip(byteArray);
-    // const fs = require('fs');
-    // // 指定保存路径
-    // const savePath = 'E:/vscode/compressed_data.gz';
-
-    // // 将压缩后的数据保存到指定路径
-    // fs.writeFileSync(savePath, compressed);
-
-    // 将压缩后的数据保存为文件
-    // const blob = new Blob([compressed], { type: 'application/gzip' });
-    // saveAs(blob, 'compressed_data.gz');
-    // const uint8Array = new Uint8Array(scalarArray.buffer);
-    // 压缩图像数据
-    // const compressedData = pako.gzip(uint8Array);
-    // 设置文件保存路径
-    // const filePath = 'E:\\vscode\\code\\js\\webpack\\backend\\vtk-js\\data\\volume\\LIDC2.vti\\data\\b1ad142a1ebc80f957fcdc329e876d51.gz';  // 自定义路径
-    // 调用 saveToFile 函数并处理返回的 Promise
-    // this.saveToFile(filePath, compressedData)
-
     // 返回处理后的 vtkImageData 对象，以及窗宽和窗位信息
     return {
       imageData: imageData,
@@ -68832,18 +69853,20 @@ class SyntheticImageData {
       //   data_b[pix_num] = hitbit.data[pix_num]-hitbit.min
       // }
       // hitbit.data = data_b
+      console.log("hitbit", dicomdata);
       // 获取 DICOM 文件中的像素间距 (Pixel Spacing)
       var hitbit = this.h_b_obj_return_h_img(dicomdata);
       const pixel_spacing = dicomdata.tags["00280030"].value;
 
       // 获取 DICOM 文件中的切片厚度 (Slice Thickness)
       const slice_thickness = dicomdata.tags["00180050"].value;
-
+      const imageOrientation = dicomdata.tags["00200032"].value;
       // 获取窗宽 (Window Width) 和窗位 (Window Center) 信息
       const window_center = dicomdata.tags["00281050"].value;
       const window_width = dicomdata.tags["00281051"].value;
       Hitbit[`h_img`] = hitbit;
       Hitbit[`pixSpacing`] = pixel_spacing[0];
+      Hitbit[`imageOrientation`] = imageOrientation;
       Hitbit[`slice_Thickness`] = slice_thickness[0];
       Hitbit[`window_l`] = window_center[0] - hitbit.dx;
       // Hitbit[`window_l`] = window_center[0];
@@ -79084,7 +80107,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _kitware_vtk_js_Rendering_Core_InteractorStyle__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/InteractorStyle */ "./node_modules/@kitware/vtk.js/Rendering/Core/InteractorStyle.js");
 /* harmony import */ var _kitware_vtk_js_Interaction_Style_InteractorStyleImage__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Style/InteractorStyleImage */ "./node_modules/@kitware/vtk.js/Interaction/Style/InteractorStyleImage.js");
 /* harmony import */ var _3d__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./3d */ "./src/3d.js");
+/* harmony import */ var _kitware_vtk_js_Common_Core_MatrixBuilder__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @kitware/vtk.js/Common/Core/MatrixBuilder */ "./node_modules/@kitware/vtk.js/Common/Core/MatrixBuilder.js");
+/* harmony import */ var _kitware_vtk_js_Interaction_Manipulators_MouseCameraTrackballPanManipulator__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballPanManipulator */ "./node_modules/@kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballPanManipulator.js");
+/* harmony import */ var _kitware_vtk_js_Interaction_Manipulators_MouseCameraTrackballZoomManipulator__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballZoomManipulator */ "./node_modules/@kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballZoomManipulator.js");
+/* harmony import */ var _kitware_vtk_js_Interaction_Style_InteractorStyleManipulator__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Style/InteractorStyleManipulator */ "./node_modules/@kitware/vtk.js/Interaction/Style/InteractorStyleManipulator.js");
 // import "@kitware/vtk.js/favicon";
+
+
+
+
+
 
 
 
@@ -79103,7 +80135,6 @@ function change3dColor(color) {
 function calculateB(a) {
   // 根据给定的数据点，使用分段线性回归进行近似
   // 我们将数据点分为几个区间，每个区间使用不同的线性方程
-
   // 数据点排序
   const dataPoints = [{
     a: 450,
@@ -79118,10 +80149,8 @@ function calculateB(a) {
     a: 135,
     b: 1.48
   }];
-
   // 对数据点进行排序
   dataPoints.sort((a, b) => a.a - b.a);
-
   // 找到输入值 a 所在的区间
   for (let i = 0; i < dataPoints.length - 1; i++) {
     const point1 = dataPoints[i];
@@ -79130,12 +80159,10 @@ function calculateB(a) {
       // 计算斜率和截距
       const slope = (point2.b - point1.b) / (point2.a - point1.a);
       const intercept = point1.b - slope * point1.a;
-
       // 使用线性插值计算b值
       return slope * a + intercept;
     }
   }
-
   // 如果a超出所有数据点的范围，返回最近的数据点
   if (a < dataPoints[0].a) return dataPoints[0].b;
   if (a > dataPoints[dataPoints.length - 1].a) return dataPoints[dataPoints.length - 1].b;
@@ -79145,6 +80172,7 @@ async function load(ArrayBuffer) {
   for (var i = 0; i < Object.keys(ArrayBuffer).length; i++) {
     const buffer = await ArrayBuffer[i]; // Resolve each promise
     if (buffer && buffer.byteLength > 0) {
+      console.log("arrayBuffer", buffer);
       arrayBuffer.push(buffer);
     }
   }
@@ -79167,14 +80195,40 @@ let eventType = 1;
 let viewObj = null;
 function changeEvent(type) {
   eventType = type;
-  if (eventType === 1) {
-    viewObj.forEach(obj => {
-      obj.interactor.setInteractorStyle(_kitware_vtk_js_Interaction_Style_InteractorStyleImage__WEBPACK_IMPORTED_MODULE_10__["default"].newInstance());
-    });
-  } else {
-    viewObj.forEach(obj => {
-      obj.interactor.setInteractorStyle(_kitware_vtk_js_Rendering_Core_InteractorStyle__WEBPACK_IMPORTED_MODULE_9__["default"].newInstance());
-    });
+  switch (eventType) {
+    case 1:
+      viewObj.forEach(obj => {
+        obj.interactor.setInteractorStyle(_kitware_vtk_js_Interaction_Style_InteractorStyleImage__WEBPACK_IMPORTED_MODULE_10__["default"].newInstance());
+      });
+      break;
+    case 2:
+      console.log("changeEvent", eventType);
+      viewObj.forEach(obj => {
+        const stl = _kitware_vtk_js_Interaction_Style_InteractorStyleManipulator__WEBPACK_IMPORTED_MODULE_15__["default"].newInstance();
+        obj.interactor.setInteractorStyle(stl);
+        // 2. 添加自定义平移操纵器（左键拖动）
+        const panManipulator = _kitware_vtk_js_Interaction_Manipulators_MouseCameraTrackballPanManipulator__WEBPACK_IMPORTED_MODULE_13__["default"].newInstance({
+          button: 1,
+          // 左键
+          shift: false,
+          control: false
+        });
+        stl.addMouseManipulator(panManipulator);
+      });
+      break;
+    case 3:
+      viewObj.forEach(obj => {
+        const stl = _kitware_vtk_js_Interaction_Style_InteractorStyleManipulator__WEBPACK_IMPORTED_MODULE_15__["default"].newInstance();
+        obj.interactor.setInteractorStyle(stl);
+        // 2. 添加自定义平移操纵器（左键拖动）
+        const panManipulator = _kitware_vtk_js_Interaction_Manipulators_MouseCameraTrackballZoomManipulator__WEBPACK_IMPORTED_MODULE_14__["default"].newInstance({
+          button: 1,
+          // 左键
+          shift: false
+        });
+        stl.addMouseManipulator(panManipulator);
+      });
+      break;
   }
 }
 function load3D(arrayBuffer, divElement) {
@@ -79182,6 +80236,12 @@ function load3D(arrayBuffer, divElement) {
     // 检查输入是否有效
     throw new Error("arrayBuffer 不能为空！");
   }
+  for (let i = 0; i < arrayBuffer.length; i++) {
+    if (arrayBuffer[i].h_img && arrayBuffer[i].h_img.dx != 0) {
+      arrayBuffer[i].h_img.data = arrayBuffer[i].h_img.data.map(num => num + arrayBuffer[i].h_img.dx);
+    }
+  }
+  arrayBuffer.sort((a, b) => a.imageOrientation[2] - b.imageOrientation[2]);
   const syntheticImageData = new _syntheticimage__WEBPACK_IMPORTED_MODULE_6__["default"]();
   const {
     imageData,
@@ -79197,223 +80257,24 @@ function load3D(arrayBuffer, divElement) {
  */
 
 function loadMPR(arrayBuffer, divElement) {
+  // for (let i = 0; i < arrayBuffer.length; i++) {
+  //   if (arrayBuffer[i].h_img && arrayBuffer[i].h_img.dx != 0) {
+  //     arrayBuffer[i].h_img.data = arrayBuffer[i].h_img.data.map(num => num + arrayBuffer[i].h_img.dx)
+  //   }
+  // }
+  console.log("loadMPR", arrayBuffer);
   if (!arrayBuffer) {
     // 检查输入是否有效
     throw new Error("arrayBuffer 不能为空！");
   }
+  arrayBuffer.sort((a, b) => a.imageOrientation[2] - b.imageOrientation[2]);
   const syntheticImageData = new _syntheticimage__WEBPACK_IMPORTED_MODULE_6__["default"]();
   const {
     imageData,
     windowWidth,
     windowCenter
   } = syntheticImageData.ImageData(arrayBuffer);
-  // console.log("imageData", imageData, windowWidth, windowCenter)
-  // const axialCanvas = document.getElementById('axial');
-  // const coronalCanvas = document.getElementById('coronal');
-  // const sagittalCanvas = document.getElementById('sagittal');
-  // const widget = vtkResliceCursorWidget.newInstance();
-  // const widgetState = widget.getWidgetState();
-  // widget.setImage(imageData);
-  // let objArr = []
-  // const createVTIObject = (canvas, imageData, widget, viewtype) => {
-  //   let obj = { viewtype: viewtype }
-  //   obj.reslice = vtkImageReslice.newInstance();
-  //   // 设置重切割操作的切片数量为 1，表示只取一个切片
-  //   obj.reslice.setSlabNumberOfSlices(1);
-  //   // 设置是否使用变换来输入采样，false 表示不使用变换
-  //   obj.reslice.setTransformInputSampling(false);
-  //   // 设置输出图像是否自动裁剪，true 表示输出图像会根据内容自动裁剪
-  //   obj.reslice.setAutoCropOutput(true);
-  //   // 设置输出图像的维度为 2，表示输出为 2D 图像（通常用于切片视图）
-  //   obj.reslice.setOutputDimensionality(2);
-  //   // 创建一个 vtkImageMapper 实例，用于映射图像数据
-  //   obj.resliceMapper = vtkImageMapper.newInstance();
-  //   obj.resliceMapper.setSliceAtFocalPoint(true); // 确保切片在焦点处
-  //   // 将 vtkImageReslice 的输出连接到映射器，确保映射器能渲染重切割后的图像
-  //   obj.resliceMapper.setInputConnection(obj.reslice.getOutputPort());
-  //   // 创建一个 vtkImageSlice 实例，用于显示图像切片
-  //   obj.resliceActor = vtkImageSlice.newInstance();
-  //   // 将映射器应用到 vtkImageSlice 上，以便它能够渲染图像
-  //   obj.resliceActor.setMapper(obj.resliceMapper);
-  //   obj.reslice.setInputData(imageData);
-  //   const grw = vtkGenericRenderWindow.newInstance();
-  //   const render = grw.getRenderer()
-  //   obj.widgetManager = vtkWidgetManager.newInstance()
-  //   obj.widgetManager.setRenderer(render);
-
-  //   obj.widgetInstance = obj.widgetManager.addWidget(widget, viewtype);
-  //   obj.widgetInstance.setKeepOrthogonality(true);
-  //   console.log(canvas)
-  //   const ctx = canvas.getContext('2d');
-  //   //canvas加监听点击事件
-  //   canvas.addEventListener('click', function (e) {
-  //     // 获取点击位置的坐标
-  //     const x = e.clientX;
-  //     const y = e.clientY;
-  //     // 获取 canvas 元素的边界信息
-  //     const rect = canvas.getBoundingClientRect();
-  //     // 计算点击位置的 X 和 Y 坐标（相对于 canvas）
-  //     const xCanvas = x - rect.left;
-  //     const yCanvas = y - rect.top;
-  //     console.log(viewtype, xCanvas, yCanvas);
-  //     let center = widget.get().widgetState.getCenter();
-  //     console.log("center", widget, widget.get().widgetState.getRotationHandleXinY0(), widget.get().widgetState.getCenter());
-  //     console.log("widgetInstance", obj.widgetInstance)
-  //     if (obj.viewtype == 4) {
-  //       center[1] = xCanvas;
-  //       center[2] = yCanvas;
-  //     } else if (obj.viewtype == 5) {
-  //       center[0] = xCanvas;
-  //       center[2] = yCanvas;
-  //     } else {
-  //       center[0] = xCanvas;
-  //       center[1] = yCanvas;
-  //     }
-  //     // widget.setCenter(center);
-  //     obj.widgetInstance.rotateLineInView("YinX", -Math.PI / 4)
-  //     obj.widgetInstance.rotateLineInView("YinZ", -Math.PI / 4)
-  //     // obj.widgetInstance.rotateLineInView("YinX", 90)
-  //     //  obj.widgetInstance.invokeInteractionEvent("rotateLine")
-  //     updateMPR(widget, objArr, center, windowWidth, windowCenter);
-  //   })
-  //   obj.ctx = ctx;
-  //   objArr.push(obj)
-  // }
-  // createVTIObject(axialCanvas, imageData, widget, 4)
-  // createVTIObject(coronalCanvas, imageData, widget, 5)
-  // createVTIObject(sagittalCanvas, imageData, widget, 6)
-  // console.log(widgetState.getCenter())
-  // let center = [200.801, 200.801, 22]
-  // widget.setCenter(center);
-  // let otherLineHandle = objArr[0].widgetInstance.getOtherLineHandle("XinY")
-  // let otherLineVector = otherLineHandle.getDirection()
-  // console.log("XinY", otherLineVector)
-  // otherLineHandle = objArr[0].widgetInstance.getOtherLineHandle("ZinY")
-  // otherLineVector = otherLineHandle.getDirection()
-  // console.log("ZinY", otherLineVector)
-  // otherLineHandle = objArr[0].widgetInstance.getOtherLineHandle("ZinX")
-  // otherLineVector = otherLineHandle.getDirection()
-  // console.log("ZinX", otherLineVector)
-  // otherLineHandle = objArr[0].widgetInstance.getOtherLineHandle("YinX")
-  // otherLineVector = otherLineHandle.getDirection()
-  // console.log("YinX", otherLineVector)
-  // otherLineHandle = objArr[0].widgetInstance.getOtherLineHandle("XinZ")
-  // otherLineVector = otherLineHandle.getDirection()
-  // console.log("XinZ", otherLineVector)
-  // otherLineHandle = objArr[0].widgetInstance.getOtherLineHandle("YinZ")
-  // otherLineVector = otherLineHandle.getDirection()
-  // console.log("YinZ", otherLineVector)
-  // // widget.get().widgetState.setRotationHandleXinY0(45)
-  // console.log("widget", widget.get())
-  // console.log("objArr", widget.get().behavior, widget.get().widgetState.getStatesWithLabel('rotation'))
-  // console.log(widget.get().widgetState.getStatesWithLabel("sphere")[1].getState())
-  // //  widget.get().widgetState.getStatesWithLabel('rotation')[0].setOffset()
-  // updateMPR(widget, objArr, center, windowWidth, windowCenter)
-  // console.log("widgetState", widgetState, widgetState.getCenter(), widgetState.getAxisXinY().get());
   MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement);
-}
-function dicom_to_8byte_from_hight_byte_at_ww_wl(pixdate, wl_y, ww) {
-  //计算最小值
-  var min = Math.min(pixdate);
-  //拨正
-  var wl = wl_y;
-  if (min < 0) {
-    for (var pix_num = 0; pix_num < pixdate.length; pix_num++) {
-      pixdate[pix_num] = pixdate[pix_num] - min;
-    }
-    var wl = wl_y - min;
-  }
-  const window_min = wl - ww / 2;
-  const window_max = wl + ww / 2;
-  const ww_wl_a = 255 / ww;
-  const ww_wl_b = window_min * 255 / ww;
-  var lut = new Uint8ClampedArray(65536);
-  var lueLenght = lut.length;
-  for (var i = 0; i < lueLenght; i++) {
-    if (i < window_min) {
-      lut[i] = 0;
-    } else if (i > window_max) {
-      lut[i] = 255;
-    } else {
-      lut[i] = parseInt(i * ww_wl_a - ww_wl_b);
-    }
-  }
-  const pixdataLenght = pixdate.length;
-  var pixUint8ArrTC = new Uint8Array(pixdataLenght * 4);
-  for (var a = 0, b = 0; a < pixdataLenght; a++) {
-    let lut_val = lut[pixdate[a]];
-    if (lut_val == undefined) {
-      lut_val = lut[Math.round(pixdate[a])];
-    }
-    pixUint8ArrTC[b] = pixUint8ArrTC[b + 1] = pixUint8ArrTC[b + 2] = lut_val;
-    pixUint8ArrTC[b + 3] = 255;
-    b += 4;
-  }
-  return pixUint8ArrTC;
-}
-function updateMPR(widget, objArr, center, windowWidth, windowCenter) {
-  for (let obj of objArr) {
-    const modified = widget.updateReslicePlane(obj.reslice, obj.viewtype);
-    let resliceAxes = obj.reslice.getResliceAxes();
-    obj.resliceActor.setUserMatrix(resliceAxes);
-    const imageData2 = obj.reslice.getOutputData();
-    const image = imageData2.getPointData().getScalars().getData();
-    const width = imageData2.getDimensions()[0];
-    const height = imageData2.getDimensions()[1];
-    const bounds = obj.resliceActor.getBounds();
-    const spacing = imageData2.getSpacing();
-    console.log(obj.viewtype, imageData2.getDimensions(), imageData2.getSpacing(), obj.resliceActor.getBounds());
-    //计算切片像素
-    const displayX = bounds[1] - bounds[0]; // X轴方向显示宽度
-    const displayY = bounds[3] - bounds[2]; // Y轴方向显示高度
-    const displayZ = bounds[5] - bounds[4]; // Y轴方向显示高度
-    let imgwidth = 0;
-    let imgheight = 0;
-    let linesX = 0;
-    let linesY = 0;
-    imgwidth = width * spacing[0];
-    imgheight = height * spacing[1];
-    if (obj.viewtype == 4) {
-      // imgwidth = displayY;
-      // imgheight = displayZ;
-      linesX = center[1];
-      linesY = center[2];
-    } else if (obj.viewtype == 5) {
-      // imgwidth = displayX;
-      // imgheight = displayZ;
-      linesX = center[0];
-      linesY = center[2];
-    } else {
-      // imgwidth = displayX;
-      // imgheight = displayY;
-      linesX = center[0];
-      linesY = center[1];
-    }
-    console.log(image);
-    const rgbaBuffer = dicom_to_8byte_from_hight_byte_at_ww_wl(image, windowCenter, windowWidth);
-    const imageDataObj = new ImageData(new Uint8ClampedArray(rgbaBuffer), width, height);
-
-    // 创建临时Canvas存放ImageData
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = width;
-    tempCanvas.height = height;
-    const tempCtx = tempCanvas.getContext('2d');
-    tempCtx.putImageData(imageDataObj, 0, 0);
-    let ctx = obj.ctx;
-    ctx.clearRect(0, 0, 520, 520);
-    ctx.drawImage(tempCanvas, 0, 0, width, height, 0, 0, imgwidth, imgheight);
-    ctx.strokeStyle = 'orange';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(linesX, 0);
-    ctx.lineTo(linesX, 520);
-    ctx.moveTo(0, linesY);
-    ctx.lineTo(520, linesY);
-    ctx.stroke();
-  }
-}
-function calculateB2(a) {
-  return 15.8 * Math.pow(a, -0.68);
 }
 function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement) {
   const loadimage = new _loadimage__WEBPACK_IMPORTED_MODULE_7__["default"]();
@@ -79442,6 +80303,11 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
     setColorProperties(obj, windowWidth, windowCenter);
     // 将该视图的重采样演员添加到渲染器中
     obj.renderer.addActor(obj.resliceActor);
+    if (i == 0) {
+      console.log("i");
+      const cam = obj.renderer.getActiveCamera();
+      console.log(cam);
+    }
     view3D.renderer.addActor(obj.resliceActor);
     // 遍历并将该视图中的球体演员添加到渲染器中
     obj.sphereActors.forEach(actor => {
@@ -79462,57 +80328,62 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
     });
     obj.interactor.onMouseMove(e => {
       if (!mouseDrawing) return;
-      if (eventType == 2) {
-        const currentPosition = e.position;
-        const renderer = obj.renderer;
-        const camera = renderer.getActiveCamera();
-        // 计算鼠标移动的增量
-        let deltaX = currentPosition.x - previousPosition.x;
-        let deltaY = currentPosition.y - previousPosition.y;
-        previousPosition = JSON.parse(JSON.stringify(currentPosition));
-        // 根据相机缩放尺寸合理平移相机位置
-        let scale = camera.getParallelScale();
-        // let bl = 160 / scale
-        let canvasH = container.offsetHeight;
-        console.log(canvasH, calculateB(canvasH));
-        let bl = calculateB(canvasH) * scale / 200;
-        deltaX = -deltaX * bl;
-        deltaY = deltaY * bl;
-        if (i == 0) {
-          camera.translate(0, deltaX, -deltaY);
-        } else if (i == 1) {
-          camera.translate(deltaX, 0, -deltaY);
-        } else {
-          camera.translate(deltaX, deltaY, 0);
-        }
-        renderer.resetCameraClippingRange();
-        obj.interactor.render();
-      }
-      if (eventType == 3) {
-        const currentPosition = e.position;
-        const renderer = obj.renderer;
-        const camera = renderer.getActiveCamera();
-        const deltaY = currentPosition.y - previousPosition.y;
-        previousPosition = JSON.parse(JSON.stringify(currentPosition));
-        // 缩放相机
-        console.log(camera);
-        let scale = camera.getParallelScale();
-        console.log(camera.getPhysicalScale());
-        scale -= deltaY * 0.5;
-        if (scale < 1) {
-          scale = 1;
-        }
-        console.log(scale);
-        camera.setParallelScale(scale);
-        renderer.resetCameraClippingRange();
-        obj.interactor.render();
-      }
+      // if (eventType == 2) {
+      //   const currentPosition = e.position;
+      //   const renderer = obj.renderer;
+      //   const camera = renderer.getActiveCamera();
+      //   // 计算鼠标移动的增量
+      //   let deltaX = currentPosition.x - previousPosition.x;
+      //   let deltaY = currentPosition.y - previousPosition.y;
+      //   previousPosition = JSON.parse(JSON.stringify(currentPosition));
+      //   // 根据相机缩放尺寸合理平移相机位置
+      //   let scale = camera.getParallelScale()
+      //   // let bl = 160 / scale
+      //   let canvasH = container.offsetHeight
+      //   console.log(canvasH, calculateB(canvasH))
+      //   let bl = calculateB(canvasH) * scale / 200
+      //   deltaX = -deltaX * bl;
+      //   deltaY = deltaY * bl;
+      //   console.log(deltaX, deltaY)
+      //   if (i == 0) {
+      //     camera.translate(0, deltaX, -deltaY);
+      //   } else if (i == 1) {
+      //     camera.translate(deltaX, 0, -deltaY);
+      //   } else {
+      //     camera.translate(deltaX, deltaY, 0);
+      //   }
+
+      //   renderer.resetCameraClippingRange();
+      //   obj.interactor.render();
+      // }
+      // if (eventType == 3) {
+      //   const currentPosition = e.position;
+      //   const renderer = obj.renderer;
+      //   const camera = renderer.getActiveCamera();
+      //   const deltaY = currentPosition.y - previousPosition.y;
+      //   previousPosition = JSON.parse(JSON.stringify(currentPosition));
+      //   // 缩放相机
+      //   console.log(camera)
+      //   let scale = camera.getParallelScale()
+      //   console.log(camera.getPhysicalScale())
+      //   scale -= deltaY * 0.5
+      //   if (scale < 1) {
+      //     scale = 1
+      //   }
+      //   console.log(scale)
+      //   camera.setParallelScale(scale);
+
+      //   renderer.resetCameraClippingRange();
+      //   obj.interactor.render();
+      // }
+
       if (eventType == 4) {
         currentLine.setAttribute('x2', e.position.x / 1.8);
         currentLine.setAttribute('y2', svgHeight - e.position.y / 1.8);
       }
     });
     obj.interactor.onLeftButtonRelease(e => {
+      // 获取表示对象
       const imageData = obj.reslice.getOutputData();
       console.log(imageData.getDimensions(), imageData.getSpacing(), imageData.getBounds());
       mouseDrawing = false;
@@ -79520,9 +80391,9 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
     });
     obj.interactor.onLeftButtonPress(e => {
       mouseDrawing = true;
-      if (eventType == 2) {
-        previousPosition = e.position;
-      }
+      // if (eventType == 2) {
+      //   previousPosition = e.position;
+      // }
       if (eventType == 3) {
         previousPosition = e.position;
       }
@@ -79680,13 +80551,19 @@ function setColorProperties(obj, windowWidth, windowCenter) {
 }
 function f_load_directory(selectFiles) {
   let dicom_arraybuffer = [];
-  for (var file of selectFiles) {
-    const readFileAsync = file => new Promise(resolve => {
+  for (let i = 0; i < selectFiles.length; i++) {
+    let f = null;
+    for (var file of selectFiles) {
+      if (file.name == i + 1) {
+        f = file;
+      }
+    }
+    const readFileAsync = f => new Promise(resolve => {
       const reader = new FileReader();
       reader.onload = evt => resolve(evt.target.result);
-      reader.readAsArrayBuffer(file);
+      reader.readAsArrayBuffer(f);
     });
-    dicom_arraybuffer.push(readFileAsync(file));
+    dicom_arraybuffer.push(readFileAsync(f));
   }
   return dicom_arraybuffer;
 }
