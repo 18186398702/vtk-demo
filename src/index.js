@@ -131,6 +131,7 @@ export function load3D(arrayBuffer, divElement) {
     }
   }
   arrayBuffer.sort((a, b) => a.image_position[2] - b.image_position[2])
+  console.log("arrayBuffer", arrayBuffer)
   const syntheticImageData = new SyntheticImageData();
   const { imageData, windowWidth, windowCenter } = syntheticImageData.ImageData(arrayBuffer)
   Demo3d(imageData, divElement)
