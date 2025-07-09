@@ -264,13 +264,13 @@ class SyntheticImageData {
 
       // 获取 DICOM 文件中的切片厚度 (Slice Thickness)
       const slice_thickness = dicomdata.tags["00180050"].value;
-      const imageOrientation = dicomdata.tags["00200032"].value;
+      const image_position = dicomdata.tags["00200032"].value;
       // 获取窗宽 (Window Width) 和窗位 (Window Center) 信息
       const window_center = dicomdata.tags["00281050"].value;
       const window_width = dicomdata.tags["00281051"].value;
       Hitbit[`h_img`] = hitbit;
       Hitbit[`pixSpacing`] = pixel_spacing[0];
-      Hitbit[`imageOrientation`] = imageOrientation;
+      Hitbit[`image_position`] = image_position;
       Hitbit[`slice_Thickness`] = slice_thickness[0];
       Hitbit[`window_l`] = window_center[0] - hitbit.dx;
       // Hitbit[`window_l`] = window_center[0];

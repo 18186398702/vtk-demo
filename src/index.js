@@ -130,7 +130,7 @@ export function load3D(arrayBuffer, divElement) {
       arrayBuffer[i].h_img.data = arrayBuffer[i].h_img.data.map(num => num + arrayBuffer[i].h_img.dx)
     }
   }
-  arrayBuffer.sort((a, b) => a.imageOrientation[2] - b.imageOrientation[2])
+  arrayBuffer.sort((a, b) => a.image_position[2] - b.image_position[2])
   const syntheticImageData = new SyntheticImageData();
   const { imageData, windowWidth, windowCenter } = syntheticImageData.ImageData(arrayBuffer)
   Demo3d(imageData, divElement)
@@ -155,7 +155,7 @@ export function loadMPR(arrayBuffer, divElement) {
     // 检查输入是否有效
     throw new Error("arrayBuffer 不能为空！");
   }
-  arrayBuffer.sort((a, b) => a.imageOrientation[2] - b.imageOrientation[2])
+  arrayBuffer.sort((a, b) => a.image_position[2] - b.image_position[2])
   const syntheticImageData = new SyntheticImageData();
   const { imageData, windowWidth, windowCenter } = syntheticImageData.ImageData(arrayBuffer)
 
