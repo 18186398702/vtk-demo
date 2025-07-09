@@ -128,7 +128,7 @@ export function load3D(arrayBuffer, divElement) {
   for (let i = 0; i < arrayBuffer.length; i++) {
     if (arrayBuffer[i].h_img && arrayBuffer[i].h_img.dx != 0) {
       var arrayBuffer_temp = new Int16Array(arrayBuffer[i].h_img.data.length)
-      arrayBuffer_temp = arrayBuffer[i].h_img.data.map(num => num + arrayBuffer[i].h_img.dx)
+      arrayBuffer_temp = Int16Array.from(arrayBuffer[i].h_img.data, num => num + arrayBuffer[i].h_img.dx);
       arrayBuffer[i].h_img.data = arrayBuffer_temp
     }
   }
