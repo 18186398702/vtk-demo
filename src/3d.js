@@ -13,11 +13,9 @@ var renderWindow_3d = null;
 var  volume_3d = null;
 export function Demo3d(source, divElement) {
     const renderMainBox = divElement;
+    renderMainBox.innerHTML = "";
     renderMainBox.style.position = "relative";
 
-    // 添加一个下拉list的选择元素到divElement
-    const select = document.createElement("select");
-    select.id = "color-preset-select";
     const fullScreenRenderer = vtkFullScreenRenderWindow.newInstance({
         container: renderMainBox,
         background: [0, 0, 0],
@@ -79,8 +77,8 @@ export function Demo3d(source, divElement) {
 
     const cam = renderer.getActiveCamera();
     cam.setPosition(0, 0, 0);
-    cam.setFocalPoint(-1, -1, 0);
-    cam.setViewUp(0, 0, -1);
+    cam.setFocalPoint(1, 1, 0);
+    cam.setViewUp(0, 0, 1);
 
     renderer.addVolume(volume_3d);
     // const pf = vtkPiecewiseFunction.newInstance();

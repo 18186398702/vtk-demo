@@ -53,12 +53,12 @@ class SyntheticImageData {
   ImageData(hitbit) {
     // 创建一个新的 vtkImageData 实例，用于存储体数据
     const imageData = vtkImageData.newInstance();
-    // console.log(hitbit,hitbit[0]);
     const zeroHit = hitbit[0];
-    const origin = [1.0, 1.0, 1.0];
+    const origin = [0, 0, 0];
     // 根据像素数据确定数据类型（如 Int16、Uint8 等）
     const data_type = getType(zeroHit.h_img.data);
     // 设置图像的维度信息：列数、行数以及切片数
+    console.log(zeroHit.h_img)
     const dimensions = [zeroHit.h_img.numCols, zeroHit.h_img.numRows, hitbit.length];
     // 设置图像的间距信息，包括像素间距和切片厚度
     const spacing = [zeroHit.pixSpacing, zeroHit.pixSpacing, zeroHit.slice_Thickness];
@@ -66,50 +66,20 @@ class SyntheticImageData {
     imageData.setSpacing(spacing);
     imageData.setOrigin(origin);
     imageData.setDimensions(...dimensions);
-    //imageData.setExtent(0, 127, 0, 127, 0, 127);
     const typedPixelArray = createTypedArray(data_type, dimensions, hitbit.length);
-    // console.log(typedPixelArray);
     hitbit.forEach((buffer, index) => {
       const sliceOffset = dimensions[0] * dimensions[1] * index;
       // console.log(sliceOffset)
       typedPixelArray.set(buffer.h_img.data, sliceOffset);
     });
-    // console.log(typedPixelArray);
     const scalarArray = vtkDataArray.newInstance({
       name: "Pixels", // 数据的名称
       dataType: data_type, // 数据类型（如 Int16、Uint8 等）
       numberOfComponents: 1, // 每个像素的分量数（单通道图像为 1）
       values: typedPixelArray, // 像素数据
     });
-
     // 将像素数据绑定到 vtkImageData 的点数据（PointData）中
     imageData.getPointData().setScalars(scalarArray);
-    // const vtiObject = this.createVTIObject(spacing, data_type, origin);
-    // console.log(JSON.stringify(vtiObject, null, 2));
-    // // 将 Uint16Array 转换为字节数组
-    // const byteArray = new Uint8Array(typedPixelArray.buffer);
-
-    // // 使用 pako 进行 GZIP 压缩
-    // const compressed = pako.gzip(byteArray);
-    // const fs = require('fs');
-    // // 指定保存路径
-    // const savePath = 'E:/vscode/compressed_data.gz';
-
-    // // 将压缩后的数据保存到指定路径
-    // fs.writeFileSync(savePath, compressed);
-
-    // 将压缩后的数据保存为文件
-    // const blob = new Blob([compressed], { type: 'application/gzip' });
-    // saveAs(blob, 'compressed_data.gz');
-    // const uint8Array = new Uint8Array(scalarArray.buffer);
-    // 压缩图像数据
-    // const compressedData = pako.gzip(uint8Array);
-    // 设置文件保存路径
-    // const filePath = 'E:\\vscode\\code\\js\\webpack\\backend\\vtk-js\\data\\volume\\LIDC2.vti\\data\\b1ad142a1ebc80f957fcdc329e876d51.gz';  // 自定义路径
-    // 调用 saveToFile 函数并处理返回的 Promise
-    // this.saveToFile(filePath, compressedData)
-    
-    
     // 返回处理后的 vtkImageData 对象，以及窗宽和窗位信息
     return {
       imageData: imageData,
@@ -168,17 +138,17 @@ class SyntheticImageData {
  * @param {Buffer|Uint8Array} data - 要保存的数据
  * @returns {Promise} - 返回一个 Promise 对象，用于处理异步操作结果
  */
-saveToFile(filePath, compressedData) {
-  const fs = require('fs');
-  // 写入文件
-  fs.writeFile(filePath, compressedData, (err) => {
-    if (err) {
-      console.error('File save error:', err);
-    } else {
-      console.log(`File saved successfully at ${filePath}`);
-    }
-  });
-}
+  saveToFile(filePath, compressedData) {
+    const fs = require('fs');
+    // 写入文件
+    fs.writeFile(filePath, compressedData, (err) => {
+      if (err) {
+        console.error('File save error:', err);
+      } else {
+        console.log(`File saved successfully at ${filePath}`);
+      }
+    });
+  }
   SyntheticImage(dicomData) {
     // 创建一个新的 vtkImageData 实例，用于存储体数据
     const imageData = vtkImageData.newInstance();
@@ -286,21 +256,23 @@ saveToFile(filePath, compressedData) {
       // for(var pix_num = 0;pix_num<hitbit.data.length;pix_num--){
       //   data_b[pix_num] = hitbit.data[pix_num]-hitbit.min
       // }
-     // hitbit.data = data_b
+      // hitbit.data = data_b
+      console.log("hitbit", dicomdata)
       // 获取 DICOM 文件中的像素间距 (Pixel Spacing)
-       var hitbit = this.h_b_obj_return_h_img(dicomdata)
+      var hitbit = this.h_b_obj_return_h_img(dicomdata)
       const pixel_spacing = dicomdata.tags["00280030"].value;
 
       // 获取 DICOM 文件中的切片厚度 (Slice Thickness)
       const slice_thickness = dicomdata.tags["00180050"].value;
-
+      const imageOrientation = dicomdata.tags["00200032"].value;
       // 获取窗宽 (Window Width) 和窗位 (Window Center) 信息
       const window_center = dicomdata.tags["00281050"].value;
       const window_width = dicomdata.tags["00281051"].value;
       Hitbit[`h_img`] = hitbit;
       Hitbit[`pixSpacing`] = pixel_spacing[0];
+      Hitbit[`imageOrientation`] = imageOrientation;
       Hitbit[`slice_Thickness`] = slice_thickness[0];
-      Hitbit[`window_l`] = window_center[0]-hitbit.dx;
+      Hitbit[`window_l`] = window_center[0] - hitbit.dx;
       // Hitbit[`window_l`] = window_center[0];
       Hitbit[`window_w`] = window_width[0]
       Hit.push(Hitbit);
@@ -308,15 +280,15 @@ saveToFile(filePath, compressedData) {
 
     return Hit;
   }
-  
-h_b_obj_return_h_img(h_b_obj) {
-    
+
+  h_b_obj_return_h_img(h_b_obj) {
+
 
     var h_img = h_b_obj.getInterpretedData(false, true);
 
     // h_img.pixtype = h_b_obj.getPhotometricInterpretation();
     // h_img.imageData_max = Math.pow(2, h_b_obj.getBitsStored());
-   // h_img.pixtype = ("00280004" in tags) ? tags["00280004"].value[0] : "MONOCHROME2";
+    // h_img.pixtype = ("00280004" in tags) ? tags["00280004"].value[0] : "MONOCHROME2";
     h_img.Is_fanzhuan = false;
     h_img.dx = 0;
     // if (h_img.min < 0) {
@@ -332,17 +304,17 @@ h_b_obj_return_h_img(h_b_obj) {
     //     h_img.max = h_img.max - h_img.dx;
     //     h_img.min = h_img.min - h_img.dx;
     // }
-  let data_b = new Int16Array(h_img.data.length)
-  for (var pix_num = 0; pix_num < h_img.data.length; pix_num++) {
-        data_b[pix_num] = h_img.data[pix_num];
+    let data_b = new Int16Array(h_img.data.length)
+    for (var pix_num = 0; pix_num < h_img.data.length; pix_num++) {
+      data_b[pix_num] = h_img.data[pix_num];
     }
     h_img.data = data_b;
 
     if (h_img.pixtype == "MONOCHROME1") {
-        h_img.Is_fanzhuan = true;
+      h_img.Is_fanzhuan = true;
     }
     return h_img;
-} 
+  }
   GetHitBitData1(arrayBuffer) {
     let Hit = [];
 

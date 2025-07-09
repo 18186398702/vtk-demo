@@ -14,6 +14,12 @@ import MPRRendering from "./rendingmpr";
 import vtkInteractorStyle from '@kitware/vtk.js/Rendering/Core/InteractorStyle';
 import vtkInteractorStyleImage from "@kitware/vtk.js/Interaction/Style/InteractorStyleImage";
 import { Demo3d, load3dColor } from "./3d";
+import { mat3, vec3 } from 'gl-matrix';
+import vtkMatrixBuilder from '@kitware/vtk.js/Common/Core/MatrixBuilder';
+import vtkMouseCameraTrackballPanManipulator from '@kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballPanManipulator';
+import vtkMouseCameraTrackballZoomManipulator from '@kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballZoomManipulator';
+import vtkInteractorStyleManipulator from '@kitware/vtk.js/Interaction/Style/InteractorStyleManipulator';
+
 export function change3dColor(color) {
   load3dColor(color)
 }
@@ -23,7 +29,6 @@ export function change3dColor(color) {
 function calculateB(a) {
   // 根据给定的数据点，使用分段线性回归进行近似
   // 我们将数据点分为几个区间，每个区间使用不同的线性方程
-
   // 数据点排序
   const dataPoints = [
     { a: 450, b: 0.45 },
@@ -31,25 +36,20 @@ function calculateB(a) {
     { a: 225, b: 0.9 },
     { a: 135, b: 1.48 }
   ];
-
   // 对数据点进行排序
   dataPoints.sort((a, b) => a.a - b.a);
-
   // 找到输入值 a 所在的区间
   for (let i = 0; i < dataPoints.length - 1; i++) {
     const point1 = dataPoints[i];
     const point2 = dataPoints[i + 1];
-
     if (a >= point1.a && a <= point2.a) {
       // 计算斜率和截距
       const slope = (point2.b - point1.b) / (point2.a - point1.a);
       const intercept = point1.b - slope * point1.a;
-
       // 使用线性插值计算b值
       return slope * a + intercept;
     }
   }
-
   // 如果a超出所有数据点的范围，返回最近的数据点
   if (a < dataPoints[0].a) return dataPoints[0].b;
   if (a > dataPoints[dataPoints.length - 1].a) return dataPoints[dataPoints.length - 1].b;
@@ -61,6 +61,7 @@ export async function load(ArrayBuffer) {
   for (var i = 0; i < Object.keys(ArrayBuffer).length; i++) {
     const buffer = await ArrayBuffer[i]; // Resolve each promise
     if (buffer && buffer.byteLength > 0) {
+      console.log("arrayBuffer", buffer)
       arrayBuffer.push(buffer);
     }
   }
@@ -83,16 +84,40 @@ let eventType = 1
 let viewObj = null
 export function changeEvent(type) {
   eventType = type
-  if (eventType === 1) {
-    viewObj.forEach(obj => {
-      obj.interactor.setInteractorStyle(vtkInteractorStyleImage.newInstance());
-    })
-  } else {
-    viewObj.forEach(obj => {
-      obj.interactor.setInteractorStyle(vtkInteractorStyle.newInstance());
-    })
-
+  switch (eventType) {
+    case 1:
+      viewObj.forEach(obj => {
+        obj.interactor.setInteractorStyle(vtkInteractorStyleImage.newInstance());
+      })
+      break;
+    case 2:
+      console.log("changeEvent", eventType)
+      viewObj.forEach(obj => {
+        const stl = vtkInteractorStyleManipulator.newInstance()
+        obj.interactor.setInteractorStyle(stl);
+        // 2. 添加自定义平移操纵器（左键拖动）
+        const panManipulator = vtkMouseCameraTrackballPanManipulator.newInstance({
+          button: 1, // 左键
+          shift: false,
+          control: false
+        });
+        stl.addMouseManipulator(panManipulator);
+      })
+      break
+    case 3:
+      viewObj.forEach(obj => {
+        const stl = vtkInteractorStyleManipulator.newInstance()
+        obj.interactor.setInteractorStyle(stl);
+        // 2. 添加自定义平移操纵器（左键拖动）
+        const panManipulator = vtkMouseCameraTrackballZoomManipulator.newInstance({
+          button: 1, // 左键
+          shift: false,
+        })
+        stl.addMouseManipulator(panManipulator);
+      })
+      break;
   }
+
 }
 
 export function load3D(arrayBuffer, divElement) {
@@ -100,6 +125,12 @@ export function load3D(arrayBuffer, divElement) {
     // 检查输入是否有效
     throw new Error("arrayBuffer 不能为空！");
   }
+  for (let i = 0; i < arrayBuffer.length; i++) {
+    if (arrayBuffer[i].h_img && arrayBuffer[i].h_img.dx != 0) {
+      arrayBuffer[i].h_img.data = arrayBuffer[i].h_img.data.map(num => num + arrayBuffer[i].h_img.dx)
+    }
+  }
+  arrayBuffer.sort((a, b) => a.imageOrientation[2] - b.imageOrientation[2])
   const syntheticImageData = new SyntheticImageData();
   const { imageData, windowWidth, windowCenter } = syntheticImageData.ImageData(arrayBuffer)
   Demo3d(imageData, divElement)
@@ -114,226 +145,24 @@ export function load3D(arrayBuffer, divElement) {
  */
 
 export function loadMPR(arrayBuffer, divElement) {
+  // for (let i = 0; i < arrayBuffer.length; i++) {
+  //   if (arrayBuffer[i].h_img && arrayBuffer[i].h_img.dx != 0) {
+  //     arrayBuffer[i].h_img.data = arrayBuffer[i].h_img.data.map(num => num + arrayBuffer[i].h_img.dx)
+  //   }
+  // }
+  console.log("loadMPR", arrayBuffer)
   if (!arrayBuffer) {
     // 检查输入是否有效
     throw new Error("arrayBuffer 不能为空！");
   }
+  arrayBuffer.sort((a, b) => a.imageOrientation[2] - b.imageOrientation[2])
   const syntheticImageData = new SyntheticImageData();
   const { imageData, windowWidth, windowCenter } = syntheticImageData.ImageData(arrayBuffer)
-  // console.log("imageData", imageData, windowWidth, windowCenter)
-  // const axialCanvas = document.getElementById('axial');
-  // const coronalCanvas = document.getElementById('coronal');
-  // const sagittalCanvas = document.getElementById('sagittal');
-  // const widget = vtkResliceCursorWidget.newInstance();
-  // const widgetState = widget.getWidgetState();
-  // widget.setImage(imageData);
-  // let objArr = []
-  // const createVTIObject = (canvas, imageData, widget, viewtype) => {
-  //   let obj = { viewtype: viewtype }
-  //   obj.reslice = vtkImageReslice.newInstance();
-  //   // 设置重切割操作的切片数量为 1，表示只取一个切片
-  //   obj.reslice.setSlabNumberOfSlices(1);
-  //   // 设置是否使用变换来输入采样，false 表示不使用变换
-  //   obj.reslice.setTransformInputSampling(false);
-  //   // 设置输出图像是否自动裁剪，true 表示输出图像会根据内容自动裁剪
-  //   obj.reslice.setAutoCropOutput(true);
-  //   // 设置输出图像的维度为 2，表示输出为 2D 图像（通常用于切片视图）
-  //   obj.reslice.setOutputDimensionality(2);
-  //   // 创建一个 vtkImageMapper 实例，用于映射图像数据
-  //   obj.resliceMapper = vtkImageMapper.newInstance();
-  //   obj.resliceMapper.setSliceAtFocalPoint(true); // 确保切片在焦点处
-  //   // 将 vtkImageReslice 的输出连接到映射器，确保映射器能渲染重切割后的图像
-  //   obj.resliceMapper.setInputConnection(obj.reslice.getOutputPort());
-  //   // 创建一个 vtkImageSlice 实例，用于显示图像切片
-  //   obj.resliceActor = vtkImageSlice.newInstance();
-  //   // 将映射器应用到 vtkImageSlice 上，以便它能够渲染图像
-  //   obj.resliceActor.setMapper(obj.resliceMapper);
-  //   obj.reslice.setInputData(imageData);
-  //   const grw = vtkGenericRenderWindow.newInstance();
-  //   const render = grw.getRenderer()
-  //   obj.widgetManager = vtkWidgetManager.newInstance()
-  //   obj.widgetManager.setRenderer(render);
 
-  //   obj.widgetInstance = obj.widgetManager.addWidget(widget, viewtype);
-  //   obj.widgetInstance.setKeepOrthogonality(true);
-  //   console.log(canvas)
-  //   const ctx = canvas.getContext('2d');
-  //   //canvas加监听点击事件
-  //   canvas.addEventListener('click', function (e) {
-  //     // 获取点击位置的坐标
-  //     const x = e.clientX;
-  //     const y = e.clientY;
-  //     // 获取 canvas 元素的边界信息
-  //     const rect = canvas.getBoundingClientRect();
-  //     // 计算点击位置的 X 和 Y 坐标（相对于 canvas）
-  //     const xCanvas = x - rect.left;
-  //     const yCanvas = y - rect.top;
-  //     console.log(viewtype, xCanvas, yCanvas);
-  //     let center = widget.get().widgetState.getCenter();
-  //     console.log("center", widget, widget.get().widgetState.getRotationHandleXinY0(), widget.get().widgetState.getCenter());
-  //     console.log("widgetInstance", obj.widgetInstance)
-  //     if (obj.viewtype == 4) {
-  //       center[1] = xCanvas;
-  //       center[2] = yCanvas;
-  //     } else if (obj.viewtype == 5) {
-  //       center[0] = xCanvas;
-  //       center[2] = yCanvas;
-  //     } else {
-  //       center[0] = xCanvas;
-  //       center[1] = yCanvas;
-  //     }
-  //     // widget.setCenter(center);
-  //     obj.widgetInstance.rotateLineInView("YinX", -Math.PI / 4)
-  //     obj.widgetInstance.rotateLineInView("YinZ", -Math.PI / 4)
-  //     // obj.widgetInstance.rotateLineInView("YinX", 90)
-  //     //  obj.widgetInstance.invokeInteractionEvent("rotateLine")
-  //     updateMPR(widget, objArr, center, windowWidth, windowCenter);
-  //   })
-  //   obj.ctx = ctx;
-  //   objArr.push(obj)
-  // }
-  // createVTIObject(axialCanvas, imageData, widget, 4)
-  // createVTIObject(coronalCanvas, imageData, widget, 5)
-  // createVTIObject(sagittalCanvas, imageData, widget, 6)
-  // console.log(widgetState.getCenter())
-  // let center = [200.801, 200.801, 22]
-  // widget.setCenter(center);
-  // let otherLineHandle = objArr[0].widgetInstance.getOtherLineHandle("XinY")
-  // let otherLineVector = otherLineHandle.getDirection()
-  // console.log("XinY", otherLineVector)
-  // otherLineHandle = objArr[0].widgetInstance.getOtherLineHandle("ZinY")
-  // otherLineVector = otherLineHandle.getDirection()
-  // console.log("ZinY", otherLineVector)
-  // otherLineHandle = objArr[0].widgetInstance.getOtherLineHandle("ZinX")
-  // otherLineVector = otherLineHandle.getDirection()
-  // console.log("ZinX", otherLineVector)
-  // otherLineHandle = objArr[0].widgetInstance.getOtherLineHandle("YinX")
-  // otherLineVector = otherLineHandle.getDirection()
-  // console.log("YinX", otherLineVector)
-  // otherLineHandle = objArr[0].widgetInstance.getOtherLineHandle("XinZ")
-  // otherLineVector = otherLineHandle.getDirection()
-  // console.log("XinZ", otherLineVector)
-  // otherLineHandle = objArr[0].widgetInstance.getOtherLineHandle("YinZ")
-  // otherLineVector = otherLineHandle.getDirection()
-  // console.log("YinZ", otherLineVector)
-  // // widget.get().widgetState.setRotationHandleXinY0(45)
-  // console.log("widget", widget.get())
-  // console.log("objArr", widget.get().behavior, widget.get().widgetState.getStatesWithLabel('rotation'))
-  // console.log(widget.get().widgetState.getStatesWithLabel("sphere")[1].getState())
-  // //  widget.get().widgetState.getStatesWithLabel('rotation')[0].setOffset()
-  // updateMPR(widget, objArr, center, windowWidth, windowCenter)
-  // console.log("widgetState", widgetState, widgetState.getCenter(), widgetState.getAxisXinY().get());
   MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
 }
-function dicom_to_8byte_from_hight_byte_at_ww_wl(pixdate, wl_y, ww) {
-  //计算最小值
-  var min = Math.min(pixdate);
-  //拨正
-  var wl = wl_y;
-  if (min < 0) {
-    for (var pix_num = 0; pix_num < pixdate.length; pix_num++) {
-      pixdate[pix_num] = pixdate[pix_num] - min;
-    }
-    var wl = wl_y - min;
-  }
 
-  const window_min = (wl - ww / 2);
-  const window_max = (wl + ww / 2);
-  const ww_wl_a = (255 / ww);
-  const ww_wl_b = ((window_min * 255) / ww);
-  var lut = new Uint8ClampedArray(65536);
-  var lueLenght = lut.length
-  for (var i = 0; i < lueLenght; i++) {
-    if (i < window_min) {
-      lut[i] = 0;
-    } else if (i > window_max) {
-      lut[i] = 255;
-    } else {
-      lut[i] = parseInt(i * ww_wl_a - ww_wl_b);
-    }
-  }
 
-  const pixdataLenght = pixdate.length
-  var pixUint8ArrTC = new Uint8Array(pixdataLenght * 4)
-  for (var a = 0, b = 0; a < pixdataLenght; a++) {
-    let lut_val = lut[pixdate[a]];
-    if (lut_val == undefined) {
-      lut_val = lut[Math.round(pixdate[a])];
-    }
-    pixUint8ArrTC[b] = pixUint8ArrTC[b + 1] = pixUint8ArrTC[b + 2] = lut_val;
-    pixUint8ArrTC[b + 3] = 255;
-    b += 4;
-  }
-  return pixUint8ArrTC
-}
-function updateMPR(widget, objArr, center, windowWidth, windowCenter) {
-  for (let obj of objArr) {
-    const modified = widget.updateReslicePlane(
-      obj.reslice,
-      obj.viewtype
-    );
-    let resliceAxes = obj.reslice.getResliceAxes();
-    obj.resliceActor.setUserMatrix(resliceAxes);
-    const imageData2 = obj.reslice.getOutputData()
-    const image = imageData2.getPointData().getScalars().getData();
-    const width = imageData2.getDimensions()[0];
-    const height = imageData2.getDimensions()[1];
-    const bounds = obj.resliceActor.getBounds();
-    const spacing = imageData2.getSpacing()
-    console.log(obj.viewtype, imageData2.getDimensions(), imageData2.getSpacing(), obj.resliceActor.getBounds())
-    //计算切片像素
-    const displayX = bounds[1] - bounds[0];  // X轴方向显示宽度
-    const displayY = bounds[3] - bounds[2]; // Y轴方向显示高度
-    const displayZ = bounds[5] - bounds[4]; // Y轴方向显示高度
-    let imgwidth = 0
-    let imgheight = 0
-    let linesX = 0
-    let linesY = 0
-
-    imgwidth = width * spacing[0];
-    imgheight = height * spacing[1];
-    if (obj.viewtype == 4) {
-      // imgwidth = displayY;
-      // imgheight = displayZ;
-      linesX = center[1]
-      linesY = center[2]
-    } else if (obj.viewtype == 5) {
-      // imgwidth = displayX;
-      // imgheight = displayZ;
-      linesX = center[0]
-      linesY = center[2]
-    } else {
-      // imgwidth = displayX;
-      // imgheight = displayY;
-      linesX = center[0]
-      linesY = center[1]
-    }
-    console.log(image)
-    const rgbaBuffer = dicom_to_8byte_from_hight_byte_at_ww_wl(image, windowCenter, windowWidth)
-    const imageDataObj = new ImageData(new Uint8ClampedArray(rgbaBuffer), width, height);
-
-    // 创建临时Canvas存放ImageData
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = width;
-    tempCanvas.height = height;
-    const tempCtx = tempCanvas.getContext('2d');
-    tempCtx.putImageData(imageDataObj, 0, 0);
-    let ctx = obj.ctx;
-    ctx.clearRect(0, 0, 520, 520);
-    ctx.drawImage(tempCanvas, 0, 0, width, height, 0, 0, imgwidth, imgheight);
-    ctx.strokeStyle = 'orange';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(linesX, 0);
-    ctx.lineTo(linesX, 520);
-    ctx.moveTo(0, linesY);
-    ctx.lineTo(520, linesY);
-    ctx.stroke();
-  }
-}
-function calculateB2(a) {
-  return 15.8 * Math.pow(a, -0.68);
-}
 function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement) {
   const loadimage = new LoadImage();
   const mprrendering = new MPRRendering();
@@ -356,8 +185,11 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
     setColorProperties(obj, windowWidth, windowCenter);
     // 将该视图的重采样演员添加到渲染器中
     obj.renderer.addActor(obj.resliceActor);
-
-
+    if (i == 0) {
+      console.log("i")
+      const cam = obj.renderer.getActiveCamera();
+      console.log(cam)
+    }
     view3D.renderer.addActor(obj.resliceActor);
     // 遍历并将该视图中的球体演员添加到渲染器中
     obj.sphereActors.forEach((actor) => {
@@ -378,52 +210,54 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
     })
     obj.interactor.onMouseMove((e) => {
       if (!mouseDrawing) return;
-      if (eventType == 2) {
-        const currentPosition = e.position;
-        const renderer = obj.renderer;
-        const camera = renderer.getActiveCamera();
-        // 计算鼠标移动的增量
-        let deltaX = currentPosition.x - previousPosition.x;
-        let deltaY = currentPosition.y - previousPosition.y;
-        previousPosition = JSON.parse(JSON.stringify(currentPosition));
-        // 根据相机缩放尺寸合理平移相机位置
-        let scale = camera.getParallelScale()
-        // let bl = 160 / scale
-        let canvasH = container.offsetHeight
-        console.log(canvasH, calculateB(canvasH))
-        let bl = calculateB(canvasH) * scale / 200
-        deltaX = -deltaX * bl;
-        deltaY = deltaY * bl;
-        if (i == 0) {
-          camera.translate(0, deltaX, -deltaY);
-        } else if (i == 1) {
-          camera.translate(deltaX, 0, -deltaY);
-        } else {
-          camera.translate(deltaX, deltaY, 0);
-        }
-        renderer.resetCameraClippingRange();
-        obj.interactor.render();
-      }
-      if (eventType == 3) {
-        const currentPosition = e.position;
-        const renderer = obj.renderer;
-        const camera = renderer.getActiveCamera();
-        const deltaY = currentPosition.y - previousPosition.y;
-        previousPosition = JSON.parse(JSON.stringify(currentPosition));
-        // 缩放相机
-        console.log(camera)
-        let scale = camera.getParallelScale()
-        console.log(camera.getPhysicalScale())
-        scale -= deltaY * 0.5
-        if (scale < 1) {
-          scale = 1
-        }
-        console.log(scale)
-        camera.setParallelScale(scale);
+      // if (eventType == 2) {
+      //   const currentPosition = e.position;
+      //   const renderer = obj.renderer;
+      //   const camera = renderer.getActiveCamera();
+      //   // 计算鼠标移动的增量
+      //   let deltaX = currentPosition.x - previousPosition.x;
+      //   let deltaY = currentPosition.y - previousPosition.y;
+      //   previousPosition = JSON.parse(JSON.stringify(currentPosition));
+      //   // 根据相机缩放尺寸合理平移相机位置
+      //   let scale = camera.getParallelScale()
+      //   // let bl = 160 / scale
+      //   let canvasH = container.offsetHeight
+      //   console.log(canvasH, calculateB(canvasH))
+      //   let bl = calculateB(canvasH) * scale / 200
+      //   deltaX = -deltaX * bl;
+      //   deltaY = deltaY * bl;
+      //   console.log(deltaX, deltaY)
+      //   if (i == 0) {
+      //     camera.translate(0, deltaX, -deltaY);
+      //   } else if (i == 1) {
+      //     camera.translate(deltaX, 0, -deltaY);
+      //   } else {
+      //     camera.translate(deltaX, deltaY, 0);
+      //   }
 
-        renderer.resetCameraClippingRange();
-        obj.interactor.render();
-      }
+      //   renderer.resetCameraClippingRange();
+      //   obj.interactor.render();
+      // }
+      // if (eventType == 3) {
+      //   const currentPosition = e.position;
+      //   const renderer = obj.renderer;
+      //   const camera = renderer.getActiveCamera();
+      //   const deltaY = currentPosition.y - previousPosition.y;
+      //   previousPosition = JSON.parse(JSON.stringify(currentPosition));
+      //   // 缩放相机
+      //   console.log(camera)
+      //   let scale = camera.getParallelScale()
+      //   console.log(camera.getPhysicalScale())
+      //   scale -= deltaY * 0.5
+      //   if (scale < 1) {
+      //     scale = 1
+      //   }
+      //   console.log(scale)
+      //   camera.setParallelScale(scale);
+
+      //   renderer.resetCameraClippingRange();
+      //   obj.interactor.render();
+      // }
 
       if (eventType == 4) {
         currentLine.setAttribute('x2', e.position.x / 1.8);
@@ -431,6 +265,7 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
       }
     })
     obj.interactor.onLeftButtonRelease((e) => {
+      // 获取表示对象
       const imageData = obj.reslice.getOutputData()
       console.log(imageData.getDimensions(), imageData.getSpacing(), imageData.getBounds())
       mouseDrawing = false;
@@ -438,9 +273,9 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
     })
     obj.interactor.onLeftButtonPress((e) => {
       mouseDrawing = true;
-      if (eventType == 2) {
-        previousPosition = e.position;
-      }
+      // if (eventType == 2) {
+      //   previousPosition = e.position;
+      // }
       if (eventType == 3) {
         previousPosition = e.position;
       }
@@ -604,14 +439,20 @@ function setColorProperties(obj, windowWidth, windowCenter) {
 
 export function f_load_directory(selectFiles) {
   let dicom_arraybuffer = [];
-  for (var file of selectFiles) {
-    const readFileAsync = (file) =>
+  for (let i = 0; i < selectFiles.length; i++) {
+    let f = null
+    for (var file of selectFiles) {
+      if (file.name == i + 1) {
+        f = file
+      }
+    }
+    const readFileAsync = (f) =>
       new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = (evt) => resolve(evt.target.result);
-        reader.readAsArrayBuffer(file);
+        reader.readAsArrayBuffer(f);
       });
-    dicom_arraybuffer.push(readFileAsync(file));
+    dicom_arraybuffer.push(readFileAsync(f));
   }
   return dicom_arraybuffer;
 }
@@ -628,3 +469,5 @@ function screenToWorld(displayPos, renderer) {
   coordinate.setValue(displayPos.x, displayPos.y, 0);
   return coordinate.getComputedWorldValue(renderer);
 }
+
+

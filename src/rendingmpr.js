@@ -13,7 +13,9 @@ import vtkWidgetManager from "@kitware/vtk.js/Widgets/Core/WidgetManager";
 import { CaptureOn } from "@kitware/vtk.js/Widgets/Core/WidgetManager/Constants";
 import { SlabMode } from "@kitware/vtk.js/Imaging/Core/ImageReslice/Constants";
 import { xyzToViewType } from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants";
-
+import vtkInteractorStyleImage from '@kitware/vtk.js/Interaction/Style/InteractorStyleImage';
+import vtkMouseCameraTrackballPanManipulator from '@kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballPanManipulator';
+import vtkInteractorStyleManipulator from '@kitware/vtk.js/Interaction/Style/InteractorStyleManipulator';
 
 class MPRRendering {
   // 创建MPR渲染页面
@@ -110,19 +112,12 @@ class MPRRendering {
       };
       // 设置当前活跃相机为平行投影（不使用透视效果）
       obj.renderer.getActiveCamera().setParallelProjection(true);
-      // const customStyle = vtkInteractorStyleMPRSlice.newInstance();
-
-      // obj.interactor.setInteractorStyle(customStyle);
-      // console.log(customStyle)
-      // customStyle.onStartWindowLevelEvent((callData) => {
-      //   console.log(callData)
-      // });
       // 设置渲染器的背景颜色，viewColors[i] 是一个 RGB 颜色数组
-      if (i<3) {
+      if (i < 3) {
         // 如果显示调试Actor，则将背景颜色设置为浅灰色
         obj.renderer.setBackground(...viewColors[i]);
       }
-     
+
 
       // 将渲染器添加到渲染窗口中，这样渲染器才能在窗口中显示
       obj.renderWindow.addRenderer(obj.renderer);
@@ -150,8 +145,16 @@ class MPRRendering {
         // const ccc = a.newInstance();
         // console.log(ccc)
         // obj.interactor.setInteractorStyle(ccc);
-        obj.interactor.setInteractorStyle(vtkInteractorStyle.newInstance());
-
+        obj.interactor.setInteractorStyle(vtkInteractorStyleImage.newInstance());
+        // const stl = vtkInteractorStyleManipulator.newInstance()
+        // obj.interactor.setInteractorStyle(stl);
+        // // 2. 添加自定义平移操纵器（左键拖动）
+        // const panManipulator = vtkMouseCameraTrackballPanManipulator.newInstance({
+        //   button: 1, // 左键
+        //   shift: false,
+        //   control: false
+        // });
+        // stl.addMouseManipulator(panManipulator);
         // 添加一个小部件（widget）到 widgetManager，并根据 xyzToViewType[i] 设置其类型
         obj.widgetInstance = obj.widgetManager.addWidget(widget, xyzToViewType[i]);
         console.log(obj.widgetInstance)
@@ -270,7 +273,7 @@ class MPRRendering {
         // axes.setXPlusFaceProperty({ text: '+X' });
         axes.setXMinusFaceProperty({
           text: "-X",
-          faceColor:"rgb(255, 71, 87)",
+          faceColor: "rgb(255, 71, 87)",
           // faceRotation: 90,
           // fontStyle: "italic",
         });
@@ -286,7 +289,7 @@ class MPRRendering {
         });
         axes.setZPlusFaceProperty({
           text: "+Z",
-          faceColor:"rgb(9, 132, 227)",
+          faceColor: "rgb(9, 132, 227)",
         });
         axes.setZMinusFaceProperty({
           text: "-Z",
