@@ -127,7 +127,9 @@ export function load3D(arrayBuffer, divElement) {
   }
   for (let i = 0; i < arrayBuffer.length; i++) {
     if (arrayBuffer[i].h_img && arrayBuffer[i].h_img.dx != 0) {
-      arrayBuffer[i].h_img.data = arrayBuffer[i].h_img.data.map(num => num + arrayBuffer[i].h_img.dx)
+      var arrayBuffer_temp = new Int16Array(arrayBuffer[i].h_img.data.length)
+      arrayBuffer_temp = arrayBuffer[i].h_img.data.map(num => num + arrayBuffer[i].h_img.dx)
+      arrayBuffer[i].h_img.data = arrayBuffer_temp
     }
   }
   arrayBuffer.sort((a, b) => a.image_position[2] - b.image_position[2])
