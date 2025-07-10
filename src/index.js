@@ -424,14 +424,12 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
 // 封装函数，检查数组有效性并设置颜色窗口和颜色中心
 function setColorProperties(obj, windowWidth, windowCenter) {
   const property = obj.resliceActor.getProperty();
-
   // 验证并设置窗口宽度，确保是整数类型
   if (Number.isInteger(windowWidth)) {
     property.setColorWindow(windowWidth);
   } else {
     console.warn("windowWidth 不是有效的整数");
   }
-
   // 验证并设置窗口中心，确保是整数类型
   if (Number.isInteger(windowCenter)) {
     property.setColorLevel(windowCenter);

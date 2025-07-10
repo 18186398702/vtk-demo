@@ -388,11 +388,11 @@ class MPRRendering {
       siderDiv.style.position = "absolute";
       siderDiv.style.zIndex = "9";
       elementParent.appendChild(siderDiv);
-      let h = siderDiv.offsetHeight - 25
       if (i < 3) {
         const reset = this.createResetButton();
         resetElements.push(reset);
         elementParent.appendChild(reset);
+        let h = siderDiv.offsetHeight - 25
         const slider = document.createElement("input");
         slider.type = "range";
         slider.min = 0;
@@ -400,6 +400,15 @@ class MPRRendering {
         slider.className = "vertical-slider";
         slider.style.width = h + "px";
         siderDiv.appendChild(slider);
+        // siderDiv加监听事件，高度变化时
+        const observer = new ResizeObserver(entries => {
+          for (let entry of entries) {
+            const { height } = entry.contentRect;
+            let h = height - 25
+            slider.style.width = h + "px";
+          }
+        });
+        observer.observe(siderDiv);
         createdSliderElements.push(slider);
       }
 
