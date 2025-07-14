@@ -10,16 +10,40 @@ import vtkVolumeProperty from "@kitware/vtk.js/Rendering/Core/VolumeProperty";
 import colorPresets from './MedicalColorPresets.json';
 
 var renderWindow_3d = null;
-var  volume_3d = null;
+var volume_3d = null;
+var sr = null
+// 导出renderWindow_3d
+export function export3dImg() {
+    renderWindow_3d.render();
+    // 将渲染窗口的内容导出成图片
+    const canvas = sr.getContainer().querySelector('canvas');;
+    canvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = 'webgl-export.png';
+        link.href = url;
+        link.click();
+        URL.revokeObjectURL(url);
+    }, 'image/png');
+}
+
 export function Demo3d(source, divElement) {
     const renderMainBox = divElement;
     renderMainBox.innerHTML = "";
     renderMainBox.style.position = "relative";
 
     const fullScreenRenderer = vtkFullScreenRenderWindow.newInstance({
+        containerStyle: {     // WebGL2专属配置
+            antialias: false,
+            depth: true,
+            preserveDrawingBuffer: true,
+            premultipliedAlpha: false   // 避免透明度混合问题
+        },
+
         container: renderMainBox,
         background: [0, 0, 0],
     });
+    sr = fullScreenRenderer;
     const renderer = fullScreenRenderer.getRenderer();
     renderWindow_3d = fullScreenRenderer.getRenderWindow();
     volume_3d = vtkVolume.newInstance();

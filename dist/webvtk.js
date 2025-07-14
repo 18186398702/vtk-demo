@@ -37492,6 +37492,7 @@ function vtkOpenGLRenderWindow(publicAPI, model) {
       } else {
         // Initialize a 3D context that may be used by child render windows
         model.context = publicAPI.get3DContext();
+        console.log('model.context', model.context);
         publicAPI.resizeFromChildRenderWindows();
         if (model.context) {
           createGLContext();
@@ -37563,7 +37564,7 @@ function vtkOpenGLRenderWindow(publicAPI, model) {
     return pixels;
   };
   publicAPI.get3DContext = function () {
-    // console.log('get3DContext');
+    console.log('get3DContext', arguments);
     let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {
       preserveDrawingBuffer: false,
       depth: true,
@@ -37936,8 +37937,8 @@ function vtkOpenGLRenderWindow(publicAPI, model) {
     const parentCanvas = rootParent.getCanvas();
     const selfCanvas = model.canvas;
     model.context2D.drawImage(parentCanvas, 0, parentCanvas.height - selfCanvas.height,
-    // source y axis is inverted
-    selfCanvas.width, selfCanvas.height, 0, 0, selfCanvas.width, selfCanvas.height);
+      // source y axis is inverted
+      selfCanvas.width, selfCanvas.height, 0, 0, selfCanvas.width, selfCanvas.height);
   };
   publicAPI.resizeFromChildRenderWindows = () => {
     // Adapt the size of the parent render window to the child render windows
@@ -65804,6 +65805,7 @@ vtk.register = register;
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Demo3d: () => (/* binding */ Demo3d),
+/* harmony export */   export3dImg: () => (/* binding */ export3dImg),
 /* harmony export */   load3dColor: () => (/* binding */ load3dColor)
 /* harmony export */ });
 /* harmony import */ var _kitware_vtk_js_Rendering_Profiles_All__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Profiles/All */ "./node_modules/@kitware/vtk.js/Rendering/Profiles/All.js");
@@ -65826,14 +65828,38 @@ __webpack_require__.r(__webpack_exports__);
 
 var renderWindow_3d = null;
 var volume_3d = null;
+var sr = null;
+// 导出renderWindow_3d
+function export3dImg() {
+  renderWindow_3d.render();
+  // 将渲染窗口的内容导出成图片
+  const canvas = sr.getContainer().querySelector('canvas');
+  ;
+  canvas.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.download = 'webgl-export.png';
+    link.href = url;
+    link.click();
+    URL.revokeObjectURL(url);
+  }, 'image/png');
+}
 function Demo3d(source, divElement) {
   const renderMainBox = divElement;
   renderMainBox.innerHTML = "";
   renderMainBox.style.position = "relative";
   const fullScreenRenderer = _kitware_vtk_js_Rendering_Misc_FullScreenRenderWindow__WEBPACK_IMPORTED_MODULE_3__["default"].newInstance({
+    containerStyle: {
+      // WebGL2专属配置
+      antialias: false,
+      depth: true,
+      preserveDrawingBuffer: true,
+      premultipliedAlpha: false // 避免透明度混合问题
+    },
     container: renderMainBox,
     background: [0, 0, 0]
   });
+  sr = fullScreenRenderer;
   const renderer = fullScreenRenderer.getRenderer();
   renderWindow_3d = fullScreenRenderer.getRenderWindow();
   volume_3d = _kitware_vtk_js_Rendering_Core_Volume__WEBPACK_IMPORTED_MODULE_1__["default"].newInstance();
@@ -69880,8 +69906,9 @@ class SyntheticImageData {
       Hitbit[`image_position`] = image_position;
       Hitbit[`slice_Thickness`] = slice_thickness[0];
       Hitbit[`window_l`] = window_center[0] - hitbit.dx;
-      // Hitbit[`window_l`] = window_center[0];
       Hitbit[`window_w`] = window_width[0];
+      // Hitbit[`window_l`] = -158
+      // Hitbit[`window_w`] = 3688
       Hit.push(Hitbit);
     });
     return Hit;
@@ -80100,6 +80127,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   change3dColor: () => (/* binding */ change3dColor),
 /* harmony export */   changeEvent: () => (/* binding */ changeEvent),
+/* harmony export */   exportImg: () => (/* binding */ exportImg),
 /* harmony export */   f_load_directory: () => (/* binding */ f_load_directory),
 /* harmony export */   load: () => (/* binding */ load),
 /* harmony export */   load3D: () => (/* binding */ load3D),
@@ -80142,6 +80170,9 @@ __webpack_require__.r(__webpack_exports__);
 
 function change3dColor(color) {
   (0,_3d__WEBPACK_IMPORTED_MODULE_11__.load3dColor)(color);
+}
+function exportImg() {
+  (0,_3d__WEBPACK_IMPORTED_MODULE_11__.export3dImg)();
 }
 function calculateB(a) {
   // 根据给定的数据点，使用分段线性回归进行近似
@@ -80370,33 +80401,35 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
       //   renderer.resetCameraClippingRange();
       //   obj.interactor.render();
       // }
-      // if (eventType == 3) {
-      //   const currentPosition = e.position;
-      //   const renderer = obj.renderer;
-      //   const camera = renderer.getActiveCamera();
-      //   const deltaY = currentPosition.y - previousPosition.y;
-      //   previousPosition = JSON.parse(JSON.stringify(currentPosition));
-      //   // 缩放相机
-      //   console.log(camera)
-      //   let scale = camera.getParallelScale()
-      //   console.log(camera.getPhysicalScale())
-      //   scale -= deltaY * 0.5
-      //   if (scale < 1) {
-      //     scale = 1
-      //   }
-      //   console.log(scale)
-      //   camera.setParallelScale(scale);
+      if (eventType == 3) {
+        //   const currentPosition = e.position;
+        //   const renderer = obj.renderer;
+        //   const camera = renderer.getActiveCamera();
+        //   const deltaY = currentPosition.y - previousPosition.y;
+        //   previousPosition = JSON.parse(JSON.stringify(currentPosition));
+        //   // 缩放相机
+        //   console.log(camera)
+        //   let scale = camera.getParallelScale()
+        //   console.log(camera.getPhysicalScale())
+        //   scale -= deltaY * 0.5
+        //   if (scale < 1) {
+        //     scale = 1
+        //   }
+        //   console.log(scale)
+        //   camera.setParallelScale(scale);
 
-      //   renderer.resetCameraClippingRange();
-      //   obj.interactor.render();
-      // }
-
+        //   renderer.resetCameraClippingRange();
+        //   obj.interactor.render();
+      }
       if (eventType == 4) {
         currentLine.setAttribute('x2', e.position.x / 1.8);
         currentLine.setAttribute('y2', svgHeight - e.position.y / 1.8);
       }
     });
     obj.interactor.onLeftButtonRelease(e => {
+      // 输出camera
+      const camera = obj.renderer.getActiveCamera();
+      console.log(camera, camera.get());
       // 获取表示对象
       const imageData = obj.reslice.getOutputData();
       console.log(imageData.getDimensions(), imageData.getSpacing(), imageData.getBounds());
@@ -80598,3 +80631,4 @@ function screenToWorld(displayPos, renderer) {
 /******/ })()
 ;
 });
+//# sourceMappingURL=webvtk.js.map

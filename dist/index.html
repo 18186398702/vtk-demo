@@ -78,6 +78,7 @@
   <button onclick="ccc(1)">调窗</button>
   <button onclick="ccc(2)">平移</button>
   <button onclick="ccc(3)">缩放</button>
+  <button onclick="exportImg()">导出</button>
   <select onchange="loadcolor(this.value)">
     <option value="CT-AAA">CT-AAA</option>
     <option value="CT-AAA2">CT-AAA2</option>
@@ -97,12 +98,27 @@
     <canvas id="sagittal" width="512" height="512"></canvas>
   </div> -->
   <div style="width: 100%;display: flex;">
-    <div id="container" style="width: 100vh;height: 100vh; border: 1px solid rgb(116, 116, 116)"></div>
+    <div id="container" style="width:  600px;height:  600px; border: 1px solid rgb(116, 116, 116)"></div>
     <div id="container3D" style="width: 600px;height: 600px; border: 1px solid rgb(116, 116, 116)"></div>
   </div>
   <script src="./webvtk.js"></script>
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
   <script>
-
+    // 创建一个可以在整个body中拖拽移动的线条
+    class DragLine {
+      constructor(container, line, line2) {
+        this.container = container;
+        this.line = line;
+        this.line2 = line2;
+        this.isDragging = false;
+        this.startX = 0;
+        this.startY = 0;
+        this.currentX = 0;
+        this.currentY = 0;
+        this.offsetX = 0;
+        this.offsetY = 0;
+      }
+    }
     // 文件选择框的变化事件
     dicomFileInput.addEventListener("change", function (event) {
       let files = event.target.files;
@@ -156,6 +172,9 @@
     }
     function loadcolor(color) {
       pian.change3dColor(color)
+    }
+    function exportImg() {
+      pian.exportImg()
     }
   </script>
 </body>

@@ -13,7 +13,7 @@ import LoadImage from "./loadimage";
 import MPRRendering from "./rendingmpr";
 import vtkInteractorStyle from '@kitware/vtk.js/Rendering/Core/InteractorStyle';
 import vtkInteractorStyleImage from "@kitware/vtk.js/Interaction/Style/InteractorStyleImage";
-import { Demo3d, load3dColor } from "./3d";
+import { Demo3d, load3dColor, export3dImg } from "./3d";
 import { mat3, vec3 } from 'gl-matrix';
 import vtkMatrixBuilder from '@kitware/vtk.js/Common/Core/MatrixBuilder';
 import vtkMouseCameraTrackballPanManipulator from '@kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballPanManipulator';
@@ -24,7 +24,9 @@ export function change3dColor(color) {
   load3dColor(color)
 }
 
-
+export function exportImg() {
+  export3dImg()
+}
 
 function calculateB(a) {
   // 根据给定的数据点，使用分段线性回归进行近似
@@ -241,26 +243,26 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
       //   renderer.resetCameraClippingRange();
       //   obj.interactor.render();
       // }
-      // if (eventType == 3) {
-      //   const currentPosition = e.position;
-      //   const renderer = obj.renderer;
-      //   const camera = renderer.getActiveCamera();
-      //   const deltaY = currentPosition.y - previousPosition.y;
-      //   previousPosition = JSON.parse(JSON.stringify(currentPosition));
-      //   // 缩放相机
-      //   console.log(camera)
-      //   let scale = camera.getParallelScale()
-      //   console.log(camera.getPhysicalScale())
-      //   scale -= deltaY * 0.5
-      //   if (scale < 1) {
-      //     scale = 1
-      //   }
-      //   console.log(scale)
-      //   camera.setParallelScale(scale);
+      if (eventType == 3) {
+        //   const currentPosition = e.position;
+        //   const renderer = obj.renderer;
+        //   const camera = renderer.getActiveCamera();
+        //   const deltaY = currentPosition.y - previousPosition.y;
+        //   previousPosition = JSON.parse(JSON.stringify(currentPosition));
+        //   // 缩放相机
+        //   console.log(camera)
+        //   let scale = camera.getParallelScale()
+        //   console.log(camera.getPhysicalScale())
+        //   scale -= deltaY * 0.5
+        //   if (scale < 1) {
+        //     scale = 1
+        //   }
+        //   console.log(scale)
+        //   camera.setParallelScale(scale);
 
-      //   renderer.resetCameraClippingRange();
-      //   obj.interactor.render();
-      // }
+        //   renderer.resetCameraClippingRange();
+        //   obj.interactor.render();
+      }
 
       if (eventType == 4) {
         currentLine.setAttribute('x2', e.position.x / 1.8);
@@ -268,6 +270,9 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
       }
     })
     obj.interactor.onLeftButtonRelease((e) => {
+      // 输出camera
+      const camera = obj.renderer.getActiveCamera()
+      console.log(camera, camera.get())
       // 获取表示对象
       const imageData = obj.reslice.getOutputData()
       console.log(imageData.getDimensions(), imageData.getSpacing(), imageData.getBounds())

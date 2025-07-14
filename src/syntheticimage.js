@@ -273,8 +273,9 @@ class SyntheticImageData {
       Hitbit[`image_position`] = image_position;
       Hitbit[`slice_Thickness`] = slice_thickness[0];
       Hitbit[`window_l`] = window_center[0] - hitbit.dx;
-      // Hitbit[`window_l`] = window_center[0];
       Hitbit[`window_w`] = window_width[0]
+      // Hitbit[`window_l`] = -158
+      // Hitbit[`window_w`] = 3688
       Hit.push(Hitbit);
     });
 
