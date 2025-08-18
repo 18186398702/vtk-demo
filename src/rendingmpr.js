@@ -14,8 +14,11 @@ import { CaptureOn } from "@kitware/vtk.js/Widgets/Core/WidgetManager/Constants"
 import { SlabMode } from "@kitware/vtk.js/Imaging/Core/ImageReslice/Constants";
 import { xyzToViewType } from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants";
 import vtkInteractorStyleImage from '@kitware/vtk.js/Interaction/Style/InteractorStyleImage';
+import windowlevelStyle from "./windowlevelStyle";
 import vtkMouseCameraTrackballPanManipulator from '@kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballPanManipulator';
 import vtkInteractorStyleManipulator from '@kitware/vtk.js/Interaction/Style/InteractorStyleManipulator';
+import macro from "@kitware/vtk.js/macro";
+
 
 class MPRRendering {
   // 创建MPR渲染页面
@@ -60,8 +63,8 @@ class MPRRendering {
     window.widget = widget;
     const widgetState = widget.getWidgetState();
     console.log(widgetState)
-    widgetState.getStatesWithLabel("sphere").forEach((handle) => handle.setScale1(7));
-    widgetState.getStatesWithLabel("line").forEach((state) => state.setScale3(1.5, 1.5, 1));
+    widgetState.getStatesWithLabel("sphere").forEach((handle) => { handle.setScale1(10) });
+    widgetState.getStatesWithLabel("line").forEach((state) => { state.setScale3(2, 2, 1); state.setOpacity(128) });
 
     widgetState.getStatesWithLabel("line")[0].setColor3(46, 213, 115);
     widgetState.getStatesWithLabel("line")[1].setColor3(9, 132, 227);
@@ -145,7 +148,17 @@ class MPRRendering {
         // const ccc = a.newInstance();
         // console.log(ccc)
         // obj.interactor.setInteractorStyle(ccc);
-        obj.interactor.setInteractorStyle(vtkInteractorStyleImage.newInstance());
+        // 1. 创建自定义交互器
+        // 写一个带新 windowLevel 的扩展函数
+        // 1️⃣ 扩展函数
+
+        const windowlevel = windowlevelStyle.newInstance()
+        console.log('继承成功111', windowlevel);
+        // 3️⃣ 创建实例
+        const customStyle = vtkInteractorStyleImage.newInstance();
+
+        // 4️⃣ 使用
+        obj.interactor.setInteractorStyle(windowlevel);
         // const stl = vtkInteractorStyleManipulator.newInstance()
         // obj.interactor.setInteractorStyle(stl);
         // // 2. 添加自定义平移操纵器（左键拖动）
@@ -313,7 +326,9 @@ class MPRRendering {
         // 为滑块添加事件监听器，当滑块值发生改变时触发
         resetElements[i].addEventListener("click", () => {
           obj.renderer.resetCamera()
-          obj.renderer.getActiveCamera().setParallelScale(200); // 例如，将当前值减半
+          const image = obj.reslice.getOutputData()
+          const boundsX = image.getBounds()[1] > image.getBounds()[3] ? image.getBounds()[1] : image.getBounds()[3]
+          obj.renderer.getActiveCamera().setParallelScale(boundsX / 1.95);
           obj.interactor.render();
         })
         createdSliderElements[i].addEventListener("input", (ev) => {

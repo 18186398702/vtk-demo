@@ -8,10 +8,12 @@ import vtkColorTransferFunction from "@kitware/vtk.js/Rendering/Core/ColorTransf
 import vtkPiecewiseFunction from "@kitware/vtk.js/Common/DataModel/PiecewiseFunction";
 import vtkVolumeProperty from "@kitware/vtk.js/Rendering/Core/VolumeProperty";
 import colorPresets from './MedicalColorPresets.json';
+import vtkLight from 'vtk.js/Sources/Rendering/Core/Light';
 
 var renderWindow_3d = null;
 var volume_3d = null;
 var sr = null
+var renderer_3d = null;
 // 导出renderWindow_3d
 export function export3dImg() {
     renderWindow_3d.render();
@@ -27,24 +29,23 @@ export function export3dImg() {
     }, 'image/png');
 }
 
+export function change3DLightIntensity(value) {
+    console.log(value, parseFloat(value) / 10)
+    renderer_3d.getLights()[0].setIntensity(parseFloat(value) / 10)
+    renderWindow_3d.render();
+}
+
 export function Demo3d(source, divElement) {
     const renderMainBox = divElement;
     renderMainBox.innerHTML = "";
     renderMainBox.style.position = "relative";
 
     const fullScreenRenderer = vtkFullScreenRenderWindow.newInstance({
-        containerStyle: {     // WebGL2专属配置
-            antialias: false,
-            depth: true,
-            preserveDrawingBuffer: true,
-            premultipliedAlpha: false   // 避免透明度混合问题
-        },
-
         container: renderMainBox,
         background: [0, 0, 0],
     });
     sr = fullScreenRenderer;
-    const renderer = fullScreenRenderer.getRenderer();
+    renderer_3d = fullScreenRenderer.getRenderer();
     renderWindow_3d = fullScreenRenderer.getRenderWindow();
     volume_3d = vtkVolume.newInstance();
     const mapper = vtkVolumeMapper.newInstance();
@@ -66,8 +67,7 @@ export function Demo3d(source, divElement) {
     mapper.setVolumetricScatteringBlending(0.5);
     mapper.setVolumeShadowSamplingDistFactor(5.0);
 
-    const volProp = vtkVolumeProperty.newInstance();
-    volProp.setInterpolationTypeToLinear();
+
     volume_3d
         .getProperty()
         .setScalarOpacityUnitDistance(
@@ -75,7 +75,7 @@ export function Demo3d(source, divElement) {
             vtkBoundingBox.getDiagonalLength(source.getBounds()) /
             Math.max(...source.getDimensions())
         );
-    volProp.setGradientOpacityMinimumValue(0, 0);
+
     const dataArray =
         source.getPointData().getScalars() ||
         source.getPointData().getArrays()[0];
@@ -85,26 +85,33 @@ export function Demo3d(source, divElement) {
         .getProperty()
         .setGradientOpacityMaximumValue(
             0,
-            (dataRange[1] - dataRange[0]) * 0.05
+            (dataRange[1] - dataRange[0]) * 0.01
         );
+    const volProp = vtkVolumeProperty.newInstance();
+    // volProp.setInterpolationTypeToLinear();
     volProp.setShade(true);
-    volProp.setUseGradientOpacity(0, false);
+    volProp.setUseGradientOpacity(0, true);
     volProp.setGradientOpacityMinimumOpacity(0, 0.0);
     volProp.setGradientOpacityMaximumOpacity(0, 1.0);
-    // volProp.setAmbient(0.0);
-    volProp.setDiffuse(2.0);
-    volProp.setSpecular(0.0);
-    volProp.setSpecularPower(0.0);
-    volProp.setUseLabelOutline(false);
+    volProp.setAmbient(0.2);  // 环境光
+    volProp.setDiffuse(0.8);  // 漫反射光
+    volProp.setSpecular(0.3); // 高光
+    // volProp.setSpecularPower(8.0);
     // volProp.setLabelOutlineThickness(2);
+
     volume_3d.setProperty(volProp);
 
-    const cam = renderer.getActiveCamera();
+
+    const cam = renderer_3d.getActiveCamera();
     cam.setPosition(0, 0, 0);
     cam.setFocalPoint(1, 1, 0);
     cam.setViewUp(0, 0, 1);
-
-    renderer.addVolume(volume_3d);
+    const fixedLight = vtkLight.newInstance();
+    // fixedLight.setPosition(0, 0, -1);   // 固定在世界坐标
+    fixedLight.setIntensity(1.0);
+    renderer_3d.removeAllLights();
+    renderer_3d.addLight(fixedLight);
+    renderer_3d.addVolume(volume_3d);
     // const pf = vtkPiecewiseFunction.newInstance();
     // pf.addPoint(0, 0.0);
     // pf.addPoint(100, 0.0);
@@ -117,8 +124,8 @@ export function Demo3d(source, divElement) {
     // volume.getProperty().setRGBTransferFunction(0, ctf);
     load3dColor('CT-AAA');
 
-    renderer.resetCamera();
-    renderer.resetCameraClippingRange();
+    renderer_3d.resetCamera();
+    renderer_3d.resetCameraClippingRange();
     renderWindow_3d.render();
 }
 
@@ -138,12 +145,13 @@ export function load3dColor(presetName) {
 
     // 设置颜色点
     // 设置颜色点（每4个一组：值, R, G, B）
+    const gain = 1; // CTF / OTF 的灰度值 亮度 >1 变亮，<1 变暗
     for (let i = 0; i < preset.RGBPoints.length; i += 4) {
         ctf.addRGBPoint(
             preset.RGBPoints[i],
-            preset.RGBPoints[i + 1],
-            preset.RGBPoints[i + 2],
-            preset.RGBPoints[i + 3]
+            preset.RGBPoints[i + 1] * gain,
+            preset.RGBPoints[i + 2] * gain,
+            preset.RGBPoints[i + 3] * gain
         );
     }
 

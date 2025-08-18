@@ -257,7 +257,7 @@ class SyntheticImageData {
       //   data_b[pix_num] = hitbit.data[pix_num]-hitbit.min
       // }
       // hitbit.data = data_b
-      console.log("hitbit", dicomdata)
+      // console.log("hitbit", dicomdata)
       // 获取 DICOM 文件中的像素间距 (Pixel Spacing)
       var hitbit = this.h_b_obj_return_h_img(dicomdata)
       const pixel_spacing = dicomdata.tags["00280030"].value;

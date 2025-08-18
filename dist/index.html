@@ -74,24 +74,27 @@
 </head>
 
 <body>
-  <input type="file" id="dicomFileInput" webkitdirectory multiple="multiple" />
+  <input type="file" id="dicomFileInput" multiple="multiple" />
   <button onclick="ccc(1)">调窗</button>
   <button onclick="ccc(2)">平移</button>
   <button onclick="ccc(3)">缩放</button>
-  <button onclick="exportImg()">导出</button>
-  <select onchange="loadcolor(this.value)">
-    <option value="CT-AAA">CT-AAA</option>
-    <option value="CT-AAA2">CT-AAA2</option>
-    <option value="CT-Bone">CT-Bone</option>
-    <option value="CT-Bones">CT-Bones</option>
-    <option value="CT-Cardiac">CT-Cardiac</option>
-    <option value="CT-Cardiac2">CT-Cardiac2</option>
-    <option value="CT-Cardiac3">CT-Cardiac3</option>
-    <option value="CT-Chest-Contrast-Enhanced">CT-Chest-Contrast-Enhanced</option>
-    <option value="CT-Chest-Vessels">CT-Chest-Vessels</option>
-    <option value="CT-Coronary-Arteries">CT-Coronary-Arteries</option>
-    <option value="CT-Coronary-Arteries-2">CT-Coronary-Arteries-2</option>
-  </select>
+  <div style="float: right;">
+    <button onclick="exportImg()">导出</button>
+    <select onchange="loadcolor(this.value)">
+      <option value="CT-AAA">CT-AAA</option>
+      <option value="CT-AAA2">CT-AAA2</option>
+      <option value="CT-Bone">CT-Bone</option>
+      <option value="CT-Bones">CT-Bones</option>
+      <option value="CT-Cardiac">CT-Cardiac</option>
+      <option value="CT-Cardiac2">CT-Cardiac2</option>
+      <option value="CT-Cardiac3">CT-Cardiac3</option>
+      <option value="CT-Chest-Contrast-Enhanced">CT-Chest-Contrast-Enhanced</option>
+      <option value="CT-Chest-Vessels">CT-Chest-Vessels</option>
+      <option value="CT-Coronary-Arteries">CT-Coronary-Arteries</option>
+      <option value="CT-Coronary-Arteries-2">CT-Coronary-Arteries-2</option>
+    </select>
+    <input type="range" min="0" max="50" value="10" onchange="change3dLight(this.value)" />
+  </div>
   <!-- <div style="zoom:0.5" class="canvas-container">
     <canvas id="axial" width="512" height="512"></canvas>
     <canvas id="coronal" width="512" height="512"></canvas>
@@ -120,7 +123,7 @@
       }
     }
     // 文件选择框的变化事件
-    dicomFileInput.addEventListener("change", function (event) {
+    dicomFileInput.addEventListener("change", async function (event) {
       let files = event.target.files;
       // 用冒泡排序files
       // for (let i = 0; i < files.length; i++) {
@@ -137,7 +140,7 @@
       // }
       console.log(files);
       if (files.length > 0) {
-        const ArrayBuffer = pian.f_load_directory(files);
+        const ArrayBuffer = await pian.f_load_directory(files);
         console.log(ArrayBuffer);
         loadAndLogBuffer(ArrayBuffer);
       }
@@ -176,7 +179,9 @@
     function exportImg() {
       pian.exportImg()
     }
+    function change3dLight(value) {
+      pian.change3DLight(value)
+    }
   </script>
 </body>
-
 </html>

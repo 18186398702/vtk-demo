@@ -13,19 +13,23 @@ import LoadImage from "./loadimage";
 import MPRRendering from "./rendingmpr";
 import vtkInteractorStyle from '@kitware/vtk.js/Rendering/Core/InteractorStyle';
 import vtkInteractorStyleImage from "@kitware/vtk.js/Interaction/Style/InteractorStyleImage";
-import { Demo3d, load3dColor, export3dImg } from "./3d";
+import { Demo3d, load3dColor, export3dImg, change3DLightIntensity } from "./3d";
 import { mat3, vec3 } from 'gl-matrix';
 import vtkMatrixBuilder from '@kitware/vtk.js/Common/Core/MatrixBuilder';
 import vtkMouseCameraTrackballPanManipulator from '@kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballPanManipulator';
 import vtkMouseCameraTrackballZoomManipulator from '@kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballZoomManipulator';
 import vtkInteractorStyleManipulator from '@kitware/vtk.js/Interaction/Style/InteractorStyleManipulator';
-
+import windowlevelStyle from "./windowlevelStyle";
 export function change3dColor(color) {
   load3dColor(color)
 }
 
 export function exportImg() {
   export3dImg()
+}
+
+export function change3DLight(value) {
+  change3DLightIntensity(value)
 }
 
 function calculateB(a) {
@@ -63,7 +67,7 @@ export async function load(ArrayBuffer) {
   for (var i = 0; i < Object.keys(ArrayBuffer).length; i++) {
     const buffer = await ArrayBuffer[i]; // Resolve each promise
     if (buffer && buffer.byteLength > 0) {
-      console.log("arrayBuffer", buffer)
+      // console.log("arrayBuffer", buffer)
       arrayBuffer.push(buffer);
     }
   }
@@ -89,7 +93,7 @@ export function changeEvent(type) {
   switch (eventType) {
     case 1:
       viewObj.forEach(obj => {
-        obj.interactor.setInteractorStyle(vtkInteractorStyleImage.newInstance());
+        obj.interactor.setInteractorStyle(windowlevelStyle.newInstance());
       })
       break;
     case 2:
@@ -122,11 +126,7 @@ export function changeEvent(type) {
 
 }
 
-export function load3D(arrayBuffer, divElement) {
-  if (!arrayBuffer) {
-    // 检查输入是否有效
-    throw new Error("arrayBuffer 不能为空！");
-  }
+function dx处理(arrayBuffer) {
   for (let i = 0; i < arrayBuffer.length; i++) {
     if (arrayBuffer[i].h_img && arrayBuffer[i].h_img.dx != 0) {
       var arrayBuffer_temp = new Int16Array(arrayBuffer[i].h_img.data.length)
@@ -135,6 +135,14 @@ export function load3D(arrayBuffer, divElement) {
     }
   }
   arrayBuffer.sort((a, b) => a.image_position[2] - b.image_position[2])
+}
+
+export function load3D(arrayBuffer, divElement) {
+  if (!arrayBuffer) {
+    // 检查输入是否有效
+    throw new Error("arrayBuffer 不能为空！");
+  }
+  dx处理(arrayBuffer)
   console.log("arrayBuffer", arrayBuffer)
   const syntheticImageData = new SyntheticImageData();
   const { imageData, windowWidth, windowCenter } = syntheticImageData.ImageData(arrayBuffer)
@@ -160,10 +168,9 @@ export function loadMPR(arrayBuffer, divElement) {
     // 检查输入是否有效
     throw new Error("arrayBuffer 不能为空！");
   }
-  arrayBuffer.sort((a, b) => a.image_position[2] - b.image_position[2])
+  dx处理(arrayBuffer)
   const syntheticImageData = new SyntheticImageData();
   const { imageData, windowWidth, windowCenter } = syntheticImageData.ImageData(arrayBuffer)
-
   MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
 }
 
@@ -415,7 +422,9 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
       slider: obj.slider,
     });
     // 渲染当前视图
-    obj.renderer.getActiveCamera().setParallelScale(200);
+    const image = obj.reslice.getOutputData()
+    const boundsX = image.getBounds()[1] > image.getBounds()[3] ? image.getBounds()[1] : image.getBounds()[3]
+    obj.renderer.getActiveCamera().setParallelScale(boundsX / 1.95);
     obj.interactor.render();
 
   });
@@ -443,25 +452,32 @@ function setColorProperties(obj, windowWidth, windowCenter) {
   }
 }
 
-export function f_load_directory(selectFiles) {
-  let dicom_arraybuffer = [];
-  for (let i = 0; i < selectFiles.length; i++) {
-    let f = null
-    for (var file of selectFiles) {
-      if (file.name == i + 1) {
-        f = file
-      }
-    }
-    const readFileAsync = (f) =>
-      new Promise((resolve) => {
+export async function f_load_directory(selectFiles) {
+  const dicom_arraybuffer = [];
+
+  // 按文件名排序确保顺序
+  const sortedFiles = [...selectFiles].sort((a, b) =>
+    parseInt(a.name) - parseInt(b.name)
+  );
+
+  for (const file of sortedFiles) {
+    try {
+      const arrayBuffer = await new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = (evt) => resolve(evt.target.result);
-        reader.readAsArrayBuffer(f);
+        reader.onerror = (err) => reject(err);
+        reader.readAsArrayBuffer(file);
       });
-    dicom_arraybuffer.push(readFileAsync(f));
+      dicom_arraybuffer.push(arrayBuffer);
+    } catch (err) {
+      console.error(`读取文件 ${file.name} 失败:`, err);
+      // 可以选择继续处理其他文件或抛出错误
+    }
   }
+
   return dicom_arraybuffer;
 }
+
 
 /**
  * 屏幕坐标转换为世界坐标

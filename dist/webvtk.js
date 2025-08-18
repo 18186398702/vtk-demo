@@ -14968,7 +14968,7 @@ function extend(publicAPI, model) {
   _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.get(publicAPI, model, ['currentImageProperty']);
 
   // For more macro methods, see "Sources/macros.js"
-
+  console.log("publicAPI", publicAPI);
   // Object specific methods
   vtkInteractorStyleImage(publicAPI, model);
 }
@@ -14976,7 +14976,7 @@ function extend(publicAPI, model) {
 // ----------------------------------------------------------------------------
 
 const newInstance = _macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.newInstance(extend, 'vtkInteractorStyleImage');
-
+console.log("newInstance", newInstance);
 // ----------------------------------------------------------------------------
 
 var vtkInteractorStyleImage$1 = {
@@ -63956,6 +63956,134 @@ function generateState() {
 
 /***/ }),
 
+/***/ "./node_modules/@kitware/vtk.js/macro.js":
+/*!***********************************************!*\
+  !*** ./node_modules/@kitware/vtk.js/macro.js ***!
+  \***********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EVENT_ABORT: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.EVENT_ABORT),
+/* harmony export */   TYPED_ARRAYS: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.TYPED_ARRAYS),
+/* harmony export */   VOID: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.VOID),
+/* harmony export */   _capitalize: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__._capitalize),
+/* harmony export */   algo: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.algo),
+/* harmony export */   capitalize: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.capitalize),
+/* harmony export */   chain: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.chain),
+/* harmony export */   debounce: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.debounce),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
+/* harmony export */   event: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.event),
+/* harmony export */   formatBytesToProperUnit: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.formatBytesToProperUnit),
+/* harmony export */   formatNumbersWithThousandSeparator: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.formatNumbersWithThousandSeparator),
+/* harmony export */   get: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.get),
+/* harmony export */   getArray: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.getArray),
+/* harmony export */   isVtkObject: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.isVtkObject),
+/* harmony export */   keystore: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.keystore),
+/* harmony export */   measurePromiseExecution: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.measurePromiseExecution),
+/* harmony export */   moveToProtected: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.moveToProtected),
+/* harmony export */   newInstance: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.newInstance),
+/* harmony export */   newTypedArray: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.newTypedArray),
+/* harmony export */   newTypedArrayFrom: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.newTypedArrayFrom),
+/* harmony export */   normalizeWheel: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.normalizeWheel),
+/* harmony export */   obj: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.obj),
+/* harmony export */   proxy: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.proxy),
+/* harmony export */   proxyPropertyMapping: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.proxyPropertyMapping),
+/* harmony export */   proxyPropertyState: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.proxyPropertyState),
+/* harmony export */   set: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.set),
+/* harmony export */   setArray: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.setArray),
+/* harmony export */   setGet: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.setGet),
+/* harmony export */   setGetArray: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.setGetArray),
+/* harmony export */   setImmediateVTK: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.setImmediateVTK),
+/* harmony export */   setLoggerFunction: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.setLoggerFunction),
+/* harmony export */   throttle: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.throttle),
+/* harmony export */   traverseInstanceTree: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.traverseInstanceTree),
+/* harmony export */   uncapitalize: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.uncapitalize),
+/* harmony export */   vtkDebugMacro: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.vtkDebugMacro),
+/* harmony export */   vtkErrorMacro: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.vtkErrorMacro),
+/* harmony export */   vtkInfoMacro: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.vtkInfoMacro),
+/* harmony export */   vtkLogMacro: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.vtkLogMacro),
+/* harmony export */   vtkOnceErrorMacro: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.vtkOnceErrorMacro),
+/* harmony export */   vtkWarningMacro: () => (/* reexport safe */ _macros_js__WEBPACK_IMPORTED_MODULE_0__.vtkWarningMacro)
+/* harmony export */ });
+/* harmony import */ var _macros_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./macros.js */ "./node_modules/@kitware/vtk.js/macros.js");
+/**
+ * Macro shim to provide backwards compat with
+ * projects that still import from 'macro.js'
+ */
+
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_macros_js__WEBPACK_IMPORTED_MODULE_0__["default"]);
+
+
+/***/ }),
+
+/***/ "./node_modules/@kitware/vtk.js/macros.js":
+/*!************************************************!*\
+  !*** ./node_modules/@kitware/vtk.js/macros.js ***!
+  \************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EVENT_ABORT: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.G),
+/* harmony export */   TYPED_ARRAYS: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.T),
+/* harmony export */   VOID: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.V),
+/* harmony export */   _capitalize: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__._),
+/* harmony export */   algo: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.d),
+/* harmony export */   capitalize: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.q),
+/* harmony export */   chain: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.h),
+/* harmony export */   debounce: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.I),
+/* harmony export */   "default": () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.m),
+/* harmony export */   event: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.f),
+/* harmony export */   formatBytesToProperUnit: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.B),
+/* harmony export */   formatNumbersWithThousandSeparator: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.C),
+/* harmony export */   get: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.g),
+/* harmony export */   getArray: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.k),
+/* harmony export */   isVtkObject: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.H),
+/* harmony export */   keystore: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.K),
+/* harmony export */   measurePromiseExecution: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.E),
+/* harmony export */   moveToProtected: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.i),
+/* harmony export */   newInstance: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.n),
+/* harmony export */   newTypedArray: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.a),
+/* harmony export */   newTypedArrayFrom: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.b),
+/* harmony export */   normalizeWheel: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.M),
+/* harmony export */   obj: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.o),
+/* harmony export */   proxy: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.p),
+/* harmony export */   proxyPropertyMapping: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.j),
+/* harmony export */   proxyPropertyState: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.L),
+/* harmony export */   set: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.s),
+/* harmony export */   setArray: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.F),
+/* harmony export */   setGet: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.e),
+/* harmony export */   setGetArray: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.l),
+/* harmony export */   setImmediateVTK: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.D),
+/* harmony export */   setLoggerFunction: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.u),
+/* harmony export */   throttle: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.J),
+/* harmony export */   traverseInstanceTree: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.t),
+/* harmony export */   uncapitalize: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.A),
+/* harmony export */   vtkDebugMacro: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.y),
+/* harmony export */   vtkErrorMacro: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.r),
+/* harmony export */   vtkInfoMacro: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.x),
+/* harmony export */   vtkLogMacro: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.w),
+/* harmony export */   vtkOnceErrorMacro: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.z),
+/* harmony export */   vtkWarningMacro: () => (/* reexport safe */ _macros2_js__WEBPACK_IMPORTED_MODULE_3__.v)
+/* harmony export */ });
+/* harmony import */ var fast_deep_equal__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! fast-deep-equal */ "./node_modules/fast-deep-equal/index.js");
+/* harmony import */ var fast_deep_equal__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(fast_deep_equal__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _vtk_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./vtk.js */ "./node_modules/@kitware/vtk.js/vtk.js");
+/* harmony import */ var _Common_Core_ClassHierarchy_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Common/Core/ClassHierarchy.js */ "./node_modules/@kitware/vtk.js/Common/Core/ClassHierarchy.js");
+/* harmony import */ var _macros2_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./macros2.js */ "./node_modules/@kitware/vtk.js/macros2.js");
+
+
+
+
+
+
+/***/ }),
+
 /***/ "./node_modules/@kitware/vtk.js/macros2.js":
 /*!*************************************************!*\
   !*** ./node_modules/@kitware/vtk.js/macros2.js ***!
@@ -64032,7 +64160,7 @@ function getCurrentGlobalMTime() {
 /* eslint-disable no-prototype-builtins                                      */
 
 const fakeConsole = {};
-function noOp() {}
+function noOp() { }
 const consoleMethods = ['log', 'debug', 'info', 'warn', 'error', 'time', 'timeEnd', 'group', 'groupEnd'];
 consoleMethods.forEach(methodName => {
   fakeConsole[methodName] = noOp;
@@ -64939,6 +65067,7 @@ function event(publicAPI, model, eventName) {
 // ----------------------------------------------------------------------------
 
 function newInstance(extend, className) {
+  // console.log('newInstance', extend, className);
   const constructor = function () {
     let initialValues = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
     const model = {};
@@ -65805,6 +65934,7 @@ vtk.register = register;
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Demo3d: () => (/* binding */ Demo3d),
+/* harmony export */   change3DLightIntensity: () => (/* binding */ change3DLightIntensity),
 /* harmony export */   export3dImg: () => (/* binding */ export3dImg),
 /* harmony export */   load3dColor: () => (/* binding */ load3dColor)
 /* harmony export */ });
@@ -65817,6 +65947,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _kitware_vtk_js_Common_DataModel_PiecewiseFunction__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @kitware/vtk.js/Common/DataModel/PiecewiseFunction */ "./node_modules/@kitware/vtk.js/Common/DataModel/PiecewiseFunction.js");
 /* harmony import */ var _kitware_vtk_js_Rendering_Core_VolumeProperty__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/VolumeProperty */ "./node_modules/@kitware/vtk.js/Rendering/Core/VolumeProperty.js");
 /* harmony import */ var _MedicalColorPresets_json__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./MedicalColorPresets.json */ "./src/MedicalColorPresets.json");
+/* harmony import */ var vtk_js_Sources_Rendering_Core_Light__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! vtk.js/Sources/Rendering/Core/Light */ "./node_modules/vtk.js/Sources/Rendering/Core/Light/index.js");
+
 
 
 
@@ -65829,6 +65961,7 @@ __webpack_require__.r(__webpack_exports__);
 var renderWindow_3d = null;
 var volume_3d = null;
 var sr = null;
+var renderer_3d = null;
 // 导出renderWindow_3d
 function export3dImg() {
   renderWindow_3d.render();
@@ -65844,23 +65977,21 @@ function export3dImg() {
     URL.revokeObjectURL(url);
   }, 'image/png');
 }
+function change3DLightIntensity(value) {
+  console.log(value, parseFloat(value) / 10);
+  renderer_3d.getLights()[0].setIntensity(parseFloat(value) / 10);
+  renderWindow_3d.render();
+}
 function Demo3d(source, divElement) {
   const renderMainBox = divElement;
   renderMainBox.innerHTML = "";
   renderMainBox.style.position = "relative";
   const fullScreenRenderer = _kitware_vtk_js_Rendering_Misc_FullScreenRenderWindow__WEBPACK_IMPORTED_MODULE_3__["default"].newInstance({
-    containerStyle: {
-      // WebGL2专属配置
-      antialias: false,
-      depth: true,
-      preserveDrawingBuffer: true,
-      premultipliedAlpha: false // 避免透明度混合问题
-    },
     container: renderMainBox,
     background: [0, 0, 0]
   });
   sr = fullScreenRenderer;
-  const renderer = fullScreenRenderer.getRenderer();
+  renderer_3d = fullScreenRenderer.getRenderer();
   renderWindow_3d = fullScreenRenderer.getRenderWindow();
   volume_3d = _kitware_vtk_js_Rendering_Core_Volume__WEBPACK_IMPORTED_MODULE_1__["default"].newInstance();
   const mapper = _kitware_vtk_js_Rendering_Core_VolumeMapper__WEBPACK_IMPORTED_MODULE_2__["default"].newInstance();
@@ -65872,30 +66003,34 @@ function Demo3d(source, divElement) {
   mapper.setGlobalIlluminationReach(0.0);
   mapper.setVolumetricScatteringBlending(0.5);
   mapper.setVolumeShadowSamplingDistFactor(5.0);
-  const volProp = _kitware_vtk_js_Rendering_Core_VolumeProperty__WEBPACK_IMPORTED_MODULE_7__["default"].newInstance();
-  volProp.setInterpolationTypeToLinear();
   volume_3d.getProperty().setScalarOpacityUnitDistance(0, _kitware_vtk_js_Common_DataModel_BoundingBox__WEBPACK_IMPORTED_MODULE_4__["default"].getDiagonalLength(source.getBounds()) / Math.max(...source.getDimensions()));
-  volProp.setGradientOpacityMinimumValue(0, 0);
   const dataArray = source.getPointData().getScalars() || source.getPointData().getArrays()[0];
   const dataRange = dataArray.getRange();
   console.log(dataRange);
-  volume_3d.getProperty().setGradientOpacityMaximumValue(0, (dataRange[1] - dataRange[0]) * 0.05);
+  volume_3d.getProperty().setGradientOpacityMaximumValue(0, (dataRange[1] - dataRange[0]) * 0.01);
+  const volProp = _kitware_vtk_js_Rendering_Core_VolumeProperty__WEBPACK_IMPORTED_MODULE_7__["default"].newInstance();
+  // volProp.setInterpolationTypeToLinear();
   volProp.setShade(true);
-  volProp.setUseGradientOpacity(0, false);
+  volProp.setUseGradientOpacity(0, true);
   volProp.setGradientOpacityMinimumOpacity(0, 0.0);
   volProp.setGradientOpacityMaximumOpacity(0, 1.0);
-  // volProp.setAmbient(0.0);
-  volProp.setDiffuse(2.0);
-  volProp.setSpecular(0.0);
-  volProp.setSpecularPower(0.0);
-  volProp.setUseLabelOutline(false);
+  volProp.setAmbient(0.2); // 环境光
+  volProp.setDiffuse(0.8); // 漫反射光
+  volProp.setSpecular(0.3); // 高光
+  // volProp.setSpecularPower(8.0);
   // volProp.setLabelOutlineThickness(2);
+
   volume_3d.setProperty(volProp);
-  const cam = renderer.getActiveCamera();
+  const cam = renderer_3d.getActiveCamera();
   cam.setPosition(0, 0, 0);
   cam.setFocalPoint(1, 1, 0);
   cam.setViewUp(0, 0, 1);
-  renderer.addVolume(volume_3d);
+  const fixedLight = vtk_js_Sources_Rendering_Core_Light__WEBPACK_IMPORTED_MODULE_9__["default"].newInstance();
+  // fixedLight.setPosition(0, 0, -1);   // 固定在世界坐标
+  fixedLight.setIntensity(1.0);
+  renderer_3d.removeAllLights();
+  renderer_3d.addLight(fixedLight);
+  renderer_3d.addVolume(volume_3d);
   // const pf = vtkPiecewiseFunction.newInstance();
   // pf.addPoint(0, 0.0);
   // pf.addPoint(100, 0.0);
@@ -65907,8 +66042,8 @@ function Demo3d(source, divElement) {
 
   // volume.getProperty().setRGBTransferFunction(0, ctf);
   load3dColor('CT-AAA');
-  renderer.resetCamera();
-  renderer.resetCameraClippingRange();
+  renderer_3d.resetCamera();
+  renderer_3d.resetCameraClippingRange();
   renderWindow_3d.render();
 }
 
@@ -65927,8 +66062,9 @@ function load3dColor(presetName) {
 
   // 设置颜色点
   // 设置颜色点（每4个一组：值, R, G, B）
+  const gain = 1; // CTF / OTF 的灰度值 亮度 >1 变亮，<1 变暗
   for (let i = 0; i < preset.RGBPoints.length; i += 4) {
-    ctf.addRGBPoint(preset.RGBPoints[i], preset.RGBPoints[i + 1], preset.RGBPoints[i + 2], preset.RGBPoints[i + 3]);
+    ctf.addRGBPoint(preset.RGBPoints[i], preset.RGBPoints[i + 1] * gain, preset.RGBPoints[i + 2] * gain, preset.RGBPoints[i + 3] * gain);
   }
 
   // 设置透明度点（每两个一组：值, 透明度）
@@ -69139,8 +69275,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _kitware_vtk_js_Imaging_Core_ImageReslice_Constants__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @kitware/vtk.js/Imaging/Core/ImageReslice/Constants */ "./node_modules/@kitware/vtk.js/Imaging/Core/ImageReslice/Constants.js");
 /* harmony import */ var _kitware_vtk_js_Widgets_Widgets3D_ResliceCursorWidget_Constants__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants */ "./node_modules/@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants.js");
 /* harmony import */ var _kitware_vtk_js_Interaction_Style_InteractorStyleImage__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Style/InteractorStyleImage */ "./node_modules/@kitware/vtk.js/Interaction/Style/InteractorStyleImage.js");
-/* harmony import */ var _kitware_vtk_js_Interaction_Manipulators_MouseCameraTrackballPanManipulator__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballPanManipulator */ "./node_modules/@kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballPanManipulator.js");
-/* harmony import */ var _kitware_vtk_js_Interaction_Style_InteractorStyleManipulator__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Style/InteractorStyleManipulator */ "./node_modules/@kitware/vtk.js/Interaction/Style/InteractorStyleManipulator.js");
+/* harmony import */ var _windowlevelStyle__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./windowlevelStyle */ "./src/windowlevelStyle.js");
+/* harmony import */ var _kitware_vtk_js_Interaction_Manipulators_MouseCameraTrackballPanManipulator__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballPanManipulator */ "./node_modules/@kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballPanManipulator.js");
+/* harmony import */ var _kitware_vtk_js_Interaction_Style_InteractorStyleManipulator__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Style/InteractorStyleManipulator */ "./node_modules/@kitware/vtk.js/Interaction/Style/InteractorStyleManipulator.js");
+/* harmony import */ var _kitware_vtk_js_macro__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @kitware/vtk.js/macro */ "./node_modules/@kitware/vtk.js/macro.js");
+
+
 
 
 
@@ -69212,8 +69352,13 @@ class MPRRendering {
     window.widget = widget;
     const widgetState = widget.getWidgetState();
     console.log(widgetState);
-    widgetState.getStatesWithLabel("sphere").forEach(handle => handle.setScale1(7));
-    widgetState.getStatesWithLabel("line").forEach(state => state.setScale3(1.5, 1.5, 1));
+    widgetState.getStatesWithLabel("sphere").forEach(handle => {
+      handle.setScale1(10);
+    });
+    widgetState.getStatesWithLabel("line").forEach(state => {
+      state.setScale3(2, 2, 1);
+      state.setOpacity(128);
+    });
     widgetState.getStatesWithLabel("line")[0].setColor3(46, 213, 115);
     widgetState.getStatesWithLabel("line")[1].setColor3(9, 132, 227);
     widgetState.getStatesWithLabel("line")[2].setColor3(255, 71, 87);
@@ -69303,7 +69448,17 @@ class MPRRendering {
         // const ccc = a.newInstance();
         // console.log(ccc)
         // obj.interactor.setInteractorStyle(ccc);
-        obj.interactor.setInteractorStyle(_kitware_vtk_js_Interaction_Style_InteractorStyleImage__WEBPACK_IMPORTED_MODULE_15__["default"].newInstance());
+        // 1. 创建自定义交互器
+        // 写一个带新 windowLevel 的扩展函数
+        // 1️⃣ 扩展函数
+
+        const windowlevel = _windowlevelStyle__WEBPACK_IMPORTED_MODULE_16__["default"].newInstance();
+        console.log('继承成功111', windowlevel);
+        // 3️⃣ 创建实例
+        const customStyle = _kitware_vtk_js_Interaction_Style_InteractorStyleImage__WEBPACK_IMPORTED_MODULE_15__["default"].newInstance();
+
+        // 4️⃣ 使用
+        obj.interactor.setInteractorStyle(windowlevel);
         // const stl = vtkInteractorStyleManipulator.newInstance()
         // obj.interactor.setInteractorStyle(stl);
         // // 2. 添加自定义平移操纵器（左键拖动）
@@ -69470,7 +69625,9 @@ class MPRRendering {
         // 为滑块添加事件监听器，当滑块值发生改变时触发
         resetElements[i].addEventListener("click", () => {
           obj.renderer.resetCamera();
-          obj.renderer.getActiveCamera().setParallelScale(200); // 例如，将当前值减半
+          const image = obj.reslice.getOutputData();
+          const boundsX = image.getBounds()[1] > image.getBounds()[3] ? image.getBounds()[1] : image.getBounds()[3];
+          obj.renderer.getActiveCamera().setParallelScale(boundsX / 1.95);
           obj.interactor.render();
         });
         createdSliderElements[i].addEventListener("input", ev => {
@@ -69890,7 +70047,7 @@ class SyntheticImageData {
       //   data_b[pix_num] = hitbit.data[pix_num]-hitbit.min
       // }
       // hitbit.data = data_b
-      console.log("hitbit", dicomdata);
+      // console.log("hitbit", dicomdata)
       // 获取 DICOM 文件中的像素间距 (Pixel Spacing)
       var hitbit = this.h_b_obj_return_h_img(dicomdata);
       const pixel_spacing = dicomdata.tags["00280030"].value;
@@ -70226,6 +70383,114 @@ function getType(value) {
 //       description: "Window Width",
 //     },
 //   };
+
+/***/ }),
+
+/***/ "./src/windowlevelStyle.js":
+/*!*********************************!*\
+  !*** ./src/windowlevelStyle.js ***!
+  \*********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ windowlevelStyle$1),
+/* harmony export */   extend: () => (/* binding */ extend),
+/* harmony export */   newInstance: () => (/* binding */ newInstance)
+/* harmony export */ });
+/* harmony import */ var _kitware_vtk_js_macros2_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @kitware/vtk.js/macros2.js */ "./node_modules/@kitware/vtk.js/macros2.js");
+/* harmony import */ var _kitware_vtk_js_Interaction_Style_InteractorStyleImage__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Style/InteractorStyleImage */ "./node_modules/@kitware/vtk.js/Interaction/Style/InteractorStyleImage.js");
+
+// import { r as radiansFromDegrees } from '@kitware/vtk.js/Common/Core/Math/index.js';
+// import { States } from '@kitware/vtk.js/Rendering/Core/InteractorStyle/Constants.js';
+
+function windowlevelStyle(publicAPI, model) {
+  // Set our className
+  console.log('windowlevelStyle');
+  model.classHierarchy.push('windowlevelStyle');
+
+  // Public API methods
+  //----------------------------------------------------------------------------
+  publicAPI.windowLevel = (renderer, position) => {
+    model.windowLevelCurrentPosition[0] = position.x;
+    model.windowLevelCurrentPosition[1] = position.y;
+    const rwi = model._interactor;
+    if (model.currentImageProperty) {
+      const size = rwi.getView().getViewportSize(renderer);
+      const mWindow = model.windowLevelInitial[0];
+      const level = model.windowLevelInitial[1];
+
+      // Compute normalized delta
+      let dx = (model.windowLevelCurrentPosition[0] - model.windowLevelStartPosition[0]) * 4.0 / size[0];
+      let dy = (model.windowLevelStartPosition[1] - model.windowLevelCurrentPosition[1]) * 4.0 / size[1];
+
+      // Scale by current values
+      if (Math.abs(mWindow) > 0.01) {
+        dx *= mWindow * 0.3;
+      } else {
+        dx *= mWindow < 0 ? -0.01 : 0.01;
+      }
+      if (Math.abs(level) > 0.01) {
+        dy *= level * 0.3;
+      } else {
+        dy *= level < 0 ? -0.01 : 0.01;
+      }
+
+      // Abs so that direction does not flip
+      if (mWindow < 0.0) {
+        dx *= -1;
+      }
+      if (level < 0.0) {
+        dy *= -1;
+      }
+
+      // Compute new mWindow level
+      let newWindow = dx + mWindow;
+      const newLevel = level - dy;
+      if (newWindow < 0.01) {
+        newWindow = 0.01;
+      }
+      model.currentImageProperty.setColorWindow(newWindow);
+      model.currentImageProperty.setColorLevel(newLevel);
+    }
+  };
+}
+
+// ----------------------------------------------------------------------------
+// Object factory
+// ----------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------
+
+function extend(publicAPI, model) {
+  let initialValues = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+  // Object.assign(model, DEFAULT_VALUES, initialValues);
+
+  // Inheritance
+  _kitware_vtk_js_Interaction_Style_InteractorStyleImage__WEBPACK_IMPORTED_MODULE_1__["default"].extend(publicAPI, model, initialValues);
+
+  // Create get-set macros
+  // macro.setGet(publicAPI, model, ['interactionMode']);
+  // macro.get(publicAPI, model, ['currentImageProperty']);
+
+  // For more macro methods, see "Sources/macros.js"
+  console.log("publicAPI", publicAPI);
+  // Object specific methods
+  windowlevelStyle(publicAPI, model);
+}
+
+// ----------------------------------------------------------------------------
+
+const newInstance = _kitware_vtk_js_macros2_js__WEBPACK_IMPORTED_MODULE_0__.m.newInstance(extend, 'windowlevelStyle');
+console.log("newInstance", newInstance);
+// ----------------------------------------------------------------------------
+
+var windowlevelStyle$1 = {
+  newInstance,
+  extend
+};
+
 
 /***/ }),
 
@@ -77839,6 +78104,4672 @@ if ( true && module.exports) {
 
 /***/ }),
 
+/***/ "./node_modules/vtk.js/Sources/Common/Core/ClassHierarchy/index.js":
+/*!*************************************************************************!*\
+  !*** ./node_modules/vtk.js/Sources/Common/Core/ClassHierarchy/index.js ***!
+  \*************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ ClassHierarchy)
+/* harmony export */ });
+/* eslint-disable prefer-rest-params */
+class ClassHierarchy extends Array {
+  push() {
+    for (let i = 0; i < arguments.length; i++) {
+      if (!this.includes(arguments[i])) {
+        super.push(arguments[i]);
+      }
+    }
+
+    return this.length;
+  }
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/vtk.js/Sources/Common/Core/Math/Constants.js":
+/*!*******************************************************************!*\
+  !*** ./node_modules/vtk.js/Sources/Common/Core/Math/Constants.js ***!
+  \*******************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EPSILON: () => (/* binding */ EPSILON),
+/* harmony export */   IDENTITY: () => (/* binding */ IDENTITY),
+/* harmony export */   IDENTITY_3X3: () => (/* binding */ IDENTITY_3X3),
+/* harmony export */   VTK_SMALL_NUMBER: () => (/* binding */ VTK_SMALL_NUMBER),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+const IDENTITY = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+const IDENTITY_3X3 = [1, 0, 0, 0, 1, 0, 0, 0, 1];
+
+const EPSILON = 1e-6;
+const VTK_SMALL_NUMBER = 1.0e-12;
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  IDENTITY,
+  IDENTITY_3X3,
+  EPSILON,
+  VTK_SMALL_NUMBER,
+});
+
+
+/***/ }),
+
+/***/ "./node_modules/vtk.js/Sources/Common/Core/Math/index.js":
+/*!***************************************************************!*\
+  !*** ./node_modules/vtk.js/Sources/Common/Core/Math/index.js ***!
+  \***************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   LUFactor3x3: () => (/* binding */ LUFactor3x3),
+/* harmony export */   LUSolve3x3: () => (/* binding */ LUSolve3x3),
+/* harmony export */   Pi: () => (/* binding */ Pi),
+/* harmony export */   add: () => (/* binding */ add),
+/* harmony export */   angleBetweenVectors: () => (/* binding */ angleBetweenVectors),
+/* harmony export */   areBoundsInitialized: () => (/* binding */ areBoundsInitialized),
+/* harmony export */   areEquals: () => (/* binding */ areEquals),
+/* harmony export */   areMatricesEqual: () => (/* binding */ areMatricesEqual),
+/* harmony export */   arrayMax: () => (/* binding */ arrayMax),
+/* harmony export */   arrayMin: () => (/* binding */ arrayMin),
+/* harmony export */   arrayRange: () => (/* binding */ arrayRange),
+/* harmony export */   beginCombination: () => (/* binding */ beginCombination),
+/* harmony export */   binomial: () => (/* binding */ binomial),
+/* harmony export */   boundsIsWithinOtherBounds: () => (/* binding */ boundsIsWithinOtherBounds),
+/* harmony export */   ceil: () => (/* binding */ ceil),
+/* harmony export */   ceilLog2: () => (/* binding */ ceilLog2),
+/* harmony export */   clampAndNormalizeValue: () => (/* binding */ clampAndNormalizeValue),
+/* harmony export */   clampValue: () => (/* binding */ clampValue),
+/* harmony export */   clampVector: () => (/* binding */ clampVector),
+/* harmony export */   columnsToMat3: () => (/* binding */ columnsToMat3),
+/* harmony export */   columnsToMat4: () => (/* binding */ columnsToMat4),
+/* harmony export */   computeBoundsFromPoints: () => (/* binding */ computeBoundsFromPoints),
+/* harmony export */   createArray: () => (/* binding */ createArray),
+/* harmony export */   createUninitializedBounds: () => (/* binding */ createUninitializedBounds),
+/* harmony export */   cross: () => (/* binding */ cross),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
+/* harmony export */   degreesFromRadians: () => (/* binding */ degreesFromRadians),
+/* harmony export */   determinant2x2: () => (/* binding */ determinant2x2),
+/* harmony export */   determinant3x3: () => (/* binding */ determinant3x3),
+/* harmony export */   diagonalize3x3: () => (/* binding */ diagonalize3x3),
+/* harmony export */   distance2BetweenPoints: () => (/* binding */ distance2BetweenPoints),
+/* harmony export */   dot: () => (/* binding */ dot),
+/* harmony export */   dot2D: () => (/* binding */ dot2D),
+/* harmony export */   estimateMatrixCondition: () => (/* binding */ estimateMatrixCondition),
+/* harmony export */   extentIsWithinOtherExtent: () => (/* binding */ extentIsWithinOtherExtent),
+/* harmony export */   factorial: () => (/* binding */ factorial),
+/* harmony export */   float2CssRGBA: () => (/* binding */ float2CssRGBA),
+/* harmony export */   floatRGB2HexCode: () => (/* binding */ floatRGB2HexCode),
+/* harmony export */   floatToHex2: () => (/* binding */ floatToHex2),
+/* harmony export */   floor: () => (/* binding */ floor),
+/* harmony export */   gaussian: () => (/* binding */ gaussian),
+/* harmony export */   gaussianAmplitude: () => (/* binding */ gaussianAmplitude),
+/* harmony export */   gaussianWeight: () => (/* binding */ gaussianWeight),
+/* harmony export */   getAdjustedScalarRange: () => (/* binding */ getAdjustedScalarRange),
+/* harmony export */   getMajorAxisIndex: () => (/* binding */ getMajorAxisIndex),
+/* harmony export */   getScalarTypeFittingRange: () => (/* binding */ getScalarTypeFittingRange),
+/* harmony export */   getSeed: () => (/* binding */ getSeed),
+/* harmony export */   getSparseOrthogonalMatrix: () => (/* binding */ getSparseOrthogonalMatrix),
+/* harmony export */   hex2float: () => (/* binding */ hex2float),
+/* harmony export */   hsv2rgb: () => (/* binding */ hsv2rgb),
+/* harmony export */   identity: () => (/* binding */ identity),
+/* harmony export */   identity3x3: () => (/* binding */ identity3x3),
+/* harmony export */   inf: () => (/* binding */ inf),
+/* harmony export */   invert3x3: () => (/* binding */ invert3x3),
+/* harmony export */   invertMatrix: () => (/* binding */ invertMatrix),
+/* harmony export */   isFinite: () => (/* binding */ isFinite),
+/* harmony export */   isIdentity: () => (/* binding */ isIdentity),
+/* harmony export */   isIdentity3x3: () => (/* binding */ isIdentity3x3),
+/* harmony export */   isInf: () => (/* binding */ isInf),
+/* harmony export */   isNaN: () => (/* binding */ isNaN),
+/* harmony export */   isNan: () => (/* binding */ isNan),
+/* harmony export */   isPowerOfTwo: () => (/* binding */ isPowerOfTwo),
+/* harmony export */   jacobi: () => (/* binding */ jacobi),
+/* harmony export */   jacobiN: () => (/* binding */ jacobiN),
+/* harmony export */   lab2rgb: () => (/* binding */ lab2rgb),
+/* harmony export */   lab2xyz: () => (/* binding */ lab2xyz),
+/* harmony export */   ldexp: () => (/* binding */ ldexp),
+/* harmony export */   linearSolve3x3: () => (/* binding */ linearSolve3x3),
+/* harmony export */   luFactorLinearSystem: () => (/* binding */ luFactorLinearSystem),
+/* harmony export */   luSolveLinearSystem: () => (/* binding */ luSolveLinearSystem),
+/* harmony export */   matrix3x3ToQuaternion: () => (/* binding */ matrix3x3ToQuaternion),
+/* harmony export */   max: () => (/* binding */ max),
+/* harmony export */   min: () => (/* binding */ min),
+/* harmony export */   multiply3x3_mat3: () => (/* binding */ multiply3x3_mat3),
+/* harmony export */   multiply3x3_vect3: () => (/* binding */ multiply3x3_vect3),
+/* harmony export */   multiplyAccumulate: () => (/* binding */ multiplyAccumulate),
+/* harmony export */   multiplyAccumulate2D: () => (/* binding */ multiplyAccumulate2D),
+/* harmony export */   multiplyMatrix: () => (/* binding */ multiplyMatrix),
+/* harmony export */   multiplyQuaternion: () => (/* binding */ multiplyQuaternion),
+/* harmony export */   multiplyScalar: () => (/* binding */ multiplyScalar),
+/* harmony export */   multiplyScalar2D: () => (/* binding */ multiplyScalar2D),
+/* harmony export */   nearestPowerOfTwo: () => (/* binding */ nearestPowerOfTwo),
+/* harmony export */   negInf: () => (/* binding */ negInf),
+/* harmony export */   nextCombination: () => (/* binding */ nextCombination),
+/* harmony export */   norm: () => (/* binding */ norm),
+/* harmony export */   norm2D: () => (/* binding */ norm2D),
+/* harmony export */   normalize: () => (/* binding */ normalize),
+/* harmony export */   normalize2D: () => (/* binding */ normalize2D),
+/* harmony export */   orthogonalize3x3: () => (/* binding */ orthogonalize3x3),
+/* harmony export */   outer: () => (/* binding */ outer),
+/* harmony export */   outer2D: () => (/* binding */ outer2D),
+/* harmony export */   perpendiculars: () => (/* binding */ perpendiculars),
+/* harmony export */   pointIsWithinBounds: () => (/* binding */ pointIsWithinBounds),
+/* harmony export */   projectVector: () => (/* binding */ projectVector),
+/* harmony export */   projectVector2D: () => (/* binding */ projectVector2D),
+/* harmony export */   quaternionToMatrix3x3: () => (/* binding */ quaternionToMatrix3x3),
+/* harmony export */   radiansFromDegrees: () => (/* binding */ radiansFromDegrees),
+/* harmony export */   random: () => (/* binding */ random),
+/* harmony export */   randomSeed: () => (/* binding */ randomSeed),
+/* harmony export */   rgb2hsv: () => (/* binding */ rgb2hsv),
+/* harmony export */   rgb2lab: () => (/* binding */ rgb2lab),
+/* harmony export */   rgb2xyz: () => (/* binding */ rgb2xyz),
+/* harmony export */   round: () => (/* binding */ round),
+/* harmony export */   roundNumber: () => (/* binding */ roundNumber),
+/* harmony export */   roundVector: () => (/* binding */ roundVector),
+/* harmony export */   rowsToMat3: () => (/* binding */ rowsToMat3),
+/* harmony export */   rowsToMat4: () => (/* binding */ rowsToMat4),
+/* harmony export */   signedAngleBetweenVectors: () => (/* binding */ signedAngleBetweenVectors),
+/* harmony export */   singularValueDecomposition3x3: () => (/* binding */ singularValueDecomposition3x3),
+/* harmony export */   solve3PointCircle: () => (/* binding */ solve3PointCircle),
+/* harmony export */   solveHomogeneousLeastSquares: () => (/* binding */ solveHomogeneousLeastSquares),
+/* harmony export */   solveLeastSquares: () => (/* binding */ solveLeastSquares),
+/* harmony export */   solveLinearSystem: () => (/* binding */ solveLinearSystem),
+/* harmony export */   subtract: () => (/* binding */ subtract),
+/* harmony export */   transpose3x3: () => (/* binding */ transpose3x3),
+/* harmony export */   uninitializeBounds: () => (/* binding */ uninitializeBounds),
+/* harmony export */   xyz2lab: () => (/* binding */ xyz2lab),
+/* harmony export */   xyz2rgb: () => (/* binding */ xyz2rgb)
+/* harmony export */ });
+/* harmony import */ var seedrandom__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! seedrandom */ "./node_modules/seedrandom/index.js");
+/* harmony import */ var seedrandom__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(seedrandom__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var vtk_js_Sources_macros__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vtk.js/Sources/macros */ "./node_modules/vtk.js/Sources/macros.js");
+/* harmony import */ var vtk_js_Sources_Common_Core_Math_Constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! vtk.js/Sources/Common/Core/Math/Constants */ "./node_modules/vtk.js/Sources/Common/Core/Math/Constants.js");
+
+
+
+
+const { vtkErrorMacro, vtkWarningMacro } = vtk_js_Sources_macros__WEBPACK_IMPORTED_MODULE_1__["default"];
+
+// ----------------------------------------------------------------------------
+/* eslint-disable camelcase                                                  */
+/* eslint-disable no-cond-assign                                             */
+/* eslint-disable no-bitwise                                                 */
+/* eslint-disable no-multi-assign                                            */
+// ----------------------------------------------------------------------------
+let randomSeedValue = 0;
+const VTK_MAX_ROTATIONS = 20;
+
+function notImplemented(method) {
+  return () => vtkErrorMacro(`vtkMath::${method} - NOT IMPLEMENTED`);
+}
+
+// Swap rows for n by n matrix
+function swapRowsMatrix_nxn(matrix, n, row1, row2) {
+  let tmp;
+  for (let i = 0; i < n; i++) {
+    tmp = matrix[row1 * n + i];
+    matrix[row1 * n + i] = matrix[row2 * n + i];
+    matrix[row2 * n + i] = tmp;
+  }
+}
+
+// Swap columns for n by n matrix
+function swapColumnsMatrix_nxn(matrix, n, column1, column2) {
+  let tmp;
+  for (let i = 0; i < n; i++) {
+    tmp = matrix[i * n + column1];
+    matrix[i * n + column1] = matrix[i * n + column2];
+    matrix[i * n + column2] = tmp;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Global methods
+// ----------------------------------------------------------------------------
+
+function createArray(size = 3) {
+  // faster than Array.from and/or while loop
+  const res = Array(size);
+  for (let i = 0; i < size; ++i) {
+    res[i] = 0;
+  }
+  return res;
+}
+
+const Pi = () => Math.PI;
+
+function ldexp(x, exponent) {
+  if (exponent > 1023) {
+    return x * 2 ** 1023 * 2 ** (exponent - 1023);
+  }
+  if (exponent < -1074) {
+    return x * 2 ** -1074 * 2 ** (exponent + 1074);
+  }
+  return x * 2 ** exponent;
+}
+
+function radiansFromDegrees(deg) {
+  return (deg / 180) * Math.PI;
+}
+
+function degreesFromRadians(rad) {
+  return (rad * 180) / Math.PI;
+}
+
+const { round, floor, ceil, min, max } = Math;
+
+function arrayMin(arr, offset = 0, stride = 1) {
+  let minValue = Infinity;
+  for (let i = offset, len = arr.length; i < len; i += stride) {
+    if (arr[i] < minValue) {
+      minValue = arr[i];
+    }
+  }
+
+  return minValue;
+}
+
+function arrayMax(arr, offset = 0, stride = 1) {
+  let maxValue = -Infinity;
+  for (let i = offset, len = arr.length; i < len; i += stride) {
+    if (maxValue < arr[i]) {
+      maxValue = arr[i];
+    }
+  }
+
+  return maxValue;
+}
+
+function arrayRange(arr, offset = 0, stride = 1) {
+  let minValue = Infinity;
+  let maxValue = -Infinity;
+  for (let i = offset, len = arr.length; i < len; i += stride) {
+    if (arr[i] < minValue) {
+      minValue = arr[i];
+    }
+    if (maxValue < arr[i]) {
+      maxValue = arr[i];
+    }
+  }
+
+  return [minValue, maxValue];
+}
+
+const ceilLog2 = notImplemented('ceilLog2');
+const factorial = notImplemented('factorial');
+
+function nearestPowerOfTwo(xi) {
+  let v = 1;
+  while (v < xi) {
+    v *= 2;
+  }
+  return v;
+}
+
+function isPowerOfTwo(x) {
+  return x === nearestPowerOfTwo(x);
+}
+
+function binomial(m, n) {
+  let r = 1;
+  for (let i = 1; i <= n; ++i) {
+    r *= (m - i + 1) / i;
+  }
+  return Math.floor(r);
+}
+
+function beginCombination(m, n) {
+  if (m < n) {
+    return 0;
+  }
+
+  const r = createArray(n);
+  for (let i = 0; i < n; ++i) {
+    r[i] = i;
+  }
+  return r;
+}
+
+function nextCombination(m, n, r) {
+  let status = 0;
+  for (let i = n - 1; i >= 0; --i) {
+    if (r[i] < m - n + i) {
+      let j = r[i] + 1;
+      while (i < n) {
+        r[i++] = j++;
+      }
+      status = 1;
+      break;
+    }
+  }
+  return status;
+}
+
+function randomSeed(seed) {
+  seedrandom__WEBPACK_IMPORTED_MODULE_0___default()(`${seed}`, { global: true });
+  randomSeedValue = seed;
+}
+
+function getSeed() {
+  return randomSeedValue;
+}
+
+function random(minValue = 0, maxValue = 1) {
+  const delta = maxValue - minValue;
+  return minValue + delta * Math.random();
+}
+
+const gaussian = notImplemented('gaussian');
+
+// Vect3 operations
+function add(a, b, out) {
+  out[0] = a[0] + b[0];
+  out[1] = a[1] + b[1];
+  out[2] = a[2] + b[2];
+  return out;
+}
+
+function subtract(a, b, out) {
+  out[0] = a[0] - b[0];
+  out[1] = a[1] - b[1];
+  out[2] = a[2] - b[2];
+  return out;
+}
+
+function multiplyScalar(vec, scalar) {
+  vec[0] *= scalar;
+  vec[1] *= scalar;
+  vec[2] *= scalar;
+  return vec;
+}
+
+function multiplyScalar2D(vec, scalar) {
+  vec[0] *= scalar;
+  vec[1] *= scalar;
+  return vec;
+}
+
+function multiplyAccumulate(a, b, scalar, out) {
+  out[0] = a[0] + b[0] * scalar;
+  out[1] = a[1] + b[1] * scalar;
+  out[2] = a[2] + b[2] * scalar;
+  return out;
+}
+
+function multiplyAccumulate2D(a, b, scalar, out) {
+  out[0] = a[0] + b[0] * scalar;
+  out[1] = a[1] + b[1] * scalar;
+  return out;
+}
+
+function dot(x, y) {
+  return x[0] * y[0] + x[1] * y[1] + x[2] * y[2];
+}
+
+function outer(x, y, out_3x3) {
+  out_3x3[0] = x[0] * y[0];
+  out_3x3[1] = x[0] * y[1];
+  out_3x3[2] = x[0] * y[2];
+  out_3x3[3] = x[1] * y[0];
+  out_3x3[4] = x[1] * y[1];
+  out_3x3[5] = x[1] * y[2];
+  out_3x3[6] = x[2] * y[0];
+  out_3x3[7] = x[2] * y[1];
+  out_3x3[8] = x[2] * y[2];
+}
+
+function cross(x, y, out) {
+  const Zx = x[1] * y[2] - x[2] * y[1];
+  const Zy = x[2] * y[0] - x[0] * y[2];
+  const Zz = x[0] * y[1] - x[1] * y[0];
+  out[0] = Zx;
+  out[1] = Zy;
+  out[2] = Zz;
+  return out;
+}
+
+function norm(x, n = 3) {
+  switch (n) {
+    case 1:
+      return Math.abs(x);
+    case 2:
+      return Math.sqrt(x[0] * x[0] + x[1] * x[1]);
+    case 3:
+      return Math.sqrt(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]);
+    default: {
+      let sum = 0;
+      for (let i = 0; i < n; i++) {
+        sum += x[i] * x[i];
+      }
+      return Math.sqrt(sum);
+    }
+  }
+}
+
+function normalize(x) {
+  const den = norm(x);
+  if (den !== 0.0) {
+    x[0] /= den;
+    x[1] /= den;
+    x[2] /= den;
+  }
+  return den;
+}
+
+function perpendiculars(x, y, z, theta) {
+  const x2 = x[0] * x[0];
+  const y2 = x[1] * x[1];
+  const z2 = x[2] * x[2];
+  const r = Math.sqrt(x2 + y2 + z2);
+
+  let dx;
+  let dy;
+  let dz;
+
+  // transpose the vector to avoid divide-by-zero error
+  if (x2 > y2 && x2 > z2) {
+    dx = 0;
+    dy = 1;
+    dz = 2;
+  } else if (y2 > z2) {
+    dx = 1;
+    dy = 2;
+    dz = 0;
+  } else {
+    dx = 2;
+    dy = 0;
+    dz = 1;
+  }
+
+  const a = x[dx] / r;
+  const b = x[dy] / r;
+  const c = x[dz] / r;
+  const tmp = Math.sqrt(a * a + c * c);
+
+  if (theta !== 0) {
+    const sintheta = Math.sin(theta);
+    const costheta = Math.cos(theta);
+
+    if (y) {
+      y[dx] = (c * costheta - a * b * sintheta) / tmp;
+      y[dy] = sintheta * tmp;
+      y[dz] = (-(a * costheta) - b * c * sintheta) / tmp;
+    }
+
+    if (z) {
+      z[dx] = (-(c * sintheta) - a * b * costheta) / tmp;
+      z[dy] = costheta * tmp;
+      z[dz] = (a * sintheta - b * c * costheta) / tmp;
+    }
+  } else {
+    if (y) {
+      y[dx] = c / tmp;
+      y[dy] = 0;
+      y[dz] = -a / tmp;
+    }
+
+    if (z) {
+      z[dx] = (-a * b) / tmp;
+      z[dy] = tmp;
+      z[dz] = (-b * c) / tmp;
+    }
+  }
+}
+
+function projectVector(a, b, projection) {
+  const bSquared = dot(b, b);
+
+  if (bSquared === 0) {
+    projection[0] = 0;
+    projection[1] = 0;
+    projection[2] = 0;
+    return false;
+  }
+
+  const scale = dot(a, b) / bSquared;
+
+  for (let i = 0; i < 3; i++) {
+    projection[i] = b[i];
+  }
+  multiplyScalar(projection, scale);
+
+  return true;
+}
+
+function dot2D(x, y) {
+  return x[0] * y[0] + x[1] * y[1];
+}
+
+function projectVector2D(a, b, projection) {
+  const bSquared = dot2D(b, b);
+
+  if (bSquared === 0) {
+    projection[0] = 0;
+    projection[1] = 0;
+    return false;
+  }
+
+  const scale = dot2D(a, b) / bSquared;
+
+  for (let i = 0; i < 2; i++) {
+    projection[i] = b[i];
+  }
+  multiplyScalar2D(projection, scale);
+
+  return true;
+}
+
+function distance2BetweenPoints(x, y) {
+  return (
+    (x[0] - y[0]) * (x[0] - y[0]) +
+    (x[1] - y[1]) * (x[1] - y[1]) +
+    (x[2] - y[2]) * (x[2] - y[2])
+  );
+}
+
+function angleBetweenVectors(v1, v2) {
+  const crossVect = [0, 0, 0];
+  cross(v1, v2, crossVect);
+  return Math.atan2(norm(crossVect), dot(v1, v2));
+}
+
+function signedAngleBetweenVectors(v1, v2, vN) {
+  const crossVect = [0, 0, 0];
+  cross(v1, v2, crossVect);
+  const angle = Math.atan2(norm(crossVect), dot(v1, v2));
+  return dot(crossVect, vN) >= 0 ? angle : -angle;
+}
+
+function gaussianAmplitude(mean, variance, position) {
+  const distanceFromMean = Math.abs(mean - position);
+  return (
+    (1 / Math.sqrt(2 * Math.PI * variance)) *
+    Math.exp(-(distanceFromMean ** 2) / (2 * variance))
+  );
+}
+
+function gaussianWeight(mean, variance, position) {
+  const distanceFromMean = Math.abs(mean - position);
+  return Math.exp(-(distanceFromMean ** 2) / (2 * variance));
+}
+
+function outer2D(x, y, out_2x2) {
+  out_2x2[0] = x[0] * y[0];
+  out_2x2[1] = x[0] * y[1];
+  out_2x2[2] = x[1] * y[0];
+  out_2x2[3] = x[1] * y[1];
+}
+
+function norm2D(x2D) {
+  return Math.sqrt(x2D[0] * x2D[0] + x2D[1] * x2D[1]);
+}
+
+function normalize2D(x) {
+  const den = norm2D(x);
+  if (den !== 0.0) {
+    x[0] /= den;
+    x[1] /= den;
+  }
+  return den;
+}
+
+function rowsToMat4(row0, row1, row2, row3, mat) {
+  for (let i = 0; i < 4; i++) {
+    mat[i] = row0[i];
+    mat[4 + i] = row1[i];
+    mat[8 + i] = row2[i];
+    mat[12 + i] = row3[i];
+  }
+  return mat;
+}
+
+function columnsToMat4(column0, column1, column2, column3, mat) {
+  for (let i = 0; i < 4; i++) {
+    mat[4 * i] = column0[i];
+    mat[4 * i + 1] = column1[i];
+    mat[4 * i + 2] = column2[i];
+    mat[4 * i + 3] = column3[i];
+  }
+  return mat;
+}
+
+function rowsToMat3(row0, row1, row2, mat) {
+  for (let i = 0; i < 3; i++) {
+    mat[i] = row0[i];
+    mat[3 + i] = row1[i];
+    mat[6 + i] = row2[i];
+  }
+  return mat;
+}
+
+function columnsToMat3(column0, column1, column2, mat) {
+  for (let i = 0; i < 3; i++) {
+    mat[3 * i] = column0[i];
+    mat[3 * i + 1] = column1[i];
+    mat[3 * i + 2] = column2[i];
+  }
+  return mat;
+}
+
+function determinant2x2(...args) {
+  if (args.length === 2) {
+    return args[0][0] * args[1][1] - args[1][0] * args[0][1];
+  }
+  if (args.length === 4) {
+    return args[0] * args[3] - args[1] * args[2];
+  }
+  return Number.NaN;
+}
+
+function LUFactor3x3(mat_3x3, index_3) {
+  let maxI;
+  let tmp;
+  let largest;
+  const scale = [0, 0, 0];
+
+  // Loop over rows to get implicit scaling information
+  for (let i = 0; i < 3; i++) {
+    largest = Math.abs(mat_3x3[i * 3]);
+    if ((tmp = Math.abs(mat_3x3[i * 3 + 1])) > largest) {
+      largest = tmp;
+    }
+    if ((tmp = Math.abs(mat_3x3[i * 3 + 2])) > largest) {
+      largest = tmp;
+    }
+    scale[i] = 1 / largest;
+  }
+
+  // Loop over all columns using Crout's method
+
+  // first column
+  largest = scale[0] * Math.abs(mat_3x3[0]);
+  maxI = 0;
+  if ((tmp = scale[1] * Math.abs(mat_3x3[3])) >= largest) {
+    largest = tmp;
+    maxI = 1;
+  }
+  if ((tmp = scale[2] * Math.abs(mat_3x3[6])) >= largest) {
+    maxI = 2;
+  }
+  if (maxI !== 0) {
+    swapRowsMatrix_nxn(mat_3x3, 3, maxI, 0);
+    scale[maxI] = scale[0];
+  }
+  index_3[0] = maxI;
+
+  mat_3x3[3] /= mat_3x3[0];
+  mat_3x3[6] /= mat_3x3[0];
+
+  // second column
+  mat_3x3[4] -= mat_3x3[3] * mat_3x3[1];
+  mat_3x3[7] -= mat_3x3[6] * mat_3x3[1];
+  largest = scale[1] * Math.abs(mat_3x3[4]);
+  maxI = 1;
+  if ((tmp = scale[2] * Math.abs(mat_3x3[7])) >= largest) {
+    maxI = 2;
+    swapRowsMatrix_nxn(mat_3x3, 3, 1, 2);
+    scale[2] = scale[1];
+  }
+  index_3[1] = maxI;
+  mat_3x3[7] /= mat_3x3[4];
+
+  // third column
+  mat_3x3[5] -= mat_3x3[3] * mat_3x3[2];
+  mat_3x3[8] -= mat_3x3[6] * mat_3x3[2] + mat_3x3[7] * mat_3x3[5];
+  index_3[2] = 2;
+}
+
+function LUSolve3x3(mat_3x3, index_3, x_3) {
+  // forward substitution
+  let sum = x_3[index_3[0]];
+  x_3[index_3[0]] = x_3[0];
+  x_3[0] = sum;
+
+  sum = x_3[index_3[1]];
+  x_3[index_3[1]] = x_3[1];
+  x_3[1] = sum - mat_3x3[3] * x_3[0];
+
+  sum = x_3[index_3[2]];
+  x_3[index_3[2]] = x_3[2];
+  x_3[2] = sum - mat_3x3[6] * x_3[0] - mat_3x3[7] * x_3[1];
+
+  // back substitution
+  x_3[2] /= mat_3x3[8];
+  x_3[1] = (x_3[1] - mat_3x3[5] * x_3[2]) / mat_3x3[4];
+  x_3[0] = (x_3[0] - mat_3x3[1] * x_3[1] - mat_3x3[2] * x_3[2]) / mat_3x3[0];
+}
+
+function linearSolve3x3(mat_3x3, x_3, y_3) {
+  const a1 = mat_3x3[0];
+  const b1 = mat_3x3[1];
+  const c1 = mat_3x3[2];
+  const a2 = mat_3x3[3];
+  const b2 = mat_3x3[4];
+  const c2 = mat_3x3[5];
+  const a3 = mat_3x3[6];
+  const b3 = mat_3x3[7];
+  const c3 = mat_3x3[8];
+
+  // Compute the adjoint
+  const d1 = +determinant2x2(b2, b3, c2, c3);
+  const d2 = -determinant2x2(a2, a3, c2, c3);
+  const d3 = +determinant2x2(a2, a3, b2, b3);
+
+  const e1 = -determinant2x2(b1, b3, c1, c3);
+  const e2 = +determinant2x2(a1, a3, c1, c3);
+  const e3 = -determinant2x2(a1, a3, b1, b3);
+
+  const f1 = +determinant2x2(b1, b2, c1, c2);
+  const f2 = -determinant2x2(a1, a2, c1, c2);
+  const f3 = +determinant2x2(a1, a2, b1, b2);
+
+  // Compute the determinant
+  const det = a1 * d1 + b1 * d2 + c1 * d3;
+
+  // Multiply by the adjoint
+  const v1 = d1 * x_3[0] + e1 * x_3[1] + f1 * x_3[2];
+  const v2 = d2 * x_3[0] + e2 * x_3[1] + f2 * x_3[2];
+  const v3 = d3 * x_3[0] + e3 * x_3[1] + f3 * x_3[2];
+
+  // Divide by the determinant
+  y_3[0] = v1 / det;
+  y_3[1] = v2 / det;
+  y_3[2] = v3 / det;
+}
+
+function multiply3x3_vect3(mat_3x3, in_3, out_3) {
+  const x = mat_3x3[0] * in_3[0] + mat_3x3[1] * in_3[1] + mat_3x3[2] * in_3[2];
+  const y = mat_3x3[3] * in_3[0] + mat_3x3[4] * in_3[1] + mat_3x3[5] * in_3[2];
+  const z = mat_3x3[6] * in_3[0] + mat_3x3[7] * in_3[1] + mat_3x3[8] * in_3[2];
+
+  out_3[0] = x;
+  out_3[1] = y;
+  out_3[2] = z;
+}
+
+function multiply3x3_mat3(a_3x3, b_3x3, out_3x3) {
+  const copyA = [...a_3x3];
+  const copyB = [...b_3x3];
+  for (let i = 0; i < 3; i++) {
+    out_3x3[i] =
+      copyA[0] * copyB[i] + copyA[1] * copyB[i + 3] + copyA[2] * copyB[i + 6];
+    out_3x3[i + 3] =
+      copyA[3] * copyB[i] + copyA[4] * copyB[i + 3] + copyA[5] * copyB[i + 6];
+    out_3x3[i + 6] =
+      copyA[6] * copyB[i] + copyA[7] * copyB[i + 3] + copyA[8] * copyB[i + 6];
+  }
+}
+
+function multiplyMatrix(a, b, rowA, colA, rowB, colB, outRowAColB) {
+  // we need colA == rowB
+  if (colA !== rowB) {
+    vtkErrorMacro('Number of columns of A must match number of rows of B.');
+  }
+
+  // If a or b is used to store the result, copying them is required
+  const copyA = [...a];
+  const copyB = [...b];
+  // output matrix is rowA*colB
+  // output row
+  for (let i = 0; i < rowA; i++) {
+    // output col
+    for (let j = 0; j < colB; j++) {
+      outRowAColB[i * colB + j] = 0;
+      // sum for this point
+      for (let k = 0; k < colA; k++) {
+        outRowAColB[i * colB + j] += copyA[i * colA + k] * copyB[j + colB * k];
+      }
+    }
+  }
+}
+
+function transpose3x3(in_3x3, outT_3x3) {
+  let tmp;
+
+  // off-diagonal elements
+  tmp = in_3x3[3];
+  outT_3x3[3] = in_3x3[1];
+  outT_3x3[1] = tmp;
+  tmp = in_3x3[6];
+  outT_3x3[6] = in_3x3[2];
+  outT_3x3[2] = tmp;
+  tmp = in_3x3[7];
+  outT_3x3[7] = in_3x3[5];
+  outT_3x3[5] = tmp;
+
+  // on-diagonal elements
+  outT_3x3[0] = in_3x3[0];
+  outT_3x3[4] = in_3x3[4];
+  outT_3x3[8] = in_3x3[8];
+}
+
+function invert3x3(in_3x3, outI_3x3) {
+  const a1 = in_3x3[0];
+  const b1 = in_3x3[1];
+  const c1 = in_3x3[2];
+  const a2 = in_3x3[3];
+  const b2 = in_3x3[4];
+  const c2 = in_3x3[5];
+  const a3 = in_3x3[6];
+  const b3 = in_3x3[7];
+  const c3 = in_3x3[8];
+
+  // Compute the adjoint
+  const d1 = +determinant2x2(b2, b3, c2, c3);
+  const d2 = -determinant2x2(a2, a3, c2, c3);
+  const d3 = +determinant2x2(a2, a3, b2, b3);
+
+  const e1 = -determinant2x2(b1, b3, c1, c3);
+  const e2 = +determinant2x2(a1, a3, c1, c3);
+  const e3 = -determinant2x2(a1, a3, b1, b3);
+
+  const f1 = +determinant2x2(b1, b2, c1, c2);
+  const f2 = -determinant2x2(a1, a2, c1, c2);
+  const f3 = +determinant2x2(a1, a2, b1, b2);
+
+  // Divide by the determinant
+  const det = a1 * d1 + b1 * d2 + c1 * d3;
+  if (det === 0) {
+    vtkWarningMacro('Matrix has 0 determinant');
+  }
+
+  outI_3x3[0] = d1 / det;
+  outI_3x3[3] = d2 / det;
+  outI_3x3[6] = d3 / det;
+
+  outI_3x3[1] = e1 / det;
+  outI_3x3[4] = e2 / det;
+  outI_3x3[7] = e3 / det;
+
+  outI_3x3[2] = f1 / det;
+  outI_3x3[5] = f2 / det;
+  outI_3x3[8] = f3 / det;
+}
+
+function determinant3x3(mat_3x3) {
+  return (
+    mat_3x3[0] * mat_3x3[4] * mat_3x3[8] +
+    mat_3x3[3] * mat_3x3[7] * mat_3x3[2] +
+    mat_3x3[6] * mat_3x3[1] * mat_3x3[5] -
+    mat_3x3[0] * mat_3x3[7] * mat_3x3[5] -
+    mat_3x3[3] * mat_3x3[1] * mat_3x3[8] -
+    mat_3x3[6] * mat_3x3[4] * mat_3x3[2]
+  );
+}
+
+/**
+ * Returns true if elements of both arrays are equals.
+ * @param {Array} a an array of numbers (vector, point, matrix...)
+ * @param {Array} b an array of numbers (vector, point, matrix...)
+ * @param {Number} eps tolerance
+ */
+function areEquals(a, b, eps = vtk_js_Sources_Common_Core_Math_Constants__WEBPACK_IMPORTED_MODULE_2__.EPSILON) {
+  if (a.length !== b.length) {
+    return false;
+  }
+
+  function isEqual(element, index) {
+    return Math.abs(element - b[index]) <= eps;
+  }
+  return a.every(isEqual);
+}
+
+const areMatricesEqual = areEquals;
+
+function identity3x3(mat_3x3) {
+  for (let i = 0; i < 3; i++) {
+    /* eslint-disable-next-line no-multi-assign */
+    mat_3x3[i * 3] = mat_3x3[i * 3 + 1] = mat_3x3[i * 3 + 2] = 0;
+    mat_3x3[i * 3 + i] = 1;
+  }
+}
+
+function identity(n, mat) {
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      mat[i * n + j] = 0;
+    }
+    mat[i * n + i] = 1;
+  }
+  return mat;
+}
+
+function isIdentity(mat, eps = vtk_js_Sources_Common_Core_Math_Constants__WEBPACK_IMPORTED_MODULE_2__.EPSILON) {
+  return areMatricesEqual(mat, vtk_js_Sources_Common_Core_Math_Constants__WEBPACK_IMPORTED_MODULE_2__.IDENTITY, eps);
+}
+
+function isIdentity3x3(mat, eps = vtk_js_Sources_Common_Core_Math_Constants__WEBPACK_IMPORTED_MODULE_2__.EPSILON) {
+  return areMatricesEqual(mat, vtk_js_Sources_Common_Core_Math_Constants__WEBPACK_IMPORTED_MODULE_2__.IDENTITY_3X3, eps);
+}
+
+function quaternionToMatrix3x3(quat_4, mat_3x3) {
+  const ww = quat_4[0] * quat_4[0];
+  const wx = quat_4[0] * quat_4[1];
+  const wy = quat_4[0] * quat_4[2];
+  const wz = quat_4[0] * quat_4[3];
+
+  const xx = quat_4[1] * quat_4[1];
+  const yy = quat_4[2] * quat_4[2];
+  const zz = quat_4[3] * quat_4[3];
+
+  const xy = quat_4[1] * quat_4[2];
+  const xz = quat_4[1] * quat_4[3];
+  const yz = quat_4[2] * quat_4[3];
+
+  const rr = xx + yy + zz;
+  // normalization factor, just in case quaternion was not normalized
+  let f = 1 / (ww + rr);
+  const s = (ww - rr) * f;
+  f *= 2;
+
+  mat_3x3[0] = xx * f + s;
+  mat_3x3[3] = (xy + wz) * f;
+  mat_3x3[6] = (xz - wy) * f;
+
+  mat_3x3[1] = (xy - wz) * f;
+  mat_3x3[4] = yy * f + s;
+  mat_3x3[7] = (yz + wx) * f;
+
+  mat_3x3[2] = (xz + wy) * f;
+  mat_3x3[5] = (yz - wx) * f;
+  mat_3x3[8] = zz * f + s;
+}
+
+function roundNumber(num, digits = 0) {
+  if (!`${num}`.includes('e')) {
+    return +`${Math.round(`${num}e+${digits}`)}e-${digits}`;
+  }
+  const arr = `${num}`.split('e');
+  let sig = '';
+  if (+arr[1] + digits > 0) {
+    sig = '+';
+  }
+  return +`${Math.round(`${+arr[0]}e${sig}${+arr[1] + digits}`)}e-${digits}`;
+}
+
+function roundVector(vector, out = [0, 0, 0], digits = 0) {
+  out[0] = roundNumber(vector[0], digits);
+  out[1] = roundNumber(vector[1], digits);
+  out[2] = roundNumber(vector[2], digits);
+
+  return out;
+}
+
+function jacobiN(a, n, w, v) {
+  let i;
+  let j;
+  let k;
+  let iq;
+  let ip;
+  let numPos;
+  let tresh;
+  let theta;
+  let t;
+  let tau;
+  let sm;
+  let s;
+  let h;
+  let g;
+  let c;
+  let tmp;
+  const b = createArray(n);
+  const z = createArray(n);
+
+  const vtkROTATE = (aa, ii, jj) => {
+    g = aa[ii];
+    h = aa[jj];
+    aa[ii] = g - s * (h + g * tau);
+    aa[jj] = h + s * (g - h * tau);
+  };
+
+  // initialize
+  identity(n, v);
+  for (ip = 0; ip < n; ip++) {
+    b[ip] = w[ip] = a[ip + ip * n];
+    z[ip] = 0.0;
+  }
+
+  // begin rotation sequence
+  for (i = 0; i < VTK_MAX_ROTATIONS; i++) {
+    sm = 0.0;
+    for (ip = 0; ip < n - 1; ip++) {
+      for (iq = ip + 1; iq < n; iq++) {
+        sm += Math.abs(a[ip * n + iq]);
+      }
+    }
+    if (sm === 0.0) {
+      break;
+    }
+
+    // first 3 sweeps
+    if (i < 3) {
+      tresh = (0.2 * sm) / (n * n);
+    } else {
+      tresh = 0.0;
+    }
+
+    for (ip = 0; ip < n - 1; ip++) {
+      for (iq = ip + 1; iq < n; iq++) {
+        g = 100.0 * Math.abs(a[ip * n + iq]);
+
+        // after 4 sweeps
+        if (
+          i > 3 &&
+          Math.abs(w[ip]) + g === Math.abs(w[ip]) &&
+          Math.abs(w[iq]) + g === Math.abs(w[iq])
+        ) {
+          a[ip * n + iq] = 0.0;
+        } else if (Math.abs(a[ip * n + iq]) > tresh) {
+          h = w[iq] - w[ip];
+          if (Math.abs(h) + g === Math.abs(h)) {
+            t = a[ip * n + iq] / h;
+          } else {
+            theta = (0.5 * h) / a[ip * n + iq];
+            t = 1.0 / (Math.abs(theta) + Math.sqrt(1.0 + theta * theta));
+            if (theta < 0.0) {
+              t = -t;
+            }
+          }
+          c = 1.0 / Math.sqrt(1 + t * t);
+          s = t * c;
+          tau = s / (1.0 + c);
+          h = t * a[ip * n + iq];
+          z[ip] -= h;
+          z[iq] += h;
+          w[ip] -= h;
+          w[iq] += h;
+          a[ip * n + iq] = 0.0;
+
+          // ip already shifted left by 1 unit
+          for (j = 0; j <= ip - 1; j++) {
+            vtkROTATE(a, j * n + ip, j * n + iq);
+          }
+          // ip and iq already shifted left by 1 unit
+          for (j = ip + 1; j <= iq - 1; j++) {
+            vtkROTATE(a, ip * n + j, j * n + iq);
+          }
+          // iq already shifted left by 1 unit
+          for (j = iq + 1; j < n; j++) {
+            vtkROTATE(a, ip * n + j, iq * n + j);
+          }
+          for (j = 0; j < n; j++) {
+            vtkROTATE(v, j * n + ip, j * n + iq);
+          }
+        }
+      }
+    }
+
+    for (ip = 0; ip < n; ip++) {
+      b[ip] += z[ip];
+      w[ip] = b[ip];
+      z[ip] = 0.0;
+    }
+  }
+
+  // this is NEVER called
+  if (i >= VTK_MAX_ROTATIONS) {
+    vtkWarningMacro('vtkMath::Jacobi: Error extracting eigenfunctions');
+    return 0;
+  }
+
+  // sort eigenfunctions: these changes do not affect accuracy
+  for (j = 0; j < n - 1; j++) {
+    // boundary incorrect
+    k = j;
+    tmp = w[k];
+    for (i = j + 1; i < n; i++) {
+      // boundary incorrect, shifted already
+      if (w[i] >= tmp || Math.abs(w[i] - tmp) < vtk_js_Sources_Common_Core_Math_Constants__WEBPACK_IMPORTED_MODULE_2__.VTK_SMALL_NUMBER) {
+        // why exchange if same?
+        k = i;
+        tmp = w[k];
+      }
+    }
+    if (k !== j) {
+      w[k] = w[j];
+      w[j] = tmp;
+      swapColumnsMatrix_nxn(v, n, j, k);
+    }
+  }
+  // ensure eigenvector consistency (i.e., Jacobi can compute vectors that
+  // are negative of one another (.707,.707,0) and (-.707,-.707,0). This can
+  // reek havoc in hyperstreamline/other stuff. We will select the most
+  // positive eigenvector.
+  const ceil_half_n = (n >> 1) + (n & 1);
+
+  for (numPos = 0, i = 0; i < n * n; i++) {
+    if (v[i] >= 0.0) {
+      numPos++;
+    }
+  }
+  //    if ( numPos < ceil(double(n)/double(2.0)) )
+  if (numPos < ceil_half_n) {
+    for (i = 0; i < n; i++) {
+      v[i * n + j] *= -1.0;
+    }
+  }
+  return 1;
+}
+
+function matrix3x3ToQuaternion(mat_3x3, quat_4) {
+  const tmp = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+  // on-diagonal elements
+  tmp[0] = mat_3x3[0] + mat_3x3[4] + mat_3x3[8];
+  tmp[5] = mat_3x3[0] - mat_3x3[4] - mat_3x3[8];
+  tmp[10] = -mat_3x3[0] + mat_3x3[4] - mat_3x3[8];
+  tmp[15] = -mat_3x3[0] - mat_3x3[4] + mat_3x3[8];
+
+  // off-diagonal elements
+  tmp[1] = tmp[4] = mat_3x3[7] - mat_3x3[5];
+  tmp[2] = tmp[8] = mat_3x3[2] - mat_3x3[6];
+  tmp[3] = tmp[12] = mat_3x3[3] - mat_3x3[1];
+
+  tmp[6] = tmp[9] = mat_3x3[3] + mat_3x3[1];
+  tmp[7] = tmp[13] = mat_3x3[2] + mat_3x3[6];
+  tmp[11] = tmp[14] = mat_3x3[7] + mat_3x3[5];
+
+  const eigenvectors = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  const eigenvalues = [0, 0, 0, 0];
+
+  // convert into format that JacobiN can use,
+  // then use Jacobi to find eigenvalues and eigenvectors
+  // tmp is copied because jacobiN may modify it
+  const NTemp = [...tmp];
+  jacobiN(NTemp, 4, eigenvalues, eigenvectors);
+
+  // the first eigenvector is the one we want
+  quat_4[0] = eigenvectors[0];
+  quat_4[1] = eigenvectors[4];
+  quat_4[2] = eigenvectors[8];
+  quat_4[3] = eigenvectors[12];
+}
+
+function multiplyQuaternion(quat_1, quat_2, quat_out) {
+  const ww = quat_1[0] * quat_2[0];
+  const wx = quat_1[0] * quat_2[1];
+  const wy = quat_1[0] * quat_2[2];
+  const wz = quat_1[0] * quat_2[3];
+
+  const xw = quat_1[1] * quat_2[0];
+  const xx = quat_1[1] * quat_2[1];
+  const xy = quat_1[1] * quat_2[2];
+  const xz = quat_1[1] * quat_2[3];
+
+  const yw = quat_1[2] * quat_2[0];
+  const yx = quat_1[2] * quat_2[1];
+  const yy = quat_1[2] * quat_2[2];
+  const yz = quat_1[2] * quat_2[3];
+
+  const zw = quat_1[3] * quat_2[0];
+  const zx = quat_1[3] * quat_2[1];
+  const zy = quat_1[3] * quat_2[2];
+  const zz = quat_1[3] * quat_2[3];
+
+  quat_out[0] = ww - xx - yy - zz;
+  quat_out[1] = wx + xw + yz - zy;
+  quat_out[2] = wy - xz + yw + zx;
+  quat_out[3] = wz + xy - yx + zw;
+}
+
+function orthogonalize3x3(a_3x3, out_3x3) {
+  // copy the matrix
+  for (let i = 0; i < 9; i++) {
+    out_3x3[i] = a_3x3[i];
+  }
+
+  // Pivot the matrix to improve accuracy
+  const scale = createArray(3);
+  const index = createArray(3);
+  let largest;
+
+  // Loop over rows to get implicit scaling information
+  for (let i = 0; i < 3; i++) {
+    const x1 = Math.abs(out_3x3[i * 3]);
+    const x2 = Math.abs(out_3x3[i * 3 + 1]);
+    const x3 = Math.abs(out_3x3[i * 3 + 2]);
+    largest = x2 > x1 ? x2 : x1;
+    largest = x3 > largest ? x3 : largest;
+    scale[i] = 1;
+    if (largest !== 0) {
+      scale[i] /= largest;
+    }
+  }
+
+  // first column
+  const x1 = Math.abs(out_3x3[0]) * scale[0];
+  const x2 = Math.abs(out_3x3[3]) * scale[1];
+  const x3 = Math.abs(out_3x3[6]) * scale[2];
+  index[0] = 0;
+  largest = x1;
+  if (x2 >= largest) {
+    largest = x2;
+    index[0] = 1;
+  }
+  if (x3 >= largest) {
+    index[0] = 2;
+  }
+  if (index[0] !== 0) {
+    // swap vectors
+    swapColumnsMatrix_nxn(out_3x3, 3, index[0], 0);
+    scale[index[0]] = scale[0];
+  }
+
+  // second column
+  const y2 = Math.abs(out_3x3[4]) * scale[1];
+  const y3 = Math.abs(out_3x3[7]) * scale[2];
+  index[1] = 1;
+  largest = y2;
+  if (y3 >= largest) {
+    index[1] = 2;
+    // swap vectors
+    swapColumnsMatrix_nxn(out_3x3, 3, 1, 2);
+  }
+
+  // third column
+  index[2] = 2;
+
+  // A quaternion can only describe a pure rotation, not
+  // a rotation with a flip, therefore the flip must be
+  // removed before the matrix is converted to a quaternion.
+  let flip = 0;
+  if (determinant3x3(out_3x3) < 0) {
+    flip = 1;
+    for (let i = 0; i < 9; i++) {
+      out_3x3[i] = -out_3x3[i];
+    }
+  }
+
+  // Do orthogonalization using a quaternion intermediate
+  // (this, essentially, does the orthogonalization via
+  // diagonalization of an appropriately constructed symmetric
+  // 4x4 matrix rather than by doing SVD of the 3x3 matrix)
+  const quat = createArray(4);
+  matrix3x3ToQuaternion(out_3x3, quat);
+  quaternionToMatrix3x3(quat, out_3x3);
+
+  // Put the flip back into the orthogonalized matrix.
+  if (flip) {
+    for (let i = 0; i < 9; i++) {
+      out_3x3[i] = -out_3x3[i];
+    }
+  }
+
+  // Undo the pivoting
+  if (index[1] !== 1) {
+    swapColumnsMatrix_nxn(out_3x3, 3, index[1], 1);
+  }
+  if (index[0] !== 0) {
+    swapColumnsMatrix_nxn(out_3x3, 3, index[0], 0);
+  }
+}
+
+function diagonalize3x3(a_3x3, w_3, v_3x3) {
+  let i;
+  let j;
+  let k;
+  let maxI;
+  let tmp;
+  let maxVal;
+
+  // a is copied because jacobiN may modify it
+  const copyA = [...a_3x3];
+
+  // diagonalize using Jacobi
+  jacobiN(copyA, 3, w_3, v_3x3);
+
+  // if all the eigenvalues are the same, return identity matrix
+  if (w_3[0] === w_3[1] && w_3[0] === w_3[2]) {
+    identity3x3(v_3x3);
+    return;
+  }
+
+  // transpose temporarily, it makes it easier to sort the eigenvectors
+  transpose3x3(v_3x3, v_3x3);
+
+  // if two eigenvalues are the same, re-orthogonalize to optimally line
+  // up the eigenvectors with the x, y, and z axes
+  for (i = 0; i < 3; i++) {
+    // two eigenvalues are the same
+    if (w_3[(i + 1) % 3] === w_3[(i + 2) % 3]) {
+      // find maximum element of the independent eigenvector
+      maxVal = Math.abs(v_3x3[i * 3]);
+      maxI = 0;
+      for (j = 1; j < 3; j++) {
+        if (maxVal < (tmp = Math.abs(v_3x3[i * 3 + j]))) {
+          maxVal = tmp;
+          maxI = j;
+        }
+      }
+      // swap the eigenvector into its proper position
+      if (maxI !== i) {
+        tmp = w_3[maxI];
+        w_3[maxI] = w_3[i];
+        w_3[i] = tmp;
+        swapRowsMatrix_nxn(v_3x3, 3, i, maxI);
+      }
+      // maximum element of eigenvector should be positive
+      if (v_3x3[maxI * 3 + maxI] < 0) {
+        v_3x3[maxI * 3] = -v_3x3[maxI * 3];
+        v_3x3[maxI * 3 + 1] = -v_3x3[maxI * 3 + 1];
+        v_3x3[maxI * 3 + 2] = -v_3x3[maxI * 3 + 2];
+      }
+
+      // re-orthogonalize the other two eigenvectors
+      j = (maxI + 1) % 3;
+      k = (maxI + 2) % 3;
+
+      v_3x3[j * 3] = 0.0;
+      v_3x3[j * 3 + 1] = 0.0;
+      v_3x3[j * 3 + 2] = 0.0;
+      v_3x3[j * 3 + j] = 1.0;
+      const vectTmp1 = cross(
+        [v_3x3[maxI * 3], v_3x3[maxI * 3 + 1], v_3x3[maxI * 3 + 2]],
+        [v_3x3[j * 3], v_3x3[j * 3 + 1], v_3x3[j * 3 + 2]],
+        []
+      );
+      normalize(vectTmp1);
+      const vectTmp2 = cross(
+        vectTmp1,
+        [v_3x3[maxI * 3], v_3x3[maxI * 3 + 1], v_3x3[maxI * 3 + 2]],
+        []
+      );
+      for (let t = 0; t < 3; t++) {
+        v_3x3[k * 3 + t] = vectTmp1[t];
+        v_3x3[j * 3 + t] = vectTmp2[t];
+      }
+
+      // transpose vectors back to columns
+      transpose3x3(v_3x3, v_3x3);
+      return;
+    }
+  }
+
+  // the three eigenvalues are different, just sort the eigenvectors
+  // to align them with the x, y, and z axes
+
+  // find the vector with the largest x element, make that vector
+  // the first vector
+  maxVal = Math.abs(v_3x3[0]);
+  maxI = 0;
+  for (i = 1; i < 3; i++) {
+    if (maxVal < (tmp = Math.abs(v_3x3[i * 3]))) {
+      maxVal = tmp;
+      maxI = i;
+    }
+  }
+  // swap eigenvalue and eigenvector
+  if (maxI !== 0) {
+    const eigenValTmp = w_3[maxI];
+    w_3[maxI] = w_3[0];
+    w_3[0] = eigenValTmp;
+    swapRowsMatrix_nxn(v_3x3, 3, maxI, 0);
+  }
+  // do the same for the y element
+  if (Math.abs(v_3x3[4]) < Math.abs(v_3x3[7])) {
+    const eigenValTmp = w_3[2];
+    w_3[2] = w_3[1];
+    w_3[1] = eigenValTmp;
+    swapRowsMatrix_nxn(v_3x3, 3, 1, 2);
+  }
+
+  // ensure that the sign of the eigenvectors is correct
+  for (i = 0; i < 2; i++) {
+    if (v_3x3[i * 3 + i] < 0) {
+      v_3x3[i * 3] = -v_3x3[i * 3];
+      v_3x3[i * 3 + 1] = -v_3x3[i * 3 + 1];
+      v_3x3[i * 3 + 2] = -v_3x3[i * 3 + 2];
+    }
+  }
+  // set sign of final eigenvector to ensure that determinant is positive
+  if (determinant3x3(v_3x3) < 0) {
+    v_3x3[6] = -v_3x3[6];
+    v_3x3[7] = -v_3x3[7];
+    v_3x3[8] = -v_3x3[8];
+  }
+
+  // transpose the eigenvectors back again
+  transpose3x3(v_3x3, v_3x3);
+}
+
+function singularValueDecomposition3x3(a_3x3, u_3x3, w_3, vT_3x3) {
+  let i;
+  // copy so that A can be used for U or VT without risk
+  const B = [...a_3x3];
+
+  // temporarily flip if determinant is negative
+  const d = determinant3x3(B);
+  if (d < 0) {
+    for (i = 0; i < 9; i++) {
+      B[i] = -B[i];
+    }
+  }
+
+  // orthogonalize, diagonalize, etc.
+  orthogonalize3x3(B, u_3x3);
+  transpose3x3(B, B);
+  multiply3x3_mat3(B, u_3x3, vT_3x3);
+  diagonalize3x3(vT_3x3, w_3, vT_3x3);
+  multiply3x3_mat3(u_3x3, vT_3x3, u_3x3);
+  transpose3x3(vT_3x3, vT_3x3);
+
+  // re-create the flip
+  if (d < 0) {
+    w_3[0] = -w_3[0];
+    w_3[1] = -w_3[1];
+    w_3[2] = -w_3[2];
+  }
+}
+
+/**
+ * Factor linear equations Ax = b using LU decomposition A = LU. Output factorization LU is in matrix A.
+ * @param {Matrix} A square matrix
+ * @param {Number} index integer array of pivot indices index[0->n-1]
+ * @param {Number} size matrix size
+ */
+function luFactorLinearSystem(A, index, size) {
+  let i;
+  let j;
+  let k;
+  let largest;
+  let maxI = 0;
+  let sum;
+  let temp1;
+  let temp2;
+  const scale = createArray(size);
+
+  //
+  // Loop over rows to get implicit scaling information
+  //
+  for (i = 0; i < size; i++) {
+    for (largest = 0.0, j = 0; j < size; j++) {
+      if ((temp2 = Math.abs(A[i * size + j])) > largest) {
+        largest = temp2;
+      }
+    }
+
+    if (largest === 0.0) {
+      vtkWarningMacro('Unable to factor linear system');
+      return 0;
+    }
+    scale[i] = 1.0 / largest;
+  }
+  //
+  // Loop over all columns using Crout's method
+  //
+  for (j = 0; j < size; j++) {
+    for (i = 0; i < j; i++) {
+      sum = A[i * size + j];
+      for (k = 0; k < i; k++) {
+        sum -= A[i * size + k] * A[k * size + j];
+      }
+      A[i * size + j] = sum;
+    }
+    //
+    // Begin search for largest pivot element
+    //
+    for (largest = 0.0, i = j; i < size; i++) {
+      sum = A[i * size + j];
+      for (k = 0; k < j; k++) {
+        sum -= A[i * size + k] * A[k * size + j];
+      }
+      A[i * size + j] = sum;
+
+      if ((temp1 = scale[i] * Math.abs(sum)) >= largest) {
+        largest = temp1;
+        maxI = i;
+      }
+    }
+    //
+    // Check for row interchange
+    //
+    if (j !== maxI) {
+      for (k = 0; k < size; k++) {
+        temp1 = A[maxI * size + k];
+        A[maxI * size + k] = A[j * size + k];
+        A[j * size + k] = temp1;
+      }
+      scale[maxI] = scale[j];
+    }
+    //
+    // Divide by pivot element and perform elimination
+    //
+    index[j] = maxI;
+
+    if (Math.abs(A[j * size + j]) <= vtk_js_Sources_Common_Core_Math_Constants__WEBPACK_IMPORTED_MODULE_2__.VTK_SMALL_NUMBER) {
+      vtkWarningMacro('Unable to factor linear system');
+      return 0;
+    }
+
+    if (j !== size - 1) {
+      temp1 = 1.0 / A[j * size + j];
+      for (i = j + 1; i < size; i++) {
+        A[i * size + j] *= temp1;
+      }
+    }
+  }
+  return 1;
+}
+
+function luSolveLinearSystem(A, index, x, size) {
+  let i;
+  let j;
+  let ii;
+  let idx;
+  let sum;
+  //
+  // Proceed with forward and backsubstitution for L and U
+  // matrices.  First, forward substitution.
+  //
+  for (ii = -1, i = 0; i < size; i++) {
+    idx = index[i];
+    sum = x[idx];
+    x[idx] = x[i];
+
+    if (ii >= 0) {
+      for (j = ii; j <= i - 1; j++) {
+        sum -= A[i * size + j] * x[j];
+      }
+    } else if (sum !== 0.0) {
+      ii = i;
+    }
+
+    x[i] = sum;
+  }
+  //
+  // Now, back substitution
+  //
+  for (i = size - 1; i >= 0; i--) {
+    sum = x[i];
+    for (j = i + 1; j < size; j++) {
+      sum -= A[i * size + j] * x[j];
+    }
+    x[i] = sum / A[i * size + i];
+  }
+}
+
+function solveLinearSystem(A, x, size) {
+  // if we solving something simple, just solve it
+  if (size === 2) {
+    const y = createArray(2);
+    const det = determinant2x2(A[0], A[1], A[2], A[3]);
+
+    if (det === 0.0) {
+      // Unable to solve linear system
+      return 0;
+    }
+
+    y[0] = (A[3] * x[0] - A[1] * x[1]) / det;
+    y[1] = (-(A[2] * x[0]) + A[0] * x[1]) / det;
+
+    x[0] = y[0];
+    x[1] = y[1];
+    return 1;
+  }
+
+  if (size === 1) {
+    if (A[0] === 0.0) {
+      // Unable to solve linear system
+      return 0;
+    }
+
+    x[0] /= A[0];
+    return 1;
+  }
+
+  //
+  // System of equations is not trivial, use Crout's method
+  //
+
+  // Check on allocation of working vectors
+  const index = createArray(size);
+
+  // Factor and solve matrix
+  if (luFactorLinearSystem(A, index, size) === 0) {
+    return 0;
+  }
+  luSolveLinearSystem(A, index, x, size);
+
+  return 1;
+}
+
+// Note that A is modified during the inversion !
+function invertMatrix(A, AI, size, index = null, column = null) {
+  const tmp1Size = index || createArray(size);
+  const tmp2Size = column || createArray(size);
+
+  // Factor matrix; then begin solving for inverse one column at a time.
+  // Note: tmp1Size returned value is used later, tmp2Size is just working
+  // memory whose values are not used in LUSolveLinearSystem
+  if (luFactorLinearSystem(A, tmp1Size, size, tmp2Size) === 0) {
+    return null;
+  }
+
+  for (let j = 0; j < size; j++) {
+    for (let i = 0; i < size; i++) {
+      tmp2Size[i] = 0.0;
+    }
+    tmp2Size[j] = 1.0;
+
+    luSolveLinearSystem(A, tmp1Size, tmp2Size, size);
+
+    for (let i = 0; i < size; i++) {
+      AI[i * size + j] = tmp2Size[i];
+    }
+  }
+
+  return AI;
+}
+
+function estimateMatrixCondition(A, size) {
+  let minValue = +Number.MAX_VALUE;
+  let maxValue = -Number.MAX_VALUE;
+
+  // find the maximum value
+  for (let i = 0; i < size; i++) {
+    for (let j = i; j < size; j++) {
+      if (Math.abs(A[i * size + j]) > maxValue) {
+        maxValue = Math.abs(A[i * size + j]);
+      }
+    }
+  }
+
+  // find the minimum diagonal value
+  for (let i = 0; i < size; i++) {
+    if (Math.abs(A[i * size + i]) < minValue) {
+      minValue = Math.abs(A[i * size + i]);
+    }
+  }
+
+  if (minValue === 0.0) {
+    return Number.MAX_VALUE;
+  }
+  return maxValue / minValue;
+}
+
+function jacobi(a_3x3, w, v) {
+  return jacobiN(a_3x3, 3, w, v);
+}
+
+function solveHomogeneousLeastSquares(numberOfSamples, xt, xOrder, mt) {
+  // check dimensional consistency
+  if (numberOfSamples < xOrder) {
+    vtkWarningMacro('Insufficient number of samples. Underdetermined.');
+    return 0;
+  }
+
+  let i;
+  let j;
+  let k;
+
+  // set up intermediate variables
+  // Allocate matrix to hold X times transpose of X
+  const XXt = createArray(xOrder * xOrder); // size x by x
+  // Allocate the array of eigenvalues and eigenvectors
+  const eigenvals = createArray(xOrder);
+  const eigenvecs = createArray(xOrder * xOrder);
+
+  // Calculate XXt upper half only, due to symmetry
+  for (k = 0; k < numberOfSamples; k++) {
+    for (i = 0; i < xOrder; i++) {
+      for (j = i; j < xOrder; j++) {
+        XXt[i * xOrder + j] += xt[k * xOrder + i] * xt[k * xOrder + j];
+      }
+    }
+  }
+
+  // now fill in the lower half of the XXt matrix
+  for (i = 0; i < xOrder; i++) {
+    for (j = 0; j < i; j++) {
+      XXt[i * xOrder + j] = XXt[j * xOrder + i];
+    }
+  }
+
+  // Compute the eigenvectors and eigenvalues
+  jacobiN(XXt, xOrder, eigenvals, eigenvecs);
+
+  // Smallest eigenval is at the end of the list (xOrder-1), and solution is
+  // corresponding eigenvec.
+  for (i = 0; i < xOrder; i++) {
+    mt[i] = eigenvecs[i * xOrder + xOrder - 1];
+  }
+
+  return 1;
+}
+
+function solveLeastSquares(
+  numberOfSamples,
+  xt,
+  xOrder,
+  yt,
+  yOrder,
+  mt,
+  checkHomogeneous = true
+) {
+  // check dimensional consistency
+  if (numberOfSamples < xOrder || numberOfSamples < yOrder) {
+    vtkWarningMacro('Insufficient number of samples. Underdetermined.');
+    return 0;
+  }
+
+  const homogenFlags = createArray(yOrder);
+  let allHomogeneous = 1;
+  let hmt;
+  let homogRC = 0;
+  let i;
+  let j;
+  let k;
+  let someHomogeneous = 0;
+
+  // Ok, first init some flags check and see if all the systems are homogeneous
+  if (checkHomogeneous) {
+    // If Y' is zero, it's a homogeneous system and can't be solved via
+    // the pseudoinverse method. Detect this case, warn the user, and
+    // invoke SolveHomogeneousLeastSquares instead. Note that it doesn't
+    // really make much sense for yOrder to be greater than one in this case,
+    // since that's just yOrder occurrences of a 0 vector on the RHS, but
+    // we allow it anyway. N
+
+    // Initialize homogeneous flags on a per-right-hand-side basis
+    for (j = 0; j < yOrder; j++) {
+      homogenFlags[j] = 1;
+    }
+    for (i = 0; i < numberOfSamples; i++) {
+      for (j = 0; j < yOrder; j++) {
+        if (Math.abs(yt[i * yOrder + j]) > vtk_js_Sources_Common_Core_Math_Constants__WEBPACK_IMPORTED_MODULE_2__.VTK_SMALL_NUMBER) {
+          allHomogeneous = 0;
+          homogenFlags[j] = 0;
+        }
+      }
+    }
+
+    // If we've got one system, and it's homogeneous, do it and bail out quickly.
+    if (allHomogeneous && yOrder === 1) {
+      vtkWarningMacro(
+        'Detected homogeneous system (Y=0), calling SolveHomogeneousLeastSquares()'
+      );
+      return solveHomogeneousLeastSquares(numberOfSamples, xt, xOrder, mt);
+    }
+
+    // Ok, we've got more than one system of equations.
+    // Figure out if we need to calculate the homogeneous equation solution for
+    // any of them.
+    if (allHomogeneous) {
+      someHomogeneous = 1;
+    } else {
+      for (j = 0; j < yOrder; j++) {
+        if (homogenFlags[j]) {
+          someHomogeneous = 1;
+        }
+      }
+    }
+  }
+
+  // If necessary, solve the homogeneous problem
+  if (someHomogeneous) {
+    // hmt is the homogeneous equation version of mt, the general solution.
+    // hmt should be xOrder x yOrder, but since we are solving only the homogeneous part, here it is xOrder x 1
+    hmt = createArray(xOrder);
+
+    // Ok, solve the homogeneous problem
+    homogRC = solveHomogeneousLeastSquares(numberOfSamples, xt, xOrder, hmt);
+  }
+
+  // set up intermediate variables
+  const XXt = createArray(xOrder * xOrder); // size x by x
+  const XXtI = createArray(xOrder * xOrder); // size x by x
+  const XYt = createArray(xOrder * yOrder); // size x by y
+
+  // first find the pseudoinverse matrix
+  for (k = 0; k < numberOfSamples; k++) {
+    for (i = 0; i < xOrder; i++) {
+      // first calculate the XXt matrix, only do the upper half (symmetrical)
+      for (j = i; j < xOrder; j++) {
+        XXt[i * xOrder + j] += xt[k * xOrder + i] * xt[k * xOrder + j];
+      }
+
+      // now calculate the XYt matrix
+      for (j = 0; j < yOrder; j++) {
+        XYt[i * yOrder + j] += xt[k * xOrder + i] * yt[k * yOrder + j];
+      }
+    }
+  }
+
+  // now fill in the lower half of the XXt matrix
+  for (i = 0; i < xOrder; i++) {
+    for (j = 0; j < i; j++) {
+      XXt[i * xOrder + j] = XXt[j * xOrder + i];
+    }
+  }
+
+  const successFlag = invertMatrix(XXt, XXtI, xOrder);
+
+  // next get the inverse of XXt
+  if (successFlag) {
+    for (i = 0; i < xOrder; i++) {
+      for (j = 0; j < yOrder; j++) {
+        mt[i * yOrder + j] = 0.0;
+        for (k = 0; k < xOrder; k++) {
+          mt[i * yOrder + j] += XXtI[i * xOrder + k] * XYt[k * yOrder + j];
+        }
+      }
+    }
+  }
+
+  // Fix up any of the solutions that correspond to the homogeneous equation
+  // problem.
+  if (someHomogeneous) {
+    for (j = 0; j < yOrder; j++) {
+      if (homogenFlags[j]) {
+        // Fix this one
+        for (i = 0; i < xOrder; i++) {
+          mt[i * yOrder + j] = hmt[i * yOrder];
+        }
+      }
+    }
+  }
+
+  if (someHomogeneous) {
+    return homogRC && successFlag;
+  }
+
+  return successFlag;
+}
+
+function hex2float(hexStr, outFloatArray = [0, 0.5, 1]) {
+  switch (hexStr.length) {
+    case 3: // abc => #aabbcc
+      outFloatArray[0] = (parseInt(hexStr[0], 16) * 17) / 255;
+      outFloatArray[1] = (parseInt(hexStr[1], 16) * 17) / 255;
+      outFloatArray[2] = (parseInt(hexStr[2], 16) * 17) / 255;
+      return outFloatArray;
+    case 4: // #abc => #aabbcc
+      outFloatArray[0] = (parseInt(hexStr[1], 16) * 17) / 255;
+      outFloatArray[1] = (parseInt(hexStr[2], 16) * 17) / 255;
+      outFloatArray[2] = (parseInt(hexStr[3], 16) * 17) / 255;
+      return outFloatArray;
+    case 6: // ab01df => #ab01df
+      outFloatArray[0] = parseInt(hexStr.substr(0, 2), 16) / 255;
+      outFloatArray[1] = parseInt(hexStr.substr(2, 2), 16) / 255;
+      outFloatArray[2] = parseInt(hexStr.substr(4, 2), 16) / 255;
+      return outFloatArray;
+    case 7: // #ab01df
+      outFloatArray[0] = parseInt(hexStr.substr(1, 2), 16) / 255;
+      outFloatArray[1] = parseInt(hexStr.substr(3, 2), 16) / 255;
+      outFloatArray[2] = parseInt(hexStr.substr(5, 2), 16) / 255;
+      return outFloatArray;
+    case 9: // #ab01df00
+      outFloatArray[0] = parseInt(hexStr.substr(1, 2), 16) / 255;
+      outFloatArray[1] = parseInt(hexStr.substr(3, 2), 16) / 255;
+      outFloatArray[2] = parseInt(hexStr.substr(5, 2), 16) / 255;
+      outFloatArray[3] = parseInt(hexStr.substr(7, 2), 16) / 255;
+      return outFloatArray;
+    default:
+      return outFloatArray;
+  }
+}
+
+function rgb2hsv(rgb, hsv) {
+  let h;
+  let s;
+  const [r, g, b] = rgb;
+  const onethird = 1.0 / 3.0;
+  const onesixth = 1.0 / 6.0;
+  const twothird = 2.0 / 3.0;
+
+  let cmax = r;
+  let cmin = r;
+
+  if (g > cmax) {
+    cmax = g;
+  } else if (g < cmin) {
+    cmin = g;
+  }
+  if (b > cmax) {
+    cmax = b;
+  } else if (b < cmin) {
+    cmin = b;
+  }
+  const v = cmax;
+
+  if (v > 0.0) {
+    s = (cmax - cmin) / cmax;
+  } else {
+    s = 0.0;
+  }
+  if (s > 0) {
+    if (r === cmax) {
+      h = (onesixth * (g - b)) / (cmax - cmin);
+    } else if (g === cmax) {
+      h = onethird + (onesixth * (b - r)) / (cmax - cmin);
+    } else {
+      h = twothird + (onesixth * (r - g)) / (cmax - cmin);
+    }
+    if (h < 0.0) {
+      h += 1.0;
+    }
+  } else {
+    h = 0.0;
+  }
+
+  // Set the values back to the array
+  hsv[0] = h;
+  hsv[1] = s;
+  hsv[2] = v;
+}
+
+function hsv2rgb(hsv, rgb) {
+  const [h, s, v] = hsv;
+  const onethird = 1.0 / 3.0;
+  const onesixth = 1.0 / 6.0;
+  const twothird = 2.0 / 3.0;
+  const fivesixth = 5.0 / 6.0;
+  let r;
+  let g;
+  let b;
+
+  // compute RGB from HSV
+  if (h > onesixth && h <= onethird) {
+    // green/red
+    g = 1.0;
+    r = (onethird - h) / onesixth;
+    b = 0.0;
+  } else if (h > onethird && h <= 0.5) {
+    // green/blue
+    g = 1.0;
+    b = (h - onethird) / onesixth;
+    r = 0.0;
+  } else if (h > 0.5 && h <= twothird) {
+    // blue/green
+    b = 1.0;
+    g = (twothird - h) / onesixth;
+    r = 0.0;
+  } else if (h > twothird && h <= fivesixth) {
+    // blue/red
+    b = 1.0;
+    r = (h - twothird) / onesixth;
+    g = 0.0;
+  } else if (h > fivesixth && h <= 1.0) {
+    // red/blue
+    r = 1.0;
+    b = (1.0 - h) / onesixth;
+    g = 0.0;
+  } else {
+    // red/green
+    r = 1.0;
+    g = h / onesixth;
+    b = 0.0;
+  }
+
+  // add Saturation to the equation.
+  r = s * r + (1.0 - s);
+  g = s * g + (1.0 - s);
+  b = s * b + (1.0 - s);
+
+  r *= v;
+  g *= v;
+  b *= v;
+
+  // Assign back to the array
+  rgb[0] = r;
+  rgb[1] = g;
+  rgb[2] = b;
+}
+
+function lab2xyz(lab, xyz) {
+  // LAB to XYZ
+  const [L, a, b] = lab;
+  let var_Y = (L + 16) / 116;
+  let var_X = a / 500 + var_Y;
+  let var_Z = var_Y - b / 200;
+
+  if (var_Y ** 3 > 0.008856) {
+    var_Y **= 3;
+  } else {
+    var_Y = (var_Y - 16.0 / 116.0) / 7.787;
+  }
+
+  if (var_X ** 3 > 0.008856) {
+    var_X **= 3;
+  } else {
+    var_X = (var_X - 16.0 / 116.0) / 7.787;
+  }
+
+  if (var_Z ** 3 > 0.008856) {
+    var_Z **= 3;
+  } else {
+    var_Z = (var_Z - 16.0 / 116.0) / 7.787;
+  }
+  const ref_X = 0.9505;
+  const ref_Y = 1.0;
+  const ref_Z = 1.089;
+  xyz[0] = ref_X * var_X; // ref_X = 0.9505  Observer= 2 deg Illuminant= D65
+  xyz[1] = ref_Y * var_Y; // ref_Y = 1.000
+  xyz[2] = ref_Z * var_Z; // ref_Z = 1.089
+}
+
+function xyz2lab(xyz, lab) {
+  const [x, y, z] = xyz;
+  const ref_X = 0.9505;
+  const ref_Y = 1.0;
+  const ref_Z = 1.089;
+  let var_X = x / ref_X; // ref_X = 0.9505  Observer= 2 deg, Illuminant= D65
+  let var_Y = y / ref_Y; // ref_Y = 1.000
+  let var_Z = z / ref_Z; // ref_Z = 1.089
+
+  if (var_X > 0.008856) var_X **= 1.0 / 3.0;
+  else var_X = 7.787 * var_X + 16.0 / 116.0;
+  if (var_Y > 0.008856) var_Y **= 1.0 / 3.0;
+  else var_Y = 7.787 * var_Y + 16.0 / 116.0;
+  if (var_Z > 0.008856) var_Z **= 1.0 / 3.0;
+  else var_Z = 7.787 * var_Z + 16.0 / 116.0;
+
+  lab[0] = 116 * var_Y - 16;
+  lab[1] = 500 * (var_X - var_Y);
+  lab[2] = 200 * (var_Y - var_Z);
+}
+
+function xyz2rgb(xyz, rgb) {
+  const [x, y, z] = xyz;
+  let r = x * 3.2406 + y * -1.5372 + z * -0.4986;
+  let g = x * -0.9689 + y * 1.8758 + z * 0.0415;
+  let b = x * 0.0557 + y * -0.204 + z * 1.057;
+
+  // The following performs a "gamma correction" specified by the sRGB color
+  // space.  sRGB is defined by a canonical definition of a display monitor and
+  // has been standardized by the International Electrotechnical Commission (IEC
+  // 61966-2-1).  The nonlinearity of the correction is designed to make the
+  // colors more perceptually uniform.  This color space has been adopted by
+  // several applications including Adobe Photoshop and Microsoft Windows color
+  // management.  OpenGL is agnostic on its RGB color space, but it is reasonable
+  // to assume it is close to this one.
+  if (r > 0.0031308) r = 1.055 * r ** (1 / 2.4) - 0.055;
+  else r *= 12.92;
+  if (g > 0.0031308) g = 1.055 * g ** (1 / 2.4) - 0.055;
+  else g *= 12.92;
+  if (b > 0.0031308) b = 1.055 * b ** (1 / 2.4) - 0.055;
+  else b *= 12.92;
+
+  // Clip colors. ideally we would do something that is perceptually closest
+  // (since we can see colors outside of the display gamut), but this seems to
+  // work well enough.
+  let maxVal = r;
+  if (maxVal < g) maxVal = g;
+  if (maxVal < b) maxVal = b;
+  if (maxVal > 1.0) {
+    r /= maxVal;
+    g /= maxVal;
+    b /= maxVal;
+  }
+  if (r < 0) r = 0;
+  if (g < 0) g = 0;
+  if (b < 0) b = 0;
+
+  // Push values back to array
+  rgb[0] = r;
+  rgb[1] = g;
+  rgb[2] = b;
+}
+
+function rgb2xyz(rgb, xyz) {
+  let [r, g, b] = rgb;
+  // The following performs a "gamma correction" specified by the sRGB color
+  // space.  sRGB is defined by a canonical definition of a display monitor and
+  // has been standardized by the International Electrotechnical Commission (IEC
+  // 61966-2-1).  The nonlinearity of the correction is designed to make the
+  // colors more perceptually uniform.  This color space has been adopted by
+  // several applications including Adobe Photoshop and Microsoft Windows color
+  // management.  OpenGL is agnostic on its RGB color space, but it is reasonable
+  // to assume it is close to this one.
+  if (r > 0.04045) r = ((r + 0.055) / 1.055) ** 2.4;
+  else r /= 12.92;
+  if (g > 0.04045) g = ((g + 0.055) / 1.055) ** 2.4;
+  else g /= 12.92;
+  if (b > 0.04045) b = ((b + 0.055) / 1.055) ** 2.4;
+  else b /= 12.92;
+
+  // Observer. = 2 deg, Illuminant = D65
+  xyz[0] = r * 0.4124 + g * 0.3576 + b * 0.1805;
+  xyz[1] = r * 0.2126 + g * 0.7152 + b * 0.0722;
+  xyz[2] = r * 0.0193 + g * 0.1192 + b * 0.9505;
+}
+
+function rgb2lab(rgb, lab) {
+  const xyz = [0, 0, 0];
+  rgb2xyz(rgb, xyz);
+  xyz2lab(xyz, lab);
+}
+
+function lab2rgb(lab, rgb) {
+  const xyz = [0, 0, 0];
+  lab2xyz(lab, xyz);
+  xyz2rgb(xyz, rgb);
+}
+
+function uninitializeBounds(bounds) {
+  bounds[0] = 1.0;
+  bounds[1] = -1.0;
+  bounds[2] = 1.0;
+  bounds[3] = -1.0;
+  bounds[4] = 1.0;
+  bounds[5] = -1.0;
+  return bounds;
+}
+
+function areBoundsInitialized(bounds) {
+  return !(bounds[1] - bounds[0] < 0.0);
+}
+
+/**
+ * @deprecated please use vtkBoundingBox.addPoints(vtkBoundingBox.reset([]), points)
+ */
+function computeBoundsFromPoints(point1, point2, bounds) {
+  bounds[0] = Math.min(point1[0], point2[0]);
+  bounds[1] = Math.max(point1[0], point2[0]);
+  bounds[2] = Math.min(point1[1], point2[1]);
+  bounds[3] = Math.max(point1[1], point2[1]);
+  bounds[4] = Math.min(point1[2], point2[2]);
+  bounds[5] = Math.max(point1[2], point2[2]);
+  return bounds;
+}
+
+function clampValue(value, minValue, maxValue) {
+  if (value < minValue) {
+    return minValue;
+  }
+  if (value > maxValue) {
+    return maxValue;
+  }
+  return value;
+}
+
+function clampVector(vector, minVector, maxVector, out = [0, 0, 0]) {
+  out[0] = clampValue(vector[0], minVector[0], maxVector[0]);
+  out[1] = clampValue(vector[1], minVector[1], maxVector[1]);
+  out[2] = clampValue(vector[2], minVector[2], maxVector[2]);
+
+  return out;
+}
+
+function clampAndNormalizeValue(value, range) {
+  let result = 0;
+  if (range[0] !== range[1]) {
+    // clamp
+    if (value < range[0]) {
+      result = range[0];
+    } else if (value > range[1]) {
+      result = range[1];
+    } else {
+      result = value;
+    }
+    // normalize
+    result = (result - range[0]) / (range[1] - range[0]);
+  }
+
+  return result;
+}
+
+const getScalarTypeFittingRange = notImplemented(
+  'GetScalarTypeFittingRange'
+);
+const getAdjustedScalarRange = notImplemented('GetAdjustedScalarRange');
+
+function extentIsWithinOtherExtent(extent1, extent2) {
+  if (!extent1 || !extent2) {
+    return 0;
+  }
+
+  for (let i = 0; i < 6; i += 2) {
+    if (
+      extent1[i] < extent2[i] ||
+      extent1[i] > extent2[i + 1] ||
+      extent1[i + 1] < extent2[i] ||
+      extent1[i + 1] > extent2[i + 1]
+    ) {
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+function boundsIsWithinOtherBounds(bounds1_6, bounds2_6, delta_3) {
+  if (!bounds1_6 || !bounds2_6) {
+    return 0;
+  }
+  for (let i = 0; i < 6; i += 2) {
+    if (
+      bounds1_6[i] + delta_3[i / 2] < bounds2_6[i] ||
+      bounds1_6[i] - delta_3[i / 2] > bounds2_6[i + 1] ||
+      bounds1_6[i + 1] + delta_3[i / 2] < bounds2_6[i] ||
+      bounds1_6[i + 1] - delta_3[i / 2] > bounds2_6[i + 1]
+    ) {
+      return 0;
+    }
+  }
+  return 1;
+}
+
+function pointIsWithinBounds(point_3, bounds_6, delta_3) {
+  if (!point_3 || !bounds_6 || !delta_3) {
+    return 0;
+  }
+  for (let i = 0; i < 3; i++) {
+    if (
+      point_3[i] + delta_3[i] < bounds_6[2 * i] ||
+      point_3[i] - delta_3[i] > bounds_6[2 * i + 1]
+    ) {
+      return 0;
+    }
+  }
+  return 1;
+}
+
+function solve3PointCircle(p1, p2, p3, center) {
+  const v21 = createArray(3);
+  const v32 = createArray(3);
+  const v13 = createArray(3);
+  const v12 = createArray(3);
+  const v23 = createArray(3);
+  const v31 = createArray(3);
+
+  for (let i = 0; i < 3; ++i) {
+    v21[i] = p1[i] - p2[i];
+    v32[i] = p2[i] - p3[i];
+    v13[i] = p3[i] - p1[i];
+    v12[i] = -v21[i];
+    v23[i] = -v32[i];
+    v31[i] = -v13[i];
+  }
+
+  const norm12 = norm(v12);
+  const norm23 = norm(v23);
+  const norm13 = norm(v13);
+
+  const crossv21v32 = createArray(3);
+  cross(v21, v32, crossv21v32);
+  const normCross = norm(crossv21v32);
+
+  const radius = (norm12 * norm23 * norm13) / (2 * normCross);
+
+  const normCross22 = 2 * normCross * normCross;
+  const alpha = (norm23 * norm23 * dot(v21, v31)) / normCross22;
+  const beta = (norm13 * norm13 * dot(v12, v32)) / normCross22;
+  const gamma = (norm12 * norm12 * dot(v13, v23)) / normCross22;
+
+  for (let i = 0; i < 3; ++i) {
+    center[i] = alpha * p1[i] + beta * p2[i] + gamma * p3[i];
+  }
+  return radius;
+}
+
+const inf = Infinity;
+const negInf = -Infinity;
+
+const isInf = (value) => !Number.isFinite(value);
+const { isFinite, isNaN } = Number;
+const isNan = isNaN;
+
+// JavaScript - add-on ----------------------
+
+function createUninitializedBounds() {
+  return [].concat([
+    Number.MAX_VALUE,
+    -Number.MAX_VALUE, // X
+    Number.MAX_VALUE,
+    -Number.MAX_VALUE, // Y
+    Number.MAX_VALUE,
+    -Number.MAX_VALUE, // Z
+  ]);
+}
+
+function getMajorAxisIndex(vector) {
+  let maxValue = -1;
+  let axisIndex = -1;
+  for (let i = 0; i < vector.length; i++) {
+    const value = Math.abs(vector[i]);
+    if (value > maxValue) {
+      axisIndex = i;
+      maxValue = value;
+    }
+  }
+
+  return axisIndex;
+}
+
+// Return the closest orthogonal matrix of 1, -1 and 0
+// It works for both column major and row major matrices
+// This function iteratively associate a column with a row by choosing
+// the greatest absolute value from the remaining row and columns
+// For each association, a -1 or a 1 is set in the output, depending on
+// the sign of the value in the original matrix
+function getSparseOrthogonalMatrix(matrix, n = 3) {
+  // Initialize rows and columns to available indices
+  const rows = new Array(n);
+  const cols = new Array(n);
+  for (let i = 0; i < n; ++i) {
+    rows[i] = i;
+    cols[i] = i;
+  }
+  // No need for the last iteration: i = 0
+  for (let i = n - 1; i > 0; i--) {
+    // Loop invariant:
+    // rows[0:i] and cols[0:i] contain the remaining rows and columns
+    // rows]i:n[ and cols]i:n[ contain the associations found (rows[k] is associated with cols[k])
+    let bestValue = -Infinity;
+    let bestRowI = 0;
+    let bestColI = 0;
+    for (let rowI = 0; rowI <= i; ++rowI) {
+      const row = rows[rowI];
+      for (let colI = 0; colI <= i; ++colI) {
+        const col = cols[colI];
+        const absVal = Math.abs(matrix[row + n * col]);
+        if (absVal > bestValue) {
+          bestValue = absVal;
+          bestRowI = rowI;
+          bestColI = colI;
+        }
+      }
+    }
+    // Found an association between rows[bestRowI] and cols[bestColI]
+    // Put both at the end of their array by swapping with i
+    [rows[i], rows[bestRowI]] = [rows[bestRowI], rows[i]];
+    [cols[i], cols[bestColI]] = [cols[bestColI], cols[i]];
+  }
+
+  // Convert row/column association to a matrix
+  const output = new Array(n * n).fill(0);
+  for (let i = 0; i < n; ++i) {
+    const matIdx = rows[i] + n * cols[i];
+    output[matIdx] = matrix[matIdx] < 0 ? -1 : 1;
+  }
+
+  return output;
+}
+
+function floatToHex2(value) {
+  const integer = Math.floor(value * 255);
+  if (integer > 15) {
+    return integer.toString(16);
+  }
+  return `0${integer.toString(16)}`;
+}
+
+function floatRGB2HexCode(rgbArray, prefix = '#') {
+  return `${prefix}${rgbArray.map(floatToHex2).join('')}`;
+}
+
+function floatToChar(f) {
+  return Math.round(f * 255);
+}
+
+function float2CssRGBA(rgbArray) {
+  if (rgbArray.length === 3) {
+    return `rgb(${rgbArray.map(floatToChar).join(', ')})`;
+  }
+  return `rgba(${floatToChar(rgbArray[0] || 0)}, ${floatToChar(
+    rgbArray[1] || 0
+  )}, ${floatToChar(rgbArray[2] || 0)}, ${rgbArray[3] || 0})`;
+}
+
+// ----------------------------------------------------------------------------
+// Only Static API
+// ----------------------------------------------------------------------------
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  Pi,
+  ldexp,
+  radiansFromDegrees,
+  degreesFromRadians,
+  round,
+  floor,
+  ceil,
+  ceilLog2,
+  min,
+  max,
+  arrayMin,
+  arrayMax,
+  arrayRange,
+  isPowerOfTwo,
+  nearestPowerOfTwo,
+  factorial,
+  binomial,
+  beginCombination,
+  nextCombination,
+  randomSeed,
+  getSeed,
+  random,
+  gaussian,
+  add,
+  subtract,
+  multiplyScalar,
+  multiplyScalar2D,
+  multiplyAccumulate,
+  multiplyAccumulate2D,
+  dot,
+  outer,
+  cross,
+  norm,
+  normalize,
+  perpendiculars,
+  projectVector,
+  projectVector2D,
+  distance2BetweenPoints,
+  angleBetweenVectors,
+  gaussianAmplitude,
+  gaussianWeight,
+  dot2D,
+  outer2D,
+  norm2D,
+  normalize2D,
+  determinant2x2,
+  LUFactor3x3,
+  LUSolve3x3,
+  linearSolve3x3,
+  multiply3x3_vect3,
+  multiply3x3_mat3,
+  multiplyMatrix,
+  transpose3x3,
+  invert3x3,
+  identity3x3,
+  identity,
+  isIdentity,
+  isIdentity3x3,
+  determinant3x3,
+  quaternionToMatrix3x3,
+  areEquals,
+  areMatricesEqual,
+  roundNumber,
+  roundVector,
+  matrix3x3ToQuaternion,
+  multiplyQuaternion,
+  orthogonalize3x3,
+  diagonalize3x3,
+  singularValueDecomposition3x3,
+  solveLinearSystem,
+  invertMatrix,
+  luFactorLinearSystem,
+  luSolveLinearSystem,
+  estimateMatrixCondition,
+  jacobi,
+  jacobiN,
+  solveHomogeneousLeastSquares,
+  solveLeastSquares,
+  hex2float,
+  rgb2hsv,
+  hsv2rgb,
+  lab2xyz,
+  xyz2lab,
+  xyz2rgb,
+  rgb2xyz,
+  rgb2lab,
+  lab2rgb,
+  uninitializeBounds,
+  areBoundsInitialized,
+  computeBoundsFromPoints,
+  clampValue,
+  clampVector,
+  clampAndNormalizeValue,
+  getScalarTypeFittingRange,
+  getAdjustedScalarRange,
+  extentIsWithinOtherExtent,
+  boundsIsWithinOtherBounds,
+  pointIsWithinBounds,
+  solve3PointCircle,
+  inf,
+  negInf,
+  isInf,
+  isNan: isNaN,
+  isNaN,
+  isFinite,
+
+  // JS add-on
+  createUninitializedBounds,
+  getMajorAxisIndex,
+  getSparseOrthogonalMatrix,
+  floatToHex2,
+  floatRGB2HexCode,
+  float2CssRGBA,
+});
+
+
+/***/ }),
+
+/***/ "./node_modules/vtk.js/Sources/Rendering/Core/Light/index.js":
+/*!*******************************************************************!*\
+  !*** ./node_modules/vtk.js/Sources/Rendering/Core/Light/index.js ***!
+  \*******************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   LIGHT_TYPES: () => (/* binding */ LIGHT_TYPES),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
+/* harmony export */   extend: () => (/* binding */ extend),
+/* harmony export */   newInstance: () => (/* binding */ newInstance)
+/* harmony export */ });
+/* harmony import */ var vtk_js_Sources_macros__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vtk.js/Sources/macros */ "./node_modules/vtk.js/Sources/macros.js");
+/* harmony import */ var vtk_js_Sources_Common_Core_Math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vtk.js/Sources/Common/Core/Math */ "./node_modules/vtk.js/Sources/Common/Core/Math/index.js");
+/* harmony import */ var gl_matrix__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! gl-matrix */ "./node_modules/gl-matrix/esm/vec3.js");
+
+
+
+
+// ----------------------------------------------------------------------------
+
+const LIGHT_TYPES = ['HeadLight', 'CameraLight', 'SceneLight'];
+
+// ----------------------------------------------------------------------------
+// vtkLight methods
+// ----------------------------------------------------------------------------
+
+function vtkLight(publicAPI, model) {
+  // Set our className
+  model.classHierarchy.push('vtkLight');
+  const tmpVec = new Float64Array(3);
+
+  publicAPI.getTransformedPosition = () => {
+    if (model.transformMatrix) {
+      gl_matrix__WEBPACK_IMPORTED_MODULE_2__.transformMat4(tmpVec, model.position, model.transformMatrix);
+    } else {
+      gl_matrix__WEBPACK_IMPORTED_MODULE_2__.set(tmpVec, model.position[0], model.position[1], model.position[2]);
+    }
+    return tmpVec;
+  };
+
+  publicAPI.getTransformedFocalPoint = () => {
+    if (model.transformMatrix) {
+      gl_matrix__WEBPACK_IMPORTED_MODULE_2__.transformMat4(tmpVec, model.focalPoint, model.transformMatrix);
+    } else {
+      gl_matrix__WEBPACK_IMPORTED_MODULE_2__.set(
+        tmpVec,
+        model.focalPoint[0],
+        model.focalPoint[1],
+        model.focalPoint[2]
+      );
+    }
+    return tmpVec;
+  };
+
+  publicAPI.getDirection = () => {
+    if (model.directionMTime < model.mtime) {
+      gl_matrix__WEBPACK_IMPORTED_MODULE_2__.sub(model.direction, model.focalPoint, model.position);
+      vtk_js_Sources_Common_Core_Math__WEBPACK_IMPORTED_MODULE_1__.normalize(model.direction);
+      model.directionMTime = model.mtime;
+    }
+    return model.direction;
+  };
+
+  // Sets the direction from a vec3 instead of a focal point
+  publicAPI.setDirection = (directionVector) => {
+    const newFocalPoint = new Float64Array(3);
+    gl_matrix__WEBPACK_IMPORTED_MODULE_2__.sub(newFocalPoint, model.position, directionVector);
+    model.focalPoint = newFocalPoint;
+  };
+
+  publicAPI.setDirectionAngle = (elevation, azimuth) => {
+    const elevationRadians = vtk_js_Sources_Common_Core_Math__WEBPACK_IMPORTED_MODULE_1__.radiansFromDegrees(elevation);
+    const azimuthRadians = vtk_js_Sources_Common_Core_Math__WEBPACK_IMPORTED_MODULE_1__.radiansFromDegrees(azimuth);
+
+    publicAPI.setPosition(
+      Math.cos(elevationRadians) * Math.sin(azimuthRadians),
+      Math.sin(elevationRadians),
+      Math.cos(elevationRadians) * Math.cos(azimuthRadians)
+    );
+
+    publicAPI.setFocalPoint(0, 0, 0);
+    publicAPI.setPositional(0);
+  };
+
+  publicAPI.setLightTypeToHeadLight = () => {
+    publicAPI.setLightType('HeadLight');
+  };
+
+  publicAPI.setLightTypeToCameraLight = () => {
+    publicAPI.setLightType('CameraLight');
+  };
+
+  publicAPI.setLightTypeToSceneLight = () => {
+    publicAPI.setTransformMatrix(null);
+    publicAPI.setLightType('SceneLight');
+  };
+
+  publicAPI.lightTypeIsHeadLight = () => model.lightType === 'HeadLight';
+
+  publicAPI.lightTypeIsSceneLight = () => model.lightType === 'SceneLight';
+
+  publicAPI.lightTypeIsCameraLight = () => model.lightType === 'CameraLight';
+}
+
+// ----------------------------------------------------------------------------
+// Object factory
+// ----------------------------------------------------------------------------
+
+const DEFAULT_VALUES = {
+  switch: true,
+  intensity: 1,
+  color: [1, 1, 1],
+  position: [0, 0, 1],
+  focalPoint: [0, 0, 0],
+  positional: false,
+  exponent: 1,
+  coneAngle: 30,
+  coneFalloff: 5,
+  attenuationValues: [1, 0, 0],
+  transformMatrix: null,
+  lightType: 'SceneLight',
+  shadowAttenuation: 1,
+  direction: [0, 0, 0],
+  directionMTime: 0,
+};
+
+// ----------------------------------------------------------------------------
+
+function extend(publicAPI, model, initialValues = {}) {
+  Object.assign(model, DEFAULT_VALUES, initialValues);
+
+  // Build VTK API
+  vtk_js_Sources_macros__WEBPACK_IMPORTED_MODULE_0__["default"].obj(publicAPI, model);
+  vtk_js_Sources_macros__WEBPACK_IMPORTED_MODULE_0__["default"].setGet(publicAPI, model, [
+    'intensity',
+    'switch',
+    'positional',
+    'exponent',
+    'coneAngle',
+    'coneFalloff',
+    'transformMatrix',
+    'lightType',
+    'shadowAttenuation',
+    'attenuationValues',
+  ]);
+  vtk_js_Sources_macros__WEBPACK_IMPORTED_MODULE_0__["default"].setGetArray(
+    publicAPI,
+    model,
+    ['color', 'position', 'focalPoint', 'attenuationValues'],
+    3
+  );
+
+  // Object methods
+  vtkLight(publicAPI, model);
+}
+
+// ----------------------------------------------------------------------------
+
+const newInstance = vtk_js_Sources_macros__WEBPACK_IMPORTED_MODULE_0__["default"].newInstance(extend, 'vtkLight');
+
+// ----------------------------------------------------------------------------
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({ newInstance, extend, LIGHT_TYPES });
+
+
+/***/ }),
+
+/***/ "./node_modules/vtk.js/Sources/macros.js":
+/*!***********************************************!*\
+  !*** ./node_modules/vtk.js/Sources/macros.js ***!
+  \***********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EVENT_ABORT: () => (/* binding */ EVENT_ABORT),
+/* harmony export */   TYPED_ARRAYS: () => (/* binding */ TYPED_ARRAYS),
+/* harmony export */   VOID: () => (/* binding */ VOID),
+/* harmony export */   _capitalize: () => (/* binding */ _capitalize),
+/* harmony export */   algo: () => (/* binding */ algo),
+/* harmony export */   capitalize: () => (/* binding */ capitalize),
+/* harmony export */   chain: () => (/* binding */ chain),
+/* harmony export */   debounce: () => (/* binding */ debounce),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
+/* harmony export */   event: () => (/* binding */ event),
+/* harmony export */   formatBytesToProperUnit: () => (/* binding */ formatBytesToProperUnit),
+/* harmony export */   formatNumbersWithThousandSeparator: () => (/* binding */ formatNumbersWithThousandSeparator),
+/* harmony export */   get: () => (/* binding */ get),
+/* harmony export */   getArray: () => (/* binding */ getArray),
+/* harmony export */   isVtkObject: () => (/* binding */ isVtkObject),
+/* harmony export */   keystore: () => (/* binding */ keystore),
+/* harmony export */   measurePromiseExecution: () => (/* binding */ measurePromiseExecution),
+/* harmony export */   moveToProtected: () => (/* binding */ moveToProtected),
+/* harmony export */   newInstance: () => (/* binding */ newInstance),
+/* harmony export */   newTypedArray: () => (/* binding */ newTypedArray),
+/* harmony export */   newTypedArrayFrom: () => (/* binding */ newTypedArrayFrom),
+/* harmony export */   normalizeWheel: () => (/* binding */ normalizeWheel),
+/* harmony export */   obj: () => (/* binding */ obj),
+/* harmony export */   proxy: () => (/* binding */ proxy),
+/* harmony export */   proxyPropertyMapping: () => (/* binding */ proxyPropertyMapping),
+/* harmony export */   proxyPropertyState: () => (/* binding */ proxyPropertyState),
+/* harmony export */   set: () => (/* binding */ set),
+/* harmony export */   setArray: () => (/* binding */ setArray),
+/* harmony export */   setGet: () => (/* binding */ setGet),
+/* harmony export */   setGetArray: () => (/* binding */ setGetArray),
+/* harmony export */   setImmediateVTK: () => (/* binding */ setImmediateVTK),
+/* harmony export */   setLoggerFunction: () => (/* binding */ setLoggerFunction),
+/* harmony export */   throttle: () => (/* binding */ throttle),
+/* harmony export */   traverseInstanceTree: () => (/* binding */ traverseInstanceTree),
+/* harmony export */   uncapitalize: () => (/* binding */ uncapitalize),
+/* harmony export */   vtkDebugMacro: () => (/* binding */ vtkDebugMacro),
+/* harmony export */   vtkErrorMacro: () => (/* binding */ vtkErrorMacro),
+/* harmony export */   vtkInfoMacro: () => (/* binding */ vtkInfoMacro),
+/* harmony export */   vtkLogMacro: () => (/* binding */ vtkLogMacro),
+/* harmony export */   vtkOnceErrorMacro: () => (/* binding */ vtkOnceErrorMacro),
+/* harmony export */   vtkWarningMacro: () => (/* binding */ vtkWarningMacro)
+/* harmony export */ });
+/* harmony import */ var fast_deep_equal__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! fast-deep-equal */ "./node_modules/fast-deep-equal/index.js");
+/* harmony import */ var fast_deep_equal__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(fast_deep_equal__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _vtk__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./vtk */ "./node_modules/vtk.js/Sources/vtk.js");
+/* harmony import */ var _Common_Core_ClassHierarchy__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Common/Core/ClassHierarchy */ "./node_modules/vtk.js/Sources/Common/Core/ClassHierarchy/index.js");
+/**
+ * macros.js is the old macro.js.
+ * The name change is so we do not get eaten by babel-plugin-macros.
+ */
+
+
+
+
+let globalMTime = 0;
+
+const VOID = Symbol('void');
+
+function getCurrentGlobalMTime() {
+  return globalMTime;
+}
+
+// ----------------------------------------------------------------------------
+// Logging function calls
+// ----------------------------------------------------------------------------
+/* eslint-disable no-prototype-builtins                                      */
+
+const fakeConsole = {};
+
+function noOp() {}
+
+const consoleMethods = [
+  'log',
+  'debug',
+  'info',
+  'warn',
+  'error',
+  'time',
+  'timeEnd',
+  'group',
+  'groupEnd',
+];
+consoleMethods.forEach((methodName) => {
+  fakeConsole[methodName] = noOp;
+});
+
+_vtk__WEBPACK_IMPORTED_MODULE_1__.vtkGlobal.console = console.hasOwnProperty('log') ? console : fakeConsole;
+
+const loggerFunctions = {
+  debug: noOp, // Don't print debug by default
+  error: _vtk__WEBPACK_IMPORTED_MODULE_1__.vtkGlobal.console.error || noOp,
+  info: _vtk__WEBPACK_IMPORTED_MODULE_1__.vtkGlobal.console.info || noOp,
+  log: _vtk__WEBPACK_IMPORTED_MODULE_1__.vtkGlobal.console.log || noOp,
+  warn: _vtk__WEBPACK_IMPORTED_MODULE_1__.vtkGlobal.console.warn || noOp,
+};
+
+function setLoggerFunction(name, fn) {
+  if (loggerFunctions[name]) {
+    loggerFunctions[name] = fn || noOp;
+  }
+}
+
+function vtkLogMacro(...args) {
+  loggerFunctions.log(...args);
+}
+
+function vtkInfoMacro(...args) {
+  loggerFunctions.info(...args);
+}
+
+function vtkDebugMacro(...args) {
+  loggerFunctions.debug(...args);
+}
+
+function vtkErrorMacro(...args) {
+  loggerFunctions.error(...args);
+}
+
+function vtkWarningMacro(...args) {
+  loggerFunctions.warn(...args);
+}
+
+const ERROR_ONCE_MAP = {};
+
+function vtkOnceErrorMacro(str) {
+  if (!ERROR_ONCE_MAP[str]) {
+    loggerFunctions.error(str);
+    ERROR_ONCE_MAP[str] = true;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// TypedArray
+// ----------------------------------------------------------------------------
+
+const TYPED_ARRAYS = Object.create(null);
+TYPED_ARRAYS.Float32Array = Float32Array;
+TYPED_ARRAYS.Float64Array = Float64Array;
+TYPED_ARRAYS.Uint8Array = Uint8Array;
+TYPED_ARRAYS.Int8Array = Int8Array;
+TYPED_ARRAYS.Uint16Array = Uint16Array;
+TYPED_ARRAYS.Int16Array = Int16Array;
+TYPED_ARRAYS.Uint32Array = Uint32Array;
+TYPED_ARRAYS.Int32Array = Int32Array;
+TYPED_ARRAYS.Uint8ClampedArray = Uint8ClampedArray;
+
+try {
+  TYPED_ARRAYS.BigInt64Array = BigInt64Array;
+  TYPED_ARRAYS.BigUint64Array = BigUint64Array;
+} catch {
+  // ignore
+}
+
+function newTypedArray(type, ...args) {
+  return new (TYPED_ARRAYS[type] || Float64Array)(...args);
+}
+
+function newTypedArrayFrom(type, ...args) {
+  return (TYPED_ARRAYS[type] || Float64Array).from(...args);
+}
+
+// ----------------------------------------------------------------------------
+// capitilize provided string
+// ----------------------------------------------------------------------------
+
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function _capitalize(str) {
+  return capitalize(str[0] === '_' ? str.slice(1) : str);
+}
+
+function uncapitalize(str) {
+  return str.charAt(0).toLowerCase() + str.slice(1);
+}
+
+// ----------------------------------------------------------------------------
+// Convert byte size into a well formatted string
+// ----------------------------------------------------------------------------
+
+function formatBytesToProperUnit(size, precision = 2, chunkSize = 1000) {
+  const units = ['TB', 'GB', 'MB', 'KB'];
+  let value = Number(size);
+  let currentUnit = 'B';
+  while (value > chunkSize) {
+    value /= chunkSize;
+    currentUnit = units.pop();
+  }
+  return `${value.toFixed(precision)} ${currentUnit}`;
+}
+
+// ----------------------------------------------------------------------------
+// Convert thousand number with proper separator
+// ----------------------------------------------------------------------------
+
+function formatNumbersWithThousandSeparator(n, separator = ' ') {
+  const sections = [];
+  let size = n;
+  while (size > 1000) {
+    sections.push(`000${size % 1000}`.slice(-3));
+    size = Math.floor(size / 1000);
+  }
+  if (size > 0) {
+    sections.push(size);
+  }
+  sections.reverse();
+  return sections.join(separator);
+}
+
+// ----------------------------------------------------------------------------
+// Array helper
+// ----------------------------------------------------------------------------
+
+function safeArrays(model) {
+  Object.keys(model).forEach((key) => {
+    if (Array.isArray(model[key])) {
+      model[key] = [].concat(model[key]);
+    }
+  });
+}
+
+function isTypedArray(value) {
+  return Object.values(TYPED_ARRAYS).some((ctor) => value instanceof ctor);
+}
+
+// ----------------------------------------------------------------------------
+// shallow equals
+// ----------------------------------------------------------------------------
+
+function shallowEquals(a, b) {
+  if (a === b) {
+    return true;
+  }
+
+  if (Array.isArray(a) && Array.isArray(b)) {
+    if (a.length !== b.length) {
+      return false;
+    }
+    for (let i = 0; i < a.length; i++) {
+      if (a[i] !== b[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  return false;
+}
+
+// ----------------------------------------------------------------------------
+
+function enumToString(e, value) {
+  return Object.keys(e).find((key) => e[key] === value);
+}
+
+function getStateArrayMapFunc(item) {
+  if (item && item.isA) {
+    return item.getState();
+  }
+  return item;
+}
+
+// ----------------------------------------------------------------------------
+// setImmediate
+// ----------------------------------------------------------------------------
+
+function setImmediateVTK(fn) {
+  setTimeout(fn, 0);
+}
+
+// ----------------------------------------------------------------------------
+// measurePromiseExecution
+//
+// Measures the time it takes for a promise to finish from
+//   the time this function is invoked.
+// The callback receives the time it took for the promise to resolve or reject.
+// ----------------------------------------------------------------------------
+
+function measurePromiseExecution(promise, callback) {
+  const start = performance.now();
+  promise.finally(() => {
+    const delta = performance.now() - start;
+    callback(delta);
+  });
+}
+
+// ----------------------------------------------------------------------------
+// vtkObject: modified(), onModified(callback), delete()
+// ----------------------------------------------------------------------------
+
+function obj(publicAPI = {}, model = {}) {
+  // Ensure each instance as a unique ref of array
+  safeArrays(model);
+
+  const callbacks = [];
+  if (!Number.isInteger(model.mtime)) {
+    model.mtime = ++globalMTime;
+  }
+
+  if (!('classHierarchy' in model)) {
+    model.classHierarchy = new _Common_Core_ClassHierarchy__WEBPACK_IMPORTED_MODULE_2__["default"]('vtkObject');
+  } else if (!(model.classHierarchy instanceof _Common_Core_ClassHierarchy__WEBPACK_IMPORTED_MODULE_2__["default"])) {
+    const hierarchy = new _Common_Core_ClassHierarchy__WEBPACK_IMPORTED_MODULE_2__["default"]();
+    for (let i = 0; i < model.classHierarchy.length; i++) {
+      hierarchy.push(model.classHierarchy[i]);
+    }
+    model.classHierarchy = hierarchy;
+  }
+
+  function off(index) {
+    callbacks[index] = null;
+  }
+
+  function on(index) {
+    function unsubscribe() {
+      off(index);
+    }
+
+    return Object.freeze({
+      unsubscribe,
+    });
+  }
+
+  publicAPI.isDeleted = () => !!model.deleted;
+
+  publicAPI.modified = (otherMTime) => {
+    if (model.deleted) {
+      vtkErrorMacro('instance deleted - cannot call any method');
+      return;
+    }
+
+    if (otherMTime && otherMTime < publicAPI.getMTime()) {
+      return;
+    }
+
+    model.mtime = ++globalMTime;
+    callbacks.forEach((callback) => callback && callback(publicAPI));
+  };
+
+  publicAPI.onModified = (callback) => {
+    if (model.deleted) {
+      vtkErrorMacro('instance deleted - cannot call any method');
+      return null;
+    }
+
+    const index = callbacks.length;
+    callbacks.push(callback);
+    return on(index);
+  };
+
+  publicAPI.getMTime = () => model.mtime;
+
+  publicAPI.isA = (className) => {
+    let count = model.classHierarchy.length;
+    // we go backwards as that is more likely for
+    // early termination
+    while (count--) {
+      if (model.classHierarchy[count] === className) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  publicAPI.getClassName = (depth = 0) =>
+    model.classHierarchy[model.classHierarchy.length - 1 - depth];
+
+  publicAPI.set = (map = {}, noWarning = false, noFunction = false) => {
+    let ret = false;
+    Object.keys(map).forEach((name) => {
+      const fn = noFunction ? null : publicAPI[`set${capitalize(name)}`];
+      if (fn && Array.isArray(map[name]) && fn.length > 1) {
+        ret = fn(...map[name]) || ret;
+      } else if (fn) {
+        ret = fn(map[name]) || ret;
+      } else {
+        // Set data on model directly
+        if (['mtime'].indexOf(name) === -1 && !noWarning) {
+          vtkWarningMacro(
+            `Warning: Set value to model directly ${name}, ${map[name]}`
+          );
+        }
+        ret = model[name] !== map[name] || ret;
+        model[name] = map[name];
+      }
+    });
+    return ret;
+  };
+
+  publicAPI.get = (...list) => {
+    if (!list.length) {
+      return model;
+    }
+    const subset = {};
+    list.forEach((name) => {
+      subset[name] = model[name];
+    });
+    return subset;
+  };
+
+  publicAPI.getReferenceByName = (val) => model[val];
+
+  publicAPI.delete = () => {
+    Object.keys(model).forEach((field) => delete model[field]);
+    callbacks.forEach((el, index) => off(index));
+
+    // Flag the instance being deleted
+    model.deleted = true;
+  };
+
+  // Add serialization support
+  publicAPI.getState = () => {
+    if (model.deleted) {
+      return null;
+    }
+    const jsonArchive = { ...model, vtkClass: publicAPI.getClassName() };
+
+    // Convert every vtkObject to its serializable form
+    Object.keys(jsonArchive).forEach((keyName) => {
+      if (
+        jsonArchive[keyName] === null ||
+        jsonArchive[keyName] === undefined ||
+        keyName[0] === '_' // protected members start with _
+      ) {
+        delete jsonArchive[keyName];
+      } else if (jsonArchive[keyName].isA) {
+        jsonArchive[keyName] = jsonArchive[keyName].getState();
+      } else if (Array.isArray(jsonArchive[keyName])) {
+        jsonArchive[keyName] = jsonArchive[keyName].map(getStateArrayMapFunc);
+      } else if (isTypedArray(jsonArchive[keyName])) {
+        jsonArchive[keyName] = Array.from(jsonArchive[keyName]);
+      }
+    });
+
+    // Sort resulting object by key name
+    const sortedObj = {};
+    Object.keys(jsonArchive)
+      .sort()
+      .forEach((name) => {
+        sortedObj[name] = jsonArchive[name];
+      });
+
+    // Remove mtime
+    if (sortedObj.mtime) {
+      delete sortedObj.mtime;
+    }
+
+    return sortedObj;
+  };
+
+  // Add shallowCopy(otherInstance) support
+  publicAPI.shallowCopy = (other, debug = false) => {
+    if (other.getClassName() !== publicAPI.getClassName()) {
+      throw new Error(
+        `Cannot ShallowCopy ${other.getClassName()} into ${publicAPI.getClassName()}`
+      );
+    }
+    const otherModel = other.get();
+
+    const keyList = Object.keys(model).sort();
+    const otherKeyList = Object.keys(otherModel).sort();
+
+    otherKeyList.forEach((key) => {
+      const keyIdx = keyList.indexOf(key);
+      if (keyIdx === -1) {
+        if (debug) {
+          vtkDebugMacro(`add ${key} in shallowCopy`);
+        }
+      } else {
+        keyList.splice(keyIdx, 1);
+      }
+      model[key] = otherModel[key];
+    });
+    if (keyList.length && debug) {
+      vtkDebugMacro(`Untouched keys: ${keyList.join(', ')}`);
+    }
+
+    publicAPI.modified();
+  };
+
+  // This function will get called when one invoke JSON.stringify(vtkObject)
+  // JSON.stringify will only stringify the return value of this function
+  publicAPI.toJSON = function vtkObjToJSON() {
+    return publicAPI.getState();
+  };
+
+  // Allow usage as decorator
+  return publicAPI;
+}
+
+// ----------------------------------------------------------------------------
+// getXXX: add getters
+// ----------------------------------------------------------------------------
+
+const objectGetterMap = {
+  object(publicAPI, model, field) {
+    return function getter() {
+      return { ...model[field.name] };
+    };
+  },
+};
+
+function get(publicAPI, model, fieldNames) {
+  fieldNames.forEach((field) => {
+    if (typeof field === 'object') {
+      const getter = objectGetterMap[field.type];
+      if (getter) {
+        publicAPI[`get${_capitalize(field.name)}`] = getter(
+          publicAPI,
+          model,
+          field
+        );
+      } else {
+        publicAPI[`get${_capitalize(field.name)}`] = () => model[field.name];
+      }
+    } else {
+      publicAPI[`get${_capitalize(field)}`] = () => model[field];
+    }
+  });
+}
+
+// ----------------------------------------------------------------------------
+// setXXX: add setters
+// ----------------------------------------------------------------------------
+
+const objectSetterMap = {
+  enum(publicAPI, model, field) {
+    const onChanged = `_on${_capitalize(field.name)}Changed`;
+    return (value) => {
+      if (typeof value === 'string') {
+        if (field.enum[value] !== undefined) {
+          if (model[field.name] !== field.enum[value]) {
+            model[field.name] = field.enum[value];
+            publicAPI.modified();
+            return true;
+          }
+          return false;
+        }
+        vtkErrorMacro(`Set Enum with invalid argument ${field}, ${value}`);
+        throw new RangeError('Set Enum with invalid string argument');
+      }
+      if (typeof value === 'number') {
+        if (model[field.name] !== value) {
+          if (
+            Object.keys(field.enum)
+              .map((key) => field.enum[key])
+              .indexOf(value) !== -1
+          ) {
+            const previousValue = model[field.name];
+            model[field.name] = value;
+            model[onChanged]?.(publicAPI, model, value, previousValue);
+            publicAPI.modified();
+            return true;
+          }
+          vtkErrorMacro(`Set Enum outside numeric range ${field}, ${value}`);
+          throw new RangeError('Set Enum outside numeric range');
+        }
+        return false;
+      }
+      vtkErrorMacro(
+        `Set Enum with invalid argument (String/Number) ${field}, ${value}`
+      );
+      throw new TypeError('Set Enum with invalid argument (String/Number)');
+    };
+  },
+  object(publicAPI, model, field) {
+    if (field.params?.length === 1) {
+      vtkWarningMacro(
+        'Setter of type "object" with a single "param" field is not supported'
+      );
+    }
+    const onChanged = `_on${_capitalize(field.name)}Changed`;
+    return (...args) => {
+      let value;
+      if (args.length > 1 && field.params?.length) {
+        value = field.params.reduce(
+          (acc, prop, idx) => Object.assign(acc, { [prop]: args[idx] }),
+          {}
+        );
+      } else {
+        value = args[0];
+      }
+      if (!fast_deep_equal__WEBPACK_IMPORTED_MODULE_0___default()(model[field.name], value)) {
+        const previousValue = model[field.name];
+        model[field.name] = value;
+        model[onChanged]?.(publicAPI, model, value, previousValue);
+        publicAPI.modified();
+        return true;
+      }
+      return false;
+    };
+  },
+};
+
+function findSetter(field) {
+  if (typeof field === 'object') {
+    const fn = objectSetterMap[field.type];
+    if (fn) {
+      return (publicAPI, model) => fn(publicAPI, model, field);
+    }
+
+    vtkErrorMacro(`No setter for field ${field}`);
+    throw new TypeError('No setter for field');
+  }
+  return function getSetter(publicAPI, model) {
+    const onChanged = `_on${_capitalize(field)}Changed`;
+    return function setter(value) {
+      if (model.deleted) {
+        vtkErrorMacro('instance deleted - cannot call any method');
+        return false;
+      }
+
+      if (model[field] !== value) {
+        const previousValue = model[field.name];
+        model[field] = value;
+        model[onChanged]?.(publicAPI, model, value, previousValue);
+        publicAPI.modified();
+        return true;
+      }
+      return false;
+    };
+  };
+}
+
+function set(publicAPI, model, fields) {
+  fields.forEach((field) => {
+    if (typeof field === 'object') {
+      publicAPI[`set${_capitalize(field.name)}`] = findSetter(field)(
+        publicAPI,
+        model
+      );
+    } else {
+      publicAPI[`set${_capitalize(field)}`] = findSetter(field)(
+        publicAPI,
+        model
+      );
+    }
+  });
+}
+
+// ----------------------------------------------------------------------------
+// set/get XXX: add both setters and getters
+// ----------------------------------------------------------------------------
+
+function setGet(publicAPI, model, fieldNames) {
+  get(publicAPI, model, fieldNames);
+  set(publicAPI, model, fieldNames);
+}
+
+// ----------------------------------------------------------------------------
+// getXXX: add getters for object of type array with copy to be safe
+// getXXXByReference: add getters for object of type array without copy
+// ----------------------------------------------------------------------------
+
+function getArray(publicAPI, model, fieldNames) {
+  fieldNames.forEach((field) => {
+    publicAPI[`get${_capitalize(field)}`] = () =>
+      model[field] ? Array.from(model[field]) : model[field];
+    publicAPI[`get${_capitalize(field)}ByReference`] = () => model[field];
+  });
+}
+
+// ----------------------------------------------------------------------------
+// setXXX: add setter for object of type array
+// if 'defaultVal' is supplied, shorter arrays will be padded to 'size' with 'defaultVal'
+// set...From: fast path to copy the content of an array to the current one without call to modified.
+// ----------------------------------------------------------------------------
+
+function setArray(
+  publicAPI,
+  model,
+  fieldNames,
+  size,
+  defaultVal = undefined
+) {
+  fieldNames.forEach((field) => {
+    if (model[field] && size && model[field].length !== size) {
+      throw new RangeError(
+        `Invalid initial number of values for array (${field})`
+      );
+    }
+    const onChanged = `_on${_capitalize(field)}Changed`;
+
+    publicAPI[`set${_capitalize(field)}`] = (...args) => {
+      if (model.deleted) {
+        vtkErrorMacro('instance deleted - cannot call any method');
+        return false;
+      }
+
+      let array = args;
+      let changeDetected;
+      let needCopy = false;
+      // allow null or an array to be passed as a single arg.
+      if (array.length === 1 && (array[0] == null || array[0].length >= 0)) {
+        /* eslint-disable prefer-destructuring */
+        array = array[0];
+        /* eslint-enable prefer-destructuring */
+        needCopy = true;
+      }
+      if (array == null) {
+        changeDetected = model[field] !== array;
+      } else {
+        if (size && array.length !== size) {
+          if (array.length < size && defaultVal !== undefined) {
+            array = Array.from(array);
+            needCopy = false;
+            while (array.length < size) array.push(defaultVal);
+          } else {
+            throw new RangeError(
+              `Invalid number of values for array setter (${field})`
+            );
+          }
+        }
+        changeDetected =
+          model[field] == null || model[field].length !== array.length;
+        for (let i = 0; !changeDetected && i < array.length; ++i) {
+          changeDetected = model[field][i] !== array[i];
+        }
+        if (changeDetected && needCopy) {
+          array = Array.from(array);
+        }
+      }
+
+      if (changeDetected) {
+        const previousValue = model[field.name];
+        model[field] = array;
+        model[onChanged]?.(publicAPI, model, array, previousValue);
+        publicAPI.modified();
+      }
+      return changeDetected;
+    };
+
+    publicAPI[`set${_capitalize(field)}From`] = (otherArray) => {
+      const target = model[field];
+      otherArray.forEach((v, i) => {
+        target[i] = v;
+      });
+    };
+  });
+}
+
+// ----------------------------------------------------------------------------
+// set/get XXX: add setter and getter for object of type array
+// ----------------------------------------------------------------------------
+
+function setGetArray(
+  publicAPI,
+  model,
+  fieldNames,
+  size,
+  defaultVal = undefined
+) {
+  getArray(publicAPI, model, fieldNames);
+  setArray(publicAPI, model, fieldNames, size, defaultVal);
+}
+
+function moveToProtected(publicAPI, model, fieldNames) {
+  for (let i = 0; i < fieldNames.length; i++) {
+    const fieldName = fieldNames[i];
+    if (model[fieldName] !== undefined) {
+      model[`_${fieldName}`] = model[fieldName];
+      delete model[fieldName];
+    }
+  }
+}
+// ----------------------------------------------------------------------------
+// vtkAlgorithm: setInputData(), setInputConnection(), getOutputData(), getOutputPort()
+// ----------------------------------------------------------------------------
+
+function algo(publicAPI, model, numberOfInputs, numberOfOutputs) {
+  if (model.inputData) {
+    model.inputData = model.inputData.map(_vtk__WEBPACK_IMPORTED_MODULE_1__["default"]);
+  } else {
+    model.inputData = [];
+  }
+
+  if (model.inputConnection) {
+    model.inputConnection = model.inputConnection.map(_vtk__WEBPACK_IMPORTED_MODULE_1__["default"]);
+  } else {
+    model.inputConnection = [];
+  }
+
+  if (model.output) {
+    model.output = model.output.map(_vtk__WEBPACK_IMPORTED_MODULE_1__["default"]);
+  } else {
+    model.output = [];
+  }
+
+  if (model.inputArrayToProcess) {
+    model.inputArrayToProcess = model.inputArrayToProcess.map(_vtk__WEBPACK_IMPORTED_MODULE_1__["default"]);
+  } else {
+    model.inputArrayToProcess = [];
+  }
+
+  // Cache the argument for later manipulation
+  model.numberOfInputs = numberOfInputs;
+
+  // Methods
+  function setInputData(dataset, port = 0) {
+    if (model.deleted) {
+      vtkErrorMacro('instance deleted - cannot call any method');
+      return;
+    }
+    if (port >= model.numberOfInputs) {
+      vtkErrorMacro(
+        `algorithm ${publicAPI.getClassName()} only has ${
+          model.numberOfInputs
+        } input ports. To add more input ports, use addInputData()`
+      );
+      return;
+    }
+    if (model.inputData[port] !== dataset || model.inputConnection[port]) {
+      model.inputData[port] = dataset;
+      model.inputConnection[port] = null;
+      if (publicAPI.modified) {
+        publicAPI.modified();
+      }
+    }
+  }
+
+  function getInputData(port = 0) {
+    if (model.inputConnection[port]) {
+      model.inputData[port] = model.inputConnection[port]();
+    }
+    return model.inputData[port];
+  }
+
+  function setInputConnection(outputPort, port = 0) {
+    if (model.deleted) {
+      vtkErrorMacro('instance deleted - cannot call any method');
+      return;
+    }
+    if (port >= model.numberOfInputs) {
+      let msg = `algorithm ${publicAPI.getClassName()} only has `;
+      msg += `${model.numberOfInputs}`;
+      msg += ' input ports. To add more input ports, use addInputConnection()';
+      vtkErrorMacro(msg);
+      return;
+    }
+    model.inputData[port] = null;
+    model.inputConnection[port] = outputPort;
+  }
+
+  function getInputConnection(port = 0) {
+    return model.inputConnection[port];
+  }
+
+  function getPortToFill() {
+    let portToFill = model.numberOfInputs;
+    while (
+      portToFill &&
+      !model.inputData[portToFill - 1] &&
+      !model.inputConnection[portToFill - 1]
+    ) {
+      portToFill--;
+    }
+    if (portToFill === model.numberOfInputs) {
+      model.numberOfInputs++;
+    }
+    return portToFill;
+  }
+
+  function addInputConnection(outputPort) {
+    if (model.deleted) {
+      vtkErrorMacro('instance deleted - cannot call any method');
+      return;
+    }
+    setInputConnection(outputPort, getPortToFill());
+  }
+
+  function addInputData(dataset) {
+    if (model.deleted) {
+      vtkErrorMacro('instance deleted - cannot call any method');
+      return;
+    }
+    setInputData(dataset, getPortToFill());
+  }
+
+  function getOutputData(port = 0) {
+    if (model.deleted) {
+      vtkErrorMacro('instance deleted - cannot call any method');
+      return null;
+    }
+    if (publicAPI.shouldUpdate()) {
+      publicAPI.update();
+    }
+    return model.output[port];
+  }
+
+  publicAPI.shouldUpdate = () => {
+    const localMTime = publicAPI.getMTime();
+    let minOutputMTime = Infinity;
+
+    let count = numberOfOutputs;
+    while (count--) {
+      if (!model.output[count] || model.output[count].isDeleted()) {
+        return true;
+      }
+      const mt = model.output[count].getMTime();
+      if (mt < localMTime) {
+        return true;
+      }
+      if (mt < minOutputMTime) {
+        minOutputMTime = mt;
+      }
+    }
+
+    count = model.numberOfInputs;
+    while (count--) {
+      if (
+        model.inputConnection[count]?.filter.shouldUpdate() ||
+        publicAPI.getInputData(count)?.getMTime() > minOutputMTime
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  function getOutputPort(port = 0) {
+    const outputPortAccess = () => getOutputData(port);
+    // Add reference to filter
+    outputPortAccess.filter = publicAPI;
+    return outputPortAccess;
+  }
+
+  // Handle input if needed
+  if (model.numberOfInputs) {
+    // Reserve inputs
+    let count = model.numberOfInputs;
+    while (count--) {
+      model.inputData.push(null);
+      model.inputConnection.push(null);
+    }
+
+    // Expose public methods
+    publicAPI.setInputData = setInputData;
+    publicAPI.setInputConnection = setInputConnection;
+    publicAPI.addInputData = addInputData;
+    publicAPI.addInputConnection = addInputConnection;
+    publicAPI.getInputData = getInputData;
+    publicAPI.getInputConnection = getInputConnection;
+  }
+
+  if (numberOfOutputs) {
+    publicAPI.getOutputData = getOutputData;
+    publicAPI.getOutputPort = getOutputPort;
+  }
+
+  publicAPI.update = () => {
+    const ins = [];
+    if (model.numberOfInputs) {
+      let count = 0;
+      while (count < model.numberOfInputs) {
+        ins[count] = publicAPI.getInputData(count);
+        count++;
+      }
+    }
+    if (publicAPI.shouldUpdate() && publicAPI.requestData) {
+      publicAPI.requestData(ins, model.output);
+    }
+  };
+
+  publicAPI.getNumberOfInputPorts = () => model.numberOfInputs;
+  publicAPI.getNumberOfOutputPorts = () =>
+    numberOfOutputs || model.output.length;
+
+  publicAPI.getInputArrayToProcess = (inputPort) => {
+    const arrayDesc = model.inputArrayToProcess[inputPort];
+    const ds = model.inputData[inputPort];
+    if (arrayDesc && ds) {
+      return ds[`get${arrayDesc.fieldAssociation}`]().getArray(
+        arrayDesc.arrayName
+      );
+    }
+    return null;
+  };
+  publicAPI.setInputArrayToProcess = (
+    inputPort,
+    arrayName,
+    fieldAssociation,
+    attributeType = 'Scalars'
+  ) => {
+    while (model.inputArrayToProcess.length < inputPort) {
+      model.inputArrayToProcess.push(null);
+    }
+    model.inputArrayToProcess[inputPort] = {
+      arrayName,
+      fieldAssociation,
+      attributeType,
+    };
+  };
+}
+
+// ----------------------------------------------------------------------------
+// Event handling: onXXX(callback), invokeXXX(args...)
+// ----------------------------------------------------------------------------
+
+const EVENT_ABORT = Symbol('Event abort');
+
+function event(publicAPI, model, eventName) {
+  const callbacks = [];
+  const previousDelete = publicAPI.delete;
+  let curCallbackID = 1;
+
+  function off(callbackID) {
+    for (let i = 0; i < callbacks.length; ++i) {
+      const [cbID] = callbacks[i];
+      if (cbID === callbackID) {
+        callbacks.splice(i, 1);
+        return;
+      }
+    }
+  }
+
+  function on(callbackID) {
+    function unsubscribe() {
+      off(callbackID);
+    }
+
+    return Object.freeze({
+      unsubscribe,
+    });
+  }
+
+  function invoke() {
+    if (model.deleted) {
+      vtkErrorMacro('instance deleted - cannot call any method');
+      return;
+    }
+    /* eslint-disable prefer-rest-params */
+    // Go through a copy of the callbacks array in case new callbacks
+    // get prepended within previous callbacks
+    const currentCallbacks = callbacks.slice();
+    for (let index = 0; index < currentCallbacks.length; ++index) {
+      const [, cb, priority] = currentCallbacks[index];
+
+      if (!cb) {
+        continue; // eslint-disable-line
+      }
+
+      if (priority < 0) {
+        setTimeout(() => cb.apply(publicAPI, arguments), 1 - priority);
+      } else {
+        // Abort only if the callback explicitly returns false
+        const continueNext = cb.apply(publicAPI, arguments);
+        if (continueNext === EVENT_ABORT) {
+          break;
+        }
+      }
+    }
+    /* eslint-enable prefer-rest-params */
+  }
+
+  publicAPI[`invoke${_capitalize(eventName)}`] = invoke;
+
+  publicAPI[`on${_capitalize(eventName)}`] = (callback, priority = 0.0) => {
+    if (!callback.apply) {
+      console.error(`Invalid callback for event ${eventName}`);
+      return null;
+    }
+
+    if (model.deleted) {
+      vtkErrorMacro('instance deleted - cannot call any method');
+      return null;
+    }
+
+    const callbackID = curCallbackID++;
+    callbacks.push([callbackID, callback, priority]);
+    callbacks.sort((cb1, cb2) => cb2[2] - cb1[2]);
+    return on(callbackID);
+  };
+
+  publicAPI.delete = () => {
+    previousDelete();
+    callbacks.forEach(([cbID]) => off(cbID));
+  };
+}
+
+// ----------------------------------------------------------------------------
+// newInstance
+// ----------------------------------------------------------------------------
+
+function newInstance(extend, className) {
+  const constructor = (initialValues = {}) => {
+    const model = {};
+    const publicAPI = {};
+    extend(publicAPI, model, initialValues);
+
+    return Object.freeze(publicAPI);
+  };
+
+  // Register constructor to factory
+  if (className) {
+    _vtk__WEBPACK_IMPORTED_MODULE_1__["default"].register(className, constructor);
+  }
+
+  return constructor;
+}
+
+// ----------------------------------------------------------------------------
+// Chain function calls
+// ----------------------------------------------------------------------------
+
+function chain(...fn) {
+  return (...args) => fn.filter((i) => !!i).map((i) => i(...args));
+}
+
+// ----------------------------------------------------------------------------
+// Some utility methods for vtk objects
+// ----------------------------------------------------------------------------
+
+function isVtkObject(instance) {
+  return instance && instance.isA && instance.isA('vtkObject');
+}
+
+function traverseInstanceTree(
+  instance,
+  extractFunction,
+  accumulator = [],
+  visitedInstances = []
+) {
+  if (isVtkObject(instance)) {
+    if (visitedInstances.indexOf(instance) >= 0) {
+      // avoid cycles
+      return accumulator;
+    }
+
+    visitedInstances.push(instance);
+    const result = extractFunction(instance);
+    if (result !== undefined) {
+      accumulator.push(result);
+    }
+
+    // Now go through this instance's model
+    const model = instance.get();
+    Object.keys(model).forEach((key) => {
+      const modelObj = model[key];
+      if (Array.isArray(modelObj)) {
+        modelObj.forEach((subObj) => {
+          traverseInstanceTree(
+            subObj,
+            extractFunction,
+            accumulator,
+            visitedInstances
+          );
+        });
+      } else {
+        traverseInstanceTree(
+          modelObj,
+          extractFunction,
+          accumulator,
+          visitedInstances
+        );
+      }
+    });
+  }
+
+  return accumulator;
+}
+
+// ----------------------------------------------------------------------------
+// Returns a function, that, as long as it continues to be invoked, will not
+// be triggered. The function will be called after it stops being called for
+// N milliseconds. If `immediate` is passed, trigger the function on the
+// leading edge, instead of the trailing.
+
+function debounce(func, wait, immediate) {
+  let timeout;
+  const debounced = (...args) => {
+    const context = this;
+    const later = () => {
+      timeout = null;
+      if (!immediate) {
+        func.apply(context, args);
+      }
+    };
+    const callNow = immediate && !timeout;
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+    if (callNow) {
+      func.apply(context, args);
+    }
+  };
+
+  debounced.cancel = () => clearTimeout(timeout);
+
+  return debounced;
+}
+
+// ----------------------------------------------------------------------------
+// Creates a throttled function that only invokes `func` at most once per
+// every `wait` milliseconds.
+
+function throttle(callback, delay) {
+  let isThrottled = false;
+  let argsToUse = null;
+
+  function next() {
+    isThrottled = false;
+    if (argsToUse !== null) {
+      wrapper(...argsToUse); // eslint-disable-line
+      argsToUse = null;
+    }
+  }
+
+  function wrapper(...args) {
+    if (isThrottled) {
+      argsToUse = args;
+      return;
+    }
+    isThrottled = true;
+    callback(...args);
+    setTimeout(next, delay);
+  }
+
+  return wrapper;
+}
+
+// ----------------------------------------------------------------------------
+// keystore(publicAPI, model, initialKeystore)
+//
+//    - initialKeystore: Initial keystore. This can be either a Map or an
+//      object.
+//
+// Generated API
+//  setKey(key, value) : mixed (returns value)
+//  getKey(key) : mixed
+//  getAllKeys() : [mixed]
+//  deleteKey(key) : Boolean
+// ----------------------------------------------------------------------------
+
+function keystore(publicAPI, model, initialKeystore = {}) {
+  model.keystore = Object.assign(model.keystore || {}, initialKeystore);
+
+  publicAPI.setKey = (key, value) => {
+    model.keystore[key] = value;
+  };
+  publicAPI.getKey = (key) => model.keystore[key];
+  publicAPI.getAllKeys = () => Object.keys(model.keystore);
+  publicAPI.deleteKey = (key) => delete model.keystore[key];
+  publicAPI.clearKeystore = () =>
+    publicAPI.getAllKeys().forEach((key) => delete model.keystore[key]);
+}
+
+// ----------------------------------------------------------------------------
+// proxy(publicAPI, model, sectionName, propertyUI)
+//
+//    - sectionName: Name of the section for UI
+//    - propertyUI: List of props with their UI description
+//
+// Generated API
+//  getProxyId() : String
+//  listProxyProperties() : [string]
+//  updateProxyProperty(name, prop)
+//  getProxySection() => List of properties for UI generation
+// ----------------------------------------------------------------------------
+let nextProxyId = 1;
+const ROOT_GROUP_NAME = '__root__';
+
+function proxy(publicAPI, model) {
+  // Proxies are keystores
+  keystore(publicAPI, model);
+
+  const parentDelete = publicAPI.delete;
+
+  // getProxyId
+  model.proxyId = `${nextProxyId++}`;
+
+  // ui handling
+  model.ui = JSON.parse(JSON.stringify(model.ui || [])); // deep copy
+  get(publicAPI, model, ['proxyId', 'proxyGroup', 'proxyName']);
+  setGet(publicAPI, model, ['proxyManager']);
+
+  // group properties
+  const propertyMap = {};
+  const groupChildrenNames = {};
+
+  function registerProperties(descriptionList, currentGroupName) {
+    if (!groupChildrenNames[currentGroupName]) {
+      groupChildrenNames[currentGroupName] = [];
+    }
+    const childrenNames = groupChildrenNames[currentGroupName];
+
+    for (let i = 0; i < descriptionList.length; i++) {
+      childrenNames.push(descriptionList[i].name);
+      propertyMap[descriptionList[i].name] = descriptionList[i];
+      if (descriptionList[i].children && descriptionList[i].children.length) {
+        registerProperties(
+          descriptionList[i].children,
+          descriptionList[i].name
+        );
+      }
+    }
+  }
+
+  registerProperties(model.ui, ROOT_GROUP_NAME);
+
+  publicAPI.updateUI = (ui) => {
+    model.ui = JSON.parse(JSON.stringify(ui || [])); // deep copy
+    Object.keys(propertyMap).forEach((k) => delete propertyMap[k]);
+    Object.keys(groupChildrenNames).forEach(
+      (k) => delete groupChildrenNames[k]
+    );
+    registerProperties(model.ui, ROOT_GROUP_NAME);
+    publicAPI.modified();
+  };
+
+  function listProxyProperties(gName = ROOT_GROUP_NAME) {
+    return groupChildrenNames[gName];
+  }
+
+  publicAPI.updateProxyProperty = (propertyName, propUI) => {
+    const prop = propertyMap[propertyName];
+    if (prop) {
+      Object.assign(prop, propUI);
+    } else {
+      propertyMap[propertyName] = { ...propUI };
+    }
+  };
+
+  publicAPI.activate = () => {
+    if (model.proxyManager) {
+      const setActiveMethod = `setActive${_capitalize(
+        publicAPI.getProxyGroup().slice(0, -1)
+      )}`;
+      if (model.proxyManager[setActiveMethod]) {
+        model.proxyManager[setActiveMethod](publicAPI);
+      }
+    }
+  };
+
+  // property link
+  model.propertyLinkSubscribers = {};
+  publicAPI.registerPropertyLinkForGC = (otherLink, type) => {
+    if (!(type in model.propertyLinkSubscribers)) {
+      model.propertyLinkSubscribers[type] = [];
+    }
+    model.propertyLinkSubscribers[type].push(otherLink);
+  };
+
+  publicAPI.gcPropertyLinks = (type) => {
+    const subscribers = model.propertyLinkSubscribers[type] || [];
+    while (subscribers.length) {
+      subscribers.pop().unbind(publicAPI);
+    }
+  };
+
+  model.propertyLinkMap = {};
+  publicAPI.getPropertyLink = (id, persistent = false) => {
+    if (model.propertyLinkMap[id]) {
+      return model.propertyLinkMap[id];
+    }
+    let value = null;
+    const links = [];
+    let count = 0;
+    let updateInProgress = false;
+
+    function update(source, force = false) {
+      if (updateInProgress) {
+        return null;
+      }
+
+      const needUpdate = [];
+      let sourceLink = null;
+      count = links.length;
+      while (count--) {
+        const link = links[count];
+        if (link.instance === source) {
+          sourceLink = link;
+        } else {
+          needUpdate.push(link);
+        }
+      }
+
+      if (!sourceLink) {
+        return null;
+      }
+
+      const newValue =
+        sourceLink.instance[`get${_capitalize(sourceLink.propertyName)}`]();
+      if (!shallowEquals(newValue, value) || force) {
+        value = newValue;
+        updateInProgress = true;
+        while (needUpdate.length) {
+          const linkToUpdate = needUpdate.pop();
+          linkToUpdate.instance.set({
+            [linkToUpdate.propertyName]: value,
+          });
+        }
+        updateInProgress = false;
+      }
+
+      if (model.propertyLinkMap[id].persistent) {
+        model.propertyLinkMap[id].value = newValue;
+      }
+
+      return newValue;
+    }
+
+    function unbind(instance, propertyName) {
+      const indexToDelete = [];
+      count = links.length;
+      while (count--) {
+        const link = links[count];
+        if (
+          link.instance === instance &&
+          (link.propertyName === propertyName || propertyName === undefined)
+        ) {
+          link.subscription.unsubscribe();
+          indexToDelete.push(count);
+        }
+      }
+      while (indexToDelete.length) {
+        links.splice(indexToDelete.pop(), 1);
+      }
+    }
+
+    function bind(instance, propertyName, updateMe = false) {
+      const subscription = instance.onModified(update);
+      const other = links[0];
+      links.push({
+        instance,
+        propertyName,
+        subscription,
+      });
+      if (updateMe) {
+        if (
+          model.propertyLinkMap[id].persistent &&
+          model.propertyLinkMap[id].value !== undefined
+        ) {
+          instance.set({
+            [propertyName]: model.propertyLinkMap[id].value,
+          });
+        } else if (other) {
+          update(other.instance, true);
+        }
+      }
+      return {
+        unsubscribe: () => unbind(instance, propertyName),
+      };
+    }
+
+    function unsubscribe() {
+      while (links.length) {
+        links.pop().subscription.unsubscribe();
+      }
+    }
+
+    const linkHandler = {
+      bind,
+      unbind,
+      unsubscribe,
+      persistent,
+    };
+    model.propertyLinkMap[id] = linkHandler;
+    return linkHandler;
+  };
+
+  // extract values
+  function getProperties(groupName = ROOT_GROUP_NAME) {
+    const values = [];
+    const id = model.proxyId;
+    const propertyNames = listProxyProperties(groupName) || [];
+    for (let i = 0; i < propertyNames.length; i++) {
+      const name = propertyNames[i];
+      const method = publicAPI[`get${_capitalize(name)}`];
+      const value = method ? method() : undefined;
+      const prop = {
+        id,
+        name,
+        value,
+      };
+      const children = getProperties(name);
+      if (children.length) {
+        prop.children = children;
+      }
+      values.push(prop);
+    }
+    return values;
+  }
+
+  publicAPI.listPropertyNames = () => getProperties().map((p) => p.name);
+
+  publicAPI.getPropertyByName = (name) =>
+    getProperties().find((p) => p.name === name);
+
+  publicAPI.getPropertyDomainByName = (name) =>
+    (propertyMap[name] || {}).domain;
+
+  // ui section
+  publicAPI.getProxySection = () => ({
+    id: model.proxyId,
+    name: model.proxyGroup,
+    ui: model.ui,
+    properties: getProperties(),
+  });
+
+  // free resources
+  publicAPI.delete = () => {
+    const list = Object.keys(model.propertyLinkMap);
+    let count = list.length;
+    while (count--) {
+      model.propertyLinkMap[list[count]].unsubscribe();
+    }
+    Object.keys(model.propertyLinkSubscribers).forEach(
+      publicAPI.gcPropertyLinks
+    );
+    parentDelete();
+  };
+
+  // @todo fix infinite recursion due to active source
+  publicAPI.getState = () => null;
+
+  function registerLinks() {
+    // Allow dynamic registration of links at the application level
+    if (model.links) {
+      for (let i = 0; i < model.links.length; i++) {
+        const { link, property, persistent, updateOnBind, type } =
+          model.links[i];
+        if (type === 'application') {
+          const sLink = model.proxyManager.getPropertyLink(link, persistent);
+          publicAPI.registerPropertyLinkForGC(sLink, 'application');
+          sLink.bind(publicAPI, property, updateOnBind);
+        }
+      }
+    }
+  }
+
+  setImmediateVTK(registerLinks);
+}
+
+// ----------------------------------------------------------------------------
+// proxyPropertyMapping(publicAPI, model, map)
+//
+//   map = {
+//      opacity: { modelKey: 'property', property: 'opacity' },
+//   }
+//
+// Generated API:
+//  Elevate set/get methods from internal object stored in the model to current one
+// ----------------------------------------------------------------------------
+
+function proxyPropertyMapping(publicAPI, model, map) {
+  const parentDelete = publicAPI.delete;
+  const subscriptions = [];
+
+  const propertyNames = Object.keys(map);
+  let count = propertyNames.length;
+  while (count--) {
+    const propertyName = propertyNames[count];
+    const { modelKey, property, modified = true } = map[propertyName];
+    const methodSrc = _capitalize(property);
+    const methodDst = _capitalize(propertyName);
+    publicAPI[`get${methodDst}`] = model[modelKey][`get${methodSrc}`];
+    publicAPI[`set${methodDst}`] = model[modelKey][`set${methodSrc}`];
+    if (modified) {
+      subscriptions.push(model[modelKey].onModified(publicAPI.modified));
+    }
+  }
+
+  publicAPI.delete = () => {
+    while (subscriptions.length) {
+      subscriptions.pop().unsubscribe();
+    }
+    parentDelete();
+  };
+}
+
+// ----------------------------------------------------------------------------
+// proxyPropertyState(publicAPI, model, state, defaults)
+//
+//   state = {
+//     representation: {
+//       'Surface with edges': { property: { edgeVisibility: true, representation: 2 } },
+//       Surface: { property: { edgeVisibility: false, representation: 2 } },
+//       Wireframe: { property: { edgeVisibility: false, representation: 1 } },
+//       Points: { property: { edgeVisibility: false, representation: 0 } },
+//     },
+//   }
+//
+//   defaults = {
+//      representation: 'Surface',
+//   }
+//
+// Generated API
+//   get / set Representation ( string ) => push state to various internal objects
+// ----------------------------------------------------------------------------
+
+function proxyPropertyState(
+  publicAPI,
+  model,
+  state = {},
+  defaults = {}
+) {
+  model.this = publicAPI;
+
+  function applyState(map) {
+    const modelKeys = Object.keys(map);
+    let count = modelKeys.length;
+    while (count--) {
+      const modelKey = modelKeys[count];
+      model[modelKey].set(map[modelKey]);
+    }
+  }
+
+  const modelKeys = Object.keys(defaults);
+  let count = modelKeys.length;
+  while (count--) {
+    // Add default
+    const key = modelKeys[count];
+    model[key] = defaults[key];
+
+    // Add set method
+    const mapping = state[key];
+    publicAPI[`set${_capitalize(key)}`] = (value) => {
+      if (value !== model[key]) {
+        model[key] = value;
+        const propValues = mapping[value];
+        applyState(propValues);
+        publicAPI.modified();
+      }
+    };
+  }
+
+  // Add getter
+  if (modelKeys.length) {
+    get(publicAPI, model, modelKeys);
+  }
+}
+
+// ----------------------------------------------------------------------------
+// From : https://github.com/facebookarchive/fixed-data-table/blob/master/src/vendor_upstream/dom/normalizeWheel.js
+//
+//
+// Copyright (c) 2015, Facebook, Inc.
+// All rights reserved.
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree. An additional grant
+// of patent rights can be found in the PATENTS file in the same directory.
+//
+//
+// Mouse wheel (and 2-finger trackpad) support on the web sucks.  It is
+// complicated, thus this doc is long and (hopefully) detailed enough to answer
+// your questions.
+//
+// If you need to react to the mouse wheel in a predictable way, this code is
+// like your bestest friend.// hugs//
+//
+// As of today, there are 4 DOM event types you can listen to:
+//
+//   'wheel'                -- Chrome(31+), FF(17+), IE(9+)
+//   'mousewheel'           -- Chrome, IE(6+), Opera, Safari
+//   'MozMousePixelScroll'  -- FF(3.5 only!) (2010-2013) -- don't bother!
+//   'DOMMouseScroll'       -- FF(0.9.7+) since 2003
+//
+// So what to do?  The is the best:
+//
+//   normalizeWheel.getEventType();
+//
+// In your event callback, use this code to get sane interpretation of the
+// deltas.  This code will return an object with properties:
+//
+//   spinX   -- normalized spin speed (use for zoom) - x plane
+//   spinY   -- " - y plane
+//   pixelX  -- normalized distance (to pixels) - x plane
+//   pixelY  -- " - y plane
+//
+// Wheel values are provided by the browser assuming you are using the wheel to
+// scroll a web page by a number of lines or pixels (or pages).  Values can vary
+// significantly on different platforms and browsers, forgetting that you can
+// scroll at different speeds.  Some devices (like trackpads) emit more events
+// at smaller increments with fine granularity, and some emit massive jumps with
+// linear speed or acceleration.
+//
+// This code does its best to normalize the deltas for you:
+//
+//   - spin is trying to normalize how far the wheel was spun (or trackpad
+//     dragged).  This is super useful for zoom support where you want to
+//     throw away the chunky scroll steps on the PC and make those equal to
+//     the slow and smooth tiny steps on the Mac. Key data: This code tries to
+//     resolve a single slow step on a wheel to 1.
+//
+//   - pixel is normalizing the desired scroll delta in pixel units.  You'll
+//     get the crazy differences between browsers, but at least it'll be in
+//     pixels!
+//
+//   - positive value indicates scrolling DOWN/RIGHT, negative UP/LEFT.  This
+//     should translate to positive value zooming IN, negative zooming OUT.
+//     This matches the newer 'wheel' event.
+//
+// Why are there spinX, spinY (or pixels)?
+//
+//   - spinX is a 2-finger side drag on the trackpad, and a shift + wheel turn
+//     with a mouse.  It results in side-scrolling in the browser by default.
+//
+//   - spinY is what you expect -- it's the classic axis of a mouse wheel.
+//
+//   - I dropped spinZ/pixelZ.  It is supported by the DOM 3 'wheel' event and
+//     probably is by browsers in conjunction with fancy 3D controllers .. but
+//     you know.
+//
+// Implementation info:
+//
+// Examples of 'wheel' event if you scroll slowly (down) by one step with an
+// average mouse:
+//
+//   OS X + Chrome  (mouse)     -    4   pixel delta  (wheelDelta -120)
+//   OS X + Safari  (mouse)     -  N/A   pixel delta  (wheelDelta  -12)
+//   OS X + Firefox (mouse)     -    0.1 line  delta  (wheelDelta  N/A)
+//   Win8 + Chrome  (mouse)     -  100   pixel delta  (wheelDelta -120)
+//   Win8 + Firefox (mouse)     -    3   line  delta  (wheelDelta -120)
+//
+// On the trackpad:
+//
+//   OS X + Chrome  (trackpad)  -    2   pixel delta  (wheelDelta   -6)
+//   OS X + Firefox (trackpad)  -    1   pixel delta  (wheelDelta  N/A)
+//
+// On other/older browsers.. it's more complicated as there can be multiple and
+// also missing delta values.
+//
+// The 'wheel' event is more standard:
+//
+// http://www.w3.org/TR/DOM-Level-3-Events/#events-wheelevents
+//
+// The basics is that it includes a unit, deltaMode (pixels, lines, pages), and
+// deltaX, deltaY and deltaZ.  Some browsers provide other values to maintain
+// backward compatibility with older events.  Those other values help us
+// better normalize spin speed.  Example of what the browsers provide:
+//
+//                          | event.wheelDelta | event.detail
+//        ------------------+------------------+--------------
+//          Safari v5/OS X  |       -120       |       0
+//          Safari v5/Win7  |       -120       |       0
+//         Chrome v17/OS X  |       -120       |       0
+//         Chrome v17/Win7  |       -120       |       0
+//                IE9/Win7  |       -120       |   undefined
+//         Firefox v4/OS X  |     undefined    |       1
+//         Firefox v4/Win7  |     undefined    |       3
+//
+// ----------------------------------------------------------------------------
+
+// Reasonable defaults
+const PIXEL_STEP = 10;
+const LINE_HEIGHT = 40;
+const PAGE_HEIGHT = 800;
+
+function normalizeWheel(wheelEvent) {
+  let sX = 0; // spinX
+  let sY = 0; // spinY
+  let pX = 0; // pixelX
+  let pY = 0; // pixelY
+
+  // Legacy
+  if ('detail' in wheelEvent) {
+    sY = wheelEvent.detail;
+  }
+  if ('wheelDelta' in wheelEvent) {
+    sY = -wheelEvent.wheelDelta / 120;
+  }
+  if ('wheelDeltaY' in wheelEvent) {
+    sY = -wheelEvent.wheelDeltaY / 120;
+  }
+  if ('wheelDeltaX' in wheelEvent) {
+    sX = -wheelEvent.wheelDeltaX / 120;
+  }
+
+  // side scrolling on FF with DOMMouseScroll
+  if ('axis' in wheelEvent && wheelEvent.axis === wheelEvent.HORIZONTAL_AXIS) {
+    sX = sY;
+    sY = 0;
+  }
+
+  pX = sX * PIXEL_STEP;
+  pY = sY * PIXEL_STEP;
+
+  if ('deltaY' in wheelEvent) {
+    pY = wheelEvent.deltaY;
+  }
+  if ('deltaX' in wheelEvent) {
+    pX = wheelEvent.deltaX;
+  }
+
+  if ((pX || pY) && wheelEvent.deltaMode) {
+    if (wheelEvent.deltaMode === 1) {
+      // delta in LINE units
+      pX *= LINE_HEIGHT;
+      pY *= LINE_HEIGHT;
+    } else {
+      // delta in PAGE units
+      pX *= PAGE_HEIGHT;
+      pY *= PAGE_HEIGHT;
+    }
+  }
+
+  // Fall-back if spin cannot be determined
+  if (pX && !sX) {
+    sX = pX < 1 ? -1 : 1;
+  }
+  if (pY && !sY) {
+    sY = pY < 1 ? -1 : 1;
+  }
+
+  return {
+    spinX: sX,
+    spinY: sY || sX,
+    pixelX: pX,
+    pixelY: pY || pX,
+  };
+}
+
+// ----------------------------------------------------------------------------
+// Default export
+// ----------------------------------------------------------------------------
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  algo,
+  capitalize,
+  chain,
+  debounce,
+  enumToString,
+  event,
+  EVENT_ABORT,
+  formatBytesToProperUnit,
+  formatNumbersWithThousandSeparator,
+  get,
+  getArray,
+  getCurrentGlobalMTime,
+  getStateArrayMapFunc,
+  isVtkObject,
+  keystore,
+  measurePromiseExecution,
+  moveToProtected,
+  newInstance,
+  newTypedArray,
+  newTypedArrayFrom,
+  normalizeWheel,
+  obj,
+  proxy,
+  proxyPropertyMapping,
+  proxyPropertyState,
+  safeArrays,
+  set,
+  setArray,
+  setGet,
+  setGetArray,
+  setImmediate: setImmediateVTK,
+  setLoggerFunction,
+  throttle,
+  traverseInstanceTree,
+  TYPED_ARRAYS, // deprecated todo remove on breaking API revision
+  uncapitalize,
+  VOID,
+  vtkDebugMacro,
+  vtkErrorMacro,
+  vtkInfoMacro,
+  vtkLogMacro,
+  vtkOnceErrorMacro,
+  vtkWarningMacro,
+  // vtk.js internal use
+  objectSetterMap,
+});
+
+
+/***/ }),
+
+/***/ "./node_modules/vtk.js/Sources/vtk.js":
+/*!********************************************!*\
+  !*** ./node_modules/vtk.js/Sources/vtk.js ***!
+  \********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ vtk),
+/* harmony export */   vtkGlobal: () => (/* binding */ vtkGlobal)
+/* harmony export */ });
+/* harmony import */ var globalthis__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! globalthis */ "./node_modules/globalthis/index.js");
+/* harmony import */ var globalthis__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(globalthis__WEBPACK_IMPORTED_MODULE_0__);
+
+
+const vtkGlobal = globalthis__WEBPACK_IMPORTED_MODULE_0___default()(); // returns native globalThis if compliant
+
+const factoryMapping = {
+  vtkObject: () => null,
+};
+
+function vtk(obj) {
+  if (obj === null || obj === undefined) {
+    return obj;
+  }
+  if (obj.isA) {
+    return obj;
+  }
+  if (!obj.vtkClass) {
+    if (vtkGlobal.console && vtkGlobal.console.error) {
+      vtkGlobal.console.error('Invalid VTK object');
+    }
+    return null;
+  }
+  const constructor = factoryMapping[obj.vtkClass];
+  if (!constructor) {
+    if (vtkGlobal.console && vtkGlobal.console.error) {
+      vtkGlobal.console.error(
+        `No vtk class found for Object of type ${obj.vtkClass}`
+      );
+    }
+    return null;
+  }
+
+  // Shallow copy object
+  const model = { ...obj };
+
+  // Convert into vtkObject any nested key
+  Object.keys(model).forEach((keyName) => {
+    if (
+      model[keyName] &&
+      typeof model[keyName] === 'object' &&
+      model[keyName].vtkClass
+    ) {
+      model[keyName] = vtk(model[keyName]);
+    }
+  });
+
+  // Return the root
+  const newInst = constructor(model);
+  if (newInst && newInst.modified) {
+    newInst.modified();
+  }
+  return newInst;
+}
+
+function register(vtkClassName, constructor) {
+  factoryMapping[vtkClassName] = constructor;
+}
+
+// Nest register method under the vtk function
+vtk.register = register;
+
+
+/***/ }),
+
 /***/ "?d4c0":
 /*!************************!*\
   !*** crypto (ignored) ***!
@@ -80125,6 +85056,7 @@ var __webpack_exports__ = {};
   \**********************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   change3DLight: () => (/* binding */ change3DLight),
 /* harmony export */   change3dColor: () => (/* binding */ change3dColor),
 /* harmony export */   changeEvent: () => (/* binding */ changeEvent),
 /* harmony export */   exportImg: () => (/* binding */ exportImg),
@@ -80150,7 +85082,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _kitware_vtk_js_Interaction_Manipulators_MouseCameraTrackballPanManipulator__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballPanManipulator */ "./node_modules/@kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballPanManipulator.js");
 /* harmony import */ var _kitware_vtk_js_Interaction_Manipulators_MouseCameraTrackballZoomManipulator__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballZoomManipulator */ "./node_modules/@kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballZoomManipulator.js");
 /* harmony import */ var _kitware_vtk_js_Interaction_Style_InteractorStyleManipulator__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Style/InteractorStyleManipulator */ "./node_modules/@kitware/vtk.js/Interaction/Style/InteractorStyleManipulator.js");
+/* harmony import */ var _windowlevelStyle__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./windowlevelStyle */ "./src/windowlevelStyle.js");
 // import "@kitware/vtk.js/favicon";
+
 
 
 
@@ -80173,6 +85107,9 @@ function change3dColor(color) {
 }
 function exportImg() {
   (0,_3d__WEBPACK_IMPORTED_MODULE_11__.export3dImg)();
+}
+function change3DLight(value) {
+  (0,_3d__WEBPACK_IMPORTED_MODULE_11__.change3DLightIntensity)(value);
 }
 function calculateB(a) {
   // 根据给定的数据点，使用分段线性回归进行近似
@@ -80214,7 +85151,7 @@ async function load(ArrayBuffer) {
   for (var i = 0; i < Object.keys(ArrayBuffer).length; i++) {
     const buffer = await ArrayBuffer[i]; // Resolve each promise
     if (buffer && buffer.byteLength > 0) {
-      console.log("arrayBuffer", buffer);
+      // console.log("arrayBuffer", buffer)
       arrayBuffer.push(buffer);
     }
   }
@@ -80240,7 +85177,7 @@ function changeEvent(type) {
   switch (eventType) {
     case 1:
       viewObj.forEach(obj => {
-        obj.interactor.setInteractorStyle(_kitware_vtk_js_Interaction_Style_InteractorStyleImage__WEBPACK_IMPORTED_MODULE_10__["default"].newInstance());
+        obj.interactor.setInteractorStyle(_windowlevelStyle__WEBPACK_IMPORTED_MODULE_16__["default"].newInstance());
       });
       break;
     case 2:
@@ -80273,11 +85210,7 @@ function changeEvent(type) {
       break;
   }
 }
-function load3D(arrayBuffer, divElement) {
-  if (!arrayBuffer) {
-    // 检查输入是否有效
-    throw new Error("arrayBuffer 不能为空！");
-  }
+function dx处理(arrayBuffer) {
   for (let i = 0; i < arrayBuffer.length; i++) {
     if (arrayBuffer[i].h_img && arrayBuffer[i].h_img.dx != 0) {
       var arrayBuffer_temp = new Int16Array(arrayBuffer[i].h_img.data.length);
@@ -80286,6 +85219,13 @@ function load3D(arrayBuffer, divElement) {
     }
   }
   arrayBuffer.sort((a, b) => a.image_position[2] - b.image_position[2]);
+}
+function load3D(arrayBuffer, divElement) {
+  if (!arrayBuffer) {
+    // 检查输入是否有效
+    throw new Error("arrayBuffer 不能为空！");
+  }
+  dx处理(arrayBuffer);
   console.log("arrayBuffer", arrayBuffer);
   const syntheticImageData = new _syntheticimage__WEBPACK_IMPORTED_MODULE_6__["default"]();
   const {
@@ -80312,7 +85252,7 @@ function loadMPR(arrayBuffer, divElement) {
     // 检查输入是否有效
     throw new Error("arrayBuffer 不能为空！");
   }
-  arrayBuffer.sort((a, b) => a.image_position[2] - b.image_position[2]);
+  dx处理(arrayBuffer);
   const syntheticImageData = new _syntheticimage__WEBPACK_IMPORTED_MODULE_6__["default"]();
   const {
     imageData,
@@ -80569,7 +85509,9 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
       slider: obj.slider
     });
     // 渲染当前视图
-    obj.renderer.getActiveCamera().setParallelScale(200);
+    const image = obj.reslice.getOutputData();
+    const boundsX = image.getBounds()[1] > image.getBounds()[3] ? image.getBounds()[1] : image.getBounds()[3];
+    obj.renderer.getActiveCamera().setParallelScale(boundsX / 1.95);
     obj.interactor.render();
   });
   // 重置 3D 渲染器的相机，确保视图显示正确
@@ -80594,21 +85536,24 @@ function setColorProperties(obj, windowWidth, windowCenter) {
     console.warn("windowCenter 不是有效的整数");
   }
 }
-function f_load_directory(selectFiles) {
-  let dicom_arraybuffer = [];
-  for (let i = 0; i < selectFiles.length; i++) {
-    let f = null;
-    for (var file of selectFiles) {
-      if (file.name == i + 1) {
-        f = file;
-      }
+async function f_load_directory(selectFiles) {
+  const dicom_arraybuffer = [];
+
+  // 按文件名排序确保顺序
+  const sortedFiles = [...selectFiles].sort((a, b) => parseInt(a.name) - parseInt(b.name));
+  for (const file of sortedFiles) {
+    try {
+      const arrayBuffer = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = evt => resolve(evt.target.result);
+        reader.onerror = err => reject(err);
+        reader.readAsArrayBuffer(file);
+      });
+      dicom_arraybuffer.push(arrayBuffer);
+    } catch (err) {
+      console.error(`读取文件 ${file.name} 失败:`, err);
+      // 可以选择继续处理其他文件或抛出错误
     }
-    const readFileAsync = f => new Promise(resolve => {
-      const reader = new FileReader();
-      reader.onload = evt => resolve(evt.target.result);
-      reader.readAsArrayBuffer(f);
-    });
-    dicom_arraybuffer.push(readFileAsync(f));
   }
   return dicom_arraybuffer;
 }
