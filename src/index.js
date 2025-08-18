@@ -133,7 +133,6 @@ function dx处理(arrayBuffer) {
       arrayBuffer_temp = Int16Array.from(arrayBuffer[i].h_img.data, num => num + arrayBuffer[i].h_img.dx);
       arrayBuffer[i].h_img.data = arrayBuffer_temp
       arrayBuffer[i].window_l = arrayBuffer[i].window_l + arrayBuffer[i].h_img.dx
-      arrayBuffer[i].window_w = arrayBuffer[i].window_w + arrayBuffer[i].h_img.dx
     }
   }
   arrayBuffer.sort((a, b) => a.image_position[2] - b.image_position[2])
