@@ -453,6 +453,14 @@ function setColorProperties(obj, windowWidth, windowCenter) {
   }
 }
 
+export async function changeMPRWindowLevel(windowWidth, windowCenter) {
+  console.log(windowWidth, windowCenter)
+  viewObj.forEach((obj) => {
+    setColorProperties(obj, windowWidth, windowCenter)
+    obj.interactor.render();
+  })
+}
+
 export async function f_load_directory(selectFiles) {
   const dicom_arraybuffer = [];
 

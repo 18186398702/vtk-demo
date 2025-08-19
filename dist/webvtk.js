@@ -70047,7 +70047,7 @@ class SyntheticImageData {
       //   data_b[pix_num] = hitbit.data[pix_num]-hitbit.min
       // }
       // hitbit.data = data_b
-      // console.log("hitbit", dicomdata)
+      console.log("hitbit", dicomdata);
       // 获取 DICOM 文件中的像素间距 (Pixel Spacing)
       var hitbit = this.h_b_obj_return_h_img(dicomdata);
       const pixel_spacing = dicomdata.tags["00280030"].value;
@@ -85059,6 +85059,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   change3DLight: () => (/* binding */ change3DLight),
 /* harmony export */   change3dColor: () => (/* binding */ change3dColor),
 /* harmony export */   changeEvent: () => (/* binding */ changeEvent),
+/* harmony export */   changeMPRWindowLevel: () => (/* binding */ changeMPRWindowLevel),
 /* harmony export */   exportImg: () => (/* binding */ exportImg),
 /* harmony export */   f_load_directory: () => (/* binding */ f_load_directory),
 /* harmony export */   load: () => (/* binding */ load),
@@ -85536,6 +85537,13 @@ function setColorProperties(obj, windowWidth, windowCenter) {
   } else {
     console.warn("windowCenter 不是有效的整数");
   }
+}
+async function changeMPRWindowLevel(windowWidth, windowCenter) {
+  console.log(windowWidth, windowCenter);
+  viewObj.forEach(obj => {
+    setColorProperties(obj, windowWidth, windowCenter);
+    obj.interactor.render();
+  });
 }
 async function f_load_directory(selectFiles) {
   const dicom_arraybuffer = [];

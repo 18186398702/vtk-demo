@@ -78,6 +78,8 @@
   <button onclick="ccc(1)">调窗</button>
   <button onclick="ccc(2)">平移</button>
   <button onclick="ccc(3)">缩放</button>
+  <button onclick="changeMPRWindowLevel(1500,-500)">肺窗</button>
+  <button onclick="changeMPRWindowLevel(3500,750)">骨窗</button>
   <div style="float: right;">
     <button onclick="exportImg()">导出</button>
     <select onchange="loadcolor(this.value)">
@@ -182,6 +184,10 @@
     function change3dLight(value) {
       pian.change3DLight(value)
     }
+    function changeMPRWindowLevel(w, l) {
+      pian.changeMPRWindowLevel(w, l)
+    }
   </script>
 </body>
+
 </html>
