@@ -221,8 +221,6 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
       }
 
       if (eventType == 4) {
-        currentLine.setAttribute('x2', e.position.x / 1.8);
-        currentLine.setAttribute('y2', svgHeight - e.position.y / 1.8);
       }
     })
     obj.interactor.onLeftButtonRelease((e) => {
@@ -246,17 +244,16 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
       }
 
       if (eventType == 4) {
-
-        startX = e.position.x / 1.8;
-        startY = svgHeight - e.position.y / 1.8;
-        currentLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        currentLine.setAttribute('stroke', '#ff0000');
-        currentLine.setAttribute('stroke-width', '2');
-        currentLine.setAttribute('x1', startX);
-        currentLine.setAttribute('y1', startY);
-        currentLine.setAttribute('x2', startX);
-        currentLine.setAttribute('y2', startY);
-        svg.appendChild(currentLine);
+        // startX = e.position.x / 1.8;
+        // startY = svgHeight - e.position.y / 1.8;
+        // currentLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        // currentLine.setAttribute('stroke', '#ff0000');
+        // currentLine.setAttribute('stroke-width', '2');
+        // currentLine.setAttribute('x1', startX);
+        // currentLine.setAttribute('y1', startY);
+        // currentLine.setAttribute('x2', startX);
+        // currentLine.setAttribute('y2', startY);
+        // svg.appendChild(currentLine);
       }
 
       // 创建SVG线条元素
