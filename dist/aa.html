@@ -1,0 +1,72 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>重叠Canvas点击测试</title>
+    <style>
+        .canvas-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            border: 1px solid #ccc;
+        }
+        #canvas1 {
+            background-color: rgba(255, 0, 0, 0.3);
+            z-index: 1;
+        }
+        #canvas2 {
+            background-color: rgba(0, 0, 255, 0.3);
+            z-index: 2;
+            pointer-events: none; /* 关键：允许事件穿透 */
+        }
+    </style>
+</head>
+<body>
+    <div class="canvas-container">
+        <canvas id="canvas1" width="400" height="400"></canvas>
+        <canvas id="canvas2" width="400" height="400"></canvas>
+    </div>
+    <div id="log"></div>
+
+    <script>
+        const canvas1 = document.getElementById('canvas1');
+        const canvas2 = document.getElementById('canvas2');
+        const log = document.getElementById('log');
+        
+        function handleClick(canvas, name, color) {
+            return function(e) {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                log.innerHTML += `<p>${name} 被点击 (${x}, ${y})</p>`;
+                
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(x, y, 8, 0, Math.PI * 2);
+                ctx.fill();
+            };
+        }
+        
+        canvas1.addEventListener('click', handleClick(canvas1, 'Canvas1', 'red'));
+        canvas2.addEventListener('click', handleClick(canvas2, 'Canvas2', 'blue'));
+        
+        // 初始化文字
+        [canvas1, canvas2].forEach((canvas, i) => {
+            const ctx = canvas.getContext('2d');
+            ctx.font = '20px Arial';
+            ctx.fillStyle = 'black';
+            ctx.textAlign = 'center';
+            ctx.fillText(`Canvas ${i+1}`, 200, 200);
+        });
+    </script>
+</body>
+</html>

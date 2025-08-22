@@ -16,10 +16,12 @@ import vtkInteractorStyleImage from "@kitware/vtk.js/Interaction/Style/Interacto
 import { Demo3d, load3dColor, export3dImg, change3DLightIntensity } from "./3d";
 import { mat3, vec3 } from 'gl-matrix';
 import vtkMatrixBuilder from '@kitware/vtk.js/Common/Core/MatrixBuilder';
-import vtkMouseCameraTrackballPanManipulator from '@kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballPanManipulator';
+// import vtkMouseCameraTrackballPanManipulator from '@kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballPanManipulator';
+import vtkMouseCameraTrackballPanManipulator from "./vtkMoveCamera"
 import vtkMouseCameraTrackballZoomManipulator from '@kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballZoomManipulator';
 import vtkInteractorStyleManipulator from '@kitware/vtk.js/Interaction/Style/InteractorStyleManipulator';
 import windowlevelStyle from "./windowlevelStyle";
+import { vtk画线, drawAllLines } from "./画线";
 export function change3dColor(color) {
   load3dColor(color)
 }
@@ -32,34 +34,7 @@ export function change3DLight(value) {
   change3DLightIntensity(value)
 }
 
-function calculateB(a) {
-  // 根据给定的数据点，使用分段线性回归进行近似
-  // 我们将数据点分为几个区间，每个区间使用不同的线性方程
-  // 数据点排序
-  const dataPoints = [
-    { a: 450, b: 0.45 },
-    { a: 270, b: 0.68 },
-    { a: 225, b: 0.9 },
-    { a: 135, b: 1.48 }
-  ];
-  // 对数据点进行排序
-  dataPoints.sort((a, b) => a.a - b.a);
-  // 找到输入值 a 所在的区间
-  for (let i = 0; i < dataPoints.length - 1; i++) {
-    const point1 = dataPoints[i];
-    const point2 = dataPoints[i + 1];
-    if (a >= point1.a && a <= point2.a) {
-      // 计算斜率和截距
-      const slope = (point2.b - point1.b) / (point2.a - point1.a);
-      const intercept = point1.b - slope * point1.a;
-      // 使用线性插值计算b值
-      return slope * a + intercept;
-    }
-  }
-  // 如果a超出所有数据点的范围，返回最近的数据点
-  if (a < dataPoints[0].a) return dataPoints[0].b;
-  if (a > dataPoints[dataPoints.length - 1].a) return dataPoints[dataPoints.length - 1].b;
-}
+
 
 
 export async function load(ArrayBuffer) {
@@ -88,6 +63,7 @@ export function loadDicom(arrayBuffer) {
 }
 let eventType = 1
 let viewObj = null
+let callBackFun = null
 export function changeEvent(type) {
   eventType = type
   switch (eventType) {
@@ -97,8 +73,7 @@ export function changeEvent(type) {
       })
       break;
     case 2:
-      console.log("changeEvent", eventType)
-      viewObj.forEach(obj => {
+      viewObj.forEach((obj, i) => {
         const stl = vtkInteractorStyleManipulator.newInstance()
         obj.interactor.setInteractorStyle(stl);
         // 2. 添加自定义平移操纵器（左键拖动）
@@ -107,6 +82,7 @@ export function changeEvent(type) {
           shift: false,
           control: false
         });
+        // panManipulator.setCallBack(callBackFun, i)
         stl.addMouseManipulator(panManipulator);
       })
       break
@@ -123,7 +99,10 @@ export function changeEvent(type) {
       })
       break;
   }
-
+  for (let i = 0; i < 3; i++) {
+    const canvas = document.getElementById('canvas' + i);
+    canvas.style.pointerEvents = eventType == 4 ? '' : 'none';
+  }
 }
 
 function dx处理(arrayBuffer) {
@@ -173,6 +152,8 @@ export function loadMPR(arrayBuffer, divElement) {
   const syntheticImageData = new SyntheticImageData();
   const { imageData, windowWidth, windowCenter } = syntheticImageData.ImageData(arrayBuffer)
   MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
+  vtk画线()
+  callBackFun = drawAllLines
 }
 
 
@@ -193,6 +174,11 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
   view3D.renderer.addActor(outlineActor);
   // 对每个视图的属性进行操作，`viewAttributes` 是包含多个视图属性的数组
   viewAttributes.forEach((obj, i) => {
+    console.log("viewAttributes", obj);
+    obj.widgetInstance.onInteractionEvent((e) => {
+      console.log("onInteractionEvent", e);
+    })
+
     // 设置该视图的重采样输入数据为加载的图像数据
     obj.reslice.setInputData(imageData);
     setColorProperties(obj, windowWidth, windowCenter);
@@ -214,62 +200,24 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
     let startX, startY;
     let currentLine = null;
     let previousPosition = {};
-    const container = obj.grw.getContainer();
-    const svg = container.querySelector('svg');
+    // const container = obj.grw.getContainer();
+    // const svg = container.querySelector('svg');
     // 获得svg实际高度
-    const svgHeight = svg.height.baseVal.value;
+    // const svgHeight = svg.height.baseVal.value;
     obj.interactor.onMouseEnter((e) => {
       console.log("鼠标进入")
     })
     obj.interactor.onMouseMove((e) => {
       if (!mouseDrawing) return;
-      // if (eventType == 2) {
-      //   const currentPosition = e.position;
-      //   const renderer = obj.renderer;
-      //   const camera = renderer.getActiveCamera();
-      //   // 计算鼠标移动的增量
-      //   let deltaX = currentPosition.x - previousPosition.x;
-      //   let deltaY = currentPosition.y - previousPosition.y;
-      //   previousPosition = JSON.parse(JSON.stringify(currentPosition));
-      //   // 根据相机缩放尺寸合理平移相机位置
-      //   let scale = camera.getParallelScale()
-      //   // let bl = 160 / scale
-      //   let canvasH = container.offsetHeight
-      //   console.log(canvasH, calculateB(canvasH))
-      //   let bl = calculateB(canvasH) * scale / 200
-      //   deltaX = -deltaX * bl;
-      //   deltaY = deltaY * bl;
-      //   console.log(deltaX, deltaY)
-      //   if (i == 0) {
-      //     camera.translate(0, deltaX, -deltaY);
-      //   } else if (i == 1) {
-      //     camera.translate(deltaX, 0, -deltaY);
-      //   } else {
-      //     camera.translate(deltaX, deltaY, 0);
-      //   }
-
-      //   renderer.resetCameraClippingRange();
-      //   obj.interactor.render();
-      // }
+      if (eventType == 2) {
+        const currentPosition = e.position;
+        // 计算鼠标移动的增量
+        let deltaX = currentPosition.x - previousPosition.x;
+        let deltaY = currentPosition.y - previousPosition.y;
+        previousPosition = JSON.parse(JSON.stringify(currentPosition));
+        callBackFun(i, deltaX / 2, -deltaY / 2)
+      }
       if (eventType == 3) {
-        //   const currentPosition = e.position;
-        //   const renderer = obj.renderer;
-        //   const camera = renderer.getActiveCamera();
-        //   const deltaY = currentPosition.y - previousPosition.y;
-        //   previousPosition = JSON.parse(JSON.stringify(currentPosition));
-        //   // 缩放相机
-        //   console.log(camera)
-        //   let scale = camera.getParallelScale()
-        //   console.log(camera.getPhysicalScale())
-        //   scale -= deltaY * 0.5
-        //   if (scale < 1) {
-        //     scale = 1
-        //   }
-        //   console.log(scale)
-        //   camera.setParallelScale(scale);
-
-        //   renderer.resetCameraClippingRange();
-        //   obj.interactor.render();
       }
 
       if (eventType == 4) {
@@ -288,10 +236,11 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
       currentLine = null;
     })
     obj.interactor.onLeftButtonPress((e) => {
+      console.log(e.position)
       mouseDrawing = true;
-      // if (eventType == 2) {
-      //   previousPosition = e.position;
-      // }
+      if (eventType == 2) {
+        previousPosition = e.position;
+      }
       if (eventType == 3) {
         previousPosition = e.position;
       }
@@ -370,22 +319,8 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
     viewAttributes.forEach((v) => {
 
       v.widgetInstance.onWidgetChange((event) => {
-
-        // console.log("事件类型", event)
+        console.log("事件类型", event)
       })
-      // 在交互开始时，更新重采样器的状态
-      // v.widgetInstance.onStartInteractionEvent(() => {
-      //   loadimage.updateReslice(view3D, widget, widgetState, {
-      //     viewType,
-      //     reslice,
-      //     actor: obj.resliceActor,
-      //     renderer: obj.renderer,
-      //     resetFocalPoint: false, // 交互开始时不重置焦点位置
-      //     computeFocalPointOffset: true, // 允许计算焦点偏移
-      //     sphereSources: obj.sphereSources,
-      //     slider: obj.slider,
-      //   });
-      // });
 
       // 在交互过程中，更新切片的位置和焦点
       v.widgetInstance.onInteractionEvent(

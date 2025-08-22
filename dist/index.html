@@ -78,6 +78,7 @@
   <button onclick="ccc(1)">调窗</button>
   <button onclick="ccc(2)">平移</button>
   <button onclick="ccc(3)">缩放</button>
+  <button onclick="ccc(4)">画线</button>
   <button onclick="changeMPRWindowLevel(1500,-500)">肺窗</button>
   <button onclick="changeMPRWindowLevel(3500,750)">骨窗</button>
   <div style="float: right;">
@@ -105,6 +106,40 @@
   <div style="width: 100%;display: flex;">
     <div id="container" style="width:  600px;height:  600px; border: 1px solid rgb(116, 116, 116)"></div>
     <div id="container3D" style="width: 600px;height: 600px; border: 1px solid rgb(116, 116, 116)"></div>
+  </div>
+  <div class="controls">
+    <div class="control-group">
+      <h3>画笔设置</h3>
+      <div>
+        <label>线条宽度: <input type="number" id="lineWidth" value="3" min="1" max="20"></label>
+      </div>
+      <div class="color-picker">
+        <label>线条颜色:</label>
+        <input type="color" id="lineColor" value="#0984e3">
+      </div>
+      <button id="clearBtn">清空画布</button>
+    </div>
+
+    <div class="control-group">
+      <h3>视图控制</h3>
+      <div>
+        <label>X偏移: <input type="number" id="offsetX" value="10"></label>
+      </div>
+      <div>
+        <label>Y偏移: <input type="number" id="offsetY" value="10"></label>
+      </div>
+      <button id="moveBtn">移动视图</button>
+    </div>
+
+    <div class="control-group">
+      <h3>缩放控制</h3>
+      <div>
+        <label>缩放比例: <input type="number" id="scaleFactor" value="1.1" step="0.1"></label>
+      </div>
+      <button id="zoomInBtn">放大</button>
+      <button id="zoomOutBtn">缩小</button>
+      <button id="resetBtn">重置视图</button>
+    </div>
   </div>
   <script src="./webvtk.js"></script>
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
