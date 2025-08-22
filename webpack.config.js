@@ -26,7 +26,7 @@ module.exports = {
     open: true,       // 自动打开浏览器
   },
 
-  devtool: false, // 禁用 source map 生成（修改点）
+  devtool: "source-map", // 禁用 source map 生成（修改点）
 
   module: {
     rules: [
