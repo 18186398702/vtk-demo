@@ -1,8 +1,6 @@
 var lines = [[], [], []]
 var lineOffset = [{ x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }]
-let offsetX = 0;
-let offsetY = 0;
-let currentScale = 1;
+var lineScale = [1, 1, 1]
 export function vtk画线() {
     for (let i = 0; i < 3; i++) {
         const canvas = document.getElementById('canvas' + i);
@@ -32,8 +30,8 @@ export function vtk画线() {
         // 获取正确的Canvas坐标（考虑缩放和偏移）
         function getCanvasPosition(clientX, clientY) {
             const rect = canvas.getBoundingClientRect();
-            const x = (clientX - rect.left - lineOffset[i].x) / currentScale;
-            const y = (clientY - rect.top - lineOffset[i].y) / currentScale;
+            const x = (clientX - rect.left - lineOffset[i].x) / lineScale[i];
+            const y = (clientY - rect.top - lineOffset[i].y) / lineScale[i];
             return { x, y };
         }
 
@@ -53,7 +51,7 @@ export function vtk画线() {
             drawAllLines(i);
             ctx.save();
             ctx.translate(lineOffset[i].x, lineOffset[i].y);
-            ctx.scale(currentScale, currentScale);
+            ctx.scale(lineScale[i], lineScale[i]);
 
             ctx.beginPath();
             ctx.moveTo(startPoint.x, startPoint.y);
@@ -61,7 +59,6 @@ export function vtk画线() {
             ctx.strokeStyle = document.getElementById('lineColor').value;
             ctx.lineWidth = document.getElementById('lineWidth').value;
             ctx.stroke();
-
             ctx.restore();
         });
 
@@ -90,66 +87,66 @@ export function vtk画线() {
         });
 
 
-        document.getElementById('zoomInBtn').addEventListener('click', () => {
-            const scaleFactor = parseFloat(document.getElementById('scaleFactor').value);
-            const prevScale = currentScale;
-            currentScale *= scaleFactor;
+        // document.getElementById('zoomInBtn').addEventListener('click', () => {
+        //     const scaleFactor = parseFloat(document.getElementById('scaleFactor').value);
+        //     const prevScale = currentScale;
+        //     currentScale *= scaleFactor;
 
-            // 调整偏移量保持中心点
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            offsetX = centerX - (centerX - offsetX) * (currentScale / prevScale);
-            offsetY = centerY - (centerY - offsetY) * (currentScale / prevScale);
+        //     // 调整偏移量保持中心点
+        //     const centerX = canvas.width / 2;
+        //     const centerY = canvas.height / 2;
+        //     offsetX = centerX - (centerX - offsetX) * (currentScale / prevScale);
+        //     offsetY = centerY - (centerY - offsetY) * (currentScale / prevScale);
 
-            drawAllLines();
-        });
+        //     drawAllLines();
+        // });
 
-        document.getElementById('zoomOutBtn').addEventListener('click', () => {
-            const scaleFactor = parseFloat(document.getElementById('scaleFactor').value);
-            const prevScale = currentScale;
-            currentScale /= scaleFactor;
+        // document.getElementById('zoomOutBtn').addEventListener('click', () => {
+        //     const scaleFactor = parseFloat(document.getElementById('scaleFactor').value);
+        //     const prevScale = currentScale;
+        //     currentScale /= scaleFactor;
 
-            // 调整偏移量保持中心点
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            offsetX = centerX - (centerX - offsetX) * (currentScale / prevScale);
-            offsetY = centerY - (centerY - offsetY) * (currentScale / prevScale);
+        //     // 调整偏移量保持中心点
+        //     const centerX = canvas.width / 2;
+        //     const centerY = canvas.height / 2;
+        //     offsetX = centerX - (centerX - offsetX) * (currentScale / prevScale);
+        //     offsetY = centerY - (centerY - offsetY) * (currentScale / prevScale);
 
-            drawAllLines();
-        });
+        //     drawAllLines();
+        // });
 
-        document.getElementById('resetBtn').addEventListener('click', () => {
-            currentScale = 1;
-            offsetX = 0;
-            offsetY = 0;
-            drawAllLines();
-        });
+        // document.getElementById('resetBtn').addEventListener('click', () => {
+        //     currentScale = 1;
+        //     offsetX = 0;
+        //     offsetY = 0;
+        //     drawAllLines();
+        // });
         // 初始化
         initCanvas();
     }
-    document.getElementById('moveBtn').addEventListener('click', () => {
-        const moveX = parseInt(document.getElementById('offsetX').value);
-        const moveY = parseInt(document.getElementById('offsetY').value);
-
-
-        drawAllLines(1);
-    });
 
 }
-export function drawAllLines(index, moveX, moveY) {
-
+// 平移回调
+export function drawAllLines(index, moveX, moveY, scaleFactor) {
+    const canvas = document.getElementById('canvas' + index);
     if (moveX || moveY) {
         lineOffset[index].x += moveX;
         lineOffset[index].y += moveY;
     }
+    if (scaleFactor) {
+        const prevScale = lineScale[index];
+        lineScale[index] *= scaleFactor;
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        lineOffset[index].x = centerX - (centerX - lineOffset[index].x) * (lineScale[index] / prevScale);
+        lineOffset[index].y = centerY - (centerY - lineOffset[index].y) * (lineScale[index] / prevScale);
+    }
 
-    const canvas = document.getElementById('canvas' + index);
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
     ctx.translate(lineOffset[index].x, lineOffset[index].y);
-    ctx.scale(currentScale, currentScale);
-
+    ctx.scale(lineScale[index], lineScale[index]);
     lines[index].forEach(line => {
         ctx.beginPath();
         ctx.moveTo(line.start.x, line.start.y);
@@ -158,6 +155,5 @@ export function drawAllLines(index, moveX, moveY) {
         ctx.lineWidth = line.width;
         ctx.stroke();
     });
-
     ctx.restore();
 }

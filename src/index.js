@@ -138,12 +138,6 @@ export function load3D(arrayBuffer, divElement) {
  */
 
 export function loadMPR(arrayBuffer, divElement) {
-  // for (let i = 0; i < arrayBuffer.length; i++) {
-  //   if (arrayBuffer[i].h_img && arrayBuffer[i].h_img.dx != 0) {
-  //     arrayBuffer[i].h_img.data = arrayBuffer[i].h_img.data.map(num => num + arrayBuffer[i].h_img.dx)
-  //   }
-  // }
-  console.log("loadMPR", arrayBuffer)
   if (!arrayBuffer) {
     // 检查输入是否有效
     throw new Error("arrayBuffer 不能为空！");
@@ -200,10 +194,7 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
     let startX, startY;
     let currentLine = null;
     let previousPosition = {};
-    // const container = obj.grw.getContainer();
-    // const svg = container.querySelector('svg');
-    // 获得svg实际高度
-    // const svgHeight = svg.height.baseVal.value;
+    let preCameraScale = obj.renderer.getActiveCamera().getParallelScale();
     obj.interactor.onMouseEnter((e) => {
       console.log("鼠标进入")
     })
@@ -218,6 +209,10 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
         callBackFun(i, deltaX / 2, -deltaY / 2)
       }
       if (eventType == 3) {
+        const currentScale = obj.renderer.getActiveCamera().getParallelScale();
+        let scaleChange = preCameraScale/currentScale;
+        preCameraScale = currentScale;
+        callBackFun(i, 0, 0, scaleChange)
       }
 
       if (eventType == 4) {
@@ -229,6 +224,8 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
       console.log(camera, camera.get())
       // 获取表示对象
       const imageData = obj.reslice.getOutputData()
+      const image = imageData.getPointData().getScalars().getData();
+      console.log(image)
       console.log(imageData.getDimensions(), imageData.getSpacing(), imageData.getBounds())
       mouseDrawing = false;
       currentLine = null;
@@ -240,7 +237,7 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
         previousPosition = e.position;
       }
       if (eventType == 3) {
-        previousPosition = e.position;
+        preCameraScale = obj.renderer.getActiveCamera().getParallelScale();
       }
 
       if (eventType == 4) {
