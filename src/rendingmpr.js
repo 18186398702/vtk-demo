@@ -428,6 +428,7 @@ class MPRRendering {
 
       // 创建图像容器
       const elementImage = document.createElement("div");
+      elementImage.id = "VTK-image-div-" + i;
       elementImage.style.width = "100%";
       elementImage.style.height = "100%";
       elementImage.style.position = "relative";
@@ -445,7 +446,7 @@ class MPRRendering {
       canvas1.style.backgroundColor = "rgba(204, 30, 30, 0.36)";
       canvas1.width = 300;
       canvas1.height = 300;
-      canvas1.id = "canvas" + i;
+      canvas1.id = "画线-canvas-" + i;
       // canvas1.addEventListener("click", (e) => {
       //   console.log(e)
       //   const rect = canvas1.getBoundingClientRect();

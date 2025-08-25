@@ -100,7 +100,7 @@ export function changeEvent(type) {
       break;
   }
   for (let i = 0; i < 3; i++) {
-    const canvas = document.getElementById('canvas' + i);
+    const canvas = document.getElementById('画线-canvas-' + i);
     canvas.style.pointerEvents = eventType == 4 ? '' : 'none';
   }
 }
@@ -206,11 +206,14 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
         let deltaX = currentPosition.x - previousPosition.x;
         let deltaY = currentPosition.y - previousPosition.y;
         previousPosition = JSON.parse(JSON.stringify(currentPosition));
-        callBackFun(i, deltaX / 2, -deltaY / 2)
+        let vtkdiv = document.getElementById("VTK-image-div-2");
+        let vtkCanvas = vtkdiv.querySelector("canvas")
+        let 画线canvas = document.getElementById("画线-canvas-2");
+        callBackFun(i, deltaX / (vtkCanvas.width / 画线canvas.width), -deltaY / (vtkCanvas.width / 画线canvas.width))
       }
       if (eventType == 3) {
         const currentScale = obj.renderer.getActiveCamera().getParallelScale();
-        let scaleChange = preCameraScale/currentScale;
+        let scaleChange = preCameraScale / currentScale;
         preCameraScale = currentScale;
         callBackFun(i, 0, 0, scaleChange)
       }

@@ -3,7 +3,7 @@ var lineOffset = [{ x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }]
 var lineScale = [1, 1, 1]
 export function vtk画线() {
     for (let i = 0; i < 3; i++) {
-        const canvas = document.getElementById('canvas' + i);
+        const canvas = document.getElementById('画线-canvas-' + i);
         const ctx = canvas.getContext('2d');
 
         let isDrawing = false;
@@ -128,7 +128,7 @@ export function vtk画线() {
 }
 // 平移回调
 export function drawAllLines(index, moveX, moveY, scaleFactor) {
-    const canvas = document.getElementById('canvas' + index);
+    const canvas = document.getElementById('画线-canvas-' + index);
     if (moveX || moveY) {
         lineOffset[index].x += moveX;
         lineOffset[index].y += moveY;
