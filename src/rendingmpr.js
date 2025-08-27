@@ -436,30 +436,18 @@ class MPRRendering {
       //   elementImage.innerHTML = `<svg id="lineSVG" style="position: absolute;
       // top: 0;
       // left: 0;width:100%;height:100%" xmlns="http://www.w3.org/2000/svg"></svg>`
-      let canvas1 = document.createElement("canvas");
-      canvas1.style.width = "100%";
-      canvas1.style.height = "100%";
-      canvas1.style.position = "absolute";
-      canvas1.style.top = "0";
-      canvas1.style.left = "0";
-      canvas1.style.zIndex = "99";
-      canvas1.style.backgroundColor = "rgba(204, 30, 30, 0.36)";
-      canvas1.width = 300;
-      canvas1.height = 300;
-      canvas1.id = "画线-canvas-" + i;
-      // canvas1.addEventListener("click", (e) => {
-      //   console.log(e)
-      //   const rect = canvas1.getBoundingClientRect();
-      //   const x = e.layerX
-      //   const y = e.layerY
-      //   const ctx = canvas1.getContext('2d');
-      //   ctx.fillStyle = "yellow";
-      //   ctx.beginPath();
-      //   ctx.arc(x, y, 8, 0, Math.PI * 2);
-      //   ctx.fill();
-      //   console.log("click");
-      // });
-      elementParent.appendChild(canvas1);
+      // let canvas1 = document.createElement("canvas");
+      // canvas1.style.width = "100%";
+      // canvas1.style.height = "100%";
+      // canvas1.style.position = "absolute";
+      // canvas1.style.top = "0";
+      // canvas1.style.left = "0";
+      // canvas1.style.zIndex = "99";
+      // canvas1.style.backgroundColor = "rgba(204, 30, 30, 0.36)";
+      // canvas1.width = 300;
+      // canvas1.height = 300;
+      // canvas1.id = "画线-canvas-" + i;
+      // elementParent.appendChild(canvas1);
       elementParent.appendChild(elementImage);
       createdElements.push(elementImage);
     }

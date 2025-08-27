@@ -82,7 +82,6 @@ export function changeEvent(type) {
           shift: false,
           control: false
         });
-        // panManipulator.setCallBack(callBackFun, i)
         stl.addMouseManipulator(panManipulator);
       })
       break
@@ -98,10 +97,18 @@ export function changeEvent(type) {
         stl.addMouseManipulator(panManipulator);
       })
       break;
+    case 4:
+      viewObj.forEach(obj => {
+        const stl = vtkInteractorStyleManipulator.newInstance()
+        obj.interactor.setInteractorStyle(stl);
+      })
+      break;
   }
   for (let i = 0; i < 3; i++) {
     const canvas = document.getElementById('画线-canvas-' + i);
-    canvas.style.pointerEvents = eventType == 4 ? '' : 'none';
+    if (canvas) {
+      canvas.style.pointerEvents = eventType == 4 ? '' : 'none';
+    }
   }
 }
 
@@ -137,7 +144,7 @@ export function load3D(arrayBuffer, divElement) {
  * @param {} arrayBuffer 
  */
 
-export function loadMPR(arrayBuffer, divElement) {
+export function loadMPR(arrayBuffer, divElement, qingniaoJSCallback) {
   if (!arrayBuffer) {
     // 检查输入是否有效
     throw new Error("arrayBuffer 不能为空！");
@@ -146,8 +153,8 @@ export function loadMPR(arrayBuffer, divElement) {
   const syntheticImageData = new SyntheticImageData();
   const { imageData, windowWidth, windowCenter } = syntheticImageData.ImageData(arrayBuffer)
   MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
-  vtk画线()
-  callBackFun = drawAllLines
+  // vtk画线()
+  callBackFun = qingniaoJSCallback
 }
 
 
@@ -168,31 +175,20 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
   view3D.renderer.addActor(outlineActor);
   // 对每个视图的属性进行操作，`viewAttributes` 是包含多个视图属性的数组
   viewAttributes.forEach((obj, i) => {
-    console.log("viewAttributes", obj);
-    obj.widgetInstance.onInteractionEvent((e) => {
-      console.log("onInteractionEvent", e);
-    })
-
     // 设置该视图的重采样输入数据为加载的图像数据
     obj.reslice.setInputData(imageData);
     setColorProperties(obj, windowWidth, windowCenter);
     // 将该视图的重采样演员添加到渲染器中
     obj.renderer.addActor(obj.resliceActor);
-    if (i == 0) {
-      console.log("i")
-      const cam = obj.renderer.getActiveCamera();
-      console.log(cam)
-    }
     view3D.renderer.addActor(obj.resliceActor);
     // 遍历并将该视图中的球体演员添加到渲染器中
     obj.sphereActors.forEach((actor) => {
       obj.renderer.addActor(actor);
       view3D.renderer.addActor(actor);
     });
-    console.log(obj.interactor)
     let mouseDrawing = false;
-    let startX, startY;
-    let currentLine = null;
+    // let startX, startY;
+    // let currentLine = null;
     let previousPosition = {};
     let preCameraScale = obj.renderer.getActiveCamera().getParallelScale();
     obj.interactor.onMouseEnter((e) => {
@@ -209,13 +205,17 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
         let vtkdiv = document.getElementById("VTK-image-div-2");
         let vtkCanvas = vtkdiv.querySelector("canvas")
         let 画线canvas = document.getElementById("画线-canvas-2");
-        callBackFun(i, deltaX / (vtkCanvas.width / 画线canvas.width), -deltaY / (vtkCanvas.width / 画线canvas.width))
+        if (callBackFun) {
+          callBackFun(i, deltaX / (vtkCanvas.width / 画线canvas.width), -deltaY / (vtkCanvas.width / 画线canvas.width))
+        }
       }
       if (eventType == 3) {
         const currentScale = obj.renderer.getActiveCamera().getParallelScale();
         let scaleChange = preCameraScale / currentScale;
         preCameraScale = currentScale;
-        callBackFun(i, 0, 0, scaleChange)
+        if (callBackFun) {
+          callBackFun(i, 0, 0, scaleChange)
+        }
       }
 
       if (eventType == 4) {
@@ -223,15 +223,14 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
     })
     obj.interactor.onLeftButtonRelease((e) => {
       // 输出camera
-      const camera = obj.renderer.getActiveCamera()
-      console.log(camera, camera.get())
-      // 获取表示对象
-      const imageData = obj.reslice.getOutputData()
-      const image = imageData.getPointData().getScalars().getData();
-      console.log(image)
-      console.log(imageData.getDimensions(), imageData.getSpacing(), imageData.getBounds())
+      // const camera = obj.renderer.getActiveCamera()
+      // console.log(camera, camera.get())
+      // const imageData = obj.reslice.getOutputData()
+      // const image = imageData.getPointData().getScalars().getData();
+      // console.log(image)
+      // console.log(imageData.getDimensions(), imageData.getSpacing(), imageData.getBounds())
       mouseDrawing = false;
-      currentLine = null;
+      // currentLine = null;
     })
     obj.interactor.onLeftButtonPress((e) => {
       console.log(e.position)
@@ -307,8 +306,6 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
     // })
     // })
 
-    // obj.renderer.getActiveCamera().setParallelScale(currentScale * 0.5); 
-    // console.log(obj.renderer.getActiveCamera().getParallelScale())
     const reslice = obj.reslice;
     const viewType = xyzToViewType[i];
     console.log(xyzToViewType)
