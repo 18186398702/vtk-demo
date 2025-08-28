@@ -14,12 +14,11 @@ import { CaptureOn } from "@kitware/vtk.js/Widgets/Core/WidgetManager/Constants"
 import { SlabMode } from "@kitware/vtk.js/Imaging/Core/ImageReslice/Constants";
 import { xyzToViewType } from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants";
 import vtkInteractorStyleImage from '@kitware/vtk.js/Interaction/Style/InteractorStyleImage';
-import windowlevelStyle from "./windowlevelStyle";
+// import windowlevelStyle from "./windowlevelStyle";
 import vtkMouseCameraTrackballPanManipulator from '@kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballPanManipulator';
 import vtkInteractorStyleManipulator from '@kitware/vtk.js/Interaction/Style/InteractorStyleManipulator';
 import macro from "@kitware/vtk.js/macro";
-
-
+import WindowLevelManipulator from "./WindowLevelManipulator"
 class MPRRendering {
   // 创建MPR渲染页面
   createRenderingPage(divElement) {
@@ -151,13 +150,10 @@ class MPRRendering {
         // 写一个带新 windowLevel 的扩展函数
         // 1️⃣ 扩展函数
 
-        const windowlevel = windowlevelStyle.newInstance()
-        console.log('继承成功111', windowlevel);
+        // const windowlevel = windowlevelStyle.newInstance()
+        // console.log('继承成功111', windowlevel);
         // 3️⃣ 创建实例
-        const customStyle = vtkInteractorStyleImage.newInstance();
-
-        // 4️⃣ 使用
-        obj.interactor.setInteractorStyle(windowlevel);
+        // const customStyle = vtkInteractorStyleImage.newInstance();
         // const stl = vtkInteractorStyleManipulator.newInstance()
         // obj.interactor.setInteractorStyle(stl);
         // // 2. 添加自定义平移操纵器（左键拖动）
@@ -322,7 +318,7 @@ class MPRRendering {
       }
       if (i < 3) {
         obj.slider = createdSliderElements[i];
-        // 为滑块添加事件监听器，当滑块值发生改变时触发
+
         resetElements[i].addEventListener("click", () => {
           obj.renderer.resetCamera()
           const image = obj.reslice.getOutputData()
@@ -330,13 +326,15 @@ class MPRRendering {
           obj.renderer.getActiveCamera().setParallelScale(boundsX / 1.95);
           obj.interactor.render();
         })
+        // 为滑块添加事件监听器，当滑块值发生改变时触发
         createdSliderElements[i].addEventListener("input", (ev) => {
           // 检查是否存在有效的图像
+          console.log("input", ev.target.value)
           const image = widget.getWidgetState().getImage();
           if (image) {
             // 获取滑块的新值（用户拖动后的数值）
             const newDistanceToP1 = ev.target.value;
-
+            console.log("newDistanceToP1", newDistanceToP1)
             // 获取当前平面的法向量（用于表示平面的方向）
             const dirProj = widget.getWidgetState().getPlanes()[xyzToViewType[i]].normal;
 
@@ -352,8 +350,6 @@ class MPRRendering {
               Number(newDistanceToP1), // 滑块值转换为数字
               [] // 结果存储在一个新数组中
             );
-            console.log(newCenter);
-            console.log(obj.widgetInstance.getActiveInteraction())
             // 设置平面的新中心点
             widget.setCenter(newCenter);
 

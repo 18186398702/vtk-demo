@@ -1,4 +1,5 @@
 import vtkMath from "@kitware/vtk.js/Common/Core/Math";
+import vtk from "@kitware/vtk.js/vtk";
 class LoadImage {
   updateReslice(view3D, widget, widgetState,
     interactionContext = {
@@ -18,11 +19,19 @@ class LoadImage {
       interactionContext.viewType
     );
     if (modified) {
-     
+
       const resliceAxes = interactionContext.reslice.getResliceAxes();
       // Get returned modified from setter to know if we have to render
       interactionContext.actor.setUserMatrix(resliceAxes);
-       console.log(resliceAxes)
+      console.log(interactionContext.viewTypex, resliceAxes)
+      // 拼接字符
+      let prestr = interactionContext.viewType == 4 ? "vtk11_" : interactionContext.viewType == 5 ? "vtk12_" : "vtk21_";
+      let sliceStr = prestr + resliceAxes.join('-')
+      let vtkDiv = document.getElementById("VTK-image-div-" + (interactionContext.viewType - 4))
+      let cavDom = vtkDiv.querySelector("canvas")
+      // dom加一个属性
+      cavDom.setAttribute("sliceId", sliceStr)
+
       // const planeSource = widget.getPlaneSource(interactionContext.viewType);
       // interactionContext.sphereSources[0].setCenter(planeSource.getOrigin());
       // interactionContext.sphereSources[1].setCenter(planeSource.getPoint1());
@@ -38,6 +47,7 @@ class LoadImage {
         interactionContext.slider.min = 0;
         interactionContext.slider.max = length;
         interactionContext.slider.value = dist;
+        console.log(length, dist)
       }
     }
     widget.updateCameraPoints(

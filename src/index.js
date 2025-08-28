@@ -16,11 +16,11 @@ import vtkInteractorStyleImage from "@kitware/vtk.js/Interaction/Style/Interacto
 import { Demo3d, load3dColor, export3dImg, change3DLightIntensity } from "./3d";
 import { mat3, vec3 } from 'gl-matrix';
 import vtkMatrixBuilder from '@kitware/vtk.js/Common/Core/MatrixBuilder';
-// import vtkMouseCameraTrackballPanManipulator from '@kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballPanManipulator';
-import vtkMouseCameraTrackballPanManipulator from "./vtkMoveCamera"
+import vtkMouseCameraTrackballPanManipulator from '@kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballPanManipulator';
+import WindowLevelManipulator from "./WindowLevelManipulator"
 import vtkMouseCameraTrackballZoomManipulator from '@kitware/vtk.js/Interaction/Manipulators/MouseCameraTrackballZoomManipulator';
 import vtkInteractorStyleManipulator from '@kitware/vtk.js/Interaction/Style/InteractorStyleManipulator';
-import windowlevelStyle from "./windowlevelStyle";
+import pageturningManipulator from "./pageturningManipulator";
 import { vtk画线, drawAllLines } from "./画线";
 export function change3dColor(color) {
   load3dColor(color)
@@ -64,12 +64,52 @@ export function loadDicom(arrayBuffer) {
 let eventType = 1
 let viewObj = null
 let callBackFun = null
+let mprwidget = null
 export function changeEvent(type) {
+  if (!viewObj) {
+    return
+  }
   eventType = type
   switch (eventType) {
+    case 5:
+      viewObj.forEach((obj, index) => {
+        const stl = vtkInteractorStyleManipulator.newInstance()
+        obj.interactor.setInteractorStyle(stl);
+        const panManipulator = pageturningManipulator.newInstance({
+          button: 1, // 左键
+          shift: false,
+          control: false
+        });
+        const panManipulator2 = WindowLevelManipulator.newInstance({
+          button: 3, // 左键
+          shift: false,
+          control: false
+        });
+        panManipulator.setSlider(obj.slider, mprwidget, viewObj, obj.widgetInstance, index)
+        panManipulator2.setInteractor(obj.interactor)
+        stl.addMouseManipulator(panManipulator2);
+        stl.addMouseManipulator(panManipulator);
+      })
+      break
     case 1:
       viewObj.forEach(obj => {
-        obj.interactor.setInteractorStyle(windowlevelStyle.newInstance());
+        const stl = vtkInteractorStyleManipulator.newInstance()
+        obj.interactor.setInteractorStyle(stl);
+        // 2. 添加自定义平移操纵器（左键拖动）
+        const panManipulator = WindowLevelManipulator.newInstance({
+          button: 1, // 左键
+          shift: false,
+          control: false
+        });
+        const panManipulator2 = WindowLevelManipulator.newInstance({
+          button: 3, // 左键
+          shift: false,
+          control: false
+        });
+        panManipulator.setInteractor(obj.interactor)
+        panManipulator2.setInteractor(obj.interactor)
+        stl.addMouseManipulator(panManipulator2);
+        stl.addMouseManipulator(panManipulator);
       })
       break;
     case 2:
@@ -77,11 +117,19 @@ export function changeEvent(type) {
         const stl = vtkInteractorStyleManipulator.newInstance()
         obj.interactor.setInteractorStyle(stl);
         // 2. 添加自定义平移操纵器（左键拖动）
+        console.log(stl)
         const panManipulator = vtkMouseCameraTrackballPanManipulator.newInstance({
           button: 1, // 左键
           shift: false,
           control: false
         });
+        const panManipulator2 = WindowLevelManipulator.newInstance({
+          button: 3, // 左键
+          shift: false,
+          control: false
+        });
+        panManipulator2.setInteractor(obj.interactor)
+        stl.addMouseManipulator(panManipulator2);
         stl.addMouseManipulator(panManipulator);
       })
       break
@@ -90,10 +138,19 @@ export function changeEvent(type) {
         const stl = vtkInteractorStyleManipulator.newInstance()
         obj.interactor.setInteractorStyle(stl);
         // 2. 添加自定义平移操纵器（左键拖动）
+        console.log(stl)
         const panManipulator = vtkMouseCameraTrackballZoomManipulator.newInstance({
           button: 1, // 左键
           shift: false,
-        })
+          control: false
+        });
+        const panManipulator2 = WindowLevelManipulator.newInstance({
+          button: 3, // 左键
+          shift: false,
+          control: false
+        });
+        panManipulator2.setInteractor(obj.interactor)
+        stl.addMouseManipulator(panManipulator2);
         stl.addMouseManipulator(panManipulator);
       })
       break;
@@ -143,7 +200,7 @@ export function load3D(arrayBuffer, divElement) {
  * 测的
  * @param {} arrayBuffer 
  */
-
+let default_windowWidth, default_windowCenter;
 export function loadMPR(arrayBuffer, divElement, qingniaoJSCallback) {
   if (!arrayBuffer) {
     // 检查输入是否有效
@@ -152,9 +209,12 @@ export function loadMPR(arrayBuffer, divElement, qingniaoJSCallback) {
   dx处理(arrayBuffer)
   const syntheticImageData = new SyntheticImageData();
   const { imageData, windowWidth, windowCenter } = syntheticImageData.ImageData(arrayBuffer)
+  default_windowWidth = windowWidth
+  default_windowCenter = windowCenter
   MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
   // vtk画线()
   callBackFun = qingniaoJSCallback
+  changeEvent(1)
 }
 
 
@@ -165,6 +225,7 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
   viewObj = viewAttributes
   // 将加载的图像数据设置到一个假设的控件 `widget` 中进行显示
   // console.log(imageData)
+  mprwidget = widget;
   widget.setImage(imageData);
   const outline = vtkOutlineFilter.newInstance();
   outline.setInputData(imageData);
@@ -191,9 +252,11 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
     // let currentLine = null;
     let previousPosition = {};
     let preCameraScale = obj.renderer.getActiveCamera().getParallelScale();
-    obj.interactor.onMouseEnter((e) => {
-      console.log("鼠标进入")
-    })
+    // obj.interactor.onMouseEnter((e) => {
+    //   console.log("鼠标进入")
+    // })
+    console.log(obj.interactor)
+
     obj.interactor.onMouseMove((e) => {
       if (!mouseDrawing) return;
       if (eventType == 2) {
@@ -206,7 +269,8 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
         let vtkCanvas = vtkdiv.querySelector("canvas")
         let 画线canvas = document.getElementById("画线-canvas-2");
         if (callBackFun) {
-          callBackFun(i, deltaX / (vtkCanvas.width / 画线canvas.width), -deltaY / (vtkCanvas.width / 画线canvas.width))
+          callBackFun(2, { x: deltaX / (vtkCanvas.width / 画线canvas.width), y: -deltaY / (vtkCanvas.height / 画线canvas.height) }, "VTK-image-div-" + i);
+          // callBackFun(i, deltaX / (vtkCanvas.width / 画线canvas.width), -deltaY / (vtkCanvas.width / 画线canvas.width))
         }
       }
       if (eventType == 3) {
@@ -214,7 +278,8 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
         let scaleChange = preCameraScale / currentScale;
         preCameraScale = currentScale;
         if (callBackFun) {
-          callBackFun(i, 0, 0, scaleChange)
+          callBackFun(3, { scale: scaleChange }, "VTK-image-div-" + i);
+          // callBackFun(i, 0, 0, scaleChange)
         }
       }
 
@@ -225,15 +290,16 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
       // 输出camera
       // const camera = obj.renderer.getActiveCamera()
       // console.log(camera, camera.get())
-      // const imageData = obj.reslice.getOutputData()
-      // const image = imageData.getPointData().getScalars().getData();
-      // console.log(image)
-      // console.log(imageData.getDimensions(), imageData.getSpacing(), imageData.getBounds())
+      const imageData = obj.reslice.getOutputData()
+      const image = imageData.getPointData().getScalars().getData();
+      console.log(image)
+      console.log(widget.getWidgetState())
+      console.log(obj.resliceMapper.get(), obj.resliceMapper.getSlice(), obj.resliceMapper.getSliceAtFocalPoint(), obj.resliceMapper.getSlicingMode(), obj.resliceMapper.getSlicingModeNormal())
+      console.log(imageData.getDimensions(), imageData.getSpacing(), imageData.getBounds())
       mouseDrawing = false;
       // currentLine = null;
     })
     obj.interactor.onLeftButtonPress((e) => {
-      console.log(e.position)
       mouseDrawing = true;
       if (eventType == 2) {
         previousPosition = e.position;
@@ -312,21 +378,18 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
     // 对所有视图进行操作，确保在当前视图进行交互时能够正确更新切片
     viewAttributes.forEach((v) => {
 
-      v.widgetInstance.onWidgetChange((event) => {
-        console.log("事件类型", event)
-      })
+      // v.widgetInstance.onWidgetChange((event) => {
+      //   console.log("事件类型", event)
+      // })
 
       // 在交互过程中，更新切片的位置和焦点
       v.widgetInstance.onInteractionEvent(
         // 可以根据当前交互方法判断是否允许更新焦点
         (interactionMethodName) => {
-          console.log("interactionMethodName", interactionMethodName)
           const canUpdateFocalPoint = interactionMethodName === InteractionMethodsName.RotateLine;
           const activeViewType = widget.getWidgetState().getActiveViewType();
           // 如果当前视图是活动视图或不能更新焦点，则允许计算焦点偏移
-          console.log("activeViewType", activeViewType, canUpdateFocalPoint)
           const computeFocalPointOffset = activeViewType === viewType || !canUpdateFocalPoint;
-          console.log("computeFocalPointOffset", computeFocalPointOffset)
           loadimage.updateReslice(view3D, widget, widgetState, {
             viewType,
             reslice,
@@ -383,7 +446,10 @@ function setColorProperties(obj, windowWidth, windowCenter) {
 }
 
 export async function changeMPRWindowLevel(windowWidth, windowCenter) {
-  console.log(windowWidth, windowCenter)
+  if (!windowWidth && !windowCenter) {
+    windowWidth = default_windowWidth;
+    windowCenter = default_windowCenter;
+  }
   viewObj.forEach((obj) => {
     setColorProperties(obj, windowWidth, windowCenter)
     obj.interactor.render();
