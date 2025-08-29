@@ -161,11 +161,17 @@ export function changeEvent(type) {
       })
       break;
   }
-  for (let i = 0; i < 3; i++) {
-    const canvas = document.getElementById('画线-canvas-' + i);
-    if (canvas) {
-      canvas.style.pointerEvents = eventType == 4 ? '' : 'none';
-    }
+  const canvas1 = document.getElementById('cmpr22_11');
+  const canvas2 = document.getElementById('cmpr22_12');
+  const canva3 = document.getElementById('cmpr22_21');
+  if (canvas1) {
+    canvas1.style.pointerEvents = eventType == 4 ? 'auto' : 'none';
+  }
+  if (canvas2) {
+    canvas2.style.pointerEvents = eventType == 4 ? 'auto' : 'none';
+  }
+  if (canva3) {
+    canva3.style.pointerEvents = eventType == 4 ? 'auto' : 'none';
   }
 }
 
@@ -198,7 +204,9 @@ export function load3D(arrayBuffer, divElement) {
 
 /**
  * 测的
- * @param {} arrayBuffer 
+ * @param [] arrayBuffer dicom序列数据
+ * @param dom divElement mpr呈现的容器
+ * @param function qingniaoJSCallback 回调函数
  */
 let default_windowWidth, default_windowCenter;
 export function loadMPR(arrayBuffer, divElement, qingniaoJSCallback) {
@@ -211,14 +219,14 @@ export function loadMPR(arrayBuffer, divElement, qingniaoJSCallback) {
   const { imageData, windowWidth, windowCenter } = syntheticImageData.ImageData(arrayBuffer)
   default_windowWidth = windowWidth
   default_windowCenter = windowCenter
-  MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
-  // vtk画线()
   callBackFun = qingniaoJSCallback
+  MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement, qingniaoJSCallback)
+  // vtk画线()
   changeEvent(1)
 }
 
 
-function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement) {
+function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement, qingniaoJSCallback) {
   const loadimage = new LoadImage();
   const mprrendering = new MPRRendering();
   const { viewAttributes, view3D, widget, widgetState } = mprrendering.createRenderingPage(divElement);
@@ -241,6 +249,7 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
     setColorProperties(obj, windowWidth, windowCenter);
     // 将该视图的重采样演员添加到渲染器中
     obj.renderer.addActor(obj.resliceActor);
+
     view3D.renderer.addActor(obj.resliceActor);
     // 遍历并将该视图中的球体演员添加到渲染器中
     obj.sphereActors.forEach((actor) => {
@@ -290,12 +299,12 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
       // 输出camera
       // const camera = obj.renderer.getActiveCamera()
       // console.log(camera, camera.get())
-      const imageData = obj.reslice.getOutputData()
-      const image = imageData.getPointData().getScalars().getData();
-      console.log(image)
-      console.log(widget.getWidgetState())
-      console.log(obj.resliceMapper.get(), obj.resliceMapper.getSlice(), obj.resliceMapper.getSliceAtFocalPoint(), obj.resliceMapper.getSlicingMode(), obj.resliceMapper.getSlicingModeNormal())
-      console.log(imageData.getDimensions(), imageData.getSpacing(), imageData.getBounds())
+      // const imageData = obj.reslice.getOutputData()
+      // const image = imageData.getPointData().getScalars().getData();
+      // console.log(image)
+      // console.log(widget.getWidgetState())
+      // console.log(obj.resliceMapper.get(), obj.resliceMapper.getSlice(), obj.resliceMapper.getSliceAtFocalPoint(), obj.resliceMapper.getSlicingMode(), obj.resliceMapper.getSlicingModeNormal())
+      // console.log(imageData.getDimensions(), imageData.getSpacing(), imageData.getBounds())
       mouseDrawing = false;
       // currentLine = null;
     })
@@ -399,7 +408,8 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
             computeFocalPointOffset: true,
             sphereSources: obj.sphereSources,
             slider: obj.slider,
-          });
+            mapper: obj.resliceMapper
+          }, qingniaoJSCallback);
         }
       );
     });
@@ -413,6 +423,7 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement)
       computeFocalPointOffset: true, // 允许计算当前偏移
       sphereSources: obj.sphereSources,
       slider: obj.slider,
+      mapper: obj.resliceMapper
     });
     // 渲染当前视图
     const image = obj.reslice.getOutputData()
