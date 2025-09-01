@@ -22,6 +22,7 @@ import vtkMouseCameraTrackballZoomManipulator from '@kitware/vtk.js/Interaction/
 import vtkInteractorStyleManipulator from '@kitware/vtk.js/Interaction/Style/InteractorStyleManipulator';
 import pageturningManipulator from "./pageturningManipulator";
 import { vtk画线, drawAllLines } from "./画线";
+import { calculateDistance } from "./qn_vtk_transition";
 export function change3dColor(color) {
   load3dColor(color)
 }
@@ -494,17 +495,11 @@ export async function f_load_directory(selectFiles) {
 }
 
 
-/**
- * 屏幕坐标转换为世界坐标
- * @param {*} displayPos 屏幕坐标
- * @param {*} renderer 渲染器
- * @returns 世界坐标
- */
-function screenToWorld(displayPos, renderer) {
-  const coordinate = vtkCoordinate.newInstance();
-  coordinate.setCoordinateSystemToDisplay();
-  coordinate.setValue(displayPos.x, displayPos.y, 0);
-  return coordinate.getComputedWorldValue(renderer);
+export function jisuan_len(start, end, renderer_num) {
+  if (!viewObj[renderer_num]) {
+    return
+  }
+  return calculateDistance(start, end, viewObj[renderer_num].renderer);
 }
 
 
