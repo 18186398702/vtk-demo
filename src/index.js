@@ -222,7 +222,7 @@ export function loadMPR(arrayBuffer, divElement, qingniaoJSCallback) {
   callBackFun = qingniaoJSCallback
   MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement, qingniaoJSCallback)
   // vtk画线()
-  changeEvent(1)
+  changeEvent(5)
 }
 
 

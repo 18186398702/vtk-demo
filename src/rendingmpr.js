@@ -2,6 +2,7 @@ import "@kitware/vtk.js/Rendering/Profiles/All";
 import vtkAnnotatedCubeActor from "@kitware/vtk.js/Rendering/Core/AnnotatedCubeActor";
 import vtkGenericRenderWindow from "@kitware/vtk.js/Rendering/Misc/GenericRenderWindow";
 import vtkImageMapper from "@kitware/vtk.js/Rendering/Core/ImageMapper";
+// import vtkImageMapper from "./imageMapper.js";
 import vtkImageReslice from "@kitware/vtk.js/Imaging/Core/ImageReslice";
 import vtkImageSlice from "@kitware/vtk.js/Rendering/Core/ImageSlice";
 import vtkInteractorStyleTrackballCamera from "@kitware/vtk.js/Interaction/Style/InteractorStyleTrackballCamera";
@@ -153,7 +154,7 @@ class MPRRendering {
         // const windowlevel = windowlevelStyle.newInstance()
         // console.log('继承成功111', windowlevel);
         // 3️⃣ 创建实例
-        // const customStyle = vtkInteractorStyleImage.newInstance();
+        const customStyle = vtkInteractorStyleImage.newInstance();
         // const stl = vtkInteractorStyleManipulator.newInstance()
         // obj.interactor.setInteractorStyle(stl);
         // // 2. 添加自定义平移操纵器（左键拖动）
@@ -210,6 +211,8 @@ class MPRRendering {
       // 创建一个 vtkImageMapper 实例，用于映射图像数据
       obj.resliceMapper = vtkImageMapper.newInstance();
       obj.resliceMapper.setSliceAtFocalPoint(true); // 确保切片在焦点处
+      obj.resliceMapper.setResolveCoincidentTopologyToPolygonOffset();
+      obj.resliceMapper.setRelativeCoincidentTopologyPolygonOffsetParameters(1, 1);
       // 将 vtkImageReslice 的输出连接到映射器，确保映射器能渲染重切割后的图像
       obj.resliceMapper.setInputConnection(obj.reslice.getOutputPort());
       // 创建一个 vtkImageSlice 实例，用于显示图像切片
@@ -329,12 +332,10 @@ class MPRRendering {
         // 为滑块添加事件监听器，当滑块值发生改变时触发
         createdSliderElements[i].addEventListener("input", (ev) => {
           // 检查是否存在有效的图像
-          console.log("input", ev.target.value)
           const image = widget.getWidgetState().getImage();
           if (image) {
             // 获取滑块的新值（用户拖动后的数值）
             const newDistanceToP1 = ev.target.value;
-            console.log("newDistanceToP1", newDistanceToP1)
             // 获取当前平面的法向量（用于表示平面的方向）
             const dirProj = widget.getWidgetState().getPlanes()[xyzToViewType[i]].normal;
 
@@ -351,6 +352,7 @@ class MPRRendering {
               [] // 结果存储在一个新数组中
             );
             // 设置平面的新中心点
+            console.log(newCenter)
             widget.setCenter(newCenter);
 
             // 模拟用户交互，触发小部件的交互事件，确保状态更新

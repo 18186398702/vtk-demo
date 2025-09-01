@@ -21,11 +21,12 @@ class LoadImage {
       interactionContext.viewType
     );
     if (modified) {
-      // console.log("图像变化了", interactionContext.viewType, interactionContext.mapper.getSlice())
+      let index = interactionContext.viewType - 4;
+      console.log(index + "图像变化了")
       const resliceAxes = interactionContext.reslice.getResliceAxes();
       // Get returned modified from setter to know if we have to render
       interactionContext.actor.setUserMatrix(resliceAxes);
-      let index = interactionContext.viewType - 4;
+
       // 拼接字符
       let prestr = interactionContext.viewType == 4 ? "vtk11_" : interactionContext.viewType == 5 ? "vtk12_" : "vtk21_";
       let sliceStr = prestr + resliceAxes.join('-')
@@ -39,7 +40,7 @@ class LoadImage {
           callBackFun(1, { slice: sliceStr }, "VTK-image-div-" + index)
         }
       }
-      console.log(this.AxesArr)
+      console.log("sliceId", interactionContext.viewType, sliceStr)
       // const planeSource = widget.getPlaneSource(interactionContext.viewType);
       // interactionContext.sphereSources[0].setCenter(planeSource.getOrigin());
       // interactionContext.sphereSources[1].setCenter(planeSource.getPoint1());
@@ -55,6 +56,7 @@ class LoadImage {
         interactionContext.slider.min = 0;
         interactionContext.slider.max = length;
         interactionContext.slider.value = dist;
+        console.log("dist", dist, "length", length)
       }
     }
     widget.updateCameraPoints(

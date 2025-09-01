@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@kitware/vtk.js": "^32.8.0",
+    "@kitware/vtk.js": "^32.12.1",
     "gl-matrix": "^3.4.3",
     "webpack-glsl-loader": "^1.0.1"
   },
