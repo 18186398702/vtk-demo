@@ -506,11 +506,11 @@ export function get_Multiple_by_renderer(renderer_num) {
   }
   //模拟点击点
   let x_len = 100;
-  let sj_x_len = calculateDistance([0,0], [x_len,0], viewObj[renderer_num].renderer);
+  let sj_x_len = calculateDistance({x:0,y:0}, {x:x_len,y:0}, viewObj[renderer_num].renderer);
   let x_Multiple = sj_x_len / x_len;
 
   let y_len = 100;
-  let sj_y_len = calculateDistance([0,0], [0,y_len], viewObj[renderer_num].renderer);
+  let sj_y_len = calculateDistance({x:0,y:0}, {x:0,y:y_len}, viewObj[renderer_num].renderer);
   let y_Multiple = sj_y_len / y_len;
 
   return x_Multiple.toString() + "\\" + y_Multiple.toString()
