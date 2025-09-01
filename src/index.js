@@ -22,6 +22,8 @@ import vtkMouseCameraTrackballZoomManipulator from '@kitware/vtk.js/Interaction/
 import vtkInteractorStyleManipulator from '@kitware/vtk.js/Interaction/Style/InteractorStyleManipulator';
 import pageturningManipulator from "./pageturningManipulator";
 import { vtk画线, drawAllLines } from "./画线";
+import { calculateDistance } from "./qn_vtk_transition";
+import { X } from '@kitware/vtk.js/Common/Core/Math/index';
 export function change3dColor(color) {
   load3dColor(color)
 }
@@ -494,17 +496,20 @@ export async function f_load_directory(selectFiles) {
 }
 
 
-/**
- * 屏幕坐标转换为世界坐标
- * @param {*} displayPos 屏幕坐标
- * @param {*} renderer 渲染器
- * @returns 世界坐标
- */
-function screenToWorld(displayPos, renderer) {
-  const coordinate = vtkCoordinate.newInstance();
-  coordinate.setCoordinateSystemToDisplay();
-  coordinate.setValue(displayPos.x, displayPos.y, 0);
-  return coordinate.getComputedWorldValue(renderer);
+export function get_Multiple_by_renderer(renderer_num) {
+  if (!viewObj[renderer_num]) {
+    return
+  }
+  //模拟点击点
+  x_len = 100;
+  sj_x_len = calculateDistance([0,0], [x_len,0], viewObj[renderer_num].renderer);
+  x_Multiple = sj_x_len / x_len;
+
+  y_len = 100;
+  sj_y_len = calculateDistance([0,0], [0,y_len], viewObj[renderer_num].renderer);
+  y_Multiple = sj_y_len / y_len;
+
+  return x_Multiple.toString() + "\\" + y_Multiple.toString()
 }
 
 
