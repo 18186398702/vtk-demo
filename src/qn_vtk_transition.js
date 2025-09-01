@@ -1,3 +1,5 @@
+import vtkCoordinate from '@kitware/vtk.js/Rendering/Core/Coordinate';
+
 // 计算两点间距离（使用世界坐标）
 
 export function calculateDistance(start, end, renderer) {
