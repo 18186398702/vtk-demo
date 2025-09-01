@@ -22,7 +22,7 @@ import vtkMouseCameraTrackballZoomManipulator from '@kitware/vtk.js/Interaction/
 import vtkInteractorStyleManipulator from '@kitware/vtk.js/Interaction/Style/InteractorStyleManipulator';
 import pageturningManipulator from "./pageturningManipulator";
 import { vtk画线, drawAllLines } from "./画线";
-import { calculateDistance } from "./qn_vtk_transition";
+import { calculateDistance, qn_vtk_transition } from "./qn_vtk_transition";
 import { X } from '@kitware/vtk.js/Common/Core/Math/index';
 export function change3dColor(color) {
   load3dColor(color)
@@ -495,21 +495,35 @@ export async function f_load_directory(selectFiles) {
   return dicom_arraybuffer;
 }
 
-
+/**
+ * Canvas和VTK之间的转换处理函数
+ * @param {number} renderer_num - 画布序号: 0，1，2
+ * @returns {Object} 倍数的字符串(canvas/vtk)
+ */
 export function get_Multiple_by_renderer(renderer_num) {
   if (!viewObj[renderer_num]) {
     return
   }
   //模拟点击点
-  x_len = 100;
-  sj_x_len = calculateDistance([0,0], [x_len,0], viewObj[renderer_num].renderer);
-  x_Multiple = sj_x_len / x_len;
+  let x_len = 100;
+  let sj_x_len = calculateDistance([0,0], [x_len,0], viewObj[renderer_num].renderer);
+  let x_Multiple = sj_x_len / x_len;
 
-  y_len = 100;
-  sj_y_len = calculateDistance([0,0], [0,y_len], viewObj[renderer_num].renderer);
-  y_Multiple = sj_y_len / y_len;
+  let y_len = 100;
+  let sj_y_len = calculateDistance([0,0], [0,y_len], viewObj[renderer_num].renderer);
+  let y_Multiple = sj_y_len / y_len;
 
   return x_Multiple.toString() + "\\" + y_Multiple.toString()
 }
 
 
+/**
+ * Canvas和VTK之间的转换处理函数
+ * @param {number} pro_type - 操作模式: 1-切图, 2-平移, 3-缩放
+ * @param {Object} data - 相关操作数据
+ * @param {Array} draw_record - 绘制记录数据(可选)
+ * @returns {Object} 处理结果
+ */
+export function zuobiao_transition(pro_type, data, draw_record) {
+    qn_vtk_transition(pro_type, data, draw_record)
+}
