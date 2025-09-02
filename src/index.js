@@ -279,7 +279,7 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement,
         let vtkdiv = document.getElementById("VTK-image-div-2");
         let vtkCanvas = vtkdiv.querySelector("canvas")
         let 画线canvas = document.getElementById("scmpr22_11");
-        if (callBackFun) {
+        if (画线canvas && callBackFun) {
           callBackFun(2, { x: deltaX / (vtkCanvas.width / 画线canvas.width), y: -deltaY / (vtkCanvas.height / 画线canvas.height) }, "VTK-image-div-" + i);
           // callBackFun(i, deltaX / (vtkCanvas.width / 画线canvas.width), -deltaY / (vtkCanvas.width / 画线canvas.width))
         }
@@ -506,11 +506,11 @@ export function get_Multiple_by_renderer(renderer_num) {
   }
   //模拟点击点
   let x_len = 100;
-  let sj_x_len = calculateDistance({x:0,y:0}, {x:x_len,y:0}, viewObj[renderer_num].renderer);
+  let sj_x_len = calculateDistance({ x: 0, y: 0 }, { x: x_len, y: 0 }, viewObj[renderer_num].renderer);
   let x_Multiple = sj_x_len / x_len;
 
   let y_len = 100;
-  let sj_y_len = calculateDistance({x:0,y:0}, {x:0,y:y_len}, viewObj[renderer_num].renderer);
+  let sj_y_len = calculateDistance({ x: 0, y: 0 }, { x: 0, y: y_len }, viewObj[renderer_num].renderer);
   let y_Multiple = sj_y_len / y_len;
 
   return x_Multiple.toString() + "\\" + y_Multiple.toString()
@@ -525,5 +525,5 @@ export function get_Multiple_by_renderer(renderer_num) {
  * @returns {Object} 处理结果
  */
 export function zuobiao_transition(pro_type, data, draw_record) {
-    qn_vtk_transition(pro_type, data, draw_record)
+  qn_vtk_transition(pro_type, data, draw_record)
 }
