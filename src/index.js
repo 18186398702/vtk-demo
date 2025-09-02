@@ -278,7 +278,7 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement,
         previousPosition = JSON.parse(JSON.stringify(currentPosition));
         let vtkdiv = document.getElementById("VTK-image-div-2");
         let vtkCanvas = vtkdiv.querySelector("canvas")
-        let 画线canvas = document.getElementById("画线-canvas-2");
+        let 画线canvas = document.getElementById("scmpr22_11");
         if (callBackFun) {
           callBackFun(2, { x: deltaX / (vtkCanvas.width / 画线canvas.width), y: -deltaY / (vtkCanvas.height / 画线canvas.height) }, "VTK-image-div-" + i);
           // callBackFun(i, deltaX / (vtkCanvas.width / 画线canvas.width), -deltaY / (vtkCanvas.width / 画线canvas.width))
