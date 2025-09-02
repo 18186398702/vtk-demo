@@ -163,9 +163,9 @@ export function changeEvent(type) {
       })
       break;
   }
-  const canvas1 = document.getElementById('cmpr22_11');
-  const canvas2 = document.getElementById('cmpr22_12');
-  const canva3 = document.getElementById('cmpr22_21');
+  const canvas1 = document.getElementById('scmpr22_11');
+  const canvas2 = document.getElementById('scmpr22_12');
+  const canva3 = document.getElementById('scmpr22_21');
   if (canvas1) {
     canvas1.style.pointerEvents = eventType == 4 ? 'auto' : 'none';
   }
