@@ -65,11 +65,12 @@ export function qn_vtk_transition(pro_type, data, draw_record) {
  */
 function handleSlice(data) {
     // 切图操作不需要修改绘制记录
-    return {
-        success: true,
-        message: `切图到 ${data.slice}`,
-        draw_record: drawRecord
-    };
+    // return {
+    //     success: true,
+    //     message: `切图到 ${data.slice}`,
+    //     draw_record: drawRecord
+    // };
+    return drawRecord;
 }
 
 /**
@@ -163,11 +164,12 @@ function handleTranslate(data) {
     // 更新存储的记录
     drawRecord = updatedRecord;
     
-    return {
-        success: true,
-        message: `平移 ${data.x}, ${data.y}`,
-        draw_record: drawRecord
-    };
+    // return {
+    //     success: true,
+    //     message: `平移 ${data.x}, ${data.y}`,
+    //     draw_record: drawRecord
+    // };
+    return drawRecord;
 }
 
 /**
@@ -310,11 +312,12 @@ function handleScale(data) {
     // 更新存储的记录
     drawRecord = updatedRecord;
     
-    return {
-        success: true,
-        message: `缩放 ${data.scale}`,
-        draw_record: drawRecord
-    };
+    // return {
+    //     success: true,
+    //     message: `缩放 ${data.scale}`,
+    //     draw_record: drawRecord
+    // };
+    return drawRecord;
 }
 
 /**

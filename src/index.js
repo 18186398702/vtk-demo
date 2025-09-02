@@ -525,5 +525,5 @@ export function get_Multiple_by_renderer(renderer_num) {
  * @returns {Object} 处理结果
  */
 export function zuobiao_transition(pro_type, data, draw_record) {
-  qn_vtk_transition(pro_type, data, draw_record)
+  return qn_vtk_transition(pro_type, data, draw_record)
 }
