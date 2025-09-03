@@ -21,8 +21,9 @@ import vtkInteractorStyleManipulator from '@kitware/vtk.js/Interaction/Style/Int
 import macro from "@kitware/vtk.js/macro";
 import WindowLevelManipulator from "./WindowLevelManipulator"
 class MPRRendering {
+
   // 创建MPR渲染页面
-  createRenderingPage(divElement) {
+  createRenderingPage(divElement, qingniaoJSCallback) {
     // 定义视图颜色（X轴、Y轴、Z轴以及其他方向的灰色）
     const viewColors = [
       [0, 0, 0], // 红色，表示X轴
@@ -46,7 +47,7 @@ class MPRRendering {
       viewColors,
       debugActors,
       cursorStyles,
-      divElement
+      divElement, qingniaoJSCallback
     );
 
     // 返回渲染页面所需的视图属性和3D视图对象
@@ -54,7 +55,7 @@ class MPRRendering {
   }
 
   // 设置MPR布局的函数
-  setupLayoutForMPR(viewColors, showDebugActors, appCursorStyles, divElement) {
+  setupLayoutForMPR(viewColors, showDebugActors, appCursorStyles, divElement, qingniaoJSCallback) {
     const viewAttributes = [];
     let view3D = null;
     // 创建vtk的ResliceCursor Widget实例
@@ -328,6 +329,9 @@ class MPRRendering {
           const boundsX = image.getBounds()[1] > image.getBounds()[3] ? image.getBounds()[1] : image.getBounds()[3]
           obj.renderer.getActiveCamera().setParallelScale(boundsX / 1.95);
           obj.interactor.render();
+          if (qingniaoJSCallback) {
+            qingniaoJSCallback(4, null, "VTK-image-div-" + i)
+          }
         })
         // 为滑块添加事件监听器，当滑块值发生改变时触发
         createdSliderElements[i].addEventListener("input", (ev) => {

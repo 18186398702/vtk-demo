@@ -231,7 +231,7 @@ export function loadMPR(arrayBuffer, divElement, qingniaoJSCallback) {
 function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement, qingniaoJSCallback) {
   const loadimage = new LoadImage();
   const mprrendering = new MPRRendering();
-  const { viewAttributes, view3D, widget, widgetState } = mprrendering.createRenderingPage(divElement);
+  const { viewAttributes, view3D, widget, widgetState } = mprrendering.createRenderingPage(divElement,qingniaoJSCallback);
   viewObj = viewAttributes
   // 将加载的图像数据设置到一个假设的控件 `widget` 中进行显示
   // console.log(imageData)
