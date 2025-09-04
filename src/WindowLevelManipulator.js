@@ -25,7 +25,6 @@ function WindowLevelManipulator(publicAPI, model) {
         }
     };
     publicAPI.onMouseMove = (interactor, renderer, position) => {
-        console.log(model)
         if (!position) {
             return;
         }
@@ -65,8 +64,6 @@ function WindowLevelManipulator(publicAPI, model) {
             // }
 
             // Compute new mWindow level
-            console.log(dx, dy)
-            console.log('windowlevelStyle', mWindow, level);
             let newWindow = dx + mWindow;
             const newLevel = level - dy;
             if (newWindow < 0.01) {
@@ -74,11 +71,13 @@ function WindowLevelManipulator(publicAPI, model) {
             }
             model.currentImageProperty.setColorWindow(newWindow);
             model.currentImageProperty.setColorLevel(newLevel);
-
-            console.log('windowlevelStyle', newWindow, newLevel);
+            const doc = document.getElementById("mpr-window-level-div" + model._index);
+            if (doc)
+                doc.innerHTML = `W: ${newWindow.toFixed(0)} / L: ${newLevel.toFixed(0)}`;
         }
     };
-    publicAPI.setInteractor = (interactor) => {
+    publicAPI.setInteractor = (interactor, index) => {
+        model._index = index;
         model._interactor = interactor;
 
         const renderer = model._interactor.getCurrentRenderer();

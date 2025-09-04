@@ -88,13 +88,13 @@ export function changeEvent(type) {
           control: false
         });
         panManipulator.setSlider(obj.slider, mprwidget, viewObj, obj.widgetInstance, index)
-        panManipulator2.setInteractor(obj.interactor)
+        panManipulator2.setInteractor(obj.interactor, index)
         stl.addMouseManipulator(panManipulator2);
         stl.addMouseManipulator(panManipulator);
       })
       break
     case 1:
-      viewObj.forEach(obj => {
+      viewObj.forEach((obj, index) => {
         const stl = vtkInteractorStyleManipulator.newInstance()
         obj.interactor.setInteractorStyle(stl);
         // 2. 添加自定义平移操纵器（左键拖动）
@@ -109,13 +109,13 @@ export function changeEvent(type) {
           control: false
         });
         panManipulator.setInteractor(obj.interactor)
-        panManipulator2.setInteractor(obj.interactor)
+        panManipulator2.setInteractor(obj.interactor, index)
         stl.addMouseManipulator(panManipulator2);
         stl.addMouseManipulator(panManipulator);
       })
       break;
     case 2:
-      viewObj.forEach((obj, i) => {
+      viewObj.forEach((obj, index) => {
         const stl = vtkInteractorStyleManipulator.newInstance()
         obj.interactor.setInteractorStyle(stl);
         // 2. 添加自定义平移操纵器（左键拖动）
@@ -130,13 +130,13 @@ export function changeEvent(type) {
           shift: false,
           control: false
         });
-        panManipulator2.setInteractor(obj.interactor)
+        panManipulator2.setInteractor(obj.interactor, index)
         stl.addMouseManipulator(panManipulator2);
         stl.addMouseManipulator(panManipulator);
       })
       break
     case 3:
-      viewObj.forEach(obj => {
+      viewObj.forEach((obj, index) => {
         const stl = vtkInteractorStyleManipulator.newInstance()
         obj.interactor.setInteractorStyle(stl);
         // 2. 添加自定义平移操纵器（左键拖动）
@@ -151,7 +151,7 @@ export function changeEvent(type) {
           shift: false,
           control: false
         });
-        panManipulator2.setInteractor(obj.interactor)
+        panManipulator2.setInteractor(obj.interactor, index)
         stl.addMouseManipulator(panManipulator2);
         stl.addMouseManipulator(panManipulator);
       })
@@ -231,7 +231,7 @@ export function loadMPR(arrayBuffer, divElement, qingniaoJSCallback) {
 function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement, qingniaoJSCallback) {
   const loadimage = new LoadImage();
   const mprrendering = new MPRRendering();
-  const { viewAttributes, view3D, widget, widgetState } = mprrendering.createRenderingPage(divElement,qingniaoJSCallback);
+  const { viewAttributes, view3D, widget, widgetState } = mprrendering.createRenderingPage(divElement, qingniaoJSCallback);
   viewObj = viewAttributes
   // 将加载的图像数据设置到一个假设的控件 `widget` 中进行显示
   // console.log(imageData)
@@ -248,7 +248,7 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement,
   viewAttributes.forEach((obj, i) => {
     // 设置该视图的重采样输入数据为加载的图像数据
     obj.reslice.setInputData(imageData);
-    setColorProperties(obj, windowWidth, windowCenter);
+    setColorProperties(obj, i, windowWidth, windowCenter);
     // 将该视图的重采样演员添加到渲染器中
     obj.renderer.addActor(obj.resliceActor);
 
@@ -442,7 +442,7 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement,
 
 }
 // 封装函数，检查数组有效性并设置颜色窗口和颜色中心
-function setColorProperties(obj, windowWidth, windowCenter) {
+function setColorProperties(obj, i, windowWidth, windowCenter) {
   const property = obj.resliceActor.getProperty();
   // 验证并设置窗口宽度，确保是整数类型
   if (Number.isInteger(windowWidth)) {
@@ -456,6 +456,9 @@ function setColorProperties(obj, windowWidth, windowCenter) {
   } else {
     console.warn("windowCenter 不是有效的整数");
   }
+  const doc = document.getElementById("mpr-window-level-div" + i);
+  if (doc)
+    doc.innerHTML = `W: ${windowWidth.toFixed(0)} / L: ${windowCenter.toFixed(0)}`;
 }
 
 export async function changeMPRWindowLevel(windowWidth, windowCenter) {
@@ -463,8 +466,8 @@ export async function changeMPRWindowLevel(windowWidth, windowCenter) {
     windowWidth = default_windowWidth;
     windowCenter = default_windowCenter;
   }
-  viewObj.forEach((obj) => {
-    setColorProperties(obj, windowWidth, windowCenter)
+  viewObj.forEach((obj, index) => {
+    setColorProperties(obj, index, windowWidth, windowCenter)
     obj.interactor.render();
   })
 }

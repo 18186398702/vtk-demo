@@ -405,6 +405,8 @@ class MPRRendering {
       siderDiv.style.zIndex = "9";
       elementParent.appendChild(siderDiv);
       if (i < 3) {
+        const windowlevelDiv = this.createWindowLevelDiv(i)
+        elementParent.appendChild(windowlevelDiv);
         const reset = this.createResetButton();
         resetElements.push(reset);
         elementParent.appendChild(reset);
@@ -434,22 +436,6 @@ class MPRRendering {
       elementImage.style.width = "100%";
       elementImage.style.height = "100%";
       elementImage.style.position = "relative";
-      // 添加一个
-      //   elementImage.innerHTML = `<svg id="lineSVG" style="position: absolute;
-      // top: 0;
-      // left: 0;width:100%;height:100%" xmlns="http://www.w3.org/2000/svg"></svg>`
-      // let canvas1 = document.createElement("canvas");
-      // canvas1.style.width = "100%";
-      // canvas1.style.height = "100%";
-      // canvas1.style.position = "absolute";
-      // canvas1.style.top = "0";
-      // canvas1.style.left = "0";
-      // canvas1.style.zIndex = "99";
-      // canvas1.style.backgroundColor = "rgba(204, 30, 30, 0.36)";
-      // canvas1.width = 300;
-      // canvas1.height = 300;
-      // canvas1.id = "画线-canvas-" + i;
-      // elementParent.appendChild(canvas1);
       elementParent.appendChild(elementImage);
       createdElements.push(elementImage);
     }
@@ -470,16 +456,29 @@ class MPRRendering {
     return button;
   }
   createResetButton() {
-    let svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" t="1751254493988" class="icon" viewBox="0 0 1024 1024" version="1.1" p-id="7351" width="20" height="20"><path d="M867.89 574.16a30.73 30.73 0 0 0-37.52 21.92c-38 144.83-169.31 246-319.25 246a330.71 330.71 0 0 1-306.27-206.82h60.29l-92.78-123.5-91.82 123.5h58.88q1.23 3.72 2.53 7.4A391.65 391.65 0 0 0 511.12 903.5c177.86 0 333.58-120 378.69-291.82a30.73 30.73 0 0 0-21.92-37.52zM153.88 452.57a30.69 30.69 0 0 0 37.35-22.2A329.68 329.68 0 0 1 511.12 182c136.8 0 256.58 82 306.4 207h-60.66l92.78 123.5L941.46 389h-58.58a391.63 391.63 0 0 0-751.2 26.24 30.73 30.73 0 0 0 22.2 37.33z" fill="#ffffff" p-id="7352"/></svg>`
+    let svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" t="1751254493988" class="icon" viewBox="0 0 1024 1024" version="1.1" p-id="7351" width="17" height="17"><path d="M867.89 574.16a30.73 30.73 0 0 0-37.52 21.92c-38 144.83-169.31 246-319.25 246a330.71 330.71 0 0 1-306.27-206.82h60.29l-92.78-123.5-91.82 123.5h58.88q1.23 3.72 2.53 7.4A391.65 391.65 0 0 0 511.12 903.5c177.86 0 333.58-120 378.69-291.82a30.73 30.73 0 0 0-21.92-37.52zM153.88 452.57a30.69 30.69 0 0 0 37.35-22.2A329.68 329.68 0 0 1 511.12 182c136.8 0 256.58 82 306.4 207h-60.66l92.78 123.5L941.46 389h-58.58a391.63 391.63 0 0 0-751.2 26.24 30.73 30.73 0 0 0 22.2 37.33z" fill="#ffffff" p-id="7352"/></svg>`
     const reset = document.createElement("div");
     reset.innerHTML = svg;
-    reset.style.width = "20px";
-    reset.style.height = "20px";
+    reset.style.width = "15px";
+    reset.style.height = "15px";
     reset.style.position = "absolute";
     reset.style.cursor = "pointer";
-    reset.style.left = "-5px";
+    reset.style.left = "-3px";
     reset.style.zIndex = "10";
     return reset;
+  }
+  createWindowLevelDiv(i) {
+    let div = document.createElement("div");
+    div.style.position = "absolute";
+    div.style.bottom = "5px";
+    div.style.right = "5px";
+    div.style.color = "white";
+    div.style.height = "10px";
+    div.style.zIndex = "1";
+    div.style.fontSize = "8px";
+    div.style.pointerEvents = "none";
+    div.id = "mpr-window-level-div" + i;
+    return div;
   }
   createRGBStringFromRGBValues(rgb) {
     if (rgb.length !== 3) {
