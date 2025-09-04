@@ -108,7 +108,7 @@ export function changeEvent(type) {
           shift: false,
           control: false
         });
-        panManipulator.setInteractor(obj.interactor)
+        panManipulator.setInteractor(obj.interactor, index)
         panManipulator2.setInteractor(obj.interactor, index)
         stl.addMouseManipulator(panManipulator2);
         stl.addMouseManipulator(panManipulator);
