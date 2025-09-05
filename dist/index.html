@@ -178,10 +178,16 @@
         console.log(arg1);
         // 输出结果
         // console.log(buffer);
+        // 获得系统毫秒
+        let time = new Date().getTime();
+        console.log(time);
         let div = document.getElementById("container");
         let div2 = document.getElementById("container3D");
         pian.loadMPR(arg1, div);
-        pian.load3D(arg1, div2)
+        let time2 = new Date().getTime();
+        console.log(time2);
+        console.log(time2 - time);
+        // pian.load3D(arg1, div2)
       } catch (error) {
         // 捕获并处理 pian.load 中的错误
         console.error("加载 buffer 时发生错误:", error);

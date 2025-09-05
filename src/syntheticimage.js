@@ -58,7 +58,6 @@ class SyntheticImageData {
     // 根据像素数据确定数据类型（如 Int16、Uint8 等）
     const data_type = getType(zeroHit.h_img.data);
     // 设置图像的维度信息：列数、行数以及切片数
-    console.log(zeroHit.h_img)
     const dimensions = [zeroHit.h_img.numCols, zeroHit.h_img.numRows, hitbit.length];
     // 设置图像的间距信息，包括像素间距和切片厚度
     const spacing = [zeroHit.pixSpacing, zeroHit.pixSpacing, zeroHit.slice_Thickness];
@@ -257,7 +256,6 @@ class SyntheticImageData {
       //   data_b[pix_num] = hitbit.data[pix_num]-hitbit.min
       // }
       // hitbit.data = data_b
-      console.log("hitbit", dicomdata)
       // 获取 DICOM 文件中的像素间距 (Pixel Spacing)
       var hitbit = this.h_b_obj_return_h_img(dicomdata)
       const pixel_spacing = dicomdata.tags["00280030"].value;

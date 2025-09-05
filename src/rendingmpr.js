@@ -389,12 +389,15 @@ class MPRRendering {
     element.style.gridTemplateColumns = '50% 50%';  // 两列等宽
     // element.style.border = "1px solid black"; // 可选，便于调试
     controlContainer.appendChild(element);
+    var mprdivArr = [];
     for (let i = 0; i < numElements; i++) {
       // 创建父级容器，放置视图和按钮
       const elementParent = document.createElement("div");
       elementParent.style.width = "100%";
       elementParent.style.height = "100%";
       elementParent.style.position = "relative";
+      // 增加双击事件
+      mprdivArr.push(elementParent);
       // elementParent.style.border = "1px solid black"; // 可选，便于调试
       element.appendChild(elementParent);
 
@@ -439,6 +442,27 @@ class MPRRendering {
       elementParent.appendChild(elementImage);
       createdElements.push(elementImage);
     }
+    mprdivArr.forEach((element, i) => {
+      element.addEventListener("dblclick", () => {
+        if (element.style.width === "100%") {
+          element.style.width = "200%";
+          element.style.height = "200%";
+          mprdivArr.forEach((el, index) => {
+            if (index !== i) {
+              el.style.display = "none";
+            }
+          });
+        } else {
+          element.style.width = "100%";
+          element.style.height = "100%";
+          mprdivArr.forEach((el, index) => {
+            if (index !== i) {
+              el.style.display = "";
+            }
+          });
+        }
+      })
+    });
 
     // 返回包含所有创建元素的数组
     return { createdElements, createdSliderElements, resetElements };

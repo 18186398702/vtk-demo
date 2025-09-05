@@ -34,7 +34,6 @@ function WindowLevelManipulator(publicAPI, model) {
         model._Slider.value = v;
         let widget = model.widget
         let i = model.viewIndex;
-        console.log(model._Slider.value);
         const image = widget.getWidgetState().getImage();
         if (image) {
             clearTimeout(model.timer);
