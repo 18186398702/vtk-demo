@@ -60,7 +60,8 @@ class SyntheticImageData {
     // 设置图像的维度信息：列数、行数以及切片数
     const dimensions = [zeroHit.h_img.numCols, zeroHit.h_img.numRows, hitbit.length];
     // 设置图像的间距信息，包括像素间距和切片厚度
-    const spacing = [zeroHit.pixSpacing, zeroHit.pixSpacing, zeroHit.slice_Thickness];
+    const spacing = [zeroHit.pixSpacing, zeroHit.pixSpacing, zeroHit.slice_spacing];
+    // console.log("pixSpacing:",zeroHit.pixSpacing,",slice_Thickness:",zeroHit.slice_Thickness)
     // 设置 vtkImageData 的间距、原点和维度
     imageData.setSpacing(spacing);
     imageData.setOrigin(origin);
