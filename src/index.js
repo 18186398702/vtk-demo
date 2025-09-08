@@ -189,25 +189,25 @@ function dx处理(arrayBuffer) {
   arrayBuffer.sort((a, b) => a.image_position[2] - b.image_position[2])
   //计算层间距
   for (let i = 0; i < arrayBuffer.length; i++) {
-      var sliceSpacing = 0;
-      if (i === 0 && arrayBuffer.length > 1) {
-          // 第一张图像：使用与下一张的间距
-          sliceSpacing = Math.abs(arrayBuffer[i + 1].image_position[2] - arrayBuffer[i].image_position[2]);
-      } else if (i === arrayBuffer.length - 1 && arrayBuffer.length > 1) {
-          // 最后一张图像：使用与上一张的间距
-          sliceSpacing = Math.abs(arrayBuffer[i].image_position[2] - arrayBuffer[i - 1].image_position[2]);
-      } else if (i > 0 && i < arrayBuffer.length - 1) {
-          // 中间图像：计算前后平均间距，更准确
-          const prevSpacing = Math.abs(arrayBuffer[i].image_position[2] - arrayBuffer[i - 1].image_position[2]);
-          const nextSpacing = Math.abs(arrayBuffer[i + 1].image_position[2] - arrayBuffer[i].image_position[2]);
-          sliceSpacing = (prevSpacing + nextSpacing) / 2;
-      } else {
-          // 只有一张图像，无法计算间距
-          sliceSpacing = 0;
-      }
+    var sliceSpacing = 0;
+    if (i === 0 && arrayBuffer.length > 1) {
+      // 第一张图像：使用与下一张的间距
+      sliceSpacing = Math.abs(arrayBuffer[i + 1].image_position[2] - arrayBuffer[i].image_position[2]);
+    } else if (i === arrayBuffer.length - 1 && arrayBuffer.length > 1) {
+      // 最后一张图像：使用与上一张的间距
+      sliceSpacing = Math.abs(arrayBuffer[i].image_position[2] - arrayBuffer[i - 1].image_position[2]);
+    } else if (i > 0 && i < arrayBuffer.length - 1) {
+      // 中间图像：计算前后平均间距，更准确
+      const prevSpacing = Math.abs(arrayBuffer[i].image_position[2] - arrayBuffer[i - 1].image_position[2]);
+      const nextSpacing = Math.abs(arrayBuffer[i + 1].image_position[2] - arrayBuffer[i].image_position[2]);
+      sliceSpacing = (prevSpacing + nextSpacing) / 2;
+    } else {
+      // 只有一张图像，无法计算间距
+      sliceSpacing = 0;
+    }
 
-      // 添加到对象中
-      arrayBuffer[i].slice_spacing = parseFloat(sliceSpacing.toFixed(6)); // 保留6位小数
+    // 添加到对象中
+    arrayBuffer[i].slice_spacing = parseFloat(sliceSpacing.toFixed(6)); // 保留6位小数
   }
 }
 
@@ -342,49 +342,7 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement,
       }
 
       if (eventType == 4) {
-        // startX = e.position.x / 1.8;
-        // startY = svgHeight - e.position.y / 1.8;
-        // currentLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        // currentLine.setAttribute('stroke', '#ff0000');
-        // currentLine.setAttribute('stroke-width', '2');
-        // currentLine.setAttribute('x1', startX);
-        // currentLine.setAttribute('y1', startY);
-        // currentLine.setAttribute('x2', startX);
-        // currentLine.setAttribute('y2', startY);
-        // svg.appendChild(currentLine);
       }
-
-      // 创建SVG线条元素
-
-      // let center = widgetState.getCenter();
-      // console.log("center", center)
-      // let otherLineHandle = obj.widgetInstance.getOtherLineHandle("XinY")
-      // let otherLineVector = otherLineHandle.getDirection()
-      // console.log("XinY", otherLineVector)
-      // otherLineHandle = obj.widgetInstance.getOtherLineHandle("ZinY")
-      // otherLineVector = otherLineHandle.getDirection()
-      // console.log("ZinY", otherLineVector)
-      // otherLineHandle = obj.widgetInstance.getOtherLineHandle("ZinX")
-      // otherLineVector = otherLineHandle.getDirection()
-      // console.log("ZinX", otherLineVector)
-      // otherLineHandle = obj.widgetInstance.getOtherLineHandle("YinX")
-      // otherLineVector = otherLineHandle.getDirection()
-      // console.log("YinX", otherLineVector)
-      // otherLineHandle = obj.widgetInstance.getOtherLineHandle("XinZ")
-      // otherLineVector = otherLineHandle.getDirection()
-      // console.log("XinZ", otherLineVector)
-      // otherLineHandle = obj.widgetInstance.getOtherLineHandle("YinZ")
-      // otherLineVector = otherLineHandle.getDirection()
-      // console.log("YinZ", otherLineVector)
-      // const imageData2 = obj.reslice.getOutputData()
-      // console.log(imageData2)
-      // const image = imageData2.getPointData().getScalars().getData();
-      // console.log(image)
-      // console.log(obj.resliceActor);
-
-      // let img = obj.reslice.getOutputData()
-      // console.log(img, img.getDimensions())
-
     })
     // obj.widgetInstance.onWidgetChange((e) => {
     // console.log(obj.widgetInstance)
@@ -407,7 +365,6 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement,
 
     const reslice = obj.reslice;
     const viewType = xyzToViewType[i];
-    console.log(xyzToViewType)
     // 对所有视图进行操作，确保在当前视图进行交互时能够正确更新切片
     viewAttributes.forEach((v) => {
 

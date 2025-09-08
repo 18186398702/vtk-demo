@@ -7,7 +7,7 @@ import vtkImageReslice from "@kitware/vtk.js/Imaging/Core/ImageReslice";
 import vtkImageSlice from "@kitware/vtk.js/Rendering/Core/ImageSlice";
 import vtkInteractorStyleTrackballCamera from "@kitware/vtk.js/Interaction/Style/InteractorStyleTrackballCamera";
 import vtkInteractorStyle from '@kitware/vtk.js/Rendering/Core/InteractorStyle';
-import vtkMath from "@kitware/vtk.js/Common/Core/Math";
+import vtkMath, { random } from "@kitware/vtk.js/Common/Core/Math";
 import vtkOrientationMarkerWidget from "@kitware/vtk.js/Interaction/Widgets/OrientationMarkerWidget";
 import vtkResliceCursorWidget from "@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget";
 import vtkWidgetManager from "@kitware/vtk.js/Widgets/Core/WidgetManager";
@@ -21,7 +21,8 @@ import vtkInteractorStyleManipulator from '@kitware/vtk.js/Interaction/Style/Int
 import macro from "@kitware/vtk.js/macro";
 import WindowLevelManipulator from "./WindowLevelManipulator"
 class MPRRendering {
-
+  viewAttributes = null
+  widgetState = null
   // 创建MPR渲染页面
   createRenderingPage(divElement, qingniaoJSCallback) {
     // 定义视图颜色（X轴、Y轴、Z轴以及其他方向的灰色）
@@ -64,9 +65,10 @@ class MPRRendering {
     window.widget = widget;
     const widgetState = widget.getWidgetState();
     console.log(widgetState)
+    this.widgetState = widgetState;
+    console.log(widgetState.getStatesWithLabel("line")[0])
     widgetState.getStatesWithLabel("sphere").forEach((handle) => { handle.setScale1(10) });
-    widgetState.getStatesWithLabel("line").forEach((state) => { state.setScale3(2, 2, 1); state.setOpacity(128) });
-
+    widgetState.getStatesWithLabel("line").forEach((state) => { state.setScale3(2, 2, 1); });
     widgetState.getStatesWithLabel("line")[0].setColor3(46, 213, 115);
     widgetState.getStatesWithLabel("line")[1].setColor3(9, 132, 227);
     widgetState.getStatesWithLabel("line")[2].setColor3(255, 71, 87);
@@ -373,6 +375,7 @@ class MPRRendering {
         });
       }
     });
+    this.viewAttributes = viewAttributes;
     // 返回视图属性和3D视图对象
     return { viewAttributes, view3D, widget, widgetState };
   }
@@ -461,6 +464,11 @@ class MPRRendering {
             }
           });
         }
+        this.viewAttributes.forEach((obj, i) => {
+          // 强制更新渲染窗口大小
+          obj.grw.resize();
+        });
+        
       })
     });
 

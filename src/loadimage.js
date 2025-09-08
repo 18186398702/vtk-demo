@@ -64,8 +64,9 @@ class LoadImage {
     );
     // interactionContext.renderer.resetCamera()
     // interactionContext.renderer.getActiveCamera().setParallelScale(200); // 例如，将当前值减半
-
-    view3D.renderWindow.render();
+    if (view3D) {
+      view3D.renderWindow.render();
+    }
     return modified;
   }
 

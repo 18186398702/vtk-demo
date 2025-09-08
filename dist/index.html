@@ -105,8 +105,8 @@
     <canvas id="sagittal" width="512" height="512"></canvas>
   </div> -->
   <div style="width: 100%;display: flex;">
-    <div id="container" style="width:  600px;height:  600px; border: 1px solid rgb(116, 116, 116)"></div>
-    <div id="container3D" style="width: 600px;height: 600px; border: 1px solid rgb(116, 116, 116)"></div>
+    <div id="container" style="width:  700px;height:  650px; border: 1px solid rgb(116, 116, 116)"></div>
+    <div id="container3D" style="width: 650px;height: 650px; border: 1px solid rgb(116, 116, 116)"></div>
   </div>
   <div class="controls">
     <div class="control-group">
@@ -183,11 +183,12 @@
         console.log(time);
         let div = document.getElementById("container");
         let div2 = document.getElementById("container3D");
+        console.log("数据",arg1);
         pian.loadMPR(arg1, div);
         let time2 = new Date().getTime();
         console.log(time2);
         console.log(time2 - time);
-        // pian.load3D(arg1, div2)
+        pian.load3D(arg1, div2)
       } catch (error) {
         // 捕获并处理 pian.load 中的错误
         console.error("加载 buffer 时发生错误:", error);
