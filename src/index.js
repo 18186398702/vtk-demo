@@ -298,10 +298,11 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement,
         let deltaX = currentPosition.x - previousPosition.x;
         let deltaY = currentPosition.y - previousPosition.y;
         previousPosition = JSON.parse(JSON.stringify(currentPosition));
-        let vtkdiv = document.getElementById("VTK-image-div-2");
+        let vtkdiv = document.getElementById("VTK-image-div-" + i);
         let vtkCanvas = vtkdiv.querySelector("canvas")
-        let 画线canvas = document.getElementById("scmpr22_11");
+        let 画线canvas = document.getElementById(i == 0 ? "scmpr22_11" : (i == 1 ? "scmpr22_12" : "scmpr22_21"));
         if (画线canvas && callBackFun) {
+          console.log("移动回调", vtkCanvas.width, 画线canvas.width)
           callBackFun(2, { x: deltaX / (vtkCanvas.width / 画线canvas.width), y: -deltaY / (vtkCanvas.height / 画线canvas.height) }, "VTK-image-div-" + i);
           // callBackFun(i, deltaX / (vtkCanvas.width / 画线canvas.width), -deltaY / (vtkCanvas.width / 画线canvas.width))
         }
@@ -409,7 +410,7 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement,
     // 渲染当前视图
     const image = obj.reslice.getOutputData()
     const boundsX = image.getBounds()[1] > image.getBounds()[3] ? image.getBounds()[1] : image.getBounds()[3]
-    obj.renderer.getActiveCamera().setParallelScale(boundsX / 1.95);
+    obj.renderer.getActiveCamera().setParallelScale(boundsX / 2);
     obj.interactor.render();
 
   });

@@ -329,7 +329,7 @@ class MPRRendering {
           obj.renderer.resetCamera()
           const image = obj.reslice.getOutputData()
           const boundsX = image.getBounds()[1] > image.getBounds()[3] ? image.getBounds()[1] : image.getBounds()[3]
-          obj.renderer.getActiveCamera().setParallelScale(boundsX / 1.95);
+          obj.renderer.getActiveCamera().setParallelScale(boundsX / 2);
           obj.interactor.render();
           if (qingniaoJSCallback) {
             qingniaoJSCallback(4, null, "VTK-image-div-" + i)
@@ -468,7 +468,7 @@ class MPRRendering {
           // 强制更新渲染窗口大小
           obj.grw.resize();
         });
-        
+
       })
     });
 
