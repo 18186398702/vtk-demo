@@ -81,7 +81,9 @@
   <button onclick="ccc(3)">缩放</button>
   <button onclick="ccc(4)">画线</button>
   <button onclick="changeMPRWindowLevel(1500,-500)">肺窗</button>
-  <button onclick="changeMPRWindowLevel(3500,750)">骨窗</button>
+  <input id="windowWidth" />
+  <input id="windowCenter" />
+  <button onclick="changeMPRWindowLevelVal()">调窗</button>
   <div style="float: right;">
     <button onclick="exportImg()">导出</button>
     <select onchange="loadcolor(this.value)">
@@ -183,7 +185,7 @@
         console.log(time);
         let div = document.getElementById("container");
         let div2 = document.getElementById("container3D");
-        console.log("数据",arg1);
+        console.log("数据", arg1);
         pian.loadMPR(arg1, div);
         let time2 = new Date().getTime();
         console.log(time2);
@@ -208,6 +210,11 @@
     }
     function changeMPRWindowLevel(w, l) {
       pian.changeMPRWindowLevel(w, l)
+    }
+    function changeMPRWindowLevelVal() {
+      var value = document.getElementById("windowWidth").value;
+      var value1 = document.getElementById("windowCenter").value;
+      pian.changeMPRWindowLevel(parseInt(value) , parseInt(value1))
     }
   </script>
 </body>

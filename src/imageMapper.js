@@ -21,7 +21,6 @@ function vtkImageMapper(publicAPI, model) {
     // Set our className
     model.classHierarchy.push('vtkImageMapper');
     publicAPI.getSliceAtPosition = (pos, viewtype) => {
-        console.log("getSliceAtPosition")
         const image = publicAPI.getCurrentImage();
         let pos3;
         if (pos.length === 3) {
@@ -47,7 +46,6 @@ function vtkImageMapper(publicAPI, model) {
             ijkMode
         } = publicAPI.getClosestIJKAxis();
         let slice = 0;
-        console.log("ijkMode", clampValue(ijk[0], ex[0], ex[1]), clampValue(ijk[1], ex[2], ex[3]), clampValue(ijk[2], ex[4], ex[5]))
         switch (viewtype) {
             case SlicingMode.I:
                 slice = clampValue(ijk[0], ex[0], ex[1]);

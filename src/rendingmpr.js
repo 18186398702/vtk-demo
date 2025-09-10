@@ -66,7 +66,6 @@ class MPRRendering {
     const widgetState = widget.getWidgetState();
     console.log(widgetState)
     this.widgetState = widgetState;
-    console.log(widgetState.getStatesWithLabel("line")[0])
     widgetState.getStatesWithLabel("sphere").forEach((handle) => { handle.setScale1(10) });
     widgetState.getStatesWithLabel("line").forEach((state) => { state.setScale3(2, 2, 1); });
     widgetState.getStatesWithLabel("line")[0].setColor3(46, 213, 115);
@@ -75,7 +74,6 @@ class MPRRendering {
     widgetState.getStatesWithLabel("line")[3].setColor3(9, 132, 227);
     widgetState.getStatesWithLabel("line")[4].setColor3(255, 71, 87);
     widgetState.getStatesWithLabel("line")[5].setColor3(46, 213, 115);
-    console.log(widgetState.getStatesWithLabel("line"))
     // 调整标签为 'center' 的所有状态的不透明度为 128
     widgetState.getStatesWithLabel("center").forEach((state) => state.setOpacity(128));
     const container = divElement;
@@ -93,7 +91,6 @@ class MPRRendering {
       // 创建一个 vtkGenericRenderWindow 实例，负责管理 VTK 渲染窗口
       const grw = vtkGenericRenderWindow.newInstance();
       // 将刚才创建的视图容器赋给渲染窗口容器
-      console.log(element);
       grw.setContainer(element);
       // 调用 resize 方法确保渲染窗口的尺寸与视图容器一致
       grw.resize();
@@ -169,7 +166,7 @@ class MPRRendering {
         // stl.addMouseManipulator(panManipulator);
         // 添加一个小部件（widget）到 widgetManager，并根据 xyzToViewType[i] 设置其类型
         obj.widgetInstance = obj.widgetManager.addWidget(widget, xyzToViewType[i]);
-        console.log(obj.widgetInstance)
+
         // 将小部件的缩放方式设置为基于像素
         obj.widgetInstance.setScaleInPixels(true);
         // 调整交线的空距
@@ -211,6 +208,7 @@ class MPRRendering {
 
       // 设置输出图像的维度为 2，表示输出为 2D 图像（通常用于切片视图）
       obj.reslice.setOutputDimensionality(2);
+      obj.reslice.setInterpolationMode(1)
       // 创建一个 vtkImageMapper 实例，用于映射图像数据
       obj.resliceMapper = vtkImageMapper.newInstance();
       obj.resliceMapper.setSliceAtFocalPoint(true); // 确保切片在焦点处
@@ -358,7 +356,6 @@ class MPRRendering {
               [] // 结果存储在一个新数组中
             );
             // 设置平面的新中心点
-            console.log(newCenter)
             widget.setCenter(newCenter);
 
             // 模拟用户交互，触发小部件的交互事件，确保状态更新

@@ -30,7 +30,6 @@ export function export3dImg() {
 }
 
 export function change3DLightIntensity(value) {
-    console.log(value, parseFloat(value) / 10)
     renderer_3d.getLights()[0].setIntensity(parseFloat(value) / 10)
     renderWindow_3d.render();
 }

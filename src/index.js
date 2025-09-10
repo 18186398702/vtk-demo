@@ -119,7 +119,6 @@ export function changeEvent(type) {
         const stl = vtkInteractorStyleManipulator.newInstance()
         obj.interactor.setInteractorStyle(stl);
         // 2. 添加自定义平移操纵器（左键拖动）
-        console.log(stl)
         const panManipulator = vtkMouseCameraTrackballPanManipulator.newInstance({
           button: 1, // 左键
           shift: false,
@@ -140,7 +139,6 @@ export function changeEvent(type) {
         const stl = vtkInteractorStyleManipulator.newInstance()
         obj.interactor.setInteractorStyle(stl);
         // 2. 添加自定义平移操纵器（左键拖动）
-        console.log(stl)
         const panManipulator = vtkMouseCameraTrackballZoomManipulator.newInstance({
           button: 1, // 左键
           shift: false,
@@ -217,7 +215,6 @@ export function load3D(arrayBuffer, divElement) {
     throw new Error("arrayBuffer 不能为空！");
   }
   dx处理(arrayBuffer)
-  console.log("arrayBuffer", arrayBuffer)
   const syntheticImageData = new SyntheticImageData();
   const { imageData, windowWidth, windowCenter } = syntheticImageData.ImageData(arrayBuffer)
   Demo3d(imageData, divElement)
@@ -288,7 +285,6 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement,
     // obj.interactor.onMouseEnter((e) => {
     //   console.log("鼠标进入")
     // })
-    console.log(obj.interactor)
 
     obj.interactor.onMouseMove((e) => {
       if (!mouseDrawing) return;
