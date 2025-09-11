@@ -34,10 +34,39 @@ export function change3DLightIntensity(value) {
     renderWindow_3d.render();
 }
 
-export function Demo3d(source, divElement) {
+export function Demo3d(source, divElement, type) {
     const renderMainBox = divElement;
     renderMainBox.innerHTML = "";
     renderMainBox.style.position = "relative";
+    if (type == '1') {
+        const lightIntensity = document.createElement("input");
+        lightIntensity.type = "range";
+        lightIntensity.min = 0;
+        lightIntensity.max = 50;
+        lightIntensity.value = 10;
+        lightIntensity.style.position = "absolute";
+        lightIntensity.style.top = "55px";
+        lightIntensity.style.right = "-55px";
+        lightIntensity.style.width = "120px";
+        // lightIntensity变纵向
+        lightIntensity.style.transform = "rotate(270deg)";
+        renderMainBox.parentElement.appendChild(lightIntensity);
+        lightIntensity.onchange = function () {
+            change3DLightIntensity(this.value);
+        };
+        const select = document.createElement("select");
+        select.onchange = function () {
+            load3dColor(this.value);
+        };
+        select.innerHTML = colorPresets.map(preset => `<option value="${preset.Name}">${preset.Name}</option>`).join('');
+        renderMainBox.appendChild(select);
+        select.style.position = "absolute";
+        select.style.bottom = "10px";
+        select.style.left = "50%";
+        select.style.transform = "translate(-50%, 0%)";
+    }
+    // 用js的方式加到divElement里
+
 
     const fullScreenRenderer = vtkFullScreenRenderWindow.newInstance({
         container: renderMainBox,

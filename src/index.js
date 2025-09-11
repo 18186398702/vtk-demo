@@ -244,6 +244,8 @@ export function loadMPR(arrayBuffer, divElement, qingniaoJSCallback) {
   MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement, qingniaoJSCallback)
   // vtk画线()
   changeEvent(5)
+  let Dom3d = document.getElementById('VTK-image-div-3');
+  Demo3d(imageData, Dom3d, "1")
 }
 
 
@@ -262,7 +264,7 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement,
   outlineMapper.setInputData(outline.getOutputData());
   const outlineActor = vtkActor.newInstance();
   outlineActor.setMapper(outlineMapper);
-  view3D.renderer.addActor(outlineActor);
+  // view3D.renderer.addActor(outlineActor);
   // 对每个视图的属性进行操作，`viewAttributes` 是包含多个视图属性的数组
   viewAttributes.forEach((obj, i) => {
     // 设置该视图的重采样输入数据为加载的图像数据
@@ -271,11 +273,11 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement,
     // 将该视图的重采样演员添加到渲染器中
     obj.renderer.addActor(obj.resliceActor);
 
-    view3D.renderer.addActor(obj.resliceActor);
+    // view3D.renderer.addActor(obj.resliceActor);
     // 遍历并将该视图中的球体演员添加到渲染器中
     obj.sphereActors.forEach((actor) => {
       obj.renderer.addActor(actor);
-      view3D.renderer.addActor(actor);
+      // view3D.renderer.addActor(actor);
     });
     let mouseDrawing = false;
     // let startX, startY;
@@ -411,10 +413,10 @@ function MultiSliceImageMapper(imageData, windowWidth, windowCenter, divElement,
 
   });
   // 重置 3D 渲染器的相机，确保视图显示正确
-  view3D.renderer.resetCamera();
+  // view3D.renderer.resetCamera();
   // 重置相机的裁剪范围
-  view3D.renderer.resetCameraClippingRange();
-  view3D.renderWindow.render();
+  // view3D.renderer.resetCameraClippingRange();
+  // view3D.renderWindow.render();
 
 }
 // 封装函数，检查数组有效性并设置颜色窗口和颜色中心
@@ -432,7 +434,7 @@ function setColorProperties(obj, i, windowWidth, windowCenter) {
   } else {
     console.warn("windowCenter 不是有效的整数");
   }
-  const doc = document.getElementById("mpr-window-level-div" + i);
+  const doc = document.getElementById("mpr-window-level-div-" + i);
   if (doc)
     doc.innerHTML = `W: ${windowWidth.toFixed(0)} / L: ${windowCenter.toFixed(0)}`;
 }

@@ -71,7 +71,7 @@ function WindowLevelManipulator(publicAPI, model) {
             }
             model.currentImageProperty.setColorWindow(newWindow);
             model.currentImageProperty.setColorLevel(newLevel);
-            const doc = document.getElementById("mpr-window-level-div" + model._index);
+            const doc = document.getElementById("mpr-window-level-div-" + model._index);
             if (doc)
                 doc.innerHTML = `W: ${newWindow.toFixed(0)} / L: ${newLevel.toFixed(0)}`;
         }

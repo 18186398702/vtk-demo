@@ -83,8 +83,8 @@ class MPRRendering {
     // 通过访问 createdViews 数组来操作这些视图元素
     createdElements.forEach((element, i) => {
       // 例如，修改第一个视图的背景颜色
-      if (i === 4) {
-        element.id = "3dView";
+      if (i === 3) {
+        return
       }
       //-------------------------------------------------------------------------------------------------------------------------------
       //-------------------------------------------------------------------------------------------------------------------------------
@@ -410,6 +410,8 @@ class MPRRendering {
       if (i < 3) {
         const windowlevelDiv = this.createWindowLevelDiv(i)
         elementParent.appendChild(windowlevelDiv);
+        const colorlDiv = this.createColorDiv(i)
+        elementParent.appendChild(colorlDiv);
         const reset = this.createResetButton();
         resetElements.push(reset);
         elementParent.appendChild(reset);
@@ -499,14 +501,28 @@ class MPRRendering {
   createWindowLevelDiv(i) {
     let div = document.createElement("div");
     div.style.position = "absolute";
-    div.style.bottom = "5px";
-    div.style.right = "5px";
+    div.style.bottom = "0px";
+    div.style.right = "10px";
     div.style.color = "white";
     div.style.height = "10px";
     div.style.zIndex = "1";
     div.style.fontSize = "8px";
     div.style.pointerEvents = "none";
-    div.id = "mpr-window-level-div" + i;
+    div.id = "mpr-window-level-div-" + i;
+    return div;
+  }
+
+  createColorDiv(i) {
+    let div = document.createElement("div");
+    div.style.position = "absolute";
+    div.style.bottom = "0px";
+    div.style.right = "0px";
+    const colorlist = ['rgb(255, 71, 87)', 'rgb(46, 213, 115)', 'rgb(9, 132, 227)',]
+    div.style.background = colorlist[i];
+    div.style.width = "8px";
+    div.style.height = "8px";
+    div.style.zIndex = "1";
+    div.style.pointerEvents = "none";
     return div;
   }
   createRGBStringFromRGBValues(rgb) {
