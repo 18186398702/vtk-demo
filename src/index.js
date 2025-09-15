@@ -187,21 +187,23 @@ function dx处理(arrayBuffer) {
   arrayBuffer.sort((a, b) => a.image_position[2] - b.image_position[2])
   //计算层间距
   for (let i = 0; i < arrayBuffer.length; i++) {
-    var sliceSpacing = 0;
-    if (i === 0 && arrayBuffer.length > 1) {
-      // 第一张图像：使用与下一张的间距
-      sliceSpacing = Math.abs(arrayBuffer[i + 1].image_position[2] - arrayBuffer[i].image_position[2]);
-    } else if (i === arrayBuffer.length - 1 && arrayBuffer.length > 1) {
-      // 最后一张图像：使用与上一张的间距
-      sliceSpacing = Math.abs(arrayBuffer[i].image_position[2] - arrayBuffer[i - 1].image_position[2]);
-    } else if (i > 0 && i < arrayBuffer.length - 1) {
-      // 中间图像：计算前后平均间距，更准确
-      const prevSpacing = Math.abs(arrayBuffer[i].image_position[2] - arrayBuffer[i - 1].image_position[2]);
-      const nextSpacing = Math.abs(arrayBuffer[i + 1].image_position[2] - arrayBuffer[i].image_position[2]);
-      sliceSpacing = (prevSpacing + nextSpacing) / 2;
-    } else {
-      // 只有一张图像，无法计算间距
-      sliceSpacing = 0;
+    var sliceSpacing = arrayBuffer[i].slice_Thickness;
+    if (arrayBuffer[i].image_position != null){
+      if (i === 0 && arrayBuffer.length > 1) {
+        // 第一张图像：使用与下一张的间距
+        sliceSpacing = Math.abs(arrayBuffer[i + 1].image_position[2] - arrayBuffer[i].image_position[2]);
+      } else if (i === arrayBuffer.length - 1 && arrayBuffer.length > 1) {
+        // 最后一张图像：使用与上一张的间距
+        sliceSpacing = Math.abs(arrayBuffer[i].image_position[2] - arrayBuffer[i - 1].image_position[2]);
+      } else if (i > 0 && i < arrayBuffer.length - 1) {
+        // 中间图像：计算前后平均间距，更准确
+        const prevSpacing = Math.abs(arrayBuffer[i].image_position[2] - arrayBuffer[i - 1].image_position[2]);
+        const nextSpacing = Math.abs(arrayBuffer[i + 1].image_position[2] - arrayBuffer[i].image_position[2]);
+        sliceSpacing = (prevSpacing + nextSpacing) / 2;
+      } else {
+        // 只有一张图像，无法计算间距
+        sliceSpacing = arrayBuffer[i].slice_Thickness;
+      }
     }
 
     // 添加到对象中
