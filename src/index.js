@@ -186,29 +186,44 @@ function dx处理(arrayBuffer) {
   }
   arrayBuffer.sort((a, b) => a.image_position[2] - b.image_position[2])
   //计算层间距
-  for (let i = 0; i < arrayBuffer.length; i++) {
-    var sliceSpacing = arrayBuffer[i].slice_Thickness;
-    if (arrayBuffer[i].image_position != null){
-      if (i === 0 && arrayBuffer.length > 1) {
-        // 第一张图像：使用与下一张的间距
-        sliceSpacing = Math.abs(arrayBuffer[i + 1].image_position[2] - arrayBuffer[i].image_position[2]);
-      } else if (i === arrayBuffer.length - 1 && arrayBuffer.length > 1) {
-        // 最后一张图像：使用与上一张的间距
-        sliceSpacing = Math.abs(arrayBuffer[i].image_position[2] - arrayBuffer[i - 1].image_position[2]);
-      } else if (i > 0 && i < arrayBuffer.length - 1) {
-        // 中间图像：计算前后平均间距，更准确
-        const prevSpacing = Math.abs(arrayBuffer[i].image_position[2] - arrayBuffer[i - 1].image_position[2]);
-        const nextSpacing = Math.abs(arrayBuffer[i + 1].image_position[2] - arrayBuffer[i].image_position[2]);
-        sliceSpacing = (prevSpacing + nextSpacing) / 2;
-      } else {
-        // 只有一张图像，无法计算间距
-        sliceSpacing = arrayBuffer[i].slice_Thickness;
-      }
+  var sliceSpacing = arrayBuffer[0].slice_Thickness;
+  //获取第一张dicom和最后一张的
+  if (arrayBuffer[0].image_position != null){
+    var sliceSpacing_all = Math.abs(arrayBuffer[0].image_position[2] - arrayBuffer[arrayBuffer.length - 1].image_position[2]);
+    var imageNumber_all = arrayBuffer.length;
+    //判断imageNumber是否在arrayBuffer中
+    if ("imageNumber" in arrayBuffer[0] && arrayBuffer[0].imageNumber != null) { 
+      imageNumber_all = Math.abs(arrayBuffer[0].imageNumber - arrayBuffer[arrayBuffer.length - 1].imageNumber)
     }
-
-    // 添加到对象中
-    arrayBuffer[i].slice_spacing = parseFloat(sliceSpacing.toFixed(6)); // 保留6位小数
+    sliceSpacing = sliceSpacing_all / imageNumber_all;
   }
+  // 把层间距遍历添加到arrayBuffer中
+  arrayBuffer = arrayBuffer.map(obj => ({ ...obj,slice_spacing: parseFloat(sliceSpacing.toFixed(6))})); // 保留6位小数
+
+  //20250915废弃
+  // for (let i = 0; i < arrayBuffer.length; i++) {
+  //   var sliceSpacing = arrayBuffer[i].slice_Thickness;
+  //   if (arrayBuffer[i].image_position != null){
+  //     if (i === 0 && arrayBuffer.length > 1) {
+  //       // 第一张图像：使用与下一张的间距
+  //       sliceSpacing = Math.abs(arrayBuffer[i + 1].image_position[2] - arrayBuffer[i].image_position[2]);
+  //     } else if (i === arrayBuffer.length - 1 && arrayBuffer.length > 1) {
+  //       // 最后一张图像：使用与上一张的间距
+  //       sliceSpacing = Math.abs(arrayBuffer[i].image_position[2] - arrayBuffer[i - 1].image_position[2]);
+  //     } else if (i > 0 && i < arrayBuffer.length - 1) {
+  //       // 中间图像：计算前后平均间距，更准确
+  //       const prevSpacing = Math.abs(arrayBuffer[i].image_position[2] - arrayBuffer[i - 1].image_position[2]);
+  //       const nextSpacing = Math.abs(arrayBuffer[i + 1].image_position[2] - arrayBuffer[i].image_position[2]);
+  //       sliceSpacing = (prevSpacing + nextSpacing) / 2;
+  //     } else {
+  //       // 只有一张图像，无法计算间距
+  //       sliceSpacing = arrayBuffer[i].slice_Thickness;
+  //     }
+  //   }
+
+  //   // 添加到对象中
+  //   arrayBuffer[i].slice_spacing = parseFloat(sliceSpacing.toFixed(6)); // 保留6位小数
+  // }
 }
 
 export function load3D(arrayBuffer, divElement) {
