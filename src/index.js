@@ -198,7 +198,10 @@ function dx处理(arrayBuffer) {
     sliceSpacing = sliceSpacing_all / imageNumber_all;
   }
   // 把层间距遍历添加到arrayBuffer中
-  arrayBuffer = arrayBuffer.map(obj => ({ ...obj,slice_spacing: parseFloat(sliceSpacing.toFixed(6))})); // 保留6位小数
+  // arrayBuffer = arrayBuffer.map(obj => ({ ...obj,slice_spacing: parseFloat(sliceSpacing.toFixed(6))})); // 保留6位小数
+  for (let i = 0; i < arrayBuffer.length; i++) {
+    arrayBuffer[i].slice_spacing = parseFloat(sliceSpacing.toFixed(6)); // 保留6位小数
+  }
 
   //20250915废弃
   // for (let i = 0; i < arrayBuffer.length; i++) {
