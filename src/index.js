@@ -23,7 +23,28 @@ import vtkInteractorStyleManipulator from '@kitware/vtk.js/Interaction/Style/Int
 import pageturningManipulator from "./pageturningManipulator";
 import { vtk画线, drawAllLines } from "./画线";
 import { calculateDistance, qn_vtk_transition } from "./qn_vtk_transition";
-import { X } from '@kitware/vtk.js/Common/Core/Math/index';
+
+// 在移動端初始化 vConsole
+function initVConsole() {
+  // 檢測是否為移動設備
+
+    import('vconsole').then(VConsoleModule => {
+      const VConsole = VConsoleModule.default;
+      const vConsole = new VConsole({
+        theme: 'dark',
+        defaultPlugins: ['system', 'network', 'element', 'storage'],
+        maxLogNumber: 1000
+      });
+      console.log('vConsole 已在移動端啟用');
+    }).catch(err => {
+      console.warn('vConsole 加載失敗:', err);
+    });
+
+}
+
+// 初始化 vConsole
+initVConsole();
+
 export function change3dColor(color) {
   load3dColor(color)
 }
@@ -237,7 +258,40 @@ export function load3D(arrayBuffer, divElement) {
   dx处理(arrayBuffer)
   const syntheticImageData = new SyntheticImageData();
   const { imageData, windowWidth, windowCenter } = syntheticImageData.ImageData(arrayBuffer)
-  Demo3d(imageData, divElement)
+  // try {
+    Demo3d(imageData, divElement)
+  // } catch (error) {
+  //   console.error('3D渲染失败:', error);
+
+  //   // 如果渲染失败，尝试显示错误信息
+  //   const errorDiv = document.createElement('div');
+  //   errorDiv.style.cssText = `
+  //     padding: 20px;
+  //     background: #ffebee;
+  //     border: 1px solid #f44336;
+  //     border-radius: 4px;
+  //     color: #c62828;
+  //     text-align: center;
+  //   `;
+
+  //   if (mobileFallback.needsFallback()) {
+  //     errorDiv.innerHTML = `
+  //       <h3>移动端3D渲染不可用</h3>
+  //       <p>您的设备不支持WebGL浮点纹理扩展 (OES_texture_float_linear)</p>
+  //       <p>这是移动设备的常见限制，无法显示3D体积渲染</p>
+  //       <p>建议使用桌面浏览器获得完整功能</p>
+  //     `;
+  //   } else {
+  //     errorDiv.innerHTML = `
+  //       <h3>3D渲染失败</h3>
+  //       <p>渲染器初始化失败: ${error.message}</p>
+  //       <p>请检查您的WebGL支持或尝试刷新页面</p>
+  //     `;
+  //   }
+
+  //   divElement.appendChild(errorDiv);
+  //   throw error;
+  // }
 }
 
 
