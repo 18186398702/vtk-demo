@@ -26,25 +26,25 @@ import { calculateDistance, qn_vtk_transition } from "./qn_vtk_transition";
 import { createPiecewiseGaussianVolumeExample } from "./piecewise-gaussian-volume";
 
 // 在移動端初始化 vConsole
-// function initVConsole() {
-//   // 檢測是否為移動設備
+function initVConsole() {
+  // 檢測是否為移動設備
 
-//     import('vconsole').then(VConsoleModule => {
-//       const VConsole = VConsoleModule.default;
-//       const vConsole = new VConsole({
-//         theme: 'dark',
-//         defaultPlugins: ['system', 'network', 'element', 'storage'],
-//         maxLogNumber: 1000
-//       });
-//       console.log('vConsole 已在移動端啟用');
-//     }).catch(err => {
-//       console.warn('vConsole 加載失敗:', err);
-//     });
+    import('vconsole').then(VConsoleModule => {
+      const VConsole = VConsoleModule.default;
+      const vConsole = new VConsole({
+        theme: 'dark',
+        defaultPlugins: ['system', 'network', 'element', 'storage'],
+        maxLogNumber: 1000
+      });
+      console.log('vConsole 已在移動端啟用');
+    }).catch(err => {
+      console.warn('vConsole 加載失敗:', err);
+    });
 
-// }
+}
 
-// // 初始化 vConsole
-// initVConsole();
+// 初始化 vConsole
+initVConsole();
 
 export function change3dColor(color) {
   load3dColor(color)

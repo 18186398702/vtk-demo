@@ -55,6 +55,7 @@ class SyntheticImageData {
     const imageData = vtkImageData.newInstance();
     const zeroHit = hitbit[0];
     const origin = [0, 0, 0];
+    console.log("getType(value)", getType(zeroHit.h_img.data));
     // 根据像素数据确定数据类型（如 Int16、Uint8 等）
     const data_type = getType(zeroHit.h_img.data);
     // 设置图像的维度信息：列数、行数以及切片数
