@@ -23,6 +23,8 @@ import vtkInteractorStyleManipulator from '@kitware/vtk.js/Interaction/Style/Int
 import pageturningManipulator from "./pageturningManipulator";
 import { vtk画线, drawAllLines } from "./画线";
 import { calculateDistance, qn_vtk_transition } from "./qn_vtk_transition";
+import { createVolumeRenderingExample } from "./volume-rendering-example";
+import { createPiecewiseGaussianVolumeExample } from "./piecewise-gaussian-volume";
 
 // 在移動端初始化 vConsole
 function initVConsole() {
@@ -581,4 +583,146 @@ export function get_Multiple_by_renderer(renderer_num) {
  */
 export function zuobiao_transition(pro_type, data, draw_record) {
   return qn_vtk_transition(pro_type, data, draw_record)
+}
+
+/**
+ * 創建體積渲染示例，使用默認DICOM文件
+ * @param {HTMLElement} container - 渲染容器
+ */
+export async function createVolumeExample(container) {
+  try {
+    console.log('開始加載默認DICOM文件進行體積渲染...');
+
+    // 加載默認DICOM文件 28, 29, 30
+    const defaultFiles = ['28', '29', '30'];
+    const arrayBuffers = [];
+
+    for (const fileName of defaultFiles) {
+      try {
+        const response = await fetch(fileName);
+        if (!response.ok) {
+          throw new Error(`加載文件 ${fileName} 失敗: ${response.status}`);
+        }
+        const arrayBuffer = await response.arrayBuffer();
+        arrayBuffers.push(arrayBuffer);
+        console.log(`成功加載文件: ${fileName}`);
+      } catch (error) {
+        console.error(`加載文件 ${fileName} 時出錯:`, error);
+      }
+    }
+
+    if (arrayBuffers.length === 0) {
+      throw new Error('沒有成功加載任何DICOM文件');
+    }
+
+    // 處理DICOM數據
+    const processedBuffer = await load(arrayBuffers);
+    const dicomData = loadDicom(processedBuffer);
+
+    // 應用dx處理
+    dx处理(dicomData);
+
+    // 創建圖像數據
+    const syntheticImageData = new SyntheticImageData();
+    const { imageData } = syntheticImageData.ImageData(dicomData);
+
+    console.log('DICOM數據處理完成，開始創建體積渲染...');
+
+    // 創建體積渲染
+    return createVolumeRenderingExample(imageData, container);
+
+  } catch (error) {
+    console.error('體積渲染示例創建失敗:', error);
+
+    // 顯示錯誤信息
+    const errorDiv = document.createElement('div');
+    errorDiv.style.cssText = `
+      padding: 20px;
+      background: #ffebee;
+      border: 1px solid #f44336;
+      border-radius: 4px;
+      color: #c62828;
+      text-align: center;
+      font-family: Arial, sans-serif;
+    `;
+    errorDiv.innerHTML = `
+      <h3>體積渲染示例失敗</h3>
+      <p>錯誤: ${error.message}</p>
+      <p>請確保DICOM文件(28, 29, 30)存在於正確位置</p>
+    `;
+    container.appendChild(errorDiv);
+
+    throw error;
+  }
+}
+
+/**
+ * 創建PiecewiseGaussian體積渲染示例，使用默認DICOM文件
+ * @param {HTMLElement} container - 渲染容器
+ */
+export async function createPiecewiseGaussianExample(container) {
+  try {
+    console.log('開始加載默認DICOM文件進行PiecewiseGaussian體積渲染...');
+
+    // 加載默認DICOM文件 28, 29, 30
+    const defaultFiles = ['28', '29', '30'];
+    const arrayBuffers = [];
+
+    for (const fileName of defaultFiles) {
+      try {
+        const response = await fetch(fileName);
+        if (!response.ok) {
+          throw new Error(`加載文件 ${fileName} 失敗: ${response.status}`);
+        }
+        const arrayBuffer = await response.arrayBuffer();
+        arrayBuffers.push(arrayBuffer);
+        console.log(`成功加載文件: ${fileName}`);
+      } catch (error) {
+        console.error(`加載文件 ${fileName} 時出錯:`, error);
+      }
+    }
+
+    if (arrayBuffers.length === 0) {
+      throw new Error('沒有成功加載任何DICOM文件');
+    }
+
+    // 處理DICOM數據
+    const processedBuffer = await load(arrayBuffers);
+    const dicomData = loadDicom(processedBuffer);
+
+    // 應用dx處理
+    dx处理(dicomData);
+
+    // 創建圖像數據
+    const syntheticImageData = new SyntheticImageData();
+    const { imageData } = syntheticImageData.ImageData(dicomData);
+
+    console.log('DICOM數據處理完成，開始創建PiecewiseGaussian體積渲染...');
+
+    // 創建PiecewiseGaussian體積渲染
+    return createPiecewiseGaussianVolumeExample(imageData, container);
+
+  } catch (error) {
+    console.error('PiecewiseGaussian體積渲染示例創建失敗:', error);
+
+    // 顯示錯誤信息
+    const errorDiv = document.createElement('div');
+    errorDiv.style.cssText = `
+      padding: 20px;
+      background: #ffebee;
+      border: 1px solid #f44336;
+      border-radius: 4px;
+      color: #c62828;
+      text-align: center;
+      font-family: Arial, sans-serif;
+    `;
+    errorDiv.innerHTML = `
+      <h3>PiecewiseGaussian體積渲染示例失敗</h3>
+      <p>錯誤: ${error.message}</p>
+      <p>請確保DICOM文件(28, 29, 30)存在且VTK.js支持PiecewiseGaussianWidget</p>
+    `;
+    container.appendChild(errorDiv);
+
+    throw error;
+  }
 }
