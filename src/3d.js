@@ -9,6 +9,8 @@ import vtkPiecewiseFunction from "@kitware/vtk.js/Common/DataModel/PiecewiseFunc
 import vtkVolumeProperty from "@kitware/vtk.js/Rendering/Core/VolumeProperty";
 import colorPresets from './MedicalColorPresets.json';
 import vtkLight from 'vtk.js/Sources/Rendering/Core/Light';
+import vtkDataArray from "@kitware/vtk.js/Common/Core/DataArray";
+import vtkImageData from "@kitware/vtk.js/Common/DataModel/ImageData";
 
 var renderWindow_3d = null;
 var volume_3d = null;
@@ -35,6 +37,34 @@ export function change3DLightIntensity(value) {
 }
 
 export function Demo3d(source, divElement, type) {
+
+    const refRange = source.getPointData().getScalars().getRange();
+
+    // 克隆本地数据以避免修改原始数据
+    const standardizedData = vtkImageData.newInstance();
+    standardizedData.setDimensions(...source.getDimensions());
+
+    // 获取本地数据的标量
+    const localScalars = source.getPointData().getScalars();
+    const localRange = localScalars.getRange();
+    // 标准化数据范围到参考数据范围
+    const localData_ = localScalars.getData();
+    const normalizedData = new Float32Array(localData_.length);
+
+    for (let i = 0; i < localData_.length; i++) {
+        // 将本地数据范围映射到参考数据范围
+        const normalizedValue = (localData_[i] - localRange[0]) / (localRange[1] - localRange[0]) * (refRange[1] - refRange[0]) + refRange[0];
+        normalizedData[i] = normalizedValue;
+    }
+
+    // 创建新的标量数组
+    const standardizedScalars = vtkDataArray.newInstance({
+        name: 'Pixels',
+        dataType: 'Float32Array',
+        numberOfComponents: 1,
+        values: normalizedData
+    });
+    source.getPointData().setScalars(standardizedScalars);
     const renderMainBox = divElement;
     renderMainBox.innerHTML = "";
     renderMainBox.style.position = "relative";
@@ -63,6 +93,7 @@ export function Demo3d(source, divElement, type) {
         select.style.position = "absolute";
         select.style.bottom = "10px";
         select.style.left = "50%";
+        select.style.width = "100px";
         select.style.transform = "translate(-50%, 0%)";
     }
     // 用js的方式加到divElement里

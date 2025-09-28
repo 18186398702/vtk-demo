@@ -13,6 +13,8 @@ import vtkColorMaps from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction/C
 import vtkHttpDataSetReader from '@kitware/vtk.js/IO/Core/HttpDataSetReader';
 import vtkHttpDataAccessHelper from '@kitware/vtk.js/IO/Core/DataAccessHelper/HttpDataAccessHelper';
 import DataAccessHelper from '@kitware/vtk.js/IO/Core/DataAccessHelper';
+import vtkImageData from "@kitware/vtk.js/Common/DataModel/ImageData";
+import vtkDataArray from "@kitware/vtk.js/Common/Core/DataArray";
 
 
 
@@ -27,19 +29,17 @@ let labelContainer = null;
  * @param {Object} imageData - VTK ImageData對象
  * @param {HTMLElement} container - 渲染容器
  */
-export function createPiecewiseGaussianVolumeExample(imageData, container) {
-
+export function createPiecewiseGaussianVolumeExample(localImageData, container) {
     // 清空容器
     container.innerHTML = '';
     container.style.position = 'relative';
-    console.log('開始創建PiecewiseGaussian體積渲染示例...', imageData);
+    console.log('開始創建PiecewiseGaussian體積渲染示例...', localImageData);
     const widgetContainer = document.createElement('div');
     widgetContainer.style.position = 'absolute';
     widgetContainer.style.top = 'calc(10px + 1em)';
     widgetContainer.style.left = '5px';
     widgetContainer.style.background = 'rgba(255, 255, 255, 0.3)';
     container.appendChild(widgetContainer);
-
 
     labelContainer = document.createElement('div');
     labelContainer.style.position = 'absolute';
@@ -51,12 +51,126 @@ export function createPiecewiseGaussianVolumeExample(imageData, container) {
     labelContainer.style.userSelect = 'none';
     labelContainer.style.cursor = 'pointer';
     container.appendChild(labelContainer);
+
+    // 函数：分析和打印imageData属性
+    function analyzeImageData(data, name) {
+        console.log(`=== ${name} ImageData 属性分析 ===`);
+        console.log('维度 (Dimensions):', data.getDimensions());
+        console.log('间距 (Spacing):', data.getSpacing());
+        console.log('原点 (Origin):', data.getOrigin());
+        console.log('边界 (Bounds):', data.getBounds());
+        console.log('扩展 (Extent):', data.getExtent());
+        const scalars = data.getPointData().getScalars();
+        if (scalars) {
+            console.log('标量数据类型:', scalars.getDataType());
+            console.log('标量数据范围:', scalars.getRange());
+            // console.log('标量数据大小:', scalars.getSize());
+            console.log('标量数据组件数:', scalars.getNumberOfComponents());
+        }
+        console.log('=====================================');
+        return data;
+    }
+
     const reader = vtkHttpDataSetReader.newInstance({ fetchGzip: true });
 
     reader.setUrl(`https://kitware.github.io/vtk-js/data/volume/LIDC2.vti`).then(() => {
         reader.loadData().then(() => {
-            imageData = reader.getOutputData();
-            console.log('數據加載完成！', imageData);
+            const remoteImageData = reader.getOutputData();
+            console.log('遠程數據加載完成！');
+
+            // 分析远程数据属性
+            analyzeImageData(remoteImageData, '遠程VTI文件');
+
+            // 分析本地数据属性
+            if (localImageData) {
+                analyzeImageData(localImageData, '本地DICOM文件');
+
+                // 对比关键属性差异
+                console.log('=== 属性差异对比 ===');
+                const remoteDims = remoteImageData.getDimensions();
+                const localDims = localImageData.getDimensions();
+                console.log('维度差异:', {
+                    remote: remoteDims,
+                    local: localDims,
+                    different: !remoteDims.every((v, i) => v === localDims[i])
+                });
+
+                const remoteSpacing = remoteImageData.getSpacing();
+                const localSpacing = localImageData.getSpacing();
+                console.log('间距差异:', {
+                    remote: remoteSpacing,
+                    local: localSpacing,
+                    different: !remoteSpacing.every((v, i) => Math.abs(v - localSpacing[i]) > 0.001)
+                });
+
+                const remoteOrigin = remoteImageData.getOrigin();
+                const localOrigin = localImageData.getOrigin();
+                console.log('原点差异:', {
+                    remote: remoteOrigin,
+                    local: localOrigin,
+                    different: !remoteOrigin.every((v, i) => Math.abs(v - localOrigin[i]) > 0.001)
+                });
+
+                const remoteRange = remoteImageData.getPointData().getScalars().getRange();
+                const localRange = localImageData.getPointData().getScalars().getRange();
+                console.log('数据范围差异:', {
+                    remote: remoteRange,
+                    local: localRange,
+                    different: Math.abs(remoteRange[0] - localRange[0]) > 0.001 || Math.abs(remoteRange[1] - localRange[1]) > 0.001
+                });
+                console.log('==================');
+            }
+
+            // 函数：标准化本地数据使其与远程数据属性一致
+            function standardizeLocalData(localData, referenceData) {
+                if (!localData || !referenceData) return localData;
+
+                console.log('開始標準化本地數據...');
+
+                const refRange = localData.getPointData().getScalars().getRange();
+
+                // 克隆本地数据以避免修改原始数据
+                const standardizedData = vtkImageData.newInstance();
+                standardizedData.setDimensions(...localData.getDimensions());
+
+                // 获取本地数据的标量
+                const localScalars = localData.getPointData().getScalars();
+                const localRange = localScalars.getRange();
+
+                // 标准化数据范围到参考数据范围
+                const localData_ = localScalars.getData();
+                const normalizedData = new Float32Array(localData_.length);
+
+                for (let i = 0; i < localData_.length; i++) {
+                    // 将本地数据范围映射到参考数据范围
+                    const normalizedValue = (localData_[i] - localRange[0]) / (localRange[1] - localRange[0]) * (refRange[1] - refRange[0]) + refRange[0];
+                    normalizedData[i] = normalizedValue;
+                }
+
+                // 创建新的标量数组
+                const standardizedScalars = vtkDataArray.newInstance({
+                    name: 'Pixels',
+                    dataType: 'Float32Array',
+                    numberOfComponents: 1,
+                    values: normalizedData
+                });
+                localData.getPointData().setScalars(standardizedScalars);
+                console.log('本地數據標準化完成');
+                analyzeImageData(standardizedData, '標準化後的本地數據');
+                return localData
+                return standardizedData;
+            }
+
+            // 决定使用哪个数据进行渲染
+            let imageData = remoteImageData;
+            let useStandardizedLocal = true; // 可以通过这个标志切换
+
+            if (localImageData && useStandardizedLocal) {
+                imageData = standardizeLocalData(localImageData, remoteImageData);
+                console.log('使用標準化後的本地數據進行渲染');
+            } else {
+                console.log('使用遠程數據進行渲染');
+            }
 
             // 創建全屏渲染窗口
             const fullScreenRenderer = vtkFullScreenRenderWindow.newInstance({
